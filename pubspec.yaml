@@ -1,0 +1,77 @@
+name: cap_project
+description: A Very Good Project created by Very Good CLI.
+version: 1.0.0+1
+publish_to: none
+
+environment:
+  sdk: ^3.9.0
+  flutter: ^3.35.0
+
+dependencies:
+  # State Management
+  bloc: ^9.0.1
+  equatable: ^2.0.5
+  flutter_bloc: ^9.1.1
+
+  # Firebase
+  firebase_core: ^3.10.0
+  firebase_auth: ^5.3.4
+  google_sign_in: ^6.2.2
+
+  # HTTP & Networking
+  http: ^1.2.2
+
+  # Local Storage
+  shared_preferences: ^2.3.4
+  drift: ^2.24.0
+  sqlite3_flutter_libs: ^0.5.24
+
+  # Image & Media
+  image_picker: ^1.1.2
+  image: ^4.3.0
+
+  # Utilities
+  uuid: ^4.5.1
+  path_provider: ^2.1.5
+  path: ^1.9.1
+
+  # Repository Packages
+  api_client:
+    path: packages/api_client
+  auth_repository:
+    path: packages/auth_repository
+  chat_repository:
+    path: packages/chat_repository
+  forum_repository:
+    path: packages/forum_repository
+  landing_repository:
+    path: packages/landing_repository
+  media_repository:
+    path: packages/media_repository
+
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: ^0.20.2
+
+dev_dependencies:
+  # Testing
+  bloc_test: ^10.0.0
+  flutter_test:
+    sdk: flutter
+  mocktail: ^1.0.4
+
+  # Code Generation
+  drift_dev: ^2.24.0
+  build_runner: ^2.4.14
+
+  # Linting
+  very_good_analysis: ^10.0.0
+
+flutter:
+  generate: true
+  uses-material-design: true
+  # Comment out assets until you create the folder
+  # assets:
+  #   - assets/

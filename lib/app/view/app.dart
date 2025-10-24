@@ -1,0 +1,118 @@
+// lib/app/app.dart
+
+import 'package:api_client/api_client.dart';
+import 'package:auth_repository/auth_repository.dart';
+import 'package:cap_project/app/view/app_config.dart';
+import 'package:cap_project/app/view/app_router.dart';
+import 'package:cap_project/core/theme/app_theme.dart';
+import 'package:cap_project/features/auth/cubit/auth_cubit.dart';
+import 'package:chat_repository/chat_repository.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:forum_repository/forum_repository.dart';
+import 'package:landing_repository/landing_repository.dart';
+import 'package:media_repository/media_repository.dart';
+
+
+/// Main app widget
+class App extends StatefulWidget {
+  const App({
+    required this.config,
+    super.key,
+  });
+
+  final AppConfig config;
+
+  @override
+  State<App> createState() => _AppState();
+}
+
+class _AppState extends State<App> {
+  late final ApiClient _apiClient;
+  late final AuthRepository _authRepository;
+  late final ChatRepository _chatRepository;
+  late final ForumRepository _forumRepository;
+  late final LandingRepository _landingRepository;
+  late final MediaRepository _mediaRepository;
+  late final AuthCubit _authCubit; // ADD THIS
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeRepositories();
+  }
+
+  void _initializeRepositories() {
+    // Initialize API client
+    _apiClient = ApiClient(
+      baseUrl: widget.config.apiBaseUrl,
+      enableLogging: widget.config.enableLogging,
+      connectTimeout: widget.config.apiTimeout,
+      receiveTimeout: widget.config.apiTimeout,
+      getAccessToken: () async {
+        return null;
+      },
+      refreshToken: () async {},
+    );
+
+    // Initialize repositories
+    _authRepository = AuthRepository(
+      apiClient: _apiClient,
+      secureStorage: SecureStorageHelper(),
+    );
+
+    _chatRepository = ChatRepository(
+      apiClient: _apiClient,
+      localCache: LocalChatCache(),
+    );
+
+    _forumRepository = ForumRepository(
+      apiClient: _apiClient,
+      database: ForumDatabase(),
+    );
+
+    _landingRepository = LandingRepository(
+      apiClient: _apiClient,
+      localPreferences: LocalPreferences(),
+    );
+
+    _mediaRepository = MediaRepository(
+      apiClient: _apiClient,
+      imageProcessor: ImageProcessor(),
+    );
+
+    // Initialize global AuthCubit
+    _authCubit = AuthCubit(authRepository: _authRepository);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiRepositoryProvider(
+      providers: [
+        RepositoryProvider.value(value: _authRepository),
+        RepositoryProvider.value(value: _chatRepository),
+        RepositoryProvider.value(value: _forumRepository),
+        RepositoryProvider.value(value: _landingRepository),
+        RepositoryProvider.value(value: _mediaRepository),
+      ],
+      child: BlocProvider.value(
+        value: _authCubit,
+        child: MaterialApp(
+          title: 'MedBot',
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: ThemeMode.system,
+          onGenerateRoute: AppRouter.generateRoute,
+          initialRoute: AppRouter.landing,
+        ),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _authCubit.close(); // ADD THIS
+    super.dispose();
+  }
+}

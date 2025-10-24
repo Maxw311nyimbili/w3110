@@ -1,0 +1,35 @@
+name: media_repository
+description: A Very Good Project created by Very Good CLI.
+version: 0.1.0+1
+publish_to: none
+
+environment:
+  sdk: ^3.9.0
+dependencies:
+  # State Management
+  bloc: ^9.0.1
+  equatable: ^2.0.5
+  api_client:
+    path: ../api_client
+
+  # HTTP & Networking
+  http: ^1.2.2
+
+  # Local Storage
+  shared_preferences: ^2.3.4
+  drift: ^2.24.0
+  sqlite3_flutter_libs: ^0.5.24
+
+  # Image & Media
+  image_picker: ^1.1.2
+  image: ^4.3.0
+
+  # Utilities
+  uuid: ^4.5.1
+  path_provider: ^2.1.5
+  path: ^1.9.1
+
+dev_dependencies:
+  mocktail: ^1.0.4
+  test: ^1.25.0
+  very_good_analysis: ^10.0.0

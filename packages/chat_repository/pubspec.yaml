@@ -1,0 +1,27 @@
+name: chat_repository
+description: A Very Good Project created by Very Good CLI.
+version: 0.1.0+1
+publish_to: none
+
+environment:
+  sdk: ^3.9.0
+
+dependencies:
+  equatable: ^2.0.5
+  api_client:
+    path: ../api_client
+
+  # Firebase
+#  firebase_core: ^3.10.0
+#  firebase_auth: ^5.3.4
+#  google_sign_in: ^6.2.2
+
+  # HTTP & Networking
+  http: ^1.2.2
+
+  # Utilities
+  uuid: ^4.5.1
+dev_dependencies:
+  mocktail: ^1.0.4
+  test: ^1.25.0
+  very_good_analysis: ^10.0.0
