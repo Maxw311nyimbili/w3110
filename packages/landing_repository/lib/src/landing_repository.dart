@@ -1,0 +1,125 @@
+// packages/landing_repository/lib/src/landing_repository.dart
+
+import 'package:api_client/api_client.dart';
+import 'package:landing_repository/src/local_preferences.dart';
+import 'package:landing_repository/src/models/announcement.dart';
+import 'package:landing_repository/src/models/consent_info.dart';
+import 'package:landing_repository/src/models/onboarding_status.dart';
+
+/// Landing repository - handles onboarding, announcements, and app initialization
+class LandingRepository {
+  LandingRepository({
+    required ApiClient apiClient,
+    required LocalPreferences localPreferences,
+  })  : _apiClient = apiClient,
+        _localPreferences = localPreferences;
+
+  final ApiClient _apiClient;
+  final LocalPreferences _localPreferences;
+
+  /// Get onboarding status from local storage
+  Future<OnboardingStatus> getOnboardingStatus() async {
+    try {
+      final data = await _localPreferences.getOnboardingStatus();
+      if (data != null) {
+        return OnboardingStatus.fromJson(data);
+      }
+      return const OnboardingStatus(isComplete: false);
+    } catch (e) {
+      throw LandingException('Failed to get onboarding status: ${e.toString()}');
+    }
+  }
+
+  /// Save onboarding status to local storage
+  Future<void> saveOnboardingStatus(OnboardingStatus status) async {
+    try {
+      await _localPreferences.saveOnboardingStatus(status.toJson());
+    } catch (e) {
+      throw LandingException('Failed to save onboarding status: ${e.toString()}');
+    }
+  }
+
+  /// Clear onboarding status (for testing/debugging)
+  Future<void> clearOnboardingStatus() async {
+    try {
+      await _localPreferences.clearOnboardingStatus();
+    } catch (e) {
+      throw LandingException('Failed to clear onboarding status: ${e.toString()}');
+    }
+  }
+
+  /// Fetch announcements from backend
+  ///
+  /// Backend endpoint: GET /announcements?active=true
+  /// Response: { "announcements": [...] }
+  Future<List<Announcement>> fetchAnnouncements() async {
+    try {
+      final response = await _apiClient.get('/announcements?active=true');
+
+      // Cast response.data to Map first
+      final responseData = response.data as Map<String, dynamic>;
+      final announcementsJson = responseData['announcements'] as List<dynamic>;
+
+      return announcementsJson
+          .map((json) => Announcement.fromJson(json as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      throw LandingException('Failed to fetch announcements: ${e.toString()}');
+    }
+  }
+
+  /// Get current consent info from backend
+  ///
+  /// Backend endpoint: GET /consent/current
+  /// Response: { "version": "1.0", "content": "...", "is_required": true }
+  Future<ConsentInfo> getCurrentConsent() async {
+    try {
+      final response = await _apiClient.get('/consent/current');
+
+      // Cast response.data to Map
+      final responseData = response.data as Map<String, dynamic>;
+
+      return ConsentInfo.fromJson(responseData);
+    } catch (e) {
+      throw LandingException('Failed to fetch consent info: ${e.toString()}');
+    }
+  }
+
+  /// Check if consent version has changed (user needs to re-consent)
+  Future<bool> needsConsentUpdate(String currentVersion) async {
+    try {
+      final latestConsent = await getCurrentConsent();
+      return latestConsent.version != currentVersion;
+    } catch (e) {
+      // If we can't check, assume no update needed
+      return false;
+    }
+  }
+
+  /// Save language preference
+  Future<void> saveLanguagePreference(String languageCode) async {
+    try {
+      await _localPreferences.saveLanguage(languageCode);
+    } catch (e) {
+      throw LandingException('Failed to save language: ${e.toString()}');
+    }
+  }
+
+  /// Get language preference
+  Future<String?> getLanguagePreference() async {
+    try {
+      return await _localPreferences.getLanguage();
+    } catch (e) {
+      return null; // Return null if no preference set
+    }
+  }
+}
+
+/// Custom exception for landing repository errors
+class LandingException implements Exception {
+  LandingException(this.message);
+  final String message;
+
+  @override
+  String toString() => 'LandingException: $message';
+}
