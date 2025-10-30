@@ -50,7 +50,7 @@ class _AppState extends State<App> {
       connectTimeout: widget.config.apiTimeout,
       receiveTimeout: widget.config.apiTimeout,
       getAccessToken: () async {
-        return null;
+        return "test-token-day2"; // ← FIXED
       },
       refreshToken: () async {},
     );

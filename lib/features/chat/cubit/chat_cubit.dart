@@ -5,7 +5,6 @@ import 'package:chat_repository/chat_repository.dart' hide ChatMessage, SourceRe
 import 'package:uuid/uuid.dart';
 import 'chat_state.dart';
 
-/// Manages chat conversation state and AI interactions
 class ChatCubit extends Cubit<ChatState> {
   ChatCubit({
     required ChatRepository chatRepository,
@@ -15,40 +14,24 @@ class ChatCubit extends Cubit<ChatState> {
 
   final ChatRepository _chatRepository;
   final Uuid _uuid;
+  String? _currentConversationId;
 
-  /// Initialize chat - load cached messages
   Future<void> initialize() async {
     try {
       emit(state.copyWith(status: ChatStatus.loading));
-
-      // TODO: Uncomment when backend ready
-      /*
-      final cachedMessages = await _chatRepository.getCachedMessages();
-      emit(state.copyWith(
-        status: ChatStatus.success,
-        messages: cachedMessages.map(_mapToStateMessage).toList(),
-      ));
-      */
-
-      // TEMPORARY: Start with empty chat
       emit(state.copyWith(status: ChatStatus.success));
     } catch (e) {
       emit(state.copyWith(
         status: ChatStatus.error,
-        error: 'Failed to load chat history',
+        error: 'Failed to initialize chat',
       ));
     }
   }
 
-  /// Send a message and get AI response
-  /// Backend endpoint: POST /chat/query
-  /// Request: { "message": "user message", "conversation_id": "optional" }
-  /// Response: { "response": "...", "sentences": [...], "sources": [...], "confidence": 0.85 }
   Future<void> sendMessage(String content) async {
     if (content.trim().isEmpty) return;
 
     try {
-      // Add user message immediately
       final userMessage = ChatMessage(
         id: _uuid.v4(),
         content: content.trim(),
@@ -61,84 +44,44 @@ class ChatCubit extends Cubit<ChatState> {
         isTyping: true,
       ));
 
-      // TODO: Uncomment when backend ready
-      /*
-      // Send to backend
       final request = ChatQueryRequest(
-        message: content.trim(),
+        query: content.trim(),
         conversationId: _currentConversationId,
       );
 
       final response = await _chatRepository.sendMessage(request);
 
-      // Create AI message from response
       final aiMessage = ChatMessage(
         id: _uuid.v4(),
-        content: response.response,
+        content: response.answer,
         isUser: false,
         timestamp: DateTime.now(),
         sentences: response.sentences
             .map((s) => SentenceWithConfidence(
-                  text: s.text,
-                  confidence: s.confidence,
-                ))
+          text: s.text,
+          confidence: s.confidence,
+        ))
             .toList(),
-        sources: response.sources
+        sources: response.sentences
+            .where((s) => s.sources != null)
+            .expand((s) => s.sources!)
             .map((s) => SourceReference(
-                  title: s.title,
-                  url: s.url,
-                  snippet: s.snippet,
-                ))
+          title: s.title,
+          url: s.url,
+          snippet: s.snippet,
+        ))
             .toList(),
-        overallConfidence: response.confidence,
+        overallConfidence: response.sentences.isNotEmpty
+            ? response.sentences
+            .map((s) => s.confidence)
+            .reduce((a, b) => a + b) /
+            response.sentences.length
+            : null,
       );
-
-      // Cache messages locally
-      await _chatRepository.cacheMessage(userMessage);
-      await _chatRepository.cacheMessage(aiMessage);
 
       emit(state.copyWith(
         status: ChatStatus.success,
         messages: [...state.messages, aiMessage],
-        isTyping: false,
-      ));
-      */
-
-      // TEMPORARY: Mock AI response for development
-      await Future.delayed(const Duration(seconds: 2));
-
-      final mockAiMessage = ChatMessage(
-        id: _uuid.v4(),
-        content: _generateMockResponse(content),
-        isUser: false,
-        timestamp: DateTime.now(),
-        sentences: [
-          SentenceWithConfidence(
-            text: 'This is a simulated response for development.',
-            confidence: 0.95,
-          ),
-          SentenceWithConfidence(
-            text: 'The backend will provide real medical information.',
-            confidence: 0.88,
-          ),
-          SentenceWithConfidence(
-            text: 'Always consult healthcare professionals for medical advice.',
-            confidence: 0.92,
-          ),
-        ],
-        sources: [
-          const SourceReference(
-            title: 'Mock Medical Source',
-            url: 'https://example.com/medical-info',
-            snippet: 'Example citation from medical database',
-          ),
-        ],
-        overallConfidence: 0.90,
-      );
-
-      emit(state.copyWith(
-        status: ChatStatus.success,
-        messages: [...state.messages, mockAiMessage],
         isTyping: false,
       ));
     } catch (e) {
@@ -150,7 +93,6 @@ class ChatCubit extends Cubit<ChatState> {
     }
   }
 
-  /// Send message with image attachment (from MedScanner)
   Future<void> sendMessageWithImage(String content, String imageUrl) async {
     if (content.trim().isEmpty) return;
 
@@ -168,23 +110,30 @@ class ChatCubit extends Cubit<ChatState> {
         isTyping: true,
       ));
 
-      // TODO: Backend integration for image analysis
-      // Similar to sendMessage but includes image data
+      final request = ChatQueryRequest(
+        query: content.trim(),
+        conversationId: _currentConversationId,
+        imageUrl: imageUrl,
+      );
 
-      await Future.delayed(const Duration(seconds: 3));
+      final response = await _chatRepository.sendMessage(request);
 
-      final mockAiMessage = ChatMessage(
+      final aiMessage = ChatMessage(
         id: _uuid.v4(),
-        content: 'I\'ve analyzed the image. This appears to be a medication label. '
-            'Here\'s what I found: [Mock analysis pending backend integration]',
+        content: response.answer,
         isUser: false,
         timestamp: DateTime.now(),
-        overallConfidence: 0.75,
+        sentences: response.sentences
+            .map((s) => SentenceWithConfidence(
+          text: s.text,
+          confidence: s.confidence,
+        ))
+            .toList(),
       );
 
       emit(state.copyWith(
         status: ChatStatus.success,
-        messages: [...state.messages, mockAiMessage],
+        messages: [...state.messages, aiMessage],
         isTyping: false,
       ));
     } catch (e) {
@@ -196,12 +145,9 @@ class ChatCubit extends Cubit<ChatState> {
     }
   }
 
-  /// Clear conversation history
   Future<void> clearHistory() async {
     try {
-      // TODO: Uncomment when backend ready
-      // await _chatRepository.clearCache();
-
+      await _chatRepository.clearCache();
       emit(state.copyWith(
         status: ChatStatus.success,
         messages: [],
@@ -214,49 +160,7 @@ class ChatCubit extends Cubit<ChatState> {
     }
   }
 
-  /// Clear error state
   void clearError() {
     emit(state.clearError());
-  }
-
-  /// Mock response generator for development
-  String _generateMockResponse(String userMessage) {
-    final lowerMessage = userMessage.toLowerCase();
-
-    if (lowerMessage.contains('pregnancy') ||
-        lowerMessage.contains('pregnant')) {
-      return 'During pregnancy, it\'s important to maintain regular prenatal care. '
-          'Make sure to take prenatal vitamins with folic acid and stay hydrated. '
-          'Always consult your healthcare provider before taking any new medications.';
-    }
-
-    if (lowerMessage.contains('medication') ||
-        lowerMessage.contains('medicine')) {
-      return 'When considering any medication, it\'s crucial to consult with your healthcare provider. '
-          'They can assess your specific situation and medical history. '
-          'Never start or stop medications without professional guidance.';
-    }
-
-    if (lowerMessage.contains('pain') || lowerMessage.contains('hurt')) {
-      return 'Pain can have many causes and should be evaluated by a healthcare professional. '
-          'Keep track of when the pain occurs, its intensity, and any triggers. '
-          'If pain is severe or persistent, seek medical attention promptly.';
-    }
-
-    return 'Thank you for your question. For personalized medical advice, please consult with a qualified healthcare provider. '
-        'This AI assistant provides general health information but cannot replace professional medical consultation.';
-  }
-
-  /// Helper to map repository message to state message
-  ChatMessage _mapToStateMessage(dynamic repoMessage) {
-    // TODO: Implement proper mapping when repository models are finalized
-    return ChatMessage(
-      id: repoMessage.id as String,
-      content: repoMessage.content as String,
-      isUser: repoMessage.isUser as bool,
-      timestamp: repoMessage.timestamp as DateTime,
-    );
-
-
   }
 }

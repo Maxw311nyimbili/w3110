@@ -1,9 +1,9 @@
 // packages/api_client/lib/src/api_client.dart
 
+import 'package:api_client/src/interceptors/auth_interceptor.dart';
+import 'package:api_client/src/interceptors/error_interceptor.dart';
+import 'package:api_client/src/interceptors/logging_interceptor.dart';
 import 'package:dio/dio.dart';
-import 'interceptors/auth_interceptor.dart';
-import 'interceptors/logging_interceptor.dart';
-import 'interceptors/error_interceptor.dart';
 
 /// API client - handles all HTTP communication with backend
 class ApiClient {
