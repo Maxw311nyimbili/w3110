@@ -19,10 +19,11 @@ class AppConfig extends Equatable {
   /// Development configuration
   factory AppConfig.development() {
     return const AppConfig(
-      apiBaseUrl: 'https://dev-api.medbot.com',
+      // apiBaseUrl: 'https://91f9d06210b5.ngrok-free.app',
+      apiBaseUrl: 'http://172.16.2.251:8000',
       environment: Environment.development,
       enableLogging: true,
-      apiTimeout: Duration(seconds: 60), // Longer timeout for debugging
+      apiTimeout: Duration(seconds: 60),
     );
   }
 

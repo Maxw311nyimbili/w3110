@@ -20,17 +20,24 @@ class AuthInterceptor extends Interceptor {
       RequestOptions options,
       RequestInterceptorHandler handler,
       ) async {
+    print('🔑 AuthInterceptor: ${options.method} ${options.path}');
+
     // Skip auth for public endpoints
     if (_isPublicEndpoint(options.path)) {
+      print('🔓 Public endpoint - skipping auth');
       return handler.next(options);
     }
+
+    print('🔑 Getting access token...');
 
     // Get access token
     final token = await getAccessToken();
 
-    if (token != null) {
-      // Add Authorization header
+    if (token != null && token.isNotEmpty) {
       options.headers['Authorization'] = 'Bearer $token';
+      print('✅ Authorization header added: Bearer ${token.substring(0, 15)}...');
+    } else {
+      print('⚠️  No token available - request may fail');
     }
 
     handler.next(options);
@@ -41,8 +48,12 @@ class AuthInterceptor extends Interceptor {
       DioException err,
       ErrorInterceptorHandler handler,
       ) async {
+    print('❌ Request error: ${err.response?.statusCode} ${err.requestOptions.path}');
+
     // Handle 401 Unauthorized - try to refresh token
     if (err.response?.statusCode == 401) {
+      print('🔄 401 Unauthorized - attempting token refresh...');
+
       try {
         // Refresh token
         await refreshToken();
@@ -50,15 +61,20 @@ class AuthInterceptor extends Interceptor {
         // Get new access token
         final newToken = await getAccessToken();
 
-        if (newToken != null) {
+        if (newToken != null && newToken.isNotEmpty) {
+          print('✅ Token refreshed - retrying request...');
+
           // Retry request with new token
           final options = err.requestOptions;
           options.headers['Authorization'] = 'Bearer $newToken';
 
           final response = await Dio().fetch(options);
           return handler.resolve(response);
+        } else {
+          print('❌ Token refresh failed - no new token');
         }
       } catch (e) {
+        print('❌ Token refresh error: $e');
         // Refresh failed - pass error through
         return handler.next(err);
       }
@@ -74,6 +90,7 @@ class AuthInterceptor extends Interceptor {
       '/auth/refresh',
       '/consent/current',
       '/announcements',
+      '/health',
     ];
 
     return publicPaths.any((p) => path.contains(p));
