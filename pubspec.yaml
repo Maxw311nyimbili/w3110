@@ -34,6 +34,7 @@ dependencies:
   uuid: ^4.5.1
   path_provider: ^2.1.5
   path: ^1.9.1
+  url_launcher: ^6.3.0
 
   # Repository Packages
   api_client:
