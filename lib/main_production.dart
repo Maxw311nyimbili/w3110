@@ -1,14 +1,20 @@
-// lib/main_production.dart
-
-import 'package:cap_project/app/app.dart';
+import 'package:cap_project/app/view/app.dart';
 import 'package:cap_project/app/view/app_config.dart';
-import 'package:cap_project/bootstrap.dart';
+import 'package:cap_project/firebase_options.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/widgets.dart';
 
-void main() {
-  bootstrap(() {
-    // Production configuration
-    final config = AppConfig.production();
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
 
-    return App(config: config);
-  });
+  // Initialize Firebase
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  runApp(
+    App(
+      config: AppConfig.production(),
+    ),
+  );
 }
