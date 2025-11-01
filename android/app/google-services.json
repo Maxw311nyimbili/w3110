@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "956333738143",
+    "project_id": "medlink-app-4f92a",
+    "storage_bucket": "medlink-app-4f92a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:956333738143:android:499e82ea222292d9563aaa",
+        "android_client_info": {
+          "package_name": "com.example.verygoodcore.cap_project"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "956333738143-2sr0rd0qfguchkrbbe9jg5bp9se565pq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAj7GMKIh6FbbYCbNaPeZJO6OcU2kIPD2Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "956333738143-2sr0rd0qfguchkrbbe9jg5bp9se565pq.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "956333738143-7c8e4fcj26784mumbk1jovima9q1qu3d.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.myApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

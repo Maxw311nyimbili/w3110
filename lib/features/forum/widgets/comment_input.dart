@@ -1,7 +1,8 @@
-// lib/features/forum/widgets/comment_input.dart
+// lib/features/forum/widgets/comment_input.dart - WITH DEBUG BYPASS
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:cap_project/features/auth/cubit/cubit.dart';
 import '../cubit/cubit.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_colors.dart';
@@ -44,19 +45,51 @@ class _CommentInputState extends State<CommentInput> {
   void _sendComment() {
     if (_controller.text.trim().isEmpty) return;
 
-    final state = context.read<ForumCubit>().state;
-    if (state.selectedPost == null) return;
+    final forumState = context.read<ForumCubit>().state;
+    final authState = context.read<AuthCubit>().state;
 
-    // TODO: Get actual user info from auth
+    if (forumState.selectedPost == null) return;
+
     final content = _controller.text.trim();
-    context.read<ForumCubit>().addComment(
-      postId: state.selectedPost!.id.isEmpty
-          ? state.selectedPost!.localId
-          : state.selectedPost!.id,
-      content: content,
-      authorId: 'current_user_id', // TODO: From auth
-      authorName: 'Current User', // TODO: From auth
-    );
+
+    // Check if user is authenticated
+    if (!authState.isAuthenticated || authState.user == null) {
+      // DEBUG: Allow commenting without auth in debug mode
+      bool isDebugMode = false;
+      assert(() {
+        isDebugMode = true;
+        return true;
+      }());
+
+      if (!isDebugMode) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please sign in to comment')),
+        );
+        return;
+      }
+
+      // DEBUG MODE: Use mock user
+      context.read<ForumCubit>().addComment(
+        postId: forumState.selectedPost!.id.isEmpty
+            ? forumState.selectedPost!.localId
+            : forumState.selectedPost!.id,
+        content: content,
+        authorId: 'debug_user_${DateTime.now().millisecondsSinceEpoch}',
+        authorName: '[DEBUG] Test User',
+      );
+    } else {
+      // PRODUCTION: Use authenticated user
+      final user = authState.user!;
+
+      context.read<ForumCubit>().addComment(
+        postId: forumState.selectedPost!.id.isEmpty
+            ? forumState.selectedPost!.localId
+            : forumState.selectedPost!.id,
+        content: content,
+        authorId: user.id,
+        authorName: user.displayName ?? user.email,
+      );
+    }
 
     _controller.clear();
     _focusNode.unfocus();

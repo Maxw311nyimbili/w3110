@@ -1,7 +1,8 @@
-// packages/auth_repository/lib/src/auth_repository.dart
+// packages/auth_repository/lib/src/auth_repository.dart - COMPLETE IMPLEMENTATION
 
 import 'dart:convert';
-
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:api_client/api_client.dart';
 import 'models/auth_tokens.dart';
 import 'models/id_token_exchange_request.dart';
@@ -14,71 +15,120 @@ class AuthRepository {
     required ApiClient apiClient,
     required SecureStorageHelper secureStorage,
   })  : _apiClient = apiClient,
-        _secureStorage = secureStorage;
+        _secureStorage = secureStorage,
+        _firebaseAuth = firebase_auth.FirebaseAuth.instance,
+        _googleSignIn = GoogleSignIn(
+          scopes: ['email', 'profile'],
+        );
 
   final ApiClient _apiClient;
   final SecureStorageHelper _secureStorage;
+  final firebase_auth.FirebaseAuth _firebaseAuth;
+  final GoogleSignIn _googleSignIn;
 
-  /// Sign in with Google OAuth
-  /// Returns Google ID token to exchange with backend
+  // ============ Firebase Sign-In ============
+
+  /// Sign in with Google using Firebase Auth
   ///
   /// Flow:
-  /// 1. Trigger Firebase Google Sign-In
-  /// 2. Get ID token from Firebase
-  /// 3. Return ID token (caller exchanges it with backend)
+  /// 1. Trigger Google Sign-In UI
+  /// 2. User selects Google account
+  /// 3. Google returns authentication tokens
+  /// 4. Create Firebase credential
+  /// 5. Sign in to Firebase
+  /// 6. Get Firebase ID token
+  /// 7. Return ID token to caller
   ///
-  /// TODO: Implement when Firebase Auth is configured
-  /// Required packages: firebase_auth, google_sign_in
+  /// Returns:
+  ///   - String: Firebase ID token (use this to exchange with backend)
+  ///   - null: If user cancelled or error occurred
   Future<String?> signInWithGoogle() async {
-    /*
     try {
-      // Step 1: Trigger Google Sign-In
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      print('Starting Google Sign-In flow...');
+
+      // Step 1: Trigger Google Sign-In UI
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
 
       if (googleUser == null) {
-        return null; // User cancelled sign-in
+        print('Google Sign-In was cancelled by user');
+        return null;
       }
+
+      print('✓ Google account selected: ${googleUser.email}');
 
       // Step 2: Get authentication details
       final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
+      await googleUser.authentication;
 
-      // Step 3: Create Firebase credential
-      final credential = GoogleAuthProvider.credential(
+      print('✓ Got Google authentication tokens');
+
+      // Step 3: Create Firebase credential from Google tokens
+      final credential = firebase_auth.GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
+      print('✓ Firebase credential created');
+
       // Step 4: Sign in to Firebase
       final userCredential =
-          await FirebaseAuth.instance.signInWithCredential(credential);
+      await _firebaseAuth.signInWithCredential(credential);
 
-      // Step 5: Get ID token
+      print('✓ Signed in to Firebase: ${userCredential.user?.email}');
+
+      // Step 5: Get Firebase ID token
       final idToken = await userCredential.user?.getIdToken();
 
-      return idToken;
-    } catch (e) {
-      throw AuthException('Google sign-in failed: ${e.toString()}');
-    }
-    */
+      if (idToken == null) {
+        throw Exception('Failed to get Firebase ID token');
+      }
 
-    // TEMPORARY: Return mock token for development
-    return 'mock_google_id_token_${DateTime.now().millisecondsSinceEpoch}';
+      print('✓ Firebase ID token obtained');
+
+      // Step 6: Save ID token temporarily
+      await _secureStorage.saveFirebaseIdToken(idToken);
+
+      return idToken;
+    } on firebase_auth.FirebaseAuthException catch (e) {
+      print('Firebase Auth error: ${e.code} - ${e.message}');
+      throw AuthException(
+          'Firebase authentication failed: ${e.message}');
+    } catch (e) {
+      print('Google Sign-In error: $e');
+      throw AuthException('Google Sign-In failed: ${e.toString()}');
+    }
   }
 
-  /// Exchange Google ID token with backend for access/refresh tokens
+  // ============ Token Exchange ============
+
+  /// Exchange Firebase ID token with backend for JWT access/refresh tokens
   ///
   /// Backend endpoint: POST /auth/exchange
-  /// Request body: { "id_token": "..." }
-  /// Response: { "access_token": "...", "refresh_token": "...", "expires_in": 3600 }
+  /// Request body: { "id_token": "firebase_id_token_here" }
+  /// Response: {
+  ///   "access_token": "jwt_access_token",
+  ///   "refresh_token": "jwt_refresh_token",
+  ///   "expires_in": 3600,
+  ///   "user": { "id": "...", "email": "...", ... }
+  /// }
+  ///
+  /// Args:
+  ///   request: Contains Firebase ID token
+  ///
+  /// Returns:
+  ///   AuthTokens: Access token, refresh token, and user info
   Future<AuthTokens> exchangeIdToken(IdTokenExchangeRequest request) async {
     try {
+      print('Exchanging Firebase ID token with backend...');
+
       final response = await _apiClient.post(
         '/auth/exchange',
         data: request.toJson(),
       );
 
-      // Cast response.data to Map
+      print('✓ Token exchange successful');
+
+      // Parse response
       final responseData = response.data as Map<String, dynamic>;
       final tokens = AuthTokens.fromJson(responseData);
 
@@ -86,47 +136,70 @@ class AuthRepository {
       await _secureStorage.saveAccessToken(tokens.accessToken);
       await _secureStorage.saveRefreshToken(tokens.refreshToken);
 
+      print('✓ Tokens stored securely');
+
+      // Store user data
+      if (responseData['user'] != null) {
+        await _secureStorage
+            .saveUserData(jsonEncode(responseData['user']));
+      }
+
+      // Clear temporary Firebase ID token
+      await _secureStorage.clearFirebaseIdToken();
+
       return tokens;
     } catch (e) {
+      print('Token exchange error: $e');
       throw AuthException('Token exchange failed: ${e.toString()}');
     }
   }
 
+  // ============ User Session ============
+
   /// Get current authenticated user
+  /// First checks local storage, then fetches from backend if needed
   ///
   /// Backend endpoint: GET /auth/me (requires access token)
   /// Response: { "id": "...", "email": "...", "display_name": "...", ... }
+  ///
+  /// Returns:
+  ///   User: Authenticated user info
+  ///   null: If not authenticated
   Future<User?> getCurrentUser() async {
     try {
-      // Check if we have stored user data
+      // Step 1: Check if we have cached user data
       final userData = await _secureStorage.getUserData();
-      if (userData != null) {
-        // Cast jsonDecode result to Map
+      if (userData != null && userData.isNotEmpty) {
+        print('Using cached user data');
         final userMap = jsonDecode(userData) as Map<String, dynamic>;
         return User.fromJson(userMap);
       }
 
-      // If not, fetch from backend
+      // Step 2: Check if we have an access token
       final accessToken = await _secureStorage.getAccessToken();
       if (accessToken == null) {
+        print('No authentication tokens found');
         return null; // Not authenticated
       }
 
+      // Step 3: Fetch user from backend using access token
+      print('Fetching user info from backend...');
       final response = await _apiClient.get(
         '/auth/me',
         headers: {'Authorization': 'Bearer $accessToken'},
       );
 
-      // Cast response.data to Map
       final responseData = response.data as Map<String, dynamic>;
       final user = User.fromJson(responseData);
 
-      // Cache user data
+      // Step 4: Cache user data locally
       await _secureStorage.saveUserData(jsonEncode(user.toJson()));
 
+      print('✓ User info retrieved: ${user.email}');
       return user;
     } catch (e) {
-      // If fetch fails, token might be expired
+      print('Error getting current user: $e');
+      // If we can't fetch, token might be expired
       return null;
     }
   }
@@ -136,6 +209,9 @@ class AuthRepository {
   /// Backend endpoint: POST /auth/refresh
   /// Request body: { "refresh_token": "..." }
   /// Response: { "access_token": "...", "expires_in": 3600 }
+  ///
+  /// This is called automatically when access token expires.
+  /// The ApiClient interceptor handles this transparently.
   Future<void> refreshToken() async {
     try {
       final refreshToken = await _secureStorage.getRefreshToken();
@@ -143,41 +219,77 @@ class AuthRepository {
         throw AuthException('No refresh token available');
       }
 
+      print('Refreshing access token...');
+
       final response = await _apiClient.post(
         '/auth/refresh',
         data: {'refresh_token': refreshToken},
       );
 
-      // Cast response.data to Map
       final responseData = response.data as Map<String, dynamic>;
       final newAccessToken = responseData['access_token'] as String;
 
       await _secureStorage.saveAccessToken(newAccessToken);
+
+      print('✓ Access token refreshed successfully');
     } catch (e) {
+      print('Token refresh error: $e');
       // If refresh fails, user needs to re-authenticate
       await signOut();
       throw AuthException('Token refresh failed: ${e.toString()}');
     }
   }
 
+  // ============ Sign Out ============
+
   /// Sign out - clear all stored data
+  ///
+  /// Steps:
+  /// 1. Sign out from Firebase
+  /// 2. Sign out from Google
+  /// 3. Clear stored tokens and user data
   Future<void> signOut() async {
     try {
-      // TODO: Uncomment when Firebase Auth is configured
-      // await FirebaseAuth.instance.signOut();
-      // await GoogleSignIn().signOut();
+      print('Signing out...');
+
+      // Sign out from Firebase
+      await _firebaseAuth.signOut();
+      print('✓ Signed out from Firebase');
+
+      // Sign out from Google
+      await _googleSignIn.signOut();
+      print('✓ Signed out from Google');
 
       // Clear stored tokens and user data
       await _secureStorage.clearAll();
+      print('✓ Cleared stored authentication data');
     } catch (e) {
+      print('Sign out error: $e');
+      // Even if errors occur, clear local data
+      await _secureStorage.clearAll();
       throw AuthException('Sign out failed: ${e.toString()}');
     }
   }
 
+  // ============ Authentication Status ============
+
   /// Check if user is authenticated
+  /// Returns true only if we have both access and refresh tokens
   Future<bool> isAuthenticated() async {
-    final accessToken = await _secureStorage.getAccessToken();
-    return accessToken != null;
+    final hasAccess = await _secureStorage.hasAccessToken();
+    final hasRefresh = await _secureStorage.hasRefreshToken();
+    return hasAccess && hasRefresh;
+  }
+
+  /// Check if user is currently signed in with Firebase
+  /// (Different from having backend JWT tokens)
+  bool isFirebaseSignedIn() {
+    return _firebaseAuth.currentUser != null;
+  }
+
+  /// Get Firebase user (if signed in)
+  firebase_auth.User? getFirebaseUser() {
+    return _firebaseAuth.currentUser;
   }
 }
 

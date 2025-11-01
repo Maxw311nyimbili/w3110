@@ -22,8 +22,8 @@ class ChatState extends Equatable {
   final ChatStatus status;
   final List<ChatMessage> messages;
   final String? error;
-  final bool isTyping; // AI is generating response
-  final String? currentMessageId; // For streaming responses
+  final bool isTyping;
+  final String? currentMessageId;
 
   bool get isLoading => status == ChatStatus.loading;
   bool get hasMessages => messages.isNotEmpty;
@@ -69,12 +69,11 @@ class ChatMessage extends Equatable {
   final String content;
   final bool isUser;
   final DateTime timestamp;
-  final List<SentenceWithConfidence> sentences; // For AI messages with per-sentence confidence
-  final List<SourceReference> sources; // Citations
-  final double? overallConfidence; // 0.0 - 1.0
-  final String? imageUrl; // For image attachments (MedScanner)
+  final List<SentenceWithConfidence> sentences;
+  final List<SourceReference> sources;
+  final double? overallConfidence;
+  final String? imageUrl;
 
-  /// Get confidence level category
   ConfidenceLevel get confidenceLevel {
     if (overallConfidence == null) return ConfidenceLevel.none;
     if (overallConfidence! >= 0.8) return ConfidenceLevel.high;
@@ -117,18 +116,20 @@ class ChatMessage extends Equatable {
   ];
 }
 
-/// Sentence with confidence score (for AI responses)
+/// Sentence with confidence score
 class SentenceWithConfidence extends Equatable {
   const SentenceWithConfidence({
     required this.text,
     required this.confidence,
+    this.sources,
   });
 
   final String text;
-  final double confidence; // 0.0 - 1.0
+  final double confidence;
+  final List<SourceReference>? sources; // ADDED: Sources per sentence
 
   @override
-  List<Object?> get props => [text, confidence];
+  List<Object?> get props => [text, confidence, sources];
 }
 
 /// Source reference/citation

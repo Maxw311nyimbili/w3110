@@ -3,6 +3,9 @@ import java.io.FileInputStream
 
 plugins {
     id("com.android.application")
+    // START: FlutterFire Configuration
+    id("com.google.gms.google-services")
+    // END: FlutterFire Configuration
     id("kotlin-android")
     id("dev.flutter.flutter-gradle-plugin")
 }
@@ -59,17 +62,14 @@ android {
     productFlavors {
         create("production") {
             dimension = "default"
-            applicationIdSuffix = ""
             manifestPlaceholders["appName"] = "Cap Project"
         }
         create("staging") {
             dimension = "default"
-            applicationIdSuffix = ".stg"
             manifestPlaceholders["appName"] = "[STG] Cap Project"
         }
         create("development") {
             dimension = "default"
-            applicationIdSuffix = ".dev"
             manifestPlaceholders["appName"] = "[DEV] Cap Project"
         }
     }

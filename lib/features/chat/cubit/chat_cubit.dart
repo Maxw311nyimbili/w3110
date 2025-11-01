@@ -1,18 +1,18 @@
 // lib/features/chat/cubit/chat_cubit.dart
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:chat_repository/chat_repository.dart' hide ChatMessage, SourceReference;
+import 'package:chat_repository/chat_repository.dart' as repo;
 import 'package:uuid/uuid.dart';
 import 'chat_state.dart';
 
 class ChatCubit extends Cubit<ChatState> {
   ChatCubit({
-    required ChatRepository chatRepository,
+    required repo.ChatRepository chatRepository,
   })  : _chatRepository = chatRepository,
         _uuid = const Uuid(),
         super(const ChatState());
 
-  final ChatRepository _chatRepository;
+  final repo.ChatRepository _chatRepository;
   final Uuid _uuid;
   String? _currentConversationId;
 
@@ -44,12 +44,26 @@ class ChatCubit extends Cubit<ChatState> {
         isTyping: true,
       ));
 
-      final request = ChatQueryRequest(
+      final request = repo.ChatQueryRequest(
         query: content.trim(),
         conversationId: _currentConversationId,
       );
 
       final response = await _chatRepository.sendMessage(request);
+
+      // Extract unique sources from all sentences
+      final allSources = <SourceReference>{};
+      for (final sentence in response.sentences) {
+        if (sentence.sources != null && sentence.sources!.isNotEmpty) {
+          for (final repoSource in sentence.sources!) {
+            allSources.add(SourceReference(
+              title: repoSource.title,
+              url: repoSource.url,
+              snippet: repoSource.snippet,
+            ));
+          }
+        }
+      }
 
       final aiMessage = ChatMessage(
         id: _uuid.v4(),
@@ -60,21 +74,18 @@ class ChatCubit extends Cubit<ChatState> {
             .map((s) => SentenceWithConfidence(
           text: s.text,
           confidence: s.confidence,
+          sources: s.sources
+              ?.map((src) => SourceReference(
+            title: src.title,
+            url: src.url,
+            snippet: src.snippet,
+          ))
+              .toList(),
         ))
             .toList(),
-        sources: response.sentences
-            .where((s) => s.sources != null)
-            .expand((s) => s.sources!)
-            .map((s) => SourceReference(
-          title: s.title,
-          url: s.url,
-          snippet: s.snippet,
-        ))
-            .toList(),
+        sources: allSources.toList(),
         overallConfidence: response.sentences.isNotEmpty
-            ? response.sentences
-            .map((s) => s.confidence)
-            .reduce((a, b) => a + b) /
+            ? response.sentences.map((s) => s.confidence).reduce((a, b) => a + b) /
             response.sentences.length
             : null,
       );
@@ -110,7 +121,7 @@ class ChatCubit extends Cubit<ChatState> {
         isTyping: true,
       ));
 
-      final request = ChatQueryRequest(
+      final request = repo.ChatQueryRequest(
         query: content.trim(),
         conversationId: _currentConversationId,
         imageUrl: imageUrl,
@@ -127,6 +138,13 @@ class ChatCubit extends Cubit<ChatState> {
             .map((s) => SentenceWithConfidence(
           text: s.text,
           confidence: s.confidence,
+          sources: s.sources
+              ?.map((src) => SourceReference(
+            title: src.title,
+            url: src.url,
+            snippet: src.snippet,
+          ))
+              .toList(),
         ))
             .toList(),
       );

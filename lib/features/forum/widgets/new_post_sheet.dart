@@ -1,7 +1,8 @@
-// lib/features/forum/widgets/new_post_sheet.dart
+// lib/features/forum/widgets/new_post_sheet.dart - WITH DEBUG BYPASS
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:cap_project/features/auth/cubit/cubit.dart';
 import '../cubit/cubit.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
@@ -29,13 +30,42 @@ class _NewPostSheetState extends State<NewPostSheet> {
   void _submitPost() {
     if (!_formKey.currentState!.validate()) return;
 
-    // TODO: Get actual user info from auth
-    context.read<ForumCubit>().createPost(
-      title: _titleController.text.trim(),
-      content: _contentController.text.trim(),
-      authorId: 'current_user_id', // TODO: From auth
-      authorName: 'Current User', // TODO: From auth
-    );
+    final authState = context.read<AuthCubit>().state;
+
+    // Check if user is authenticated
+    if (!authState.isAuthenticated || authState.user == null) {
+      // DEBUG: Allow posting without auth in debug mode
+      bool isDebugMode = false;
+      assert(() {
+        isDebugMode = true;
+        return true;
+      }());
+
+      if (!isDebugMode) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please sign in to create a post')),
+        );
+        return;
+      }
+
+      // DEBUG MODE: Use mock user
+      context.read<ForumCubit>().createPost(
+        title: _titleController.text.trim(),
+        content: _contentController.text.trim(),
+        authorId: 'debug_user_${DateTime.now().millisecondsSinceEpoch}',
+        authorName: '[DEBUG] Test User',
+      );
+    } else {
+      // PRODUCTION: Use authenticated user
+      final user = authState.user!;
+
+      context.read<ForumCubit>().createPost(
+        title: _titleController.text.trim(),
+        content: _contentController.text.trim(),
+        authorId: user.id,
+        authorName: user.displayName ?? user.email,
+      );
+    }
 
     Navigator.of(context).pop();
   }

@@ -1,10 +1,18 @@
-// lib/features/auth/cubit/auth_cubit.dart
+// lib/features/auth/cubit/auth_cubit.dart - COMPLETE IMPLEMENTATION
 
 import 'package:auth_repository/auth_repository.dart';
 import 'package:cap_project/features/auth/cubit/auth_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// Manages authentication state and user sessions
+///
+/// Authentication flow:
+/// 1. signInWithGoogle() → triggers Google Sign-In in Firebase
+/// 2. Firebase returns ID token
+/// 3. exchangeTokenWithBackend() → exchanges ID token with backend
+/// 4. Backend returns JWT access/refresh tokens
+/// 5. Tokens stored securely
+/// 6. User info retrieved and emitted
 class AuthCubit extends Cubit<AuthState> {
   AuthCubit({
     required AuthRepository authRepository,
@@ -14,85 +22,107 @@ class AuthCubit extends Cubit<AuthState> {
   final AuthRepository _authRepository;
 
   /// Initialize auth - check for existing session
+  /// Called when app starts to see if user is already logged in
   Future<void> initialize() async {
     try {
       emit(state.copyWith(status: AuthStatus.loading));
 
-      final user = await _authRepository.getCurrentUser();
+      print('🔐 Initializing authentication...');
 
-      if (user != null) {
-        emit(state.copyWith(
-          status: AuthStatus.authenticated,
-          user: _mapToAuthUser(user),
-        ));
-      } else {
-        emit(state.copyWith(status: AuthStatus.unauthenticated));
+      // Check if user has valid tokens
+      final isAuthenticated = await _authRepository.isAuthenticated();
+
+      if (isAuthenticated) {
+        // User has tokens, fetch their info
+        final user = await _authRepository.getCurrentUser();
+
+        if (user != null) {
+          print('✓ User session restored: ${user.email}');
+          emit(state.copyWith(
+            status: AuthStatus.authenticated,
+            user: _mapToAuthUser(user),
+          ));
+          return;
+        }
       }
+
+      // No valid session
+      print('ℹ️ No existing session found');
+      emit(state.copyWith(status: AuthStatus.unauthenticated));
     } catch (e) {
+      print('❌ Auth initialization error: $e');
       emit(state.copyWith(
-        status: AuthStatus.unauthenticated,
+        status: AuthStatus.error,
         error: 'Failed to initialize authentication',
       ));
     }
   }
 
-  /// Sign in with Google OAuth
-  /// Flow: Google Sign-In → Get ID Token → Exchange with Backend → Get Access/Refresh Tokens
+  /// Sign in with Google OAuth via Firebase
+  ///
+  /// Complete flow:
+  /// 1. User taps "Sign in with Google" button
+  /// 2. Google Sign-In UI appears
+  /// 3. User selects their Google account
+  /// 4. Firebase handles authentication
+  /// 5. Get Firebase ID token
+  /// 6. Exchange ID token with backend for JWT tokens
+  /// 7. Store tokens securely
+  /// 8. Fetch and store user info
+  /// 9. Update state to authenticated
   Future<void> signInWithGoogle() async {
     try {
       emit(state.copyWith(status: AuthStatus.loading));
 
-      // TODO: Uncomment when Firebase Auth is configured
-      /*
-      // Step 1: Trigger Google Sign-In via Firebase Auth
-      final googleIdToken = await _authRepository.signInWithGoogle();
+      print('🔐 Starting Google Sign-In...');
 
-      if (googleIdToken == null) {
+      // Step 1: Get Firebase ID token from Google Sign-In
+      final firebaseIdToken = await _authRepository.signInWithGoogle();
+
+      if (firebaseIdToken == null) {
+        print('ℹ️ Google Sign-In was cancelled');
         emit(state.copyWith(
           status: AuthStatus.unauthenticated,
-          error: 'Google sign-in was cancelled',
+          error: 'Sign-in was cancelled',
         ));
         return;
       }
 
-      // Step 2: Exchange Google ID token with backend
-      // Backend endpoint: POST /auth/exchange
-      // Request body: { "id_token": "google_id_token_here" }
-      // Response: { "access_token": "...", "refresh_token": "...", "user": {...} }
+      print('✓ Got Firebase ID token');
+
+      // Step 2: Exchange Firebase ID token with backend
+      // This call sends the ID token to POST /auth/exchange
+      // Backend verifies it with Firebase Admin SDK and returns JWT tokens
       final authTokens = await _authRepository.exchangeIdToken(
-        IdTokenExchangeRequest(idToken: googleIdToken),
+        IdTokenExchangeRequest(idToken: firebaseIdToken),
       );
 
-      // Step 3: Store tokens securely (handled by repository)
-      // Repository will save access_token and refresh_token to secure storage
+      print('✓ Exchanged ID token for JWT tokens');
+      print('  - Access token expires in: ${authTokens.expiresIn}s');
 
-      // Step 4: Get current user from backend using access token
+      // Step 3: Get current user from backend
+      // The API client now has the access token and will use it for all requests
       final user = await _authRepository.getCurrentUser();
 
       if (user == null) {
         throw Exception('Failed to get user after authentication');
       }
 
+      print('✓ Authentication complete: ${user.email}');
+
+      // Step 4: Update state to authenticated
       emit(state.copyWith(
         status: AuthStatus.authenticated,
         user: _mapToAuthUser(user),
       ));
-      */
-
-      // TEMPORARY: Mock successful auth for development
-      await Future.delayed(const Duration(seconds: 1));
-
+    } on AuthException catch (e) {
+      print('❌ Auth error: $e');
       emit(state.copyWith(
-        status: AuthStatus.authenticated,
-        user: const AuthUser(
-          id: 'mock_user_123',
-          email: 'demo@medlink.dev',
-          displayName: 'Demo User',
-          photoUrl: null,
-          role: 'expecting_mother',
-        ),
+        status: AuthStatus.error,
+        error: e.message,
       ));
     } catch (e) {
+      print('❌ Sign-in error: $e');
       emit(state.copyWith(
         status: AuthStatus.error,
         error: 'Sign-in failed: ${e.toString()}',
@@ -101,22 +131,35 @@ class AuthCubit extends Cubit<AuthState> {
   }
 
   /// Sign out - clear tokens and user data
+  ///
+  /// Steps:
+  /// 1. Sign out from Firebase
+  /// 2. Sign out from Google
+  /// 3. Clear stored tokens
+  /// 4. Update state to unauthenticated
   Future<void> signOut() async {
     try {
       emit(state.copyWith(status: AuthStatus.loading));
 
-      // TODO: Uncomment when Firebase Auth is configured
-      /*
-      // Sign out from Firebase
+      print('🔐 Signing out...');
+
+      // Sign out from Firebase and Google
       await _authRepository.signOut();
-      // Repository will also clear stored tokens from secure storage
-      */
+
+      print('✓ Signed out successfully');
 
       emit(state.copyWith(
         status: AuthStatus.unauthenticated,
         user: null,
       ));
+    } on AuthException catch (e) {
+      print('❌ Sign-out error: $e');
+      emit(state.copyWith(
+        status: AuthStatus.error,
+        error: e.message,
+      ));
     } catch (e) {
+      print('❌ Sign-out error: $e');
       emit(state.copyWith(
         status: AuthStatus.error,
         error: 'Sign-out failed: ${e.toString()}',
@@ -125,17 +168,41 @@ class AuthCubit extends Cubit<AuthState> {
   }
 
   /// Refresh authentication tokens when they expire
-  /// TODO: Implement when backend token refresh endpoint is ready
-  /// Backend endpoint: POST /auth/refresh
-  /// Request body: { "refresh_token": "stored_refresh_token" }
-  /// Response: { "access_token": "new_access_token" }
+  ///
+  /// This is typically called automatically by the API client interceptor
+  /// when an access token expires. This method can be called manually
+  /// if needed.
+  ///
+  /// The backend endpoint POST /auth/refresh:
+  /// - Accepts the refresh token
+  /// - Validates it
+  /// - Returns a new access token
   Future<void> refreshToken() async {
     try {
-      // await _authRepository.refreshToken();
-      // If successful, tokens are updated silently in secure storage
-      // If refresh fails (expired refresh token), force sign out
+      print('🔄 Refreshing access token...');
+
+      // Call the repository to refresh
+      await _authRepository.refreshToken();
+
+      print('✓ Access token refreshed');
+
+      // Optionally update user info
+      final user = await _authRepository.getCurrentUser();
+      if (user != null) {
+        emit(state.copyWith(
+          user: _mapToAuthUser(user),
+        ));
+      }
+    } on AuthException catch (e) {
+      print('❌ Token refresh failed: $e');
+      // Refresh failed - sign out user
+      await signOut();
+      emit(state.copyWith(
+        status: AuthStatus.error,
+        error: 'Session expired. Please sign in again.',
+      ));
     } catch (e) {
-      // Refresh token expired or invalid - sign out user
+      print(' Refresh error: $e');
       await signOut();
     }
   }
@@ -143,20 +210,6 @@ class AuthCubit extends Cubit<AuthState> {
   /// Clear error state
   void clearError() {
     emit(state.clearError());
-  }
-
-  /// DEVELOPMENT ONLY: Bypass auth for testing UI without backend
-  /// TODO: Remove this method before production deployment
-  void bypassAuth() {
-    emit(state.copyWith(
-      status: AuthStatus.authenticated,
-      user: const AuthUser(
-        id: 'bypass_user_dev',
-        email: 'bypass@dev.local',
-        displayName: 'Dev Bypass User',
-        role: 'expecting_mother',
-      ),
-    ));
   }
 
   /// Helper to map repository user model to auth state user model
