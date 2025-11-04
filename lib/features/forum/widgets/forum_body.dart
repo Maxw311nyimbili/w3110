@@ -1,4 +1,5 @@
 // lib/features/forum/widgets/forum_body.dart
+// PREMIUM DESIGN - Uses App Theme & Colors
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -10,7 +11,6 @@ import 'post_card.dart';
 import 'comment_list_item.dart';
 import 'comment_input.dart';
 
-/// Main forum body - switches between list view and detail view
 class ForumBody extends StatelessWidget {
   const ForumBody({super.key});
 
@@ -18,12 +18,16 @@ class ForumBody extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocListener<ForumCubit, ForumState>(
       listener: (context, state) {
-        // Show errors
         if (state.error != null) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.error!),
-              backgroundColor: Theme.of(context).colorScheme.error,
+              backgroundColor: AppColors.error,
+              behavior: SnackBarBehavior.floating,
+              margin: const EdgeInsets.all(16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
           );
           context.read<ForumCubit>().clearError();
@@ -31,7 +35,6 @@ class ForumBody extends StatelessWidget {
       },
       child: BlocBuilder<ForumCubit, ForumState>(
         builder: (context, state) {
-          // Switch between list and detail view
           if (state.view == ForumView.detail) {
             return _buildDetailView(context, state);
           }
@@ -46,8 +49,12 @@ class ForumBody extends StatelessWidget {
   // ============================================================
   Widget _buildListView(BuildContext context, ForumState state) {
     if (state.isLoading && !state.hasPosts) {
-      return const Center(
-        child: CircularProgressIndicator(),
+      return Center(
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(
+            AppColors.accentPrimary,
+          ),
+        ),
       );
     }
 
@@ -57,8 +64,10 @@ class ForumBody extends StatelessWidget {
 
     return RefreshIndicator(
       onRefresh: () => context.read<ForumCubit>().syncWithBackend(),
+      color: AppColors.accentPrimary,
+      backgroundColor: AppColors.backgroundSurface,
       child: ListView.builder(
-        padding: const EdgeInsets.all(AppSpacing.lg),
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
         itemCount: state.posts.length,
         itemBuilder: (context, index) {
           final post = state.posts[index];
@@ -74,33 +83,35 @@ class ForumBody extends StatelessWidget {
   Widget _buildEmptyState(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.screenHorizontalLarge),
+        padding: const EdgeInsets.all(32),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.forum_outlined,
-              size: 64,
-              color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
-            ),
-            const SizedBox(height: AppSpacing.xl),
-            Text(
-              'No posts yet',
-              style: AppTextStyles.headlineMedium.copyWith(
-                color: Theme.of(context)
-                    .colorScheme
-                    .onSurface
-                    .withOpacity(0.6),
+            Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                color: AppColors.backgroundElevated,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Icon(
+                Icons.forum_outlined,
+                size: 32,
+                color: AppColors.textTertiary,
               ),
             ),
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: 20),
+            Text(
+              'No posts yet',
+              style: AppTextStyles.headlineLarge.copyWith(
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 8),
             Text(
               'Be the first to start a discussion',
               style: AppTextStyles.bodyMedium.copyWith(
-                color: Theme.of(context)
-                    .colorScheme
-                    .onSurface
-                    .withOpacity(0.5),
+                color: AppColors.textTertiary,
               ),
               textAlign: TextAlign.center,
             ),
@@ -120,22 +131,26 @@ class ForumBody extends StatelessWidget {
 
     return Column(
       children: [
-        // Post content + comments
         Expanded(
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Post header
                 _buildPostHeader(context, state.selectedPost!),
-
-                const Divider(height: 1),
-
-                // Comments section
+                Divider(
+                  height: 1,
+                  color: AppColors.gray200,
+                ),
                 if (state.isLoading && !state.hasComments)
-                  const Padding(
-                    padding: EdgeInsets.all(AppSpacing.xl),
-                    child: Center(child: CircularProgressIndicator()),
+                  Padding(
+                    padding: const EdgeInsets.all(32),
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          AppColors.accentPrimary,
+                        ),
+                      ),
+                    ),
                   )
                 else if (!state.hasComments)
                   _buildNoComments(context)
@@ -145,8 +160,6 @@ class ForumBody extends StatelessWidget {
             ),
           ),
         ),
-
-        // Comment input
         const CommentInput(),
       ],
     );
@@ -154,119 +167,121 @@ class ForumBody extends StatelessWidget {
 
   Widget _buildPostHeader(BuildContext context, ForumPost post) {
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.xl),
+      color: AppColors.backgroundSurface,
+      padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Author and timestamp
+          // Author
           Row(
             children: [
-              CircleAvatar(
-                radius: 20,
-                backgroundColor: AppColors.accentPrimary,
-                child: Text(
-                  post.authorName[0].toUpperCase(),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: AppColors.accentLight,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Center(
+                  child: Text(
+                    post.authorName[0].toUpperCase(),
+                    style: TextStyle(
+                      color: AppColors.accentPrimary,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ),
-              const SizedBox(width: AppSpacing.md),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       post.authorName,
-                      style: AppTextStyles.labelLarge,
+                      style: AppTextStyles.labelLarge.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
                     ),
-                    const SizedBox(height: AppSpacing.xs),
+                    const SizedBox(height: 3),
                     Text(
                       _formatTimestamp(post.createdAt),
-                      style: AppTextStyles.labelSmall,
+                      style: AppTextStyles.labelSmall.copyWith(
+                        color: AppColors.textTertiary,
+                      ),
                     ),
                   ],
                 ),
               ),
-              // Sync indicator
               if (post.isPendingSync)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.sm,
-                    vertical: AppSpacing.xs,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.warning.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: AppColors.warning.withOpacity(0.3),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.cloud_upload_outlined,
-                        size: 14,
-                        color: AppColors.warning,
-                      ),
-                      const SizedBox(width: AppSpacing.xs),
-                      Text(
-                        'Syncing...',
-                        style: AppTextStyles.labelSmall.copyWith(
-                          color: AppColors.warning,
-                        ),
-                      ),
-                    ],
-                  ),
+                Icon(
+                  Icons.cloud_upload_outlined,
+                  size: 18,
+                  color: AppColors.warning,
                 ),
             ],
           ),
 
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: 16),
 
           // Title
           Text(
             post.title,
-            style: AppTextStyles.headlineLarge,
+            style: AppTextStyles.displayMedium.copyWith(
+              color: AppColors.textPrimary,
+            ),
           ),
 
-          const SizedBox(height: AppSpacing.md),
+          const SizedBox(height: 12),
 
           // Content
           Text(
             post.content,
-            style: AppTextStyles.bodyLarge.copyWith(height: 1.6),
+            style: AppTextStyles.bodyLarge.copyWith(
+              color: AppColors.textPrimary,
+              height: 1.6,
+            ),
           ),
 
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: 16),
 
-          // Post stats
+          // Stats
           Row(
             children: [
-              Icon(
-                Icons.comment_outlined,
-                size: 18,
-                color: AppColors.textSecondary,
-              ),
-              const SizedBox(width: AppSpacing.xs),
-              Text(
-                '${post.commentCount}',
-                style: AppTextStyles.labelMedium,
-              ),
-              const SizedBox(width: AppSpacing.lg),
-              Icon(
-                Icons.favorite_outline,
-                size: 18,
-                color: AppColors.textSecondary,
-              ),
-              const SizedBox(width: AppSpacing.xs),
-              Text(
-                '${post.likeCount}',
-                style: AppTextStyles.labelMedium,
-              ),
+              _buildStatBadge(Icons.comment_outlined, post.commentCount),
+              const SizedBox(width: 16),
+              _buildStatBadge(Icons.favorite_outline, post.likeCount),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatBadge(IconData icon, int count) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: AppColors.backgroundElevated,
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            size: 14,
+            color: AppColors.textSecondary,
+          ),
+          const SizedBox(width: 6),
+          Text(
+            '$count',
+            style: AppTextStyles.labelSmall.copyWith(
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ],
       ),
@@ -277,9 +292,12 @@ class ForumBody extends StatelessWidget {
     return ListView.separated(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: const EdgeInsets.all(20),
       itemCount: state.comments.length,
-      separatorBuilder: (context, index) => const Divider(height: 1),
+      separatorBuilder: (context, index) => Divider(
+        height: 20,
+        color: AppColors.gray200,
+      ),
       itemBuilder: (context, index) {
         return CommentListItem(comment: state.comments[index]);
       },
@@ -288,23 +306,31 @@ class ForumBody extends StatelessWidget {
 
   Widget _buildNoComments(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(AppSpacing.xl),
+      padding: const EdgeInsets.all(40),
       child: Center(
         child: Column(
           children: [
-            Icon(
-              Icons.chat_bubble_outline,
-              size: 48,
-              color: AppColors.textTertiary,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              'No comments yet',
-              style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.textSecondary,
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: AppColors.backgroundElevated,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                Icons.chat_bubble_outline,
+                size: 28,
+                color: AppColors.textTertiary,
               ),
             ),
-            const SizedBox(height: AppSpacing.sm),
+            const SizedBox(height: 16),
+            Text(
+              'No comments yet',
+              style: AppTextStyles.headlineMedium.copyWith(
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 6),
             Text(
               'Be the first to comment',
               style: AppTextStyles.bodySmall.copyWith(

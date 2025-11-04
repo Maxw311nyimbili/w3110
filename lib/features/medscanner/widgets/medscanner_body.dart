@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../cubit/cubit.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/theme/app_colors.dart';
 import 'camera_preview_widget.dart';
 import 'scan_result_widget.dart';
 
@@ -21,7 +22,12 @@ class MedScannerBody extends StatelessWidget {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.error!),
-              backgroundColor: Theme.of(context).colorScheme.error,
+              backgroundColor: AppColors.error,
+              behavior: SnackBarBehavior.floating,
+              margin: const EdgeInsets.all(16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
           );
           context.read<MedScannerCubit>().clearError();
@@ -54,6 +60,12 @@ class MedScannerBody extends StatelessWidget {
         // Instructions and controls
         Container(
           padding: const EdgeInsets.all(AppSpacing.xl),
+          decoration: BoxDecoration(
+            color: AppColors.backgroundSurface,
+            borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(20),
+            ),
+          ),
           child: Column(
             children: [
               // Instructions
@@ -66,10 +78,7 @@ class MedScannerBody extends StatelessWidget {
               Text(
                 'Ensure good lighting and hold steady',
                 style: AppTextStyles.bodySmall.copyWith(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .onSurface
-                      .withOpacity(0.6),
+                  color: AppColors.textSecondary,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -112,14 +121,26 @@ class MedScannerBody extends StatelessWidget {
   }
 
   Widget _buildCameraInitializing(BuildContext context) {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          CircularProgressIndicator(),
-          SizedBox(height: AppSpacing.lg),
-          Text('Initializing camera...'),
-        ],
+    return Container(
+      color: Colors.black87,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(
+                AppColors.accentPrimary,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            Text(
+              'Initializing camera...',
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -146,8 +167,10 @@ class _ActionButton extends StatelessWidget {
           icon: Icon(icon, size: 32),
           onPressed: onPressed,
           style: IconButton.styleFrom(
-            backgroundColor: Theme.of(context).colorScheme.surface,
-            foregroundColor: Theme.of(context).colorScheme.onSurface,
+            backgroundColor: AppColors.backgroundElevated,
+            foregroundColor: AppColors.accentPrimary,
+            disabledBackgroundColor: AppColors.gray200,
+            disabledForegroundColor: AppColors.textTertiary,
           ),
         ),
         const SizedBox(height: AppSpacing.xs),
@@ -180,18 +203,35 @@ class _CaptureButton extends StatelessWidget {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           border: Border.all(
-            color: Theme.of(context).colorScheme.primary,
+            color: onPressed != null
+                ? AppColors.accentPrimary
+                : AppColors.gray200,
             width: 4,
           ),
+          boxShadow: onPressed != null
+              ? [
+            BoxShadow(
+              color: AppColors.accentPrimary.withOpacity(0.3),
+              blurRadius: 8,
+              spreadRadius: 2,
+            ),
+          ]
+              : [],
         ),
         child: Center(
           child: isProcessing
-              ? const CircularProgressIndicator()
+              ? CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(
+              AppColors.accentPrimary,
+            ),
+          )
               : Container(
             width: 64,
             height: 64,
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary,
+              color: onPressed != null
+                  ? AppColors.accentPrimary
+                  : AppColors.gray200,
               shape: BoxShape.circle,
             ),
           ),

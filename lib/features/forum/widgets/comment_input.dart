@@ -1,4 +1,5 @@
-// lib/features/forum/widgets/comment_input.dart - WITH DEBUG BYPASS
+// lib/features/forum/widgets/comment_input.dart
+// PREMIUM DESIGN - Uses App Theme & Colors
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -7,7 +8,6 @@ import '../cubit/cubit.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_colors.dart';
 
-/// Comment input field - add comments to posts
 class CommentInput extends StatefulWidget {
   const CommentInput({super.key});
 
@@ -52,9 +52,7 @@ class _CommentInputState extends State<CommentInput> {
 
     final content = _controller.text.trim();
 
-    // Check if user is authenticated
     if (!authState.isAuthenticated || authState.user == null) {
-      // DEBUG: Allow commenting without auth in debug mode
       bool isDebugMode = false;
       assert(() {
         isDebugMode = true;
@@ -68,7 +66,6 @@ class _CommentInputState extends State<CommentInput> {
         return;
       }
 
-      // DEBUG MODE: Use mock user
       context.read<ForumCubit>().addComment(
         postId: forumState.selectedPost!.id.isEmpty
             ? forumState.selectedPost!.localId
@@ -78,7 +75,6 @@ class _CommentInputState extends State<CommentInput> {
         authorName: '[DEBUG] Test User',
       );
     } else {
-      // PRODUCTION: Use authenticated user
       final user = authState.user!;
 
       context.read<ForumCubit>().addComment(
@@ -98,74 +94,76 @@ class _CommentInputState extends State<CommentInput> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.md,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.backgroundSurface,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
+      color: AppColors.backgroundSurface,
       child: SafeArea(
         top: false,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            // Text input field
-            Expanded(
-              child: Container(
-                constraints: const BoxConstraints(maxHeight: 100),
-                decoration: BoxDecoration(
-                  color: AppColors.backgroundElevated,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: AppColors.gray200),
-                ),
-                child: TextField(
-                  controller: _controller,
-                  focusNode: _focusNode,
-                  maxLines: null,
-                  textInputAction: TextInputAction.newline,
-                  decoration: const InputDecoration(
-                    hintText: 'Add a comment...',
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: AppSpacing.lg,
-                      vertical: AppSpacing.md,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.md,
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Expanded(
+                child: Container(
+                  constraints: const BoxConstraints(maxHeight: 100),
+                  decoration: BoxDecoration(
+                    color: AppColors.backgroundElevated,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: AppColors.gray200,
+                      width: 1,
                     ),
                   ),
-                  onSubmitted: (_) => _sendComment(),
+                  child: TextField(
+                    controller: _controller,
+                    focusNode: _focusNode,
+                    maxLines: null,
+                    textInputAction: TextInputAction.newline,
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: AppColors.textPrimary,
+                    ),
+                    decoration: InputDecoration(
+                      hintText: 'Add a comment...',
+                      hintStyle: TextStyle(
+                        fontSize: 15,
+                        color: AppColors.textTertiary,
+                      ),
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.lg,
+                        vertical: AppSpacing.md,
+                      ),
+                    ),
+                  ),
                 ),
               ),
-            ),
 
-            const SizedBox(width: AppSpacing.sm),
+              const SizedBox(width: AppSpacing.sm),
 
-            // Send button
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              width: 40,
-              height: 40,
-              child: IconButton(
-                onPressed: _hasText ? _sendComment : null,
-                icon: Icon(
-                  Icons.send,
-                  color: _hasText ? AppColors.accentPrimary : AppColors.gray400,
-                  size: 22,
-                ),
-                style: IconButton.styleFrom(
-                  backgroundColor: _hasText
-                      ? AppColors.accentLight
-                      : AppColors.gray100,
+              // Send button
+              GestureDetector(
+                onTap: _hasText ? _sendComment : null,
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: _hasText
+                        ? AppColors.accentPrimary
+                        : AppColors.backgroundElevated,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    Icons.arrow_upward,
+                    color: _hasText ? Colors.white : AppColors.textTertiary,
+                    size: 18,
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

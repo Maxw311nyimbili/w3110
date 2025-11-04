@@ -1,5 +1,7 @@
 // lib/features/forum/view/forum_list_page.dart
 
+import 'package:cap_project/core/theme/app_colors.dart';
+import 'package:cap_project/core/theme/app_text_styles.dart';
 import 'package:cap_project/core/widgets/app_drawer.dart';
 import 'package:cap_project/features/forum/cubit/cubit.dart';
 import 'package:cap_project/features/forum/widgets/widgets.dart';
@@ -36,16 +38,23 @@ class ForumListView extends StatelessWidget {
     return BlocBuilder<ForumCubit, ForumState>(
       builder: (context, state) {
         return Scaffold(
+          backgroundColor: AppColors.backgroundPrimary,
           appBar: AppBar(
+            backgroundColor: AppColors.backgroundSurface,
+            elevation: 0,
+            scrolledUnderElevation: 0,
             title: Text(
-              state.view == ForumView.detail ? 'Post Details' : 'Community Forum',
+              state.view == ForumView.detail ? 'Post Details' : 'Community',
+              style: AppTextStyles.headlineMedium.copyWith(
+                color: AppColors.textPrimary,
+              ),
             ),
             leading: state.view == ForumView.detail
                 ? IconButton(
               icon: const Icon(Icons.arrow_back_rounded),
               onPressed: () => context.read<ForumCubit>().backToList(),
             )
-                : null, // Will show hamburger menu automatically
+                : null,
             actions: [
               // Sync status indicator
               if (state.isSyncing)
@@ -55,27 +64,43 @@ class ForumListView extends StatelessWidget {
                     child: SizedBox(
                       width: 20,
                       height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          AppColors.accentPrimary,
+                        ),
+                      ),
                     ),
                   ),
                 )
               else if (state.hasPendingSync)
                 IconButton(
                   icon: const Icon(Icons.cloud_upload_outlined),
+                  color: AppColors.warning,
                   tooltip: 'Sync pending',
-                  onPressed: () => context.read<ForumCubit>().syncWithBackend(),
+                  onPressed: () =>
+                      context.read<ForumCubit>().syncWithBackend(),
                 )
               else if (state.lastSyncTime != null)
                   IconButton(
                     icon: const Icon(Icons.cloud_done_outlined),
+                    color: AppColors.accentPrimary,
                     tooltip: 'Synced',
                     onPressed: () {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
                             'Last synced: ${_formatSyncTime(state.lastSyncTime!)}',
+                            style: AppTextStyles.bodySmall.copyWith(
+                              color: Colors.white,
+                            ),
                           ),
                           behavior: SnackBarBehavior.floating,
+                          backgroundColor: AppColors.textPrimary,
+                          margin: const EdgeInsets.all(16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                         ),
                       );
                     },
@@ -87,14 +112,52 @@ class ForumListView extends StatelessWidget {
             child: ForumBody(),
           ),
           floatingActionButton: state.view == ForumView.list
-              ? FloatingActionButton.extended(
-            onPressed: () => _showNewPostSheet(context),
-            icon: const Icon(Icons.add_rounded),
-            label: const Text('New Post'),
-          )
+              ? _buildPremiumFAB(context)
               : null,
         );
       },
+    );
+  }
+
+  /// Premium FAB with icon and text
+  Widget _buildPremiumFAB(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 24, right: 24),
+      child: GestureDetector(
+        onTap: () => _showNewPostSheet(context),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+          decoration: BoxDecoration(
+            color: AppColors.accentPrimary,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.accentPrimary.withOpacity(0.3),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.add_rounded,
+                color: Colors.white,
+                size: 24,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'New Post',
+                style: AppTextStyles.labelLarge.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -104,9 +167,11 @@ class ForumListView extends StatelessWidget {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (modalContext) => Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        decoration: BoxDecoration(
+          color: AppColors.backgroundSurface,
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(20),
+          ),
         ),
         child: BlocProvider.value(
           value: context.read<ForumCubit>(),
