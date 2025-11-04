@@ -1,57 +1,42 @@
 // lib/features/medscanner/widgets/camera_preview_widget.dart
 
 import 'package:flutter/material.dart';
+import 'package:camera/camera.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../cubit/cubit.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 /// Camera preview widget - displays live camera feed
-/// TODO: Replace with actual camera package implementation (camera, camera_platform_interface)
 class CameraPreviewWidget extends StatelessWidget {
   const CameraPreviewWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final cubit = context.read<MedScannerCubit>();
+    final controller = cubit.cameraController;
+
+    // Simple check: if controller is null OR not initialized
+    if (controller == null) {
+      return _buildLoadingState();
+    }
+
+    if (controller.value.isInitialized == false) {
+      return _buildLoadingState();
+    }
+
+    // Controller is ready - use it safely
     return Stack(
       children: [
-        // TODO: Uncomment when camera package is integrated
-        /*
-        // Actual camera preview
-        CameraPreview(_cameraController),
-        */
+        // Live camera preview
+        CameraPreview(controller),
 
-        // TEMPORARY: Mock camera preview for development
+        // Dark overlay
         Container(
-          color: Colors.black87,
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.camera_alt_outlined,
-                  size: 80,
-                  color: Colors.white.withOpacity(0.3),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Camera Preview',
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.5),
-                    fontSize: 16,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  '(Will show live camera feed)',
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.3),
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-          ),
+          color: Colors.black.withOpacity(0.1),
         ),
 
-        // Scanning frame overlay (helps user frame the medication)
+        // Scanning frame overlay
         Center(
           child: _buildScanningFrame(context),
         ),
@@ -67,7 +52,7 @@ class CameraPreviewWidget extends StatelessWidget {
               vertical: 12,
             ),
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.6),
+              color: Colors.black.withOpacity(0.7),
               borderRadius: BorderRadius.circular(8),
             ),
             child: const Row(
@@ -92,6 +77,26 @@ class CameraPreviewWidget extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildLoadingState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(
+              AppColors.accentPrimary,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Initializing camera...',
+            style: AppTextStyles.bodyMedium,
+          ),
+        ],
+      ),
     );
   }
 

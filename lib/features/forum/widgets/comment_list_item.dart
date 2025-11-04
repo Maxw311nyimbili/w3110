@@ -1,12 +1,11 @@
 // lib/features/forum/widgets/comment_list_item.dart
+// PREMIUM DESIGN - Uses App Theme & Colors
 
 import 'package:flutter/material.dart';
 import '../cubit/cubit.dart';
-import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
-/// Comment list item - displays a single comment
 class CommentListItem extends StatelessWidget {
   const CommentListItem({
     required this.comment,
@@ -17,71 +16,77 @@ class CommentListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Author avatar
-          CircleAvatar(
-            radius: 16,
-            backgroundColor: AppColors.accentPrimary.withOpacity(0.2),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Avatar
+        Container(
+          width: 32,
+          height: 32,
+          decoration: BoxDecoration(
+            color: AppColors.accentLight,
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Center(
             child: Text(
               comment.authorName[0].toUpperCase(),
               style: TextStyle(
                 color: AppColors.accentPrimary,
                 fontSize: 14,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
+        ),
 
-          const SizedBox(width: AppSpacing.md),
+        const SizedBox(width: 12),
 
-          // Comment content
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Author name and timestamp
-                Row(
-                  children: [
-                    Text(
-                      comment.authorName,
-                      style: AppTextStyles.labelMedium.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+        // Comment content
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Author and timestamp
+              Row(
+                children: [
+                  Text(
+                    comment.authorName,
+                    style: AppTextStyles.labelLarge.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
                     ),
-                    const SizedBox(width: AppSpacing.sm),
-                    Text(
-                      _formatTimestamp(comment.createdAt),
-                      style: AppTextStyles.labelSmall.copyWith(
-                        color: AppColors.textTertiary,
-                      ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    _formatTimestamp(comment.createdAt),
+                    style: AppTextStyles.labelSmall.copyWith(
+                      color: AppColors.textTertiary,
                     ),
-                    const Spacer(),
-                    // Sync indicator
-                    if (comment.isPendingSync)
-                      Icon(
-                        Icons.cloud_upload_outlined,
-                        size: 14,
-                        color: AppColors.warning,
-                      ),
-                  ],
-                ),
+                  ),
+                  const Spacer(),
+                  // Sync indicator
+                  if (comment.isPendingSync)
+                    Icon(
+                      Icons.cloud_upload_outlined,
+                      size: 14,
+                      color: AppColors.warning,
+                    ),
+                ],
+              ),
 
-                const SizedBox(height: AppSpacing.sm),
+              const SizedBox(height: 6),
 
-                // Comment text
-                Text(
-                  comment.content,
-                  style: AppTextStyles.bodyMedium.copyWith(height: 1.5),
+              // Comment text
+              Text(
+                comment.content,
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: AppColors.textPrimary,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
