@@ -1,9 +1,11 @@
 // lib/features/landing/view/landing_page.dart
 
+import 'package:auth_repository/auth_repository.dart';
 import 'package:cap_project/app/view/app_router.dart';
 import 'package:cap_project/features/landing/cubit/cubit.dart';
 import 'package:cap_project/features/landing/widgets/landing_body.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:landing_repository/landing_repository.dart';
 
 /// Entry point for onboarding flow
@@ -21,6 +23,7 @@ class LandingPage extends StatelessWidget {
     return BlocProvider(
       create: (context) => LandingCubit(
         landingRepository: context.read<LandingRepository>(),
+        authRepository: context.read<AuthRepository>(), // ← ADD THIS
       )..initialize(),
       child: const LandingView(),
     );
@@ -50,8 +53,8 @@ class LandingView extends StatelessWidget {
           // Navigate after this frame to avoid build conflicts
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (context.mounted) {
-              // Navigate to auth page (or chat if you prefer)
-              AppRouter.replaceTo(context, AppRouter.auth);
+              // Navigate to chat page (since auth happens during onboarding)
+              AppRouter.replaceTo(context, AppRouter.chat);
 
               // Show completion message
               ScaffoldMessenger.of(context).showSnackBar(

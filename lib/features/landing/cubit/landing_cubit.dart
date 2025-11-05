@@ -1,17 +1,27 @@
-// lib/features/landing/cubit/landing_cubit.dart
-
+import 'package:auth_repository/auth_repository.dart';
 import 'package:cap_project/features/landing/cubit/landing_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:landing_repository/landing_repository.dart';
 
-/// Manages onboarding flow and user preferences
+/// Manages onboarding flow including authentication step
+///
+/// Flow:
+/// 1. Welcome - intro screen
+/// 2. Authentication - Google sign-in (now part of landing)
+/// 3. Role Selection - user picks their primary role
+/// 4. Context Gathering - interests/topics (optional)
+/// 5. Consent - medical disclaimer
+/// 6. Complete - onboarding finished, ready for chat
 class LandingCubit extends Cubit<LandingState> {
   LandingCubit({
     required LandingRepository landingRepository,
+    required AuthRepository authRepository,
   })  : _landingRepository = landingRepository,
+        _authRepository = authRepository,
         super(const LandingState());
 
   final LandingRepository _landingRepository;
+  final AuthRepository _authRepository;
 
   /// Initialize - check if onboarding already completed
   Future<void> initialize() async {
@@ -21,6 +31,7 @@ class LandingCubit extends Cubit<LandingState> {
       final status = await _landingRepository.getOnboardingStatus();
 
       if (status.isComplete) {
+        // Onboarding already done, go straight to complete
         emit(state.copyWith(
           currentStep: OnboardingStep.complete,
           selectedRole: _mapStringToRole(status.userRole),
@@ -29,6 +40,7 @@ class LandingCubit extends Cubit<LandingState> {
           isLoading: false,
         ));
       } else {
+        // Start onboarding from welcome
         emit(state.copyWith(isLoading: false));
       }
     } catch (e) {
@@ -52,6 +64,68 @@ class LandingCubit extends Cubit<LandingState> {
     final previousStep = _getPreviousStep(state.currentStep);
     if (previousStep != null) {
       emit(state.copyWith(currentStep: previousStep));
+    }
+  }
+
+  /// Authenticate with Google as part of onboarding
+  /// This is called from the authentication step
+  Future<void> authenticateWithGoogle() async {
+    try {
+      emit(state.copyWith(isAuthenticating: true, authError: null));
+
+      print('🔐 Starting Google Sign-In from onboarding...');
+
+      // Get Firebase ID token from Google Sign-In
+      final firebaseIdToken = await _authRepository.signInWithGoogle();
+
+      if (firebaseIdToken == null) {
+        print('ℹ️ Google Sign-In was cancelled');
+        emit(state.copyWith(
+          isAuthenticating: false,
+          authError: 'Sign-in was cancelled',
+        ));
+        return;
+      }
+
+      print('✓ Got Firebase ID token');
+
+      // Exchange Firebase ID token with backend
+      final authTokens = await _authRepository.exchangeIdToken(
+        IdTokenExchangeRequest(idToken: firebaseIdToken),
+      );
+
+      print('✓ Exchanged ID token for JWT tokens');
+      print('  - Access token expires in: ${authTokens.expiresIn}s');
+
+      // Get current user from backend
+      final user = await _authRepository.getCurrentUser();
+
+      if (user == null) {
+        throw Exception('Failed to get user after authentication');
+      }
+
+      print('✓ Authentication complete: ${user.email}');
+
+      // Authentication successful - move to role selection
+      emit(state.copyWith(
+        isAuthenticating: false,
+        authError: null,
+      ));
+
+      // Move to next step (role selection)
+      nextStep();
+    } on AuthException catch (e) {
+      print('❌ Auth error: $e');
+      emit(state.copyWith(
+        isAuthenticating: false,
+        authError: e.message,
+      ));
+    } catch (e) {
+      print('❌ Sign-in error: $e');
+      emit(state.copyWith(
+        isAuthenticating: false,
+        authError: 'Sign-in failed: ${e.toString()}',
+      ));
     }
   }
 
@@ -131,10 +205,13 @@ class LandingCubit extends Cubit<LandingState> {
     emit(state.clearError());
   }
 
-  // Helper methods
+  // ============ Helper methods ============
+
   OnboardingStep _getNextStep(OnboardingStep current) {
     switch (current) {
       case OnboardingStep.welcome:
+        return OnboardingStep.authentication; // ← Auth is next after welcome
+      case OnboardingStep.authentication:
         return OnboardingStep.roleSelection;
       case OnboardingStep.roleSelection:
         return OnboardingStep.contextGathering;
@@ -151,8 +228,10 @@ class LandingCubit extends Cubit<LandingState> {
     switch (current) {
       case OnboardingStep.welcome:
         return null;
+      case OnboardingStep.authentication:
+        return OnboardingStep.welcome; // ← Can go back to welcome
       case OnboardingStep.roleSelection:
-        return OnboardingStep.welcome;
+        return OnboardingStep.authentication; // ← Can go back to auth
       case OnboardingStep.contextGathering:
         return OnboardingStep.roleSelection;
       case OnboardingStep.consent:
