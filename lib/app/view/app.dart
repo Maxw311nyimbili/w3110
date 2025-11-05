@@ -6,6 +6,7 @@ import 'package:cap_project/app/view/app_config.dart';
 import 'package:cap_project/app/view/app_router.dart';
 import 'package:cap_project/core/theme/app_theme.dart';
 import 'package:cap_project/features/auth/cubit/auth_cubit.dart';
+import 'package:cap_project/features/landing/cubit/landing_cubit.dart';
 import 'package:chat_repository/chat_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -34,7 +35,8 @@ class _AppState extends State<App> {
   late final ForumRepository _forumRepository;
   late final LandingRepository _landingRepository;
   late final MediaRepository _mediaRepository;
-  late final AuthCubit _authCubit; // ADD THIS
+  late final AuthCubit _authCubit;
+  late final LandingCubit _landingCubit; // ← ADD THIS
 
   @override
   void initState() {
@@ -50,7 +52,7 @@ class _AppState extends State<App> {
       connectTimeout: widget.config.apiTimeout,
       receiveTimeout: widget.config.apiTimeout,
       getAccessToken: () async {
-        return "test-token-day2"; // ← FIXED
+        return "test-token-day2";
       },
       refreshToken: () async {},
     );
@@ -83,6 +85,12 @@ class _AppState extends State<App> {
 
     // Initialize global AuthCubit
     _authCubit = AuthCubit(authRepository: _authRepository);
+
+    // Initialize global LandingCubit with both repositories ← ADD THIS
+    _landingCubit = LandingCubit(
+      landingRepository: _landingRepository,
+      authRepository: _authRepository,
+    );
   }
 
   @override
@@ -95,8 +103,12 @@ class _AppState extends State<App> {
         RepositoryProvider.value(value: _landingRepository),
         RepositoryProvider.value(value: _mediaRepository),
       ],
-      child: BlocProvider.value(
-        value: _authCubit,
+      child: MultiBlocProvider(
+        // ← CHANGE: Use MultiBlocProvider instead of just BlocProvider.value
+        providers: [
+          BlocProvider.value(value: _authCubit),
+          BlocProvider.value(value: _landingCubit), // ← ADD THIS
+        ],
         child: MaterialApp(
           title: 'MedBot',
           debugShowCheckedModeBanner: false,
@@ -112,7 +124,8 @@ class _AppState extends State<App> {
 
   @override
   void dispose() {
-    _authCubit.close(); // ADD THIS
+    _authCubit.close();
+    _landingCubit.close(); // ← ADD THIS
     super.dispose();
   }
 }

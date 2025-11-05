@@ -1,9 +1,8 @@
-// lib/features/landing/cubit/landing_state.dart
-
 import 'package:equatable/equatable.dart';
 
 enum OnboardingStep {
   welcome,
+  authentication, // ← NEW: Auth step happens before customization
   roleSelection,
   contextGathering,
   consent,
@@ -18,6 +17,8 @@ enum UserRole {
 }
 
 /// Immutable state for landing/onboarding flow
+///
+/// Flow: Welcome → Auth → Role Selection → Context Gathering → Consent → Complete
 class LandingState extends Equatable {
   const LandingState({
     this.currentStep = OnboardingStep.welcome,
@@ -28,6 +29,8 @@ class LandingState extends Equatable {
     this.consentVersion,
     this.isLoading = false,
     this.error,
+    this.authError, // ← NEW: Track auth errors separately
+    this.isAuthenticating = false, // ← NEW: Track auth loading state
   });
 
   final OnboardingStep currentStep;
@@ -38,12 +41,16 @@ class LandingState extends Equatable {
   final String? consentVersion;
   final bool isLoading;
   final String? error;
+  final String? authError; // ← NEW
+  final bool isAuthenticating; // ← NEW
 
   bool get isComplete => currentStep == OnboardingStep.complete;
   bool get canProceed {
     switch (currentStep) {
       case OnboardingStep.welcome:
         return true;
+      case OnboardingStep.authentication:
+        return true; // Auth button always enabled
       case OnboardingStep.roleSelection:
         return selectedRole != null;
       case OnboardingStep.contextGathering:
@@ -64,6 +71,8 @@ class LandingState extends Equatable {
     String? consentVersion,
     bool? isLoading,
     String? error,
+    String? authError,
+    bool? isAuthenticating,
   }) {
     return LandingState(
       currentStep: currentStep ?? this.currentStep,
@@ -74,11 +83,13 @@ class LandingState extends Equatable {
       consentVersion: consentVersion ?? this.consentVersion,
       isLoading: isLoading ?? this.isLoading,
       error: error,
+      authError: authError,
+      isAuthenticating: isAuthenticating ?? this.isAuthenticating,
     );
   }
 
   LandingState clearError() {
-    return copyWith(error: null);
+    return copyWith(error: null, authError: null);
   }
 
   @override
@@ -91,5 +102,7 @@ class LandingState extends Equatable {
     consentVersion,
     isLoading,
     error,
+    authError,
+    isAuthenticating,
   ];
 }
