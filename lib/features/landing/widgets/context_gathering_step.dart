@@ -1,14 +1,10 @@
-// lib/features/landing/widgets/context_gathering_step.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
-import '../../../core/constants/app_strings.dart';
 import '../cubit/cubit.dart';
 
-/// Optional context gathering - interests and topics
 class ContextGatheringStep extends StatelessWidget {
   const ContextGatheringStep({super.key});
 
@@ -17,13 +13,14 @@ class ContextGatheringStep extends StatelessWidget {
     return BlocBuilder<LandingCubit, LandingState>(
       builder: (context, state) {
         return Padding(
-          padding: const EdgeInsets.all(AppSpacing.screenHorizontalLarge),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.xl,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: AppSpacing.xxl),
-
-              // Back button
+              const SizedBox(height: 12),
               Align(
                 alignment: Alignment.centerLeft,
                 child: IconButton(
@@ -31,101 +28,64 @@ class ContextGatheringStep extends StatelessWidget {
                   onPressed: () => context.read<LandingCubit>().previousStep(),
                 ),
               ),
-
-              const SizedBox(height: AppSpacing.lg),
-
-              // Title
+              const SizedBox(height: 12),
               Text(
-                'What brings you here today?',
-                style: AppTextStyles.displayMedium,
+                'What interests you?',
+                style: AppTextStyles.displayMedium.copyWith(
+                  color: AppColors.textPrimary,
+                ),
               ),
-
-              const SizedBox(height: AppSpacing.md),
-
-              // Subtitle
+              const SizedBox(height: 8),
               Text(
-                'Select topics that interest you (optional)',
-                style: AppTextStyles.bodyLarge.copyWith(
+                'Select topics (optional)',
+                style: AppTextStyles.bodySmall.copyWith(
                   color: AppColors.textSecondary,
                 ),
               ),
-
-              const SizedBox(height: AppSpacing.xl),
-
-              // Interest chips
+              const SizedBox(height: 24),
               Expanded(
                 child: SingleChildScrollView(
                   child: Wrap(
-                    spacing: AppSpacing.md,
-                    runSpacing: AppSpacing.md,
+                    spacing: 8,
+                    runSpacing: 8,
                     children: [
-                      _InterestChip(
-                        label: 'Pregnancy & Prenatal Care',
-                        isSelected: state.interests.contains('pregnancy'),
-                        onTap: () => _toggleInterest(context, 'pregnancy'),
-                      ),
-                      _InterestChip(
-                        label: 'Medication Safety',
-                        isSelected: state.interests.contains('medication'),
-                        onTap: () => _toggleInterest(context, 'medication'),
-                      ),
-                      _InterestChip(
-                        label: 'Nutrition & Diet',
-                        isSelected: state.interests.contains('nutrition'),
-                        onTap: () => _toggleInterest(context, 'nutrition'),
-                      ),
-                      _InterestChip(
-                        label: 'Child Development',
-                        isSelected: state.interests.contains('child_development'),
-                        onTap: () => _toggleInterest(context, 'child_development'),
-                      ),
-                      _InterestChip(
-                        label: 'Mental Health',
-                        isSelected: state.interests.contains('mental_health'),
-                        onTap: () => _toggleInterest(context, 'mental_health'),
-                      ),
-                      _InterestChip(
-                        label: 'Immunizations',
-                        isSelected: state.interests.contains('immunizations'),
-                        onTap: () => _toggleInterest(context, 'immunizations'),
-                      ),
-                      _InterestChip(
-                        label: 'Postpartum Care',
-                        isSelected: state.interests.contains('postpartum'),
-                        onTap: () => _toggleInterest(context, 'postpartum'),
-                      ),
-                      _InterestChip(
-                        label: 'General Health',
-                        isSelected: state.interests.contains('general_health'),
-                        onTap: () => _toggleInterest(context, 'general_health'),
-                      ),
-                    ],
+                      'Pregnancy',
+                      'Medications',
+                      'Nutrition',
+                      'Child Health',
+                      'Mental Health',
+                      'Immunizations',
+                      'Postpartum',
+                      'General Health',
+                    ]
+                        .map((label) => _InterestChip(
+                      label: label,
+                      isSelected: state.interests.contains(label.toLowerCase()),
+                      onTap: () => _toggleInterest(context, label),
+                    ))
+                        .toList(),
                   ),
                 ),
               ),
-
-              const SizedBox(height: AppSpacing.lg),
-
-              // Action buttons
+              const SizedBox(height: 20),
               Row(
                 children: [
                   Expanded(
                     child: TextButton(
                       onPressed: () => context.read<LandingCubit>().skipStep(),
-                      child: const Text(AppStrings.skip),
+                      child: const Text('Skip'),
                     ),
                   ),
-                  const SizedBox(width: AppSpacing.md),
+                  const SizedBox(width: 12),
                   Expanded(
                     flex: 2,
                     child: ElevatedButton(
                       onPressed: () => context.read<LandingCubit>().nextStep(),
-                      child: const Text(AppStrings.next),
+                      child: const Text('Continue'),
                     ),
                   ),
                 ],
               ),
-
               const SizedBox(height: AppSpacing.lg),
             ],
           ),
@@ -137,11 +97,12 @@ class ContextGatheringStep extends StatelessWidget {
   void _toggleInterest(BuildContext context, String interest) {
     final cubit = context.read<LandingCubit>();
     final state = cubit.state;
+    final key = interest.toLowerCase();
 
-    if (state.interests.contains(interest)) {
-      cubit.removeInterest(interest);
+    if (state.interests.contains(key)) {
+      cubit.removeInterest(key);
     } else {
-      cubit.addInterest(interest);
+      cubit.addInterest(key);
     }
   }
 }
@@ -159,25 +120,29 @@ class _InterestChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FilterChip(
-      label: Text(label),
-      selected: isSelected,
-      onSelected: (_) => onTap(),
-      labelStyle: AppTextStyles.labelMedium.copyWith(
-        color: isSelected ? Colors.white : AppColors.textPrimary,
-      ),
-      backgroundColor: AppColors.gray100,
-      selectedColor: AppColors.accentPrimary,
-      checkmarkColor: Colors.white,
-      shape: RoundedRectangleBorder(
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
         borderRadius: BorderRadius.circular(20),
-        side: isSelected
-            ? BorderSide.none
-            : const BorderSide(color: AppColors.gray300),
-      ),
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.sm,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          decoration: BoxDecoration(
+            color: isSelected ? AppColors.accentPrimary : AppColors.backgroundElevated,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: isSelected ? AppColors.accentPrimary : AppColors.gray200,
+              width: 0.5,
+            ),
+          ),
+          child: Text(
+            label,
+            style: AppTextStyles.labelSmall.copyWith(
+              color: isSelected ? Colors.white : AppColors.textPrimary,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
       ),
     );
   }

@@ -1,25 +1,21 @@
-// lib/features/chat/widgets/chat_input.dart
-// PREMIUM DESIGN - Authority & Trust Statement
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../cubit/cubit.dart';
-import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
-import '../../../core/constants/app_strings.dart';
 
-class ChatInput extends StatefulWidget {
-  const ChatInput({super.key});
+class RefinedChatInput extends StatefulWidget {
+  const RefinedChatInput({super.key});
 
   @override
-  State<ChatInput> createState() => _ChatInputState();
+  State<RefinedChatInput> createState() => _RefinedChatInputState();
 }
 
-class _ChatInputState extends State<ChatInput> {
+class _RefinedChatInputState extends State<RefinedChatInput> {
   final _controller = TextEditingController();
   final _focusNode = FocusNode();
   bool _hasText = false;
+  bool _isRecording = false;
 
   @override
   void initState() {
@@ -45,144 +41,174 @@ class _ChatInputState extends State<ChatInput> {
 
   void _sendMessage() {
     if (_controller.text.trim().isEmpty) return;
-
     final message = _controller.text.trim();
     context.read<ChatCubit>().sendMessage(message);
-
     _controller.clear();
     _focusNode.unfocus();
+    setState(() {
+      _hasText = false;
+    });
+  }
+
+  void _toggleVoice() {
+    setState(() {
+      _isRecording = !_isRecording;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: AppColors.backgroundPrimary,
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.lg,
-            vertical: AppSpacing.lg,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Input row
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  // Premium text input
-                  Expanded(
-                    child: Container(
-                      constraints: const BoxConstraints(maxHeight: 120),
-                      decoration: BoxDecoration(
-                        color: AppColors.backgroundSurface,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: AppColors.gray200,
-                          width: 1,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.accentPrimary.withOpacity(0.05),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: TextField(
-                        controller: _controller,
-                        focusNode: _focusNode,
-                        maxLines: null,
-                        textInputAction: TextInputAction.newline,
-                        style: AppTextStyles.bodyMedium.copyWith(
-                          color: AppColors.textPrimary,
-                        ),
-                        decoration: InputDecoration(
-                          hintText: 'Ask about health, medications, care...',
-                          hintStyle: AppTextStyles.bodyMedium.copyWith(
-                            color: AppColors.textTertiary,
-                          ),
-                          border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.lg,
-                            vertical: AppSpacing.md,
-                          ),
-                        ),
-                        onSubmitted: (_) => _sendMessage(),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(width: AppSpacing.md),
-
-                  // Premium send button
-                  BlocBuilder<ChatCubit, ChatState>(
-                    builder: (context, state) {
-                      final canSend = _hasText && !state.isTyping;
-
-                      return GestureDetector(
-                        onTap: canSend ? _sendMessage : null,
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          width: 44,
-                          height: 44,
-                          decoration: BoxDecoration(
-                            color: canSend
-                                ? AppColors.accentPrimary
-                                : AppColors.backgroundElevated,
-                            borderRadius: BorderRadius.circular(10),
-                            boxShadow: canSend
-                                ? [
-                              BoxShadow(
-                                color: AppColors.accentPrimary
-                                    .withOpacity(0.25),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
-                              ),
-                            ]
-                                : [],
-                          ),
-                          child: Icon(
-                            Icons.arrow_upward_rounded,
-                            color: canSend
-                                ? Colors.white
-                                : AppColors.textTertiary,
-                            size: 20,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Main encapsulated container
+          Container(
+            decoration: BoxDecoration(
+              color: AppColors.backgroundSurface,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: _focusNode.hasFocus
+                    ? AppColors.accentPrimary
+                    : AppColors.gray200,
+                width: 0.8,
               ),
-
-              const SizedBox(height: AppSpacing.md),
-
-              // Trust statement - subtle but present
-              Row(
-                children: [
-                  Icon(
-                    Icons.verified_rounded,
-                    size: 14,
-                    color: AppColors.accentPrimary,
+              boxShadow: _focusNode.hasFocus
+                  ? [
+                BoxShadow(
+                  color: AppColors.accentPrimary.withOpacity(0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ]
+                  : [],
+            ),
+            child: Column(
+              children: [
+                // Text input field - full width, no border, with top radius
+                ClipRRect(
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(20),
                   ),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(
-                      'MedLink AI: Reliable health guidance. Not a substitute for professional medical advice.',
-                      style: AppTextStyles.labelSmall.copyWith(
+                  child: TextField(
+                    controller: _controller,
+                    focusNode: _focusNode,
+                    maxLines: null,
+                    minLines: 1,
+                    maxLength: 5000,
+                    textInputAction: TextInputAction.newline,
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
+                    decoration: InputDecoration(
+                      hintText: 'Ask MedLink anything...',
+                      hintStyle: AppTextStyles.bodySmall.copyWith(
                         color: AppColors.textTertiary,
-                        height: 1.3,
                       ),
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      counterText: '',
                     ),
+                    onSubmitted: (_) => _sendMessage(),
                   ),
-                ],
-              ),
-            ],
+                ),
+
+                // Bottom action bar
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // Voice button
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: _toggleVoice,
+                          borderRadius: BorderRadius.circular(8),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8),
+                            child: Icon(
+                              _isRecording
+                                  ? Icons.mic
+                                  : Icons.mic_none_rounded,
+                              color: _isRecording
+                                  ? AppColors.error
+                                  : AppColors.textTertiary,
+                              size: 20,
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // Send button
+                      BlocBuilder<ChatCubit, ChatState>(
+                        builder: (context, state) {
+                          final canSend = _hasText && !state.isTyping;
+                          return AnimatedContainer(
+                            duration: const Duration(milliseconds: 150),
+                            decoration: BoxDecoration(
+                              color: canSend
+                                  ? AppColors.accentPrimary
+                                  : AppColors.backgroundElevated,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                onTap: canSend ? _sendMessage : null,
+                                borderRadius: BorderRadius.circular(8),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8),
+                                  child: Icon(
+                                    Icons.arrow_upward_rounded,
+                                    color: canSend
+                                        ? Colors.white
+                                        : AppColors.textTertiary,
+                                    size: 20,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
+
+          // Recording indicator
+          if (_isRecording) ...[
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: AppColors.error,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Recording...',
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.error,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
       ),
     );
   }

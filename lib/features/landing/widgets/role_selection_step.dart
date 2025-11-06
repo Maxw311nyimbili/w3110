@@ -1,14 +1,10 @@
-// lib/features/landing/widgets/role_selection_step.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
-import '../../../core/constants/app_strings.dart';
 import '../cubit/cubit.dart';
 
-/// Role selection screen - user picks their primary role
 class RoleSelectionStep extends StatelessWidget {
   const RoleSelectionStep({super.key});
 
@@ -17,88 +13,84 @@ class RoleSelectionStep extends StatelessWidget {
     return BlocBuilder<LandingCubit, LandingState>(
       builder: (context, state) {
         return Padding(
-          padding: const EdgeInsets.all(AppSpacing.screenHorizontalLarge),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.xl,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: AppSpacing.xxl),
-
-              // Title
+              const SizedBox(height: 12),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () => context.read<LandingCubit>().previousStep(),
+                ),
+              ),
+              const SizedBox(height: 12),
               Text(
-                AppStrings.onboardingRoleTitle,
-                style: AppTextStyles.displayMedium,
+                'Who are you?',
+                style: AppTextStyles.displayMedium.copyWith(
+                  color: AppColors.textPrimary,
+                ),
                 textAlign: TextAlign.center,
               ),
-
-              const SizedBox(height: AppSpacing.xl),
-
-              // Role options
+              const SizedBox(height: 8),
+              Text(
+                'Help us personalize your experience',
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 28),
               Expanded(
                 child: ListView(
                   children: [
                     _RoleCard(
                       icon: Icons.pregnant_woman,
-                      title: AppStrings.onboardingRoleExpectingMother,
-                      description: 'Prenatal care and pregnancy guidance',
+                      title: 'Expecting Mother',
+                      description: 'Prenatal care',
                       role: UserRole.expectingMother,
                       isSelected: state.selectedRole == UserRole.expectingMother,
-                      onTap: () => context.read<LandingCubit>().selectRole(
-                        UserRole.expectingMother,
-                      ),
+                      onTap: () => context.read<LandingCubit>().selectRole(UserRole.expectingMother),
                     ),
-
-                    const SizedBox(height: AppSpacing.lg),
-
+                    const SizedBox(height: 12),
                     _RoleCard(
                       icon: Icons.medical_services_outlined,
-                      title: AppStrings.onboardingRoleHealthcare,
-                      description: 'Medical professionals and clinicians',
+                      title: 'Healthcare Provider',
+                      description: 'Medical professional',
                       role: UserRole.healthcareProvider,
                       isSelected: state.selectedRole == UserRole.healthcareProvider,
-                      onTap: () => context.read<LandingCubit>().selectRole(
-                        UserRole.healthcareProvider,
-                      ),
+                      onTap: () => context.read<LandingCubit>().selectRole(UserRole.healthcareProvider),
                     ),
-
-                    const SizedBox(height: AppSpacing.lg),
-
+                    const SizedBox(height: 12),
                     _RoleCard(
                       icon: Icons.family_restroom,
-                      title: AppStrings.onboardingRoleParent,
-                      description: 'Parents, guardians, and caregivers',
+                      title: 'Parent/Caregiver',
+                      description: 'Family care',
                       role: UserRole.parentCaregiver,
                       isSelected: state.selectedRole == UserRole.parentCaregiver,
-                      onTap: () => context.read<LandingCubit>().selectRole(
-                        UserRole.parentCaregiver,
-                      ),
+                      onTap: () => context.read<LandingCubit>().selectRole(UserRole.parentCaregiver),
                     ),
-
-                    const SizedBox(height: AppSpacing.lg),
-
+                    const SizedBox(height: 12),
                     _RoleCard(
                       icon: Icons.search,
-                      title: AppStrings.onboardingRoleExplorer,
-                      description: 'Learning and exploring health topics',
+                      title: 'Just Exploring',
+                      description: 'Learning health topics',
                       role: UserRole.explorer,
                       isSelected: state.selectedRole == UserRole.explorer,
-                      onTap: () => context.read<LandingCubit>().selectRole(
-                        UserRole.explorer,
-                      ),
+                      onTap: () => context.read<LandingCubit>().selectRole(UserRole.explorer),
                     ),
                   ],
                 ),
               ),
-
-              const SizedBox(height: AppSpacing.lg),
-
-              // Continue button
+              const SizedBox(height: 20),
               ElevatedButton(
-                onPressed: state.canProceed
-                    ? () => context.read<LandingCubit>().nextStep()
-                    : null,
-                child: const Text(AppStrings.next),
+                onPressed: state.canProceed ? () => context.read<LandingCubit>().nextStep() : null,
+                child: const Text('Continue'),
               ),
-
               const SizedBox(height: AppSpacing.lg),
             ],
           ),
@@ -127,68 +119,62 @@ class _RoleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: isSelected ? 2 : 1,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: isSelected
-            ? const BorderSide(color: AppColors.accentPrimary, width: 2)
-            : BorderSide.none,
-      ),
+    return Material(
+      color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: isSelected ? AppColors.accentLight : AppColors.backgroundSurface,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isSelected ? AppColors.accentPrimary : AppColors.gray200,
+              width: isSelected ? 1.5 : 0.5,
+            ),
+          ),
           child: Row(
             children: [
-              // Icon
               Container(
-                padding: const EdgeInsets.all(AppSpacing.md),
+                padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: isSelected
-                      ? AppColors.accentLight
-                      : AppColors.gray100,
-                  borderRadius: BorderRadius.circular(12),
+                  color: isSelected ? AppColors.accentPrimary.withOpacity(0.2) : AppColors.gray100,
+                  borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
                   icon,
-                  size: 32,
-                  color: isSelected
-                      ? AppColors.accentPrimary
-                      : AppColors.textSecondary,
+                  size: 24,
+                  color: isSelected ? AppColors.accentPrimary : AppColors.textSecondary,
                 ),
               ),
-
-              const SizedBox(width: AppSpacing.lg),
-
-              // Text content
+              const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       title,
-                      style: AppTextStyles.headlineMedium.copyWith(
-                        color: isSelected
-                            ? AppColors.accentPrimary
-                            : AppColors.textPrimary,
+                      style: AppTextStyles.labelLarge.copyWith(
+                        color: isSelected ? AppColors.accentPrimary : AppColors.textPrimary,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
-                    const SizedBox(height: AppSpacing.xs),
+                    const SizedBox(height: 2),
                     Text(
                       description,
-                      style: AppTextStyles.bodySmall,
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.textTertiary,
+                      ),
                     ),
                   ],
                 ),
               ),
-
-              // Selection indicator
               if (isSelected)
-                const Icon(
+                Icon(
                   Icons.check_circle,
                   color: AppColors.accentPrimary,
+                  size: 20,
                 ),
             ],
           ),

@@ -1,16 +1,11 @@
-// lib/features/chat/widgets/message_bubble.dart
-// PREMIUM DESIGN - Tight spacing, clear attribution
-
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../cubit/cubit.dart';
-import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
-import 'confidence_indicator.dart';
 
-class MessageBubble extends StatelessWidget {
-  const MessageBubble({
+class RefinedMessageBubble extends StatelessWidget {
+  const RefinedMessageBubble({
     required this.message,
     super.key,
   });
@@ -24,189 +19,234 @@ class MessageBubble extends StatelessWidget {
       child: Row(
         mainAxisAlignment:
         message.isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          // AI avatar + message (left)
-          if (!message.isUser) ...[
-            _buildMedLinkAvatar(),
-            const SizedBox(width: 8),
-            Flexible(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildMessageCard(context),
-                  if (message.overallConfidence != null) ...[
-                    const SizedBox(height: 6),
-                    ConfidenceIndicator(
-                      confidence: message.overallConfidence!,
-                      level: message.confidenceLevel,
-                    ),
-                  ],
-                  if (message.sentences.isNotEmpty) ...[
-                    const SizedBox(height: 6),
-                    _buildCitedSources(context),
-                  ],
-                  const SizedBox(height: 4),
-                  Text(
-                    _formatTimestamp(message.timestamp),
-                    style: AppTextStyles.labelSmall.copyWith(
-                      color: AppColors.textTertiary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-          // User message + avatar (right)
-          if (message.isUser) ...[
-            Flexible(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  _buildMessageCard(context),
-                  const SizedBox(height: 4),
-                  Text(
-                    _formatTimestamp(message.timestamp),
-                    style: AppTextStyles.labelSmall.copyWith(
-                      color: AppColors.textTertiary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 8),
-            _buildUserAvatar(),
-          ],
+          if (!message.isUser) _buildAIBubble(context),
+          if (message.isUser) _buildUserBubble(context),
         ],
       ),
     );
   }
 
-  /// MedLink branded avatar - compact and tight
-  Widget _buildMedLinkAvatar() {
-    return Container(
-      width: 28,
-      height: 28,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            AppColors.accentPrimary,
-            AppColors.accentPrimary.withOpacity(0.8),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(6),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.accentPrimary.withOpacity(0.2),
-            blurRadius: 3,
-            offset: const Offset(0, 1),
-          ),
-        ],
-      ),
-      child: const Center(
-        child: Icon(
-          Icons.medical_services_outlined,
-          size: 14,
-          color: Colors.white,
-        ),
-      ),
-    );
-  }
-
-  /// User avatar - compact and tight
-  Widget _buildUserAvatar() {
-    return Container(
-      width: 28,
-      height: 28,
-      decoration: BoxDecoration(
-        color: AppColors.backgroundElevated,
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(
-          color: AppColors.gray200,
-          width: 0.5,
-        ),
-      ),
-      child: Icon(
-        Icons.person_rounded,
-        size: 14,
-        color: AppColors.textSecondary,
-      ),
-    );
-  }
-
-  /// Compact message card - tighter padding
-  Widget _buildMessageCard(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 12,
-        vertical: 8,
-      ),
-      decoration: BoxDecoration(
-        color: message.isUser ? AppColors.accentLight : AppColors.backgroundSurface,
-        borderRadius: BorderRadius.circular(11).copyWith(
-          topLeft: message.isUser ? const Radius.circular(11) : Radius.zero,
-          topRight: message.isUser ? Radius.zero : const Radius.circular(11),
-          bottomLeft: const Radius.circular(11),
-          bottomRight: const Radius.circular(11),
-        ),
-        border: message.isUser
-            ? null
-            : Border.all(
-          color: AppColors.gray200,
-          width: 0.5,
-        ),
-        boxShadow: !message.isUser
-            ? [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 2,
-            offset: const Offset(0, 0.5),
-          ),
-        ]
-            : [],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (message.imageUrl != null) ...[
-            ClipRRect(
-              borderRadius: BorderRadius.circular(6),
-              child: Image.network(
-                message.imageUrl!,
-                height: 140,
-                width: double.infinity,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    height: 140,
-                    color: AppColors.gray200,
-                    child: const Center(
-                      child: Icon(Icons.broken_image, size: 24),
-                    ),
-                  );
-                },
-              ),
+  Widget _buildUserBubble(BuildContext context) {
+    return Flexible(
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.accentPrimary,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.accentPrimary.withOpacity(0.2),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
             ),
-            const SizedBox(height: 8),
           ],
-          Text(
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          child: Text(
             message.content,
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.textPrimary,
+            style: AppTextStyles.bodySmall.copyWith(
+              color: Colors.white,
               height: 1.4,
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAIBubble(BuildContext context) {
+    return Flexible(
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.backgroundSurface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: AppColors.gray200,
+            width: 0.5,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header with gradient accent and clickable confidence dot
+            Container(
+              decoration: BoxDecoration(
+                borderRadius:
+                const BorderRadius.vertical(top: Radius.circular(16)),
+                gradient: LinearGradient(
+                  colors: [
+                    AppColors.accentPrimary.withOpacity(0.08),
+                    AppColors.accentPrimary.withOpacity(0.04),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+              ),
+              child: Padding(
+                padding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 20,
+                      height: 20,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            AppColors.accentPrimary,
+                            AppColors.accentPrimary.withOpacity(0.8),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      child: const Center(
+                        child: Icon(
+                          Icons.medical_services_outlined,
+                          size: 10,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'MedLink',
+                      style: AppTextStyles.labelSmall.copyWith(
+                        color: AppColors.accentPrimary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const Spacer(),
+                    _buildClickableConfidenceDot(context),
+                  ],
+                ),
+              ),
+            ),
+
+            // Content
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    message.content,
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: AppColors.textPrimary,
+                      height: 1.5,
+                    ),
+                  ),
+
+                  if (message.sentences.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    _buildSourcesIndicator(context),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildClickableConfidenceDot(BuildContext context) {
+    final color = _getConfidenceColor();
+    final label = _getConfidenceLabel();
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => _showConfidenceModal(context, label, color),
+        borderRadius: BorderRadius.circular(6),
+        child: Padding(
+          padding: const EdgeInsets.all(4),
+          child: Container(
+            width: 10,
+            height: 10,
+            decoration: BoxDecoration(
+              color: color,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: color.withOpacity(0.4),
+                  blurRadius: 4,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showConfidenceModal(BuildContext context, String label, Color color) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        backgroundColor: AppColors.backgroundSurface,
+        title: Row(
+          children: [
+            Container(
+              width: 12,
+              height: 12,
+              decoration: BoxDecoration(
+                color: color,
+                shape: BoxShape.circle,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              'Confidence Level',
+              style: AppTextStyles.headlineSmall.copyWith(
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          label,
+          style: AppTextStyles.bodySmall.copyWith(
+            color: AppColors.textPrimary,
+            height: 1.5,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Got it',
+              style: AppTextStyles.labelLarge.copyWith(
+                color: AppColors.accentPrimary,
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 
-  /// Compact source citations
-  Widget _buildCitedSources(BuildContext context) {
-    final citedSources = <SourceReference>{};
+  String _getConfidenceLabel() {
+    switch (message.confidenceLevel) {
+      case ConfidenceLevel.high:
+        return 'High confidence - This information is reliable and well-supported.';
+      case ConfidenceLevel.medium:
+        return 'Medium confidence - Good information, but verify with professionals if important.';
+      case ConfidenceLevel.low:
+        return 'Low confidence - This is preliminary. Always consult healthcare professionals.';
+      case ConfidenceLevel.none:
+        return 'No confidence data available.';
+    }
+  }
 
+  Widget _buildSourcesIndicator(BuildContext context) {
+    final citedSources = <SourceReference>{};
     for (final sentence in message.sentences) {
       if (sentence.sources != null && sentence.sources!.isNotEmpty) {
         citedSources.addAll(sentence.sources!);
@@ -217,133 +257,139 @@ class MessageBubble extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    final sourcesList = citedSources.toList();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Sources',
-          style: AppTextStyles.labelSmall.copyWith(
-            fontWeight: FontWeight.w500,
-            color: AppColors.textTertiary,
-            fontSize: 11,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Wrap(
-          spacing: 4,
-          runSpacing: 4,
-          children: sourcesList.asMap().entries.map((entry) {
-            final index = entry.key + 1;
-            final source = entry.value;
-            return _buildSourceChip(context, index, source);
-          }).toList(),
-        ),
-      ],
-    );
-  }
-
-  /// Compact source chip
-  Widget _buildSourceChip(
-      BuildContext context, int index, SourceReference source) {
-    return InkWell(
-      onTap: () => _showSourcePreview(context, source, index),
-      borderRadius: BorderRadius.circular(6),
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 6,
-          vertical: 2,
-        ),
-        decoration: BoxDecoration(
-          color: AppColors.backgroundElevated,
-          borderRadius: BorderRadius.circular(6),
-          border: Border.all(color: AppColors.gray200, width: 0.5),
-        ),
-        child: Text(
-          '[$index]',
-          style: AppTextStyles.labelSmall.copyWith(
-            color: AppColors.accentPrimary,
-            fontWeight: FontWeight.w600,
-            fontSize: 10,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => _showSourcesList(context, citedSources.toList()),
+        borderRadius: BorderRadius.circular(6),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.source_outlined,
+                size: 14,
+                color: AppColors.accentPrimary,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                '${citedSources.length} source${citedSources.length > 1 ? 's' : ''}',
+                style: AppTextStyles.caption.copyWith(
+                  color: AppColors.accentPrimary,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  /// Source preview modal
-  void _showSourcePreview(
-      BuildContext context, SourceReference source, int index) {
+  void _showSourcesList(BuildContext context, List<SourceReference> sources) {
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
+      backgroundColor: AppColors.backgroundPrimary,
       builder: (context) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.xl),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: AppColors.accentLight,
-                      borderRadius: BorderRadius.circular(8),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppColors.accentLight,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(
+                        Icons.source_outlined,
+                        color: AppColors.accentPrimary,
+                        size: 16,
+                      ),
                     ),
-                    child: Icon(
-                      Icons.link,
-                      color: AppColors.accentPrimary,
-                      size: 18,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      'Source [$index]',
-                      style: AppTextStyles.headlineMedium.copyWith(
+                    const SizedBox(width: 12),
+                    Text(
+                      'Sources (${sources.length})',
+                      style: AppTextStyles.headlineSmall.copyWith(
                         color: AppColors.textPrimary,
                       ),
                     ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ],
-              ),
-              const Divider(height: 24),
-              Text(
-                source.title,
-                style: AppTextStyles.bodyLarge.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
+                  ],
                 ),
-              ),
-              const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: AppColors.backgroundElevated,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
+                const SizedBox(height: 16),
+                ...sources.asMap().entries.map((entry) {
+                  final index = entry.key + 1;
+                  final source = entry.value;
+                  return _buildSourceCard(context, index, source);
+                }).toList(),
+                const SizedBox(height: 8),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSourceCard(
+      BuildContext context,
+      int index,
+      SourceReference source,
+      ) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.backgroundSurface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: AppColors.gray200,
+            width: 0.5,
+          ),
+        ),
+        child: InkWell(
+          onTap: () => _launchURL(context, source.url),
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   children: [
-                    Icon(
-                      Icons.language,
-                      size: 14,
-                      color: AppColors.textSecondary,
+                    Container(
+                      width: 24,
+                      height: 24,
+                      decoration: BoxDecoration(
+                        color: AppColors.accentLight,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Center(
+                        child: Text(
+                          '$index',
+                          style: AppTextStyles.labelSmall.copyWith(
+                            color: AppColors.accentPrimary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
                     ),
-                    const SizedBox(width: 6),
+                    const SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        source.url,
-                        style: AppTextStyles.labelSmall.copyWith(
-                          color: AppColors.textSecondary,
+                        source.title,
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: AppColors.textPrimary,
+                          fontWeight: FontWeight.w600,
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -351,49 +397,60 @@ class MessageBubble extends StatelessWidget {
                     ),
                   ],
                 ),
-              ),
-              if (source.snippet != null) ...[
-                const SizedBox(height: 16),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppColors.backgroundSurface,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: AppColors.gray200, width: 0.5),
-                  ),
-                  child: Text(
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.language,
+                      size: 12,
+                      color: AppColors.textTertiary,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        source.url,
+                        style: AppTextStyles.caption.copyWith(
+                          color: AppColors.textTertiary,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                if (source.snippet != null) ...[
+                  const SizedBox(height: 8),
+                  Text(
                     source.snippet!,
-                    style: AppTextStyles.bodySmall.copyWith(
+                    style: AppTextStyles.caption.copyWith(
                       color: AppColors.textSecondary,
                       fontStyle: FontStyle.italic,
-                      height: 1.4,
+                      height: 1.3,
                     ),
-                    maxLines: 4,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
+                ],
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.open_in_new_rounded,
+                      size: 14,
+                      color: AppColors.accentPrimary,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Open Source',
+                      style: AppTextStyles.labelSmall.copyWith(
+                        color: AppColors.accentPrimary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                 ),
               ],
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    _launchURL(context, source.url);
-                  },
-                  icon: const Icon(Icons.open_in_new_rounded, size: 18),
-                  label: const Text('Open Source'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.accentPrimary,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -404,43 +461,33 @@ class MessageBubble extends StatelessWidget {
     try {
       final uri = Uri.parse(url);
       if (await canLaunchUrl(uri)) {
-        await launchUrl(
-          uri,
-          mode: LaunchMode.externalApplication,
-        );
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
       } else {
         if (context.mounted) {
-          _showError(context, 'Could not open link');
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Could not open link')),
+          );
         }
       }
     } catch (e) {
       if (context.mounted) {
-        _showError(context, 'Error opening link');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error opening link')),
+        );
       }
     }
   }
 
-  void _showError(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: AppColors.error,
-      ),
-    );
-  }
-
-  String _formatTimestamp(DateTime timestamp) {
-    final now = DateTime.now();
-    final difference = now.difference(timestamp);
-
-    if (difference.inMinutes < 1) {
-      return 'Just now';
-    } else if (difference.inHours < 1) {
-      return '${difference.inMinutes}m ago';
-    } else if (difference.inDays < 1) {
-      return '${difference.inHours}h ago';
-    } else {
-      return '${timestamp.hour.toString().padLeft(2, '0')}:${timestamp.minute.toString().padLeft(2, '0')}';
+  Color _getConfidenceColor() {
+    switch (message.confidenceLevel) {
+      case ConfidenceLevel.high:
+        return const Color(0xFF10B981);
+      case ConfidenceLevel.medium:
+        return const Color(0xFFF59E0B);
+      case ConfidenceLevel.low:
+        return const Color(0xFFEF4444);
+      case ConfidenceLevel.none:
+        return AppColors.gray400;
     }
   }
 }

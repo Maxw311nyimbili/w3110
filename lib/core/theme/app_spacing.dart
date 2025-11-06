@@ -1,30 +1,24 @@
 // lib/core/theme/app_spacing.dart
+// REFINED DESIGN - Consistent spacing scale
 
-/// 4pt base grid spacing system - DO NOT use arbitrary values
 class AppSpacing {
-  AppSpacing._();
+  // Micro - tiny gaps
+  static const double xs = 4;
+  static const double sm = 8;
 
-  // Base unit
-  static const double base = 4.0;
+  // Base - standard spacing
+  static const double md = 12;
+  static const double lg = 16;
 
-  // Micro spacing
-  static const double xs = base; // 4pt
-  static const double sm = base * 2; // 8pt
+  // Large - generous spacing
+  static const double xl = 24;
+  static const double xxl = 32;
 
-  // Standard spacing
-  static const double md = base * 3; // 12pt
-  static const double lg = base * 4; // 16pt
-  static const double xl = base * 6; // 24pt
+  // Chat-specific spacing
+  static const double chatMessageGap = 8;
+  static const double chatBubblePadding = 12;
+  static const double chatInputPadding = 12;
 
-  // Generous spacing
-  static const double xxl = base * 8; // 32pt
-  static const double xxxl = base * 12; // 48pt
-
-  // Consistent horizontal padding across app
-  static const double screenHorizontal = lg; // 16pt
-  static const double screenHorizontalLarge = xl; // 24pt
-
-  // Vertical section spacing
-  static const double sectionVertical = xl; // 24pt
-  static const double sectionVerticalLarge = xxl; // 32pt
+  // Reduced padding for dense layouts
+  static const double dense = 6;
 }
