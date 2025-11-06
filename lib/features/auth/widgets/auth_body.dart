@@ -52,7 +52,7 @@ class AuthBody extends StatelessWidget {
         }
       },
       child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.screenHorizontalLarge),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.xl),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.stretch,
