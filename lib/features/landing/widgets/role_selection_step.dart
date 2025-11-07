@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lottie/lottie.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
@@ -12,127 +13,125 @@ class RoleSelectionStep extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<LandingCubit, LandingState>(
       builder: (context, state) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.lg,
-            vertical: AppSpacing.xl,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const SizedBox(height: 12),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () => context.read<LandingCubit>().previousStep(),
+        return Scaffold(
+          backgroundColor: AppColors.backgroundPrimary,
+          body: SafeArea(
+            child: Column(
+              children: [
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: () => context.read<LandingCubit>().previousStep(),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'Who are you?',
-                style: AppTextStyles.displayMedium.copyWith(
-                  color: AppColors.textPrimary,
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Container(
+                            width: 140,
+                            height: 140,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.accentPrimary.withOpacity(0.08),
+                                  blurRadius: 32,
+                                  offset: const Offset(0, 16),
+                                ),
+                              ],
+                            ),
+                            child: Center(
+                              child: Lottie.asset(
+                                'assets/animations/medical_hero.json',
+                                fit: BoxFit.contain,
+                                repeat: true,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 40),
+                          Text(
+                            'Who are you?',
+                            style: AppTextStyles.displayMedium.copyWith(
+                              color: AppColors.textPrimary,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -0.8,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            'Help us personalize your experience',
+                            style: AppTextStyles.bodySmall.copyWith(
+                              color: AppColors.textSecondary,
+                              height: 1.4,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 40),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Help us personalize your experience',
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: AppColors.textSecondary,
+                Expanded(
+                  flex: 1,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                    child: ListView(
+                      children: [
+                        _buildRoleCard(context, 'Expecting Mother', 'Prenatal care',
+                            Icons.pregnant_woman, UserRole.expectingMother, state),
+                        const SizedBox(height: 12),
+                        _buildRoleCard(context, 'Healthcare Provider', 'Medical professional',
+                            Icons.medical_services_outlined, UserRole.healthcareProvider, state),
+                        const SizedBox(height: 12),
+                        _buildRoleCard(context, 'Parent/Caregiver', 'Family care', Icons.family_restroom,
+                            UserRole.parentCaregiver, state),
+                        const SizedBox(height: 12),
+                        _buildRoleCard(context, 'Just Exploring', 'Learning health topics', Icons.search,
+                            UserRole.explorer, state),
+                      ],
+                    ),
+                  ),
                 ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 28),
-              Expanded(
-                child: ListView(
-                  children: [
-                    _RoleCard(
-                      icon: Icons.pregnant_woman,
-                      title: 'Expecting Mother',
-                      description: 'Prenatal care',
-                      role: UserRole.expectingMother,
-                      isSelected: state.selectedRole == UserRole.expectingMother,
-                      onTap: () => context.read<LandingCubit>().selectRole(UserRole.expectingMother),
-                    ),
-                    const SizedBox(height: 12),
-                    _RoleCard(
-                      icon: Icons.medical_services_outlined,
-                      title: 'Healthcare Provider',
-                      description: 'Medical professional',
-                      role: UserRole.healthcareProvider,
-                      isSelected: state.selectedRole == UserRole.healthcareProvider,
-                      onTap: () => context.read<LandingCubit>().selectRole(UserRole.healthcareProvider),
-                    ),
-                    const SizedBox(height: 12),
-                    _RoleCard(
-                      icon: Icons.family_restroom,
-                      title: 'Parent/Caregiver',
-                      description: 'Family care',
-                      role: UserRole.parentCaregiver,
-                      isSelected: state.selectedRole == UserRole.parentCaregiver,
-                      onTap: () => context.read<LandingCubit>().selectRole(UserRole.parentCaregiver),
-                    ),
-                    const SizedBox(height: 12),
-                    _RoleCard(
-                      icon: Icons.search,
-                      title: 'Just Exploring',
-                      description: 'Learning health topics',
-                      role: UserRole.explorer,
-                      isSelected: state.selectedRole == UserRole.explorer,
-                      onTap: () => context.read<LandingCubit>().selectRole(UserRole.explorer),
-                    ),
-                  ],
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: 24),
+                  child: _buildPrimaryButton(
+                    onPressed: state.canProceed ? () => context.read<LandingCubit>().nextStep() : null,
+                    label: 'Continue',
+                  ),
                 ),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: state.canProceed ? () => context.read<LandingCubit>().nextStep() : null,
-                child: const Text('Continue'),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-            ],
+              ],
+            ),
           ),
         );
       },
     );
   }
-}
 
-class _RoleCard extends StatelessWidget {
-  const _RoleCard({
-    required this.icon,
-    required this.title,
-    required this.description,
-    required this.role,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String title;
-  final String description;
-  final UserRole role;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildRoleCard(BuildContext context, String title, String desc, IconData icon, UserRole role,
+      LandingState state) {
+    final isSelected = state.selectedRole == role;
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: onTap,
+        onTap: () => context.read<LandingCubit>().selectRole(role),
         borderRadius: BorderRadius.circular(12),
         child: Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             color: isSelected ? AppColors.accentLight : AppColors.backgroundSurface,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: isSelected ? AppColors.accentPrimary : AppColors.gray200,
-              width: isSelected ? 1.5 : 0.5,
-            ),
+                color: isSelected ? AppColors.accentPrimary : AppColors.gray200,
+                width: isSelected ? 1.5 : 0.5),
           ),
           child: Row(
             children: [
@@ -142,41 +141,69 @@ class _RoleCard extends StatelessWidget {
                   color: isSelected ? AppColors.accentPrimary.withOpacity(0.2) : AppColors.gray100,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(
-                  icon,
-                  size: 24,
-                  color: isSelected ? AppColors.accentPrimary : AppColors.textSecondary,
-                ),
+                child: Icon(icon, size: 22, color: isSelected ? AppColors.accentPrimary : AppColors.textSecondary),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      title,
-                      style: AppTextStyles.labelLarge.copyWith(
-                        color: isSelected ? AppColors.accentPrimary : AppColors.textPrimary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
+                    Text(title,
+                        style: AppTextStyles.labelLarge.copyWith(
+                            color: isSelected ? AppColors.accentPrimary : AppColors.textPrimary,
+                            fontWeight: FontWeight.w600)),
                     const SizedBox(height: 2),
-                    Text(
-                      description,
-                      style: AppTextStyles.caption.copyWith(
-                        color: AppColors.textTertiary,
-                      ),
-                    ),
+                    Text(desc, style: AppTextStyles.caption.copyWith(color: AppColors.textTertiary)),
                   ],
                 ),
               ),
-              if (isSelected)
-                Icon(
-                  Icons.check_circle,
-                  color: AppColors.accentPrimary,
-                  size: 20,
-                ),
+              if (isSelected) Icon(Icons.check_circle, color: AppColors.accentPrimary, size: 20),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPrimaryButton({
+    required VoidCallback? onPressed,
+    required String label,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            AppColors.accentPrimary,
+            AppColors.accentPrimary.withOpacity(0.9),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.accentPrimary.withOpacity(0.25),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(14),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+            child: Text(
+              label,
+              style: AppTextStyles.labelLarge.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+                fontSize: 15,
+              ),
+              textAlign: TextAlign.center,
+            ),
           ),
         ),
       ),
