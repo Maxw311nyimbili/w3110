@@ -6,8 +6,39 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../cubit/cubit.dart';
 
-class ContextGatheringStep extends StatelessWidget {
+class ContextGatheringStep extends StatefulWidget {
   const ContextGatheringStep({super.key});
+
+  @override
+  State<ContextGatheringStep> createState() => _ContextGatheringStepState();
+}
+
+class _ContextGatheringStepState extends State<ContextGatheringStep>
+    with TickerProviderStateMixin {
+  late AnimationController _lottieController;
+  late Animation<double> _lottieFadeAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _lottieController = AnimationController(
+      duration: const Duration(milliseconds: 4000),
+      vsync: this,
+    )..repeat();
+
+    _lottieFadeAnimation = Tween<double>(begin: 1.0, end: 0.3).animate(
+      CurvedAnimation(
+        parent: _lottieController,
+        curve: const Interval(0.75, 1.0, curve: Curves.easeInQuad),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _lottieController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,8 +65,8 @@ class ContextGatheringStep extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           Container(
-                            width: 140,
-                            height: 140,
+                            width: 160,
+                            height: 160,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               boxShadow: [
@@ -47,10 +78,19 @@ class ContextGatheringStep extends StatelessWidget {
                               ],
                             ),
                             child: Center(
-                              child: Lottie.asset(
-                                'assets/animations/medical_hero.json',
-                                fit: BoxFit.contain,
-                                repeat: true,
+                              child: AnimatedBuilder(
+                                animation: _lottieFadeAnimation,
+                                builder: (context, child) {
+                                  return Opacity(
+                                    opacity: _lottieFadeAnimation.value,
+                                    child: Lottie.asset(
+                                      'assets/animations/interests.json',
+                                      fit: BoxFit.contain,
+                                      repeat: true,
+                                      controller: _lottieController,
+                                    ),
+                                  );
+                                },
                               ),
                             ),
                           ),
