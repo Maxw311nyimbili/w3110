@@ -48,7 +48,7 @@ class RoleSelectionStep extends StatelessWidget {
                             ),
                             child: Center(
                               child: Lottie.asset(
-                                'assets/animations/medical_hero.json',
+                                'assets/animations/roles.json',
                                 fit: BoxFit.contain,
                                 repeat: true,
                               ),
