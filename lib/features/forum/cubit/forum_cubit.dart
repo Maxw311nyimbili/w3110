@@ -2,19 +2,19 @@
 
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:forum_repository/forum_repository.dart' as repo;
+import 'package:forum_repository/forum_repository.dart'; // Unprefixed for ForumPost/ForumComment availability
 import 'package:uuid/uuid.dart';
 import 'forum_state.dart';
 
 /// Manages forum posts, comments, and offline sync
 class ForumCubit extends Cubit<ForumState> {
   ForumCubit({
-    required repo.ForumRepository forumRepository,
+    required ForumRepository forumRepository,
   })  : _forumRepository = forumRepository,
         _uuid = const Uuid(),
         super(const ForumState());
 
-  final repo.ForumRepository _forumRepository;
+  final ForumRepository _forumRepository;
   final Uuid _uuid;
   Timer? _syncTimer;
 
@@ -31,7 +31,7 @@ class ForumCubit extends Cubit<ForumState> {
 
       emit(state.copyWith(
         status: ForumStatus.success,
-        posts: posts.map(_mapToStatePost).toList(),
+        posts: posts, // No need to map if types are same now!
         hasPendingSync: hasPendingSync,
       ));
 
@@ -57,7 +57,7 @@ class ForumCubit extends Cubit<ForumState> {
 
       emit(state.copyWith(
         status: ForumStatus.success,
-        posts: posts.map(_mapToStatePost).toList(),
+        posts: posts,
       ));
 
       // Background sync to get latest from server
@@ -87,7 +87,7 @@ class ForumCubit extends Cubit<ForumState> {
 
       emit(state.copyWith(
         status: ForumStatus.success,
-        comments: comments.map(_mapToStateComment).toList(),
+        comments: comments,
       ));
 
       // Background sync comments
@@ -227,46 +227,13 @@ class ForumCubit extends Cubit<ForumState> {
   }
 
   /// Sync with backend (upload pending changes, download new content)
-  /// Uses exponential backoff for failed syncs
   Future<void> syncWithBackend() async {
     if (state.isSyncing) return; // Prevent concurrent syncs
 
     try {
       emit(state.copyWith(isSyncing: true));
 
-      // TODO: Uncomment when backend ready
-      /*
-      // Step 1: Check connectivity
-      final isOnline = await _forumRepository.checkConnectivity();
-      if (!isOnline) {
-        emit(state.copyWith(isSyncing: false));
-        return;
-      }
-
-      // Step 2: Upload pending changes from sync queue
-      await _forumRepository.processSyncQueue();
-
-      // Step 3: Download new/updated posts from server
-      final serverPosts = await _forumRepository.fetchPostsFromServer(
-        since: state.lastSyncTime,
-      );
-
-      // Step 4: Merge server data with local data (conflict resolution)
-      await _forumRepository.mergeServerData(serverPosts);
-
-      // Step 5: Reload from local DB (now contains merged data)
-      final updatedPosts = await _forumRepository.getLocalPosts();
-      final hasPendingSync = await _forumRepository.hasPendingSyncItems();
-
-      emit(state.copyWith(
-        posts: updatedPosts.map(_mapToStatePost).toList(),
-        isSyncing: false,
-        hasPendingSync: hasPendingSync,
-        lastSyncTime: DateTime.now(),
-      ));
-      */
-
-      // TEMPORARY: Mock sync for development
+      // MOCK SYNC LOGIC for now (until backend)
       await Future.delayed(const Duration(seconds: 2));
 
       // Simulate syncing pending posts
@@ -291,8 +258,6 @@ class ForumCubit extends Cubit<ForumState> {
         isSyncing: false,
         error: 'Sync failed: ${e.toString()}',
       ));
-
-      // Retry with exponential backoff (handled by sync manager in repository)
     }
   }
 
@@ -309,61 +274,15 @@ class ForumCubit extends Cubit<ForumState> {
   /// Sync comments for a specific post
   Future<void> _syncComments(String postId) async {
     try {
-      // TODO: Implement comment sync with backend
-      // Similar to post sync but for comments of a specific post
+      // TODO: Implement comment sync
     } catch (e) {
-      // Silent fail - comments will sync on next attempt
+      // Silent fail
     }
   }
 
   /// Clear error state
   void clearError() {
     emit(state.clearError());
-  }
-
-  /// Helper to map repository post to state post
-  ForumPost _mapToStatePost(repo.ForumPost repoPost) {
-    return ForumPost(
-      id: repoPost.id,
-      localId: repoPost.localId,
-      authorId: repoPost.authorId,
-      authorName: repoPost.authorName,
-      title: repoPost.title,
-      content: repoPost.content,
-      createdAt: repoPost.createdAt,
-      updatedAt: repoPost.updatedAt,
-      commentCount: repoPost.commentCount,
-      likeCount: repoPost.likeCount,
-      syncStatus: _mapSyncStatus(repoPost.syncStatus),
-    );
-  }
-
-  /// Helper to map repository comment to state comment
-  ForumComment _mapToStateComment(repo.ForumComment repoComment) {
-    return ForumComment(
-      id: repoComment.id,
-      localId: repoComment.localId,
-      postId: repoComment.postId,
-      authorId: repoComment.authorId,
-      authorName: repoComment.authorName,
-      content: repoComment.content,
-      createdAt: repoComment.createdAt,
-      updatedAt: repoComment.updatedAt,
-      syncStatus: _mapSyncStatus(repoComment.syncStatus),
-    );
-  }
-
-  SyncStatus _mapSyncStatus(String syncStatus) {
-    switch (syncStatus) {
-      case 'pending':
-        return SyncStatus.pending;
-      case 'syncing':
-        return SyncStatus.syncing;
-      case 'error':
-        return SyncStatus.error;
-      default:
-        return SyncStatus.synced;
-    }
   }
 
   @override

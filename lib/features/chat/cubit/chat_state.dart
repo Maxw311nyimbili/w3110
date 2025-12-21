@@ -1,6 +1,9 @@
 // lib/features/chat/cubit/chat_state.dart
+// This file REPLACES the ChatMessage from chat_repository
+// It adds dual-mode (quickAnswer + detailedAnswer) support
 
 import 'package:equatable/equatable.dart';
+import 'package:chat_repository/chat_repository.dart' hide ChatMessage;
 
 enum ChatStatus {
   initial,
@@ -9,7 +12,26 @@ enum ChatStatus {
   error,
 }
 
-/// Immutable chat state - manages conversation and UI state
+/// ✅ SourceReference model (for dual-mode)
+class SourceReference extends Equatable {
+  final String title;
+  final String url;
+  final String? domain;
+  final String? authority;
+  final String? snippet;
+
+  const SourceReference({
+    required this.title,
+    required this.url,
+    this.domain,
+    this.authority,
+    this.snippet,
+  });
+
+  @override
+  List<Object?> get props => [title, url, domain, authority, snippet];
+}
+
 class ChatState extends Equatable {
   const ChatState({
     this.status = ChatStatus.initial,
@@ -17,6 +39,7 @@ class ChatState extends Equatable {
     this.error,
     this.isTyping = false,
     this.currentMessageId,
+    this.sessionId,
   });
 
   final ChatStatus status;
@@ -24,6 +47,7 @@ class ChatState extends Equatable {
   final String? error;
   final bool isTyping;
   final String? currentMessageId;
+  final String? sessionId;
 
   bool get isLoading => status == ChatStatus.loading;
   bool get hasMessages => messages.isNotEmpty;
@@ -34,6 +58,7 @@ class ChatState extends Equatable {
     String? error,
     bool? isTyping,
     String? currentMessageId,
+    String? sessionId,
   }) {
     return ChatState(
       status: status ?? this.status,
@@ -41,6 +66,7 @@ class ChatState extends Equatable {
       error: error,
       isTyping: isTyping ?? this.isTyping,
       currentMessageId: currentMessageId ?? this.currentMessageId,
+      sessionId: sessionId ?? this.sessionId,
     );
   }
 
@@ -49,57 +75,65 @@ class ChatState extends Equatable {
   }
 
   @override
-  List<Object?> get props => [status, messages, error, isTyping, currentMessageId];
+  List<Object?> get props => [status, messages, error, isTyping, currentMessageId, sessionId];
 }
 
-/// Chat message model
+/// ✅ NEW ChatMessage with dual-mode support
+/// Replaces chat_repository.ChatMessage
 class ChatMessage extends Equatable {
   const ChatMessage({
     required this.id,
     required this.content,
     required this.isUser,
     required this.timestamp,
-    this.sentences = const [],
     this.sources = const [],
-    this.overallConfidence,
-    this.imageUrl,
+    this.isRefusal = false,
+    this.refusalReason,
+    this.isDualMode = false,
+    this.quickAnswer,
+    this.detailedAnswer,
+    this.latencyMs,
   });
 
   final String id;
   final String content;
   final bool isUser;
   final DateTime timestamp;
-  final List<SentenceWithConfidence> sentences;
   final List<SourceReference> sources;
-  final double? overallConfidence;
-  final String? imageUrl;
+  final bool isRefusal;
+  final String? refusalReason;
 
-  ConfidenceLevel get confidenceLevel {
-    if (overallConfidence == null) return ConfidenceLevel.none;
-    if (overallConfidence! >= 0.8) return ConfidenceLevel.high;
-    if (overallConfidence! >= 0.5) return ConfidenceLevel.medium;
-    return ConfidenceLevel.low;
-  }
+  // ✅ NEW: Dual-mode fields
+  final bool isDualMode;
+  final String? quickAnswer;
+  final String? detailedAnswer;
+  final int? latencyMs;
 
   ChatMessage copyWith({
     String? id,
     String? content,
     bool? isUser,
     DateTime? timestamp,
-    List<SentenceWithConfidence>? sentences,
     List<SourceReference>? sources,
-    double? overallConfidence,
-    String? imageUrl,
+    bool? isRefusal,
+    String? refusalReason,
+    bool? isDualMode,
+    String? quickAnswer,
+    String? detailedAnswer,
+    int? latencyMs,
   }) {
     return ChatMessage(
       id: id ?? this.id,
       content: content ?? this.content,
       isUser: isUser ?? this.isUser,
       timestamp: timestamp ?? this.timestamp,
-      sentences: sentences ?? this.sentences,
       sources: sources ?? this.sources,
-      overallConfidence: overallConfidence ?? this.overallConfidence,
-      imageUrl: imageUrl ?? this.imageUrl,
+      isRefusal: isRefusal ?? this.isRefusal,
+      refusalReason: refusalReason ?? this.refusalReason,
+      isDualMode: isDualMode ?? this.isDualMode,
+      quickAnswer: quickAnswer ?? this.quickAnswer,
+      detailedAnswer: detailedAnswer ?? this.detailedAnswer,
+      latencyMs: latencyMs ?? this.latencyMs,
     );
   }
 
@@ -109,46 +143,16 @@ class ChatMessage extends Equatable {
     content,
     isUser,
     timestamp,
-    sentences,
     sources,
-    overallConfidence,
-    imageUrl,
+    isRefusal,
+    refusalReason,
+    isDualMode,
+    quickAnswer,
+    detailedAnswer,
+    latencyMs,
   ];
 }
 
-/// Sentence with confidence score
-class SentenceWithConfidence extends Equatable {
-  const SentenceWithConfidence({
-    required this.text,
-    required this.confidence,
-    this.sources,
-  });
-
-  final String text;
-  final double confidence;
-  final List<SourceReference>? sources; // ADDED: Sources per sentence
-
-  @override
-  List<Object?> get props => [text, confidence, sources];
-}
-
-/// Source reference/citation
-class SourceReference extends Equatable {
-  const SourceReference({
-    required this.title,
-    required this.url,
-    this.snippet,
-  });
-
-  final String title;
-  final String url;
-  final String? snippet;
-
-  @override
-  List<Object?> get props => [title, url, snippet];
-}
-
-/// Confidence level categories
 enum ConfidenceLevel {
   none,
   low,

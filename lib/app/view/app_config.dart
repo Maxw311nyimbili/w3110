@@ -20,8 +20,8 @@ class AppConfig extends Equatable {
   factory AppConfig.development() {
     return const AppConfig(
       // apiBaseUrl: 'https://91f9d06210b5.ngrok-free.app',
-      // apiBaseUrl: 'http://172.16.2.102:8000',
-      apiBaseUrl: 'http://10.0.2.2:8000',
+      apiBaseUrl: 'http://172.16.2.224:8000',
+      //apiBaseUrl: 'http://10.0.2.2:8000',
       environment: Environment.development,
       enableLogging: true,
       apiTimeout: Duration(seconds: 60),

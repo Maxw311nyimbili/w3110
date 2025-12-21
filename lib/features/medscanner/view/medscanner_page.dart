@@ -1,6 +1,6 @@
 // lib/features/medscanner/view/medscanner_page.dart
 
-import 'package:cap_project/core/widgets/app_drawer.dart';
+import 'package:cap_project/core/theme/app_colors.dart';
 import 'package:cap_project/features/medscanner/cubit/cubit.dart';
 import 'package:cap_project/features/medscanner/widgets/widgets.dart';
 import 'package:flutter/material.dart';
@@ -22,7 +22,18 @@ class MedScannerPage extends StatelessWidget {
       create: (context) => MedScannerCubit(
         mediaRepository: context.read<MediaRepository>(),
       )..initialize(),
-      child: const MedScannerView(),
+      child: Builder(
+        builder: (context) {
+          // Check for arguments after the cubit is created
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            final args = ModalRoute.of(context)?.settings.arguments;
+            if (args == 'gallery') {
+              context.read<MedScannerCubit>().pickImageFromGallery();
+            }
+          });
+          return const MedScannerView();
+        },
+      ),
     );
   }
 }
@@ -36,7 +47,12 @@ class MedScannerView extends StatelessWidget {
     return BlocBuilder<MedScannerCubit, MedScannerState>(
       builder: (context, state) {
         return Scaffold(
+          backgroundColor: AppColors.backgroundPrimary,
           appBar: AppBar(
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+              onPressed: () => Navigator.pop(context),
+            ),
             title: const Text('Med Scanner'),
             actions: [
               // Show info button
@@ -47,7 +63,6 @@ class MedScannerView extends StatelessWidget {
               ),
             ],
           ),
-          drawer: const AppDrawer(),
           body: const SafeArea(
             child: MedScannerBody(),
           ),

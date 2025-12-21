@@ -1,229 +1,69 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../cubit/cubit.dart';
+import '../cubit/chat_state.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
-class RefinedMessageBubble extends StatelessWidget {
-  const RefinedMessageBubble({
-    required this.message,
-    super.key,
-  });
+class RefinedMessageBubble extends StatefulWidget {
+  const RefinedMessageBubble({required this.message, super.key});
 
   final ChatMessage message;
 
   @override
+  State<RefinedMessageBubble> createState() => _RefinedMessageBubbleState();
+}
+
+class _RefinedMessageBubbleState extends State<RefinedMessageBubble> {
+  bool _isDetailed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Default to detailed if it's dual mode, otherwise quick
+    _isDetailed = widget.message.isDualMode;
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final isUser = widget.message.isUser;
+    
+    if (isUser) {
+      return _buildUserMessage(context);
+    } else {
+      return _buildAIMessage(context);
+    }
+  }
+
+  Widget _buildUserMessage(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        mainAxisAlignment:
-        message.isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+      padding: const EdgeInsets.fromLTRB(48, 16, 16, 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          if (!message.isUser) _buildAIBubble(context),
-          if (message.isUser) _buildUserBubble(context),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildUserBubble(BuildContext context) {
-    return Flexible(
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppColors.accentPrimary,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.accentPrimary.withOpacity(0.2),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          child: Text(
-            message.content,
-            style: AppTextStyles.bodySmall.copyWith(
-              color: Colors.white,
-              height: 1.4,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAIBubble(BuildContext context) {
-    return Flexible(
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppColors.backgroundSurface,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: AppColors.gray200,
-            width: 0.5,
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header with gradient accent and clickable confidence dot
-            Container(
-              decoration: BoxDecoration(
-                borderRadius:
-                const BorderRadius.vertical(top: Radius.circular(16)),
-                gradient: LinearGradient(
-                  colors: [
-                    AppColors.accentPrimary.withOpacity(0.08),
-                    AppColors.accentPrimary.withOpacity(0.04),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-              ),
-              child: Padding(
-                padding:
-                const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 20,
-                      height: 20,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            AppColors.accentPrimary,
-                            AppColors.accentPrimary.withOpacity(0.8),
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                      child: const Center(
-                        child: Icon(
-                          Icons.medical_services_outlined,
-                          size: 10,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      'MedLink',
-                      style: AppTextStyles.labelSmall.copyWith(
-                        color: AppColors.accentPrimary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const Spacer(),
-                    _buildClickableConfidenceDot(context),
-                  ],
-                ),
-              ),
-            ),
-
-            // Content
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    message.content,
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: AppColors.textPrimary,
-                      height: 1.5,
-                    ),
-                  ),
-
-                  if (message.sentences.isNotEmpty) ...[
-                    const SizedBox(height: 8),
-                    _buildSourcesIndicator(context),
-                  ],
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildClickableConfidenceDot(BuildContext context) {
-    final color = _getConfidenceColor();
-    final label = _getConfidenceLabel();
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () => _showConfidenceModal(context, label, color),
-        borderRadius: BorderRadius.circular(6),
-        child: Padding(
-          padding: const EdgeInsets.all(4),
-          child: Container(
-            width: 10,
-            height: 10,
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
             decoration: BoxDecoration(
-              color: color,
-              shape: BoxShape.circle,
+              color: AppColors.backgroundSurface,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(24),
+                topRight: Radius.circular(24),
+                bottomLeft: Radius.circular(24),
+                bottomRight: Radius.circular(4),
+              ),
               boxShadow: [
                 BoxShadow(
-                  color: color.withOpacity(0.4),
-                  blurRadius: 4,
+                  color: Colors.black.withOpacity(0.04),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
                 ),
               ],
             ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _showConfidenceModal(BuildContext context, String label, Color color) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        backgroundColor: AppColors.backgroundSurface,
-        title: Row(
-          children: [
-            Container(
-              width: 12,
-              height: 12,
-              decoration: BoxDecoration(
-                color: color,
-                shape: BoxShape.circle,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              'Confidence Level',
-              style: AppTextStyles.headlineSmall.copyWith(
-                color: AppColors.textPrimary,
-              ),
-            ),
-          ],
-        ),
-        content: Text(
-          label,
-          style: AppTextStyles.bodySmall.copyWith(
-            color: AppColors.textPrimary,
-            height: 1.5,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
             child: Text(
-              'Got it',
-              style: AppTextStyles.labelLarge.copyWith(
-                color: AppColors.accentPrimary,
+              widget.message.content,
+              style: AppTextStyles.bodyLarge.copyWith(
+                color: AppColors.textPrimary,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ),
@@ -232,262 +72,254 @@ class RefinedMessageBubble extends StatelessWidget {
     );
   }
 
-  String _getConfidenceLabel() {
-    switch (message.confidenceLevel) {
-      case ConfidenceLevel.high:
-        return 'High confidence - This information is reliable and well-supported.';
-      case ConfidenceLevel.medium:
-        return 'Medium confidence - Good information, but verify with professionals if important.';
-      case ConfidenceLevel.low:
-        return 'Low confidence - This is preliminary. Always consult healthcare professionals.';
-      case ConfidenceLevel.none:
-        return 'No confidence data available.';
-    }
-  }
+  Widget _buildAIMessage(BuildContext context) {
+    final hasSources = widget.message.sources.isNotEmpty;
+    final content = _isDetailed 
+        ? (widget.message.detailedAnswer ?? widget.message.content)
+        : (widget.message.quickAnswer ?? widget.message.content);
 
-  Widget _buildSourcesIndicator(BuildContext context) {
-    final citedSources = <SourceReference>{};
-    for (final sentence in message.sentences) {
-      if (sentence.sources != null && sentence.sources!.isNotEmpty) {
-        citedSources.addAll(sentence.sources!);
-      }
-    }
-
-    if (citedSources.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () => _showSourcesList(context, citedSources.toList()),
-        borderRadius: BorderRadius.circular(6),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (hasSources) ...[
+            _buildSourceList(widget.message.sources),
+            const SizedBox(height: 24),
+          ],
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Icon(
-                Icons.source_outlined,
-                size: 14,
-                color: AppColors.accentPrimary,
-              ),
-              const SizedBox(width: 6),
-              Text(
-                '${citedSources.length} source${citedSources.length > 1 ? 's' : ''}',
-                style: AppTextStyles.caption.copyWith(
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
                   color: AppColors.accentPrimary,
-                  fontWeight: FontWeight.w500,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.shield_rounded,
+                  size: 14,
+                  color: Colors.white,
                 ),
               ),
+              const SizedBox(width: 12),
+              Text(
+                'Thanzi AI',
+                style: AppTextStyles.labelLarge.copyWith(
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.2,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const Spacer(),
+              if (widget.message.isDualMode)
+                _buildModeToggle(),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  void _showSourcesList(BuildContext context, List<SourceReference> sources) {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      backgroundColor: AppColors.backgroundPrimary,
-      builder: (context) => SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: AppColors.accentLight,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Icon(
-                        Icons.source_outlined,
-                        color: AppColors.accentPrimary,
-                        size: 16,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      'Sources (${sources.length})',
-                      style: AppTextStyles.headlineSmall.copyWith(
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                  ],
+          const SizedBox(height: 16),
+          Padding(
+            padding: const EdgeInsets.only(left: 4),
+            child: AnimatedSize(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              child: MarkdownBody(
+                data: content,
+                selectable: true,
+                onTapLink: (text, href, title) {
+                  if (href != null) launchUrl(Uri.parse(href));
+                },
+                styleSheet: MarkdownStyleSheet(
+                  p: AppTextStyles.bodyLarge.copyWith(
+                    color: AppColors.textPrimary,
+                    height: 1.6,
+                    letterSpacing: 0.1,
+                  ),
+                  strong: AppTextStyles.bodyLarge.copyWith(
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  listBullet: AppTextStyles.bodyLarge.copyWith(
+                    color: AppColors.textPrimary,
+                  ),
                 ),
-                const SizedBox(height: 16),
-                ...sources.asMap().entries.map((entry) {
-                  final index = entry.key + 1;
-                  final source = entry.value;
-                  return _buildSourceCard(context, index, source);
-                }).toList(),
-                const SizedBox(height: 8),
-              ],
+              ),
             ),
           ),
-        ),
+          const SizedBox(height: 24),
+          _buildFooter(),
+        ],
       ),
     );
   }
 
-  Widget _buildSourceCard(
-      BuildContext context,
-      int index,
-      SourceReference source,
-      ) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppColors.backgroundSurface,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: AppColors.gray200,
-            width: 0.5,
-          ),
+  Widget _buildSourceList(List<SourceReference> sources) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Icon(Icons.menu_book_outlined, size: 16, color: AppColors.textSecondary),
+            const SizedBox(width: 8),
+            Text(
+              'SOURCES',
+              style: AppTextStyles.labelSmall.copyWith(
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.2,
+              ),
+            ),
+          ],
         ),
-        child: InkWell(
-          onTap: () => _launchURL(context, source.url),
-          borderRadius: BorderRadius.circular(12),
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      width: 24,
-                      height: 24,
-                      decoration: BoxDecoration(
-                        color: AppColors.accentLight,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Center(
-                        child: Text(
-                          '$index',
-                          style: AppTextStyles.labelSmall.copyWith(
-                            color: AppColors.accentPrimary,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
+        const SizedBox(height: 12),
+        SizedBox(
+          height: 90,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: sources.length,
+            padding: EdgeInsets.zero,
+            itemBuilder: (context, index) {
+              final source = sources[index];
+              return GestureDetector(
+                onTap: () => launchUrl(Uri.parse(source.url)),
+                child: Container(
+                  width: 160,
+                  margin: const EdgeInsets.only(right: 12),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.backgroundSurface,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: AppColors.gray200, width: 0.5),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
                         source.title,
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: AppColors.textPrimary,
-                          fontWeight: FontWeight.w600,
-                        ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.language,
-                      size: 12,
-                      color: AppColors.textTertiary,
-                    ),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        source.url,
-                        style: AppTextStyles.caption.copyWith(
-                          color: AppColors.textTertiary,
+                        style: AppTextStyles.labelMedium.copyWith(
+                          fontWeight: FontWeight.bold,
+                          height: 1.2,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                  ],
-                ),
-                if (source.snippet != null) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    source.snippet!,
-                    style: AppTextStyles.caption.copyWith(
-                      color: AppColors.textSecondary,
-                      fontStyle: FontStyle.italic,
-                      height: 1.3,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+                      const Spacer(),
+                      Row(
+                        children: [
+                          if (source.domain != null) ...[
+                            Flexible(
+                              child: Text(
+                                source.domain!,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: AppTextStyles.caption.copyWith(
+                                  color: AppColors.textTertiary,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            const Icon(Icons.circle, size: 2, color: AppColors.textTertiary),
+                            const SizedBox(width: 4),
+                          ],
+                          Text(
+                            '${index + 1}',
+                            style: AppTextStyles.caption.copyWith(
+                              color: AppColors.textTertiary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                ],
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.open_in_new_rounded,
-                      size: 14,
-                      color: AppColors.accentPrimary,
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      'Open Source',
-                      style: AppTextStyles.labelSmall.copyWith(
-                        color: AppColors.accentPrimary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
                 ),
-              ],
-            ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildModeToggle() {
+    return Container(
+      padding: const EdgeInsets.all(2),
+      decoration: BoxDecoration(
+        color: AppColors.gray100,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildToggleItem('Quick', !_isDetailed),
+          _buildToggleItem('Detailed', _isDetailed),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildToggleItem(String label, bool active) {
+    return GestureDetector(
+      onTap: () => setState(() => _isDetailed = label == 'Detailed'),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: active ? Colors.white : Colors.transparent,
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: active ? [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            )
+          ] : null,
+        ),
+        child: Text(
+          label,
+          style: AppTextStyles.labelSmall.copyWith(
+            color: active ? AppColors.textPrimary : AppColors.textTertiary,
+            fontWeight: active ? FontWeight.bold : FontWeight.w500,
           ),
         ),
       ),
     );
   }
 
-  Future<void> _launchURL(BuildContext context, String url) async {
-    try {
-      final uri = Uri.parse(url);
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      } else {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Could not open link')),
-          );
-        }
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error opening link')),
-        );
-      }
-    }
+  Widget _buildFooter() {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4),
+      child: Row(
+        children: [
+          _buildActionIcon(Icons.copy_rounded, () {}),
+          const SizedBox(width: 16),
+          _buildActionIcon(Icons.share_outlined, () {}),
+          const SizedBox(width: 16),
+          _buildActionIcon(Icons.thumb_up_outlined, () {}),
+          const SizedBox(width: 16),
+          _buildActionIcon(Icons.thumb_down_outlined, () {}),
+          const Spacer(),
+          if (widget.message.latencyMs != null)
+            Text(
+              '${(widget.message.latencyMs! / 1000).toStringAsFixed(1)}s',
+              style: AppTextStyles.caption.copyWith(color: AppColors.textTertiary),
+            ),
+        ],
+      ),
+    );
   }
 
-  Color _getConfidenceColor() {
-    switch (message.confidenceLevel) {
-      case ConfidenceLevel.high:
-        return const Color(0xFF10B981);
-      case ConfidenceLevel.medium:
-        return const Color(0xFFF59E0B);
-      case ConfidenceLevel.low:
-        return const Color(0xFFEF4444);
-      case ConfidenceLevel.none:
-        return AppColors.gray400;
-    }
+  Widget _buildActionIcon(IconData icon, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.all(4),
+        child: Icon(
+          icon,
+          size: 18,
+          color: AppColors.textTertiary,
+        ),
+      ),
+    );
   }
 }

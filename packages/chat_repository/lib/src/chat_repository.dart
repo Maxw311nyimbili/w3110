@@ -4,6 +4,7 @@ import 'package:api_client/api_client.dart';
 import 'models/chat_message.dart';
 import 'models/chat_query_request.dart';
 import 'models/chat_response.dart';
+import 'models/validated_answer_response.dart';
 import 'local_chat_cache.dart';
 
 /// Chat repository - handles AI chat interactions and message caching
@@ -17,11 +18,9 @@ class ChatRepository {
   final ApiClient _apiClient;
   final LocalChatCache _localCache;
 
-  /// Send message to AI backend
+  /// Send message to v1 RAG backend
   ///
   /// Backend endpoint: POST /chat/query
-  /// Request: { "message": "...", "conversation_id": "...", "image_url": "..." }
-  /// Response: { "response": "...", "sentences": [...], "sources": [...], "confidence": 0.9 }
   Future<ChatResponse> sendMessage(ChatQueryRequest request) async {
     try {
       final response = await _apiClient.post(
@@ -29,12 +28,37 @@ class ChatRepository {
         data: request.toJson(),
       );
 
-      // Cast response.data to Map
       final responseData = response.data as Map<String, dynamic>;
-
       return ChatResponse.fromJson(responseData);
     } catch (e) {
       throw ChatException('Failed to send message: ${e.toString()}');
+    }
+  }
+
+  /// Send message to v1.1 validation pipeline
+  ///
+  /// Backend endpoint: POST /chat/validate
+  /// This endpoint can take up to 90 seconds, so we use an extended timeout
+  Future<ValidatedAnswerResponse> sendMessageValidated(
+      ChatQueryRequest request,
+      ) async {
+    try {
+      print('🔄 Sending validated request...');
+
+      // Use extended timeout for validation pipeline (backend takes ~40-90s)
+      final response = await _apiClient.post(
+        '/chat/validate',
+        data: request.toJson(),
+        receiveTimeout: const Duration(seconds: 120), // 2 minutes to be safe
+      );
+
+      print('✅ Got response');
+
+      final responseData = response.data as Map<String, dynamic>;
+      return ValidatedAnswerResponse.fromJson(responseData);
+    } catch (e) {
+      print('❌ Validation Error: $e');
+      throw ChatException('Failed to validate message: ${e.toString()}');
     }
   }
 
@@ -62,6 +86,16 @@ class ChatRepository {
       await _localCache.clearCache();
     } catch (e) {
       throw ChatException('Failed to clear cache: ${e.toString()}');
+    }
+  }
+
+  /// Test health endpoint
+  Future<bool> isHealthy() async {
+    try {
+      final response = await _apiClient.get('/health');
+      return response.statusCode == 200;
+    } catch (e) {
+      return false;
     }
   }
 }
