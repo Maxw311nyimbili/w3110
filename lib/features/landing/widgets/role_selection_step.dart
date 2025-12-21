@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lottie/lottie.dart';
-import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../cubit/cubit.dart';
@@ -15,100 +13,62 @@ class RoleSelectionStep extends StatelessWidget {
       builder: (context, state) {
         return Scaffold(
           backgroundColor: AppColors.backgroundPrimary,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              color: AppColors.textPrimary,
+              onPressed: () => context.read<LandingCubit>().previousStep(),
+            ),
+          ),
           body: SafeArea(
-            child: Column(
-              children: [
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: IconButton(
-                    icon: const Icon(Icons.arrow_back),
-                    onPressed: () => context.read<LandingCubit>().previousStep(),
-                  ),
-                ),
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Container(
-                            width: 140,
-                            height: 140,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AppColors.accentPrimary.withOpacity(0.08),
-                                  blurRadius: 32,
-                                  offset: const Offset(0, 16),
-                                ),
-                              ],
-                            ),
-                            child: Center(
-                              child: Lottie.asset(
-                                'assets/animations/roles.json',
-                                fit: BoxFit.contain,
-                                repeat: true,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 40),
-                          Text(
-                            'Who are you?',
-                            style: AppTextStyles.displayMedium.copyWith(
-                              color: AppColors.textPrimary,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: -0.8,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            'Help us personalize your experience',
-                            style: AppTextStyles.bodySmall.copyWith(
-                              color: AppColors.textSecondary,
-                              height: 1.4,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 40),
-                        ],
-                      ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 16),
+                  Text(
+                    'Select your role',
+                    style: AppTextStyles.displayMedium.copyWith(
+                      color: AppColors.textPrimary,
+                      letterSpacing: -0.5,
                     ),
                   ),
-                ),
-                Expanded(
-                  flex: 1,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                  const SizedBox(height: 32),
+                  Expanded(
                     child: ListView(
                       children: [
-                        _buildRoleCard(context, 'Expecting Mother', 'Prenatal care',
-                            Icons.pregnant_woman, UserRole.expectingMother, state),
-                        const SizedBox(height: 12),
-                        _buildRoleCard(context, 'Healthcare Provider', 'Medical professional',
-                            Icons.medical_services_outlined, UserRole.healthcareProvider, state),
-                        const SizedBox(height: 12),
-                        _buildRoleCard(context, 'Parent/Caregiver', 'Family care', Icons.family_restroom,
-                            UserRole.parentCaregiver, state),
-                        const SizedBox(height: 12),
-                        _buildRoleCard(context, 'Just Exploring', 'Learning health topics', Icons.search,
-                            UserRole.explorer, state),
+                        _buildRoleItem(context, 'Expecting Mother', UserRole.expectingMother, state),
+                        _buildRoleItem(context, 'Healthcare Provider', UserRole.healthcareProvider, state),
+                        _buildRoleItem(context, 'Parent/Caregiver', UserRole.parentCaregiver, state),
+                        _buildRoleItem(context, 'Just Exploring', UserRole.explorer, state),
                       ],
                     ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: 24),
-                  child: _buildPrimaryButton(
-                    onPressed: state.canProceed ? () => context.read<LandingCubit>().nextStep() : null,
-                    label: 'Continue',
+                  SizedBox(
+                    width: double.infinity,
+                    height: 56,
+                    child: ElevatedButton(
+                      onPressed: state.canProceed 
+                          ? () => context.read<LandingCubit>().nextStep() 
+                          : null,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.textPrimary,
+                        foregroundColor: AppColors.backgroundSurface,
+                        disabledBackgroundColor: AppColors.gray300,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                      ),
+                      child: const Text('Continue'),
+                    ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 24),
+                ],
+              ),
             ),
           ),
         );
@@ -116,94 +76,37 @@ class RoleSelectionStep extends StatelessWidget {
     );
   }
 
-  Widget _buildRoleCard(BuildContext context, String title, String desc, IconData icon, UserRole role,
-      LandingState state) {
+  Widget _buildRoleItem(BuildContext context, String title, UserRole role, LandingState state) {
     final isSelected = state.selectedRole == role;
-    return Material(
-      color: Colors.transparent,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12.0),
       child: InkWell(
         onTap: () => context.read<LandingCubit>().selectRole(role),
         borderRadius: BorderRadius.circular(12),
         child: Container(
-          padding: const EdgeInsets.all(14),
+          padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: isSelected ? AppColors.accentLight : AppColors.backgroundSurface,
-            borderRadius: BorderRadius.circular(12),
+            color: isSelected ? AppColors.backgroundSurface : Colors.transparent,
             border: Border.all(
-                color: isSelected ? AppColors.accentPrimary : AppColors.gray200,
-                width: isSelected ? 1.5 : 0.5),
+              color: isSelected ? AppColors.textPrimary : AppColors.gray300,
+              width: isSelected ? 1.5 : 1,
+            ),
+            borderRadius: BorderRadius.circular(12),
           ),
           child: Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: isSelected ? AppColors.accentPrimary.withOpacity(0.2) : AppColors.gray100,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(icon, size: 22, color: isSelected ? AppColors.accentPrimary : AppColors.textSecondary),
-              ),
-              const SizedBox(width: 14),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(title,
-                        style: AppTextStyles.labelLarge.copyWith(
-                            color: isSelected ? AppColors.accentPrimary : AppColors.textPrimary,
-                            fontWeight: FontWeight.w600)),
-                    const SizedBox(height: 2),
-                    Text(desc, style: AppTextStyles.caption.copyWith(color: AppColors.textTertiary)),
-                  ],
+                child: Text(
+                  title,
+                  style: AppTextStyles.bodyLarge.copyWith(
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
               ),
-              if (isSelected) Icon(Icons.check_circle, color: AppColors.accentPrimary, size: 20),
+              if (isSelected) 
+                const Icon(Icons.check_circle, size: 20, color: AppColors.textPrimary),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPrimaryButton({
-    required VoidCallback? onPressed,
-    required String label,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            AppColors.accentPrimary,
-            AppColors.accentPrimary.withOpacity(0.9),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.accentPrimary.withOpacity(0.25),
-            blurRadius: 12,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onPressed,
-          borderRadius: BorderRadius.circular(14),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
-            child: Text(
-              label,
-              style: AppTextStyles.labelLarge.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.w700,
-                fontSize: 15,
-              ),
-              textAlign: TextAlign.center,
-            ),
           ),
         ),
       ),

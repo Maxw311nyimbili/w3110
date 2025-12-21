@@ -40,7 +40,7 @@ class AuthInterceptor extends Interceptor {
       print('⚠️  No token available - request may fail');
     }
 
-    handler.next(options);
+    return handler.next(options);
   }
 
   @override
@@ -91,6 +91,7 @@ class AuthInterceptor extends Interceptor {
       '/consent/current',
       '/announcements',
       '/health',
+      '/chat/validate'
     ];
 
     return publicPaths.any((p) => path.contains(p));

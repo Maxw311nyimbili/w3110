@@ -1,6 +1,7 @@
 // packages/forum_repository/lib/src/models/forum_comment.dart
 
 import 'package:equatable/equatable.dart';
+import 'sync_status.dart';
 import '../database/forum_database.dart';
 
 /// Forum comment model - represents a comment on a forum post
@@ -14,7 +15,7 @@ class ForumComment extends Equatable {
     required this.content,
     required this.createdAt,
     this.updatedAt,
-    this.syncStatus = 'synced',
+    this.syncStatus = SyncStatus.synced,
   });
 
   final String id; // Server ID
@@ -25,7 +26,9 @@ class ForumComment extends Equatable {
   final String content;
   final DateTime createdAt;
   final DateTime? updatedAt;
-  final String syncStatus;
+  final SyncStatus syncStatus;
+
+  bool get isPendingSync => syncStatus == SyncStatus.pending;
 
   /// Create from Drift database row
   factory ForumComment.fromDatabase(ForumCommentData data) {
@@ -38,20 +41,11 @@ class ForumComment extends Equatable {
       content: data.content,
       createdAt: data.createdAt,
       updatedAt: data.updatedAt,
-      syncStatus: data.syncStatus,
+      syncStatus: _parseSyncStatus(data.syncStatus),
     );
   }
 
   /// Create from backend JSON
-  /// Expected response from GET /forum/posts/{id}/comments:
-  /// {
-  ///   "id": "server-uuid",
-  ///   "post_id": "post-uuid",
-  ///   "author_id": "user-uuid",
-  ///   "author_name": "Jane Smith",
-  ///   "content": "Great question!",
-  ///   "created_at": "2025-01-15T10:45:00Z"
-  /// }
   factory ForumComment.fromJson(Map<String, dynamic> json) {
     return ForumComment(
       id: json['id'] as String,
@@ -64,8 +58,41 @@ class ForumComment extends Equatable {
       updatedAt: json['updated_at'] != null
           ? DateTime.parse(json['updated_at'] as String)
           : null,
-      syncStatus: 'synced', // From server = already synced
+      syncStatus: SyncStatus.synced, // From server = already synced
     );
+  }
+
+  ForumComment copyWith({
+    String? id,
+    String? localId,
+    String? postId,
+    String? authorId,
+    String? authorName,
+    String? content,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    SyncStatus? syncStatus,
+  }) {
+    return ForumComment(
+      id: id ?? this.id,
+      localId: localId ?? this.localId,
+      postId: postId ?? this.postId,
+      authorId: authorId ?? this.authorId,
+      authorName: authorName ?? this.authorName,
+      content: content ?? this.content,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      syncStatus: syncStatus ?? this.syncStatus,
+    );
+  }
+
+  static SyncStatus _parseSyncStatus(String status) {
+    switch (status) {
+      case 'pending': return SyncStatus.pending;
+      case 'syncing': return SyncStatus.syncing;
+      case 'error': return SyncStatus.error;
+      default: return SyncStatus.synced;
+    }
   }
 
   @override

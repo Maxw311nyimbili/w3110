@@ -110,7 +110,7 @@ class _AppState extends State<App> {
           BlocProvider.value(value: _landingCubit), // ← ADD THIS
         ],
         child: MaterialApp(
-          title: 'MedBot',
+          title: 'Thanzi',
           debugShowCheckedModeBanner: false,
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,

@@ -18,8 +18,9 @@ class ApiClient {
     _dio = Dio(
       BaseOptions(
         baseUrl: baseUrl,
-        connectTimeout: connectTimeout ?? const Duration(seconds: 30),
-        receiveTimeout: receiveTimeout ?? const Duration(seconds: 30),
+        connectTimeout: connectTimeout ?? const Duration(seconds: 15),
+        receiveTimeout: receiveTimeout ?? const Duration(seconds: 300), // 5 minutes max
+        sendTimeout: const Duration(seconds: 30),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -52,12 +53,16 @@ class ApiClient {
         Map<String, dynamic>? queryParameters,
         Map<String, dynamic>? headers,
         CancelToken? cancelToken,
+        Duration? receiveTimeout,
       }) async {
     try {
       return await _dio.get<T>(
         path,
         queryParameters: queryParameters,
-        options: Options(headers: headers),
+        options: Options(
+          headers: headers,
+          receiveTimeout: receiveTimeout,
+        ),
         cancelToken: cancelToken,
       );
     } on DioException catch (e) {
@@ -72,13 +77,17 @@ class ApiClient {
         Map<String, dynamic>? queryParameters,
         Map<String, dynamic>? headers,
         CancelToken? cancelToken,
+        Duration? receiveTimeout,
       }) async {
     try {
       return await _dio.post<T>(
         path,
         data: data,
         queryParameters: queryParameters,
-        options: Options(headers: headers),
+        options: Options(
+          headers: headers,
+          receiveTimeout: receiveTimeout,
+        ),
         cancelToken: cancelToken,
       );
     } on DioException catch (e) {
@@ -93,13 +102,17 @@ class ApiClient {
         Map<String, dynamic>? queryParameters,
         Map<String, dynamic>? headers,
         CancelToken? cancelToken,
+        Duration? receiveTimeout,
       }) async {
     try {
       return await _dio.put<T>(
         path,
         data: data,
         queryParameters: queryParameters,
-        options: Options(headers: headers),
+        options: Options(
+          headers: headers,
+          receiveTimeout: receiveTimeout,
+        ),
         cancelToken: cancelToken,
       );
     } on DioException catch (e) {
@@ -114,13 +127,17 @@ class ApiClient {
         Map<String, dynamic>? queryParameters,
         Map<String, dynamic>? headers,
         CancelToken? cancelToken,
+        Duration? receiveTimeout,
       }) async {
     try {
       return await _dio.patch<T>(
         path,
         data: data,
         queryParameters: queryParameters,
-        options: Options(headers: headers),
+        options: Options(
+          headers: headers,
+          receiveTimeout: receiveTimeout,
+        ),
         cancelToken: cancelToken,
       );
     } on DioException catch (e) {
@@ -135,13 +152,17 @@ class ApiClient {
         Map<String, dynamic>? queryParameters,
         Map<String, dynamic>? headers,
         CancelToken? cancelToken,
+        Duration? receiveTimeout,
       }) async {
     try {
       return await _dio.delete<T>(
         path,
         data: data,
         queryParameters: queryParameters,
-        options: Options(headers: headers),
+        options: Options(
+          headers: headers,
+          receiveTimeout: receiveTimeout,
+        ),
         cancelToken: cancelToken,
       );
     } on DioException catch (e) {

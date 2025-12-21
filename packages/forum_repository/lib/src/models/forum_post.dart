@@ -1,6 +1,7 @@
 // packages/forum_repository/lib/src/models/forum_post.dart
 
 import 'package:equatable/equatable.dart';
+import 'sync_status.dart'; // Ensure this exists or is exported
 import '../database/forum_database.dart';
 
 /// Forum post model - represents a forum post in the app
@@ -17,7 +18,7 @@ class ForumPost extends Equatable {
     this.commentCount = 0,
     this.likeCount = 0,
     this.isLiked = false,
-    this.syncStatus = 'synced',
+    this.syncStatus = SyncStatus.synced,
   });
 
   final String id; // Server ID
@@ -31,7 +32,13 @@ class ForumPost extends Equatable {
   final int commentCount;
   final int likeCount;
   final bool isLiked;
-  final String syncStatus;
+  final SyncStatus syncStatus;
+
+  // Helpers
+  bool get isPendingSync => syncStatus == SyncStatus.pending;
+  bool get isSyncing => syncStatus == SyncStatus.syncing;
+  bool get isSynced => syncStatus == SyncStatus.synced;
+  bool get hasSyncError => syncStatus == SyncStatus.error;
 
   /// Create from Drift database row
   factory ForumPost.fromDatabase(ForumPostData data) {
@@ -47,23 +54,11 @@ class ForumPost extends Equatable {
       commentCount: data.commentCount,
       likeCount: data.likeCount,
       isLiked: data.isLiked,
-      syncStatus: data.syncStatus,
+      syncStatus: _parseSyncStatus(data.syncStatus),
     );
   }
 
   /// Create from backend JSON
-  /// Expected response from GET /forum/posts:
-  /// {
-  ///   "id": "server-uuid",
-  ///   "author_id": "user-uuid",
-  ///   "author_name": "John Doe",
-  ///   "title": "Question about...",
-  ///   "content": "...",
-  ///   "created_at": "2025-01-15T10:30:00Z",
-  ///   "updated_at": "2025-01-15T10:35:00Z",
-  ///   "comment_count": 5,
-  ///   "like_count": 12
-  /// }
   factory ForumPost.fromJson(Map<String, dynamic> json) {
     return ForumPost(
       id: json['id'] as String,
@@ -78,8 +73,47 @@ class ForumPost extends Equatable {
           : null,
       commentCount: json['comment_count'] as int? ?? 0,
       likeCount: json['like_count'] as int? ?? 0,
-      syncStatus: 'synced', // From server = already synced
+      syncStatus: SyncStatus.synced, // From server = already synced
     );
+  }
+
+  ForumPost copyWith({
+    String? id,
+    String? localId,
+    String? authorId,
+    String? authorName,
+    String? title,
+    String? content,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    int? commentCount,
+    int? likeCount,
+    bool? isLiked,
+    SyncStatus? syncStatus,
+  }) {
+    return ForumPost(
+      id: id ?? this.id,
+      localId: localId ?? this.localId,
+      authorId: authorId ?? this.authorId,
+      authorName: authorName ?? this.authorName,
+      title: title ?? this.title,
+      content: content ?? this.content,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      commentCount: commentCount ?? this.commentCount,
+      likeCount: likeCount ?? this.likeCount,
+      isLiked: isLiked ?? this.isLiked,
+      syncStatus: syncStatus ?? this.syncStatus,
+    );
+  }
+
+  static SyncStatus _parseSyncStatus(String status) {
+    switch (status) {
+      case 'pending': return SyncStatus.pending;
+      case 'syncing': return SyncStatus.syncing;
+      case 'error': return SyncStatus.error;
+      default: return SyncStatus.synced;
+    }
   }
 
   @override

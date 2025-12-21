@@ -1,17 +1,22 @@
 // lib/core/theme/app_text_styles.dart
 
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:cap_project/core/theme/app_colors.dart';
 
 class AppTextStyles {
+  // Use Inter from Google Fonts for that premium, clean look
+  static TextStyle get _baseFont => GoogleFonts.inter();
+
   // Display - for empty states, major headings
-  static const TextStyle displayLarge = TextStyle(
+  static TextStyle get displayLarge => _baseFont.copyWith(
     fontSize: 32,
     fontWeight: FontWeight.w700,
     height: 1.2,
     letterSpacing: -0.5,
   );
 
-  static const TextStyle displayMedium = TextStyle(
+  static TextStyle get displayMedium => _baseFont.copyWith(
     fontSize: 28,
     fontWeight: FontWeight.w700,
     height: 1.25,
@@ -19,42 +24,42 @@ class AppTextStyles {
   );
 
   // Headline - section headers
-  static const TextStyle headlineLarge = TextStyle(
+  static TextStyle get headlineLarge => _baseFont.copyWith(
     fontSize: 24,
-    fontWeight: FontWeight.w700,
+    fontWeight: FontWeight.w600,
     height: 1.3,
     letterSpacing: -0.2,
   );
 
-  static const TextStyle headlineMedium = TextStyle(
+  static TextStyle get headlineMedium => _baseFont.copyWith(
     fontSize: 20,
     fontWeight: FontWeight.w600,
     height: 1.35,
     letterSpacing: -0.1,
   );
 
-  static const TextStyle headlineSmall = TextStyle(
+  static TextStyle get headlineSmall => _baseFont.copyWith(
     fontSize: 18,
     fontWeight: FontWeight.w600,
     height: 1.4,
   );
 
   // Body - main content text
-  static const TextStyle bodyLarge = TextStyle(
+  static TextStyle get bodyLarge => _baseFont.copyWith(
     fontSize: 16,
-    fontWeight: FontWeight.w500,
-    height: 1.5,
+    fontWeight: FontWeight.w400,
+    height: 1.6, // Taller line height for readability
     letterSpacing: 0,
   );
 
-  static const TextStyle bodyMedium = TextStyle(
+  static TextStyle get bodyMedium => _baseFont.copyWith(
     fontSize: 15,
     fontWeight: FontWeight.w400,
-    height: 1.5,
+    height: 1.6,
     letterSpacing: 0,
   );
 
-  static const TextStyle bodySmall = TextStyle(
+  static TextStyle get bodySmall => _baseFont.copyWith(
     fontSize: 13,
     fontWeight: FontWeight.w400,
     height: 1.5,
@@ -62,29 +67,29 @@ class AppTextStyles {
   );
 
   // Label - UI elements, badges
-  static const TextStyle labelLarge = TextStyle(
+  static TextStyle get labelLarge => _baseFont.copyWith(
     fontSize: 14,
     fontWeight: FontWeight.w500,
     height: 1.4,
     letterSpacing: 0.1,
   );
 
-  static const TextStyle labelMedium = TextStyle(
+  static TextStyle get labelMedium => _baseFont.copyWith(
     fontSize: 12,
     fontWeight: FontWeight.w500,
     height: 1.35,
     letterSpacing: 0.1,
   );
 
-  static const TextStyle labelSmall = TextStyle(
+  static TextStyle get labelSmall => _baseFont.copyWith(
     fontSize: 11,
-    fontWeight: FontWeight.w400,
+    fontWeight: FontWeight.w500,
     height: 1.3,
     letterSpacing: 0.2,
   );
 
   // Caption - smallest, for timestamps and meta
-  static const TextStyle caption = TextStyle(
+  static TextStyle get caption => _baseFont.copyWith(
     fontSize: 10,
     fontWeight: FontWeight.w400,
     height: 1.2,

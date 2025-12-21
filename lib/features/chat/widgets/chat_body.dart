@@ -1,3 +1,4 @@
+import 'package:cap_project/features/chat/widgets/audio_waveform.dart';
 import 'package:cap_project/features/chat/widgets/chat_input.dart';
 import 'package:cap_project/features/chat/widgets/message_bubble.dart';
 import 'package:flutter/material.dart';
@@ -7,7 +8,14 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
 class ChatBody extends StatefulWidget {
-  const ChatBody({super.key});
+  final bool isAudioMode;
+  final VoidCallback onToggleAudio;
+
+  const ChatBody({
+    super.key,
+    required this.isAudioMode,
+    required this.onToggleAudio,
+  });
 
   @override
   State<ChatBody> createState() => _ChatBodyState();
@@ -95,7 +103,10 @@ class _ChatBodyState extends State<ChatBody> {
         ),
         bottomSheet: Container(
           color: AppColors.backgroundPrimary,
-          child: const RefinedChatInput(),
+          child: RefinedChatInput(
+            isAudioMode: widget.isAudioMode,
+            onToggleAudio: widget.onToggleAudio,
+          ),
         ),
       ),
     );
@@ -103,40 +114,52 @@ class _ChatBodyState extends State<ChatBody> {
 
   Widget _buildEmptyState(BuildContext context) {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: AppColors.accentLight,
-              borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.backgroundSurface,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
+              ),
+              child: const Icon(
+                Icons.shield_outlined,
+                size: 32,
+                color: AppColors.accentPrimary,
+              ),
             ),
-            child: const Icon(
-              Icons.medical_services_outlined,
-              size: 24,
-              color: AppColors.accentPrimary,
+            const SizedBox(height: 32),
+            Text(
+              'How can Thanzi\nhelp you today?',
+              style: AppTextStyles.displayMedium.copyWith(
+                color: AppColors.textPrimary,
+                fontWeight: FontWeight.w800,
+                height: 1.2,
+                letterSpacing: -1,
+              ),
+              textAlign: TextAlign.center,
             ),
-          ),
-          const SizedBox(height: 20),
-          Text(
-            'Medical Guidance,\nInstantly.',
-            style: AppTextStyles.displayMedium.copyWith(
-              color: AppColors.textPrimary,
-              fontWeight: FontWeight.w700,
+            const SizedBox(height: 16),
+            Text(
+              'Ask about symptoms, medications, or health tips.',
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.textSecondary,
+                letterSpacing: 0.2,
+              ),
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Trusted AI-powered health information',
-            style: AppTextStyles.bodySmall.copyWith(
-              color: AppColors.textSecondary,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -179,10 +202,6 @@ class _ChatBodyState extends State<ChatBody> {
             decoration: BoxDecoration(
               color: AppColors.backgroundSurface,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: AppColors.gray200,
-                width: 0.5,
-              ),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -212,7 +231,7 @@ class _ChatBodyState extends State<ChatBody> {
             width: 6,
             height: 6,
             decoration: const BoxDecoration(
-              color: AppColors.accentPrimary,
+              color: AppColors.textPrimary,
               shape: BoxShape.circle,
             ),
           ),

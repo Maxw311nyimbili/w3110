@@ -1,166 +1,148 @@
 // lib/features/forum/widgets/post_card.dart
-// PREMIUM DESIGN - Uses App Theme & Colors
 
+import 'package:cap_project/core/theme/app_colors.dart';
+import 'package:cap_project/core/theme/app_text_styles.dart';
 import 'package:flutter/material.dart';
-import '../cubit/cubit.dart';
-import '../../../core/theme/app_spacing.dart';
-import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_text_styles.dart';
+import 'package:forum_repository/forum_repository.dart';
 
 class PostCard extends StatelessWidget {
   const PostCard({
-    required this.post,
-    required this.onTap,
     super.key,
+    required this.post,
+    this.onTap,
   });
 
   final ForumPost post;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
+
+  String _formatTime(DateTime time) {
+    final difference = DateTime.now().difference(time);
+    if (difference.inMinutes < 60) {
+      return '${difference.inMinutes}m ago';
+    } else if (difference.inHours < 24) {
+      return '${difference.inHours}h ago';
+    } else {
+      return '${difference.inDays}d ago';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: AppColors.backgroundSurface,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: AppColors.gray200,
-            width: 1,
+          border: Border(
+            bottom: BorderSide(
+              color: Theme.of(context).dividerColor.withOpacity(0.5),
+              width: 1,
+            ),
           ),
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Author section
-              Row(
-                children: [
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: AppColors.accentLight,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Center(
-                      child: Text(
-                        post.authorName[0].toUpperCase(),
-                        style: TextStyle(
-                          color: AppColors.accentPrimary,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header: Avatar + Name + Time
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 10,
+                  backgroundColor: AppColors.backgroundPrimary,
+                  child: Text(
+                    post.authorName.isNotEmpty ? post.authorName[0].toUpperCase() : '?',
+                    style: const TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          post.authorName,
-                          style: AppTextStyles.labelLarge.copyWith(
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          _formatTimestamp(post.createdAt),
-                          style: AppTextStyles.labelSmall.copyWith(
-                            color: AppColors.textTertiary,
-                          ),
-                        ),
-                      ],
-                    ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  post.authorName,
+                  style: AppTextStyles.labelMedium.copyWith(
+                    fontWeight: FontWeight.w600,
                   ),
-                  if (post.isPendingSync)
-                    Icon(
-                      Icons.cloud_upload_outlined,
-                      size: 16,
-                      color: AppColors.warning,
-                    ),
-                ],
-              ),
-
-              const SizedBox(height: 12),
-
-              // Title
-              Text(
-                post.title,
-                style: AppTextStyles.headlineMedium.copyWith(
-                  color: AppColors.textPrimary,
                 ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-
-              const SizedBox(height: 8),
-
-              // Content preview
-              Text(
-                post.content,
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: AppColors.textSecondary,
+                const SizedBox(width: 4),
+                Text(
+                  '•',
+                  style: AppTextStyles.caption.copyWith(color: AppColors.textTertiary),
                 ),
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
+                const SizedBox(width: 4),
+                Text(
+                  _formatTime(post.createdAt),
+                  style: AppTextStyles.caption.copyWith(color: AppColors.textTertiary),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            // Title
+            Text(
+              post.title,
+              style: AppTextStyles.headlineSmall.copyWith(
+                fontWeight: FontWeight.w700,
+                fontSize: 17,
               ),
-
-              const SizedBox(height: 12),
-
-              // Stats footer
-              Row(
-                children: [
-                  _buildStat(Icons.comment_outlined, post.commentCount),
-                  const SizedBox(width: 20),
-                  _buildStat(Icons.favorite_outline, post.likeCount),
-                ],
+            ),
+            const SizedBox(height: 4),
+            // Content Preview
+            Text(
+              post.content,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.textSecondary,
               ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 16),
+            // Footer: Actions
+            Row(
+              children: [
+                _buildAction(
+                  Icons.arrow_upward_rounded,
+                  post.likeCount.toString(),
+                  isActive: post.isLiked,
+                ),
+                const SizedBox(width: 16),
+                _buildAction(
+                  Icons.chat_bubble_outline_rounded,
+                  post.commentCount.toString(),
+                ),
+                const Spacer(),
+                if (post.syncStatus != 'synced')
+                  Icon(
+                    Icons.cloud_upload_outlined,
+                    size: 16,
+                    color: AppColors.textTertiary,
+                  ),
+              ],
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildStat(IconData icon, int count) {
+  Widget _buildAction(IconData icon, String label, {bool isActive = false}) {
     return Row(
       children: [
         Icon(
           icon,
-          size: 14,
-          color: AppColors.textTertiary,
+          size: 18,
+          color: isActive ? AppColors.textPrimary : AppColors.textTertiary,
         ),
-        const SizedBox(width: 6),
+        const SizedBox(width: 4),
         Text(
-          '$count',
+          label,
           style: AppTextStyles.labelSmall.copyWith(
-            color: AppColors.textSecondary,
+            color: isActive ? AppColors.textPrimary : AppColors.textTertiary,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ],
     );
-  }
-
-  String _formatTimestamp(DateTime timestamp) {
-    final now = DateTime.now();
-    final difference = now.difference(timestamp);
-
-    if (difference.inMinutes < 1) {
-      return 'Just now';
-    } else if (difference.inHours < 1) {
-      return '${difference.inMinutes}m ago';
-    } else if (difference.inDays < 1) {
-      return '${difference.inHours}h ago';
-    } else if (difference.inDays < 7) {
-      return '${difference.inDays}d ago';
-    } else {
-      return '${timestamp.day}/${timestamp.month}/${timestamp.year}';
-    }
   }
 }
