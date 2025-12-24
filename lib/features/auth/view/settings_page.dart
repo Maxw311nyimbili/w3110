@@ -23,51 +23,56 @@ class SettingsPage extends StatelessWidget {
         ),
       ),
       body: ListView(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
         children: [
           _buildSectionHeader('PREFERENCES'),
-          _buildSettingTile(
-            title: 'Language',
-            subtitle: 'English (US)',
-            icon: Icons.language_rounded,
-            onTap: () {
-              // Show language picker
-            },
-          ),
-          _buildSettingTile(
-            title: 'Dark Mode',
-            subtitle: 'System Default',
-            icon: Icons.dark_mode_outlined,
-            onTap: () {},
-          ),
+          _buildGroup([
+            _buildSettingTile(
+              title: 'Language',
+              subtitle: 'English (US)',
+              icon: Icons.language_rounded,
+              showDivider: true,
+              onTap: () {},
+            ),
+            _buildSettingTile(
+              title: 'Dark Mode',
+              subtitle: 'System Default',
+              icon: Icons.dark_mode_outlined,
+              onTap: () {},
+            ),
+          ]),
           const SizedBox(height: 32),
           _buildSectionHeader('PROFILE'),
-          _buildSettingTile(
-            title: 'Account Info',
-            icon: Icons.person_outline_rounded,
-            onTap: () {},
-          ),
-          _buildSettingTile(
-            title: 'Sign Out',
-            icon: Icons.logout_rounded,
-            textColor: AppColors.error,
-            onTap: () {
-              // Handle sign out
-            },
-          ),
+          _buildGroup([
+            _buildSettingTile(
+              title: 'Account Info',
+              icon: Icons.person_outline_rounded,
+              showDivider: true,
+              onTap: () {},
+            ),
+            _buildSettingTile(
+              title: 'Sign Out',
+              icon: Icons.logout_rounded,
+              textColor: AppColors.error,
+              onTap: () {},
+            ),
+          ]),
           const SizedBox(height: 32),
           _buildSectionHeader('ABOUT'),
-          _buildSettingTile(
-            title: 'Privacy Policy',
-            icon: Icons.privacy_tip_outlined,
-            onTap: () {},
-          ),
-          _buildSettingTile(
-            title: 'Version',
-            subtitle: '1.0.0 (Thanzi Build)',
-            icon: Icons.info_outline_rounded,
-            onTap: null,
-          ),
+          _buildGroup([
+            _buildSettingTile(
+              title: 'Privacy Policy',
+              icon: Icons.privacy_tip_outlined,
+              showDivider: true,
+              onTap: () {},
+            ),
+            _buildSettingTile(
+              title: 'Version',
+              subtitle: '1.0.0 (Thanzi Build)',
+              icon: Icons.info_outline_rounded,
+              onTap: null,
+            ),
+          ]),
         ],
       ),
     );
@@ -75,14 +80,28 @@ class SettingsPage extends StatelessWidget {
 
   Widget _buildSectionHeader(String title) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12, left: 4),
+      padding: const EdgeInsets.only(bottom: 8, left: 16),
       child: Text(
         title,
         style: AppTextStyles.caption.copyWith(
           color: AppColors.textTertiary,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 1.2,
+          fontWeight: FontWeight.w500,
+          letterSpacing: 0.5,
+          fontSize: 13,
         ),
+      ),
+    );
+  }
+
+  Widget _buildGroup(List<Widget> children) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.backgroundSurface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.borderLight, width: 0.5),
+      ),
+      child: Column(
+        children: children,
       ),
     );
   }
@@ -93,57 +112,74 @@ class SettingsPage extends StatelessWidget {
     required IconData icon,
     VoidCallback? onTap,
     Color? textColor,
+    bool showDivider = false,
   }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(12),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-            decoration: BoxDecoration(
-              color: AppColors.backgroundSurface,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.borderLight, width: 0.5),
-            ),
-            child: Row(
-              children: [
-                Icon(icon, size: 20, color: textColor ?? AppColors.textSecondary),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: AppTextStyles.bodyMedium.copyWith(
-                          color: textColor ?? AppColors.textPrimary,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      if (subtitle != null)
+    return Column(
+      children: [
+        Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                children: [
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: (textColor ?? AppColors.accentPrimary).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      icon, 
+                      size: 18, 
+                      color: textColor ?? AppColors.accentPrimary
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                         Text(
-                          subtitle,
-                          style: AppTextStyles.caption.copyWith(
-                            color: AppColors.textTertiary,
+                          title,
+                          style: AppTextStyles.bodyMedium.copyWith(
+                            color: textColor ?? AppColors.textPrimary,
+                            fontWeight: FontWeight.w400,
+                            fontSize: 16,
                           ),
                         ),
-                    ],
+                        if (subtitle != null)
+                          Text(
+                            subtitle,
+                            style: AppTextStyles.caption.copyWith(
+                              color: AppColors.textTertiary,
+                              fontSize: 13,
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
-                ),
-                if (onTap != null)
-                  Icon(
-                    Icons.chevron_right_rounded,
-                    size: 20,
-                    color: AppColors.textTertiary,
-                  ),
-              ],
+                  if (onTap != null)
+                    const Icon(
+                      Icons.chevron_right_rounded,
+                      size: 20,
+                      color: AppColors.textTertiary,
+                    ),
+                ],
+              ),
             ),
           ),
         ),
-      ),
+        if (showDivider)
+          const Divider(
+            height: 1,
+            indent: 64,
+            endIndent: 0,
+            color: AppColors.borderLight,
+          ),
+      ],
     );
   }
 }

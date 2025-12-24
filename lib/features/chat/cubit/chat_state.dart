@@ -40,6 +40,9 @@ class ChatState extends Equatable {
     this.isTyping = false,
     this.currentMessageId,
     this.sessionId,
+    this.isRecording = false,
+    this.recordingPath,
+    this.amplitude = -160.0,
   });
 
   final ChatStatus status;
@@ -48,6 +51,9 @@ class ChatState extends Equatable {
   final bool isTyping;
   final String? currentMessageId;
   final String? sessionId;
+  final bool isRecording;
+  final String? recordingPath;
+  final double amplitude;
 
   bool get isLoading => status == ChatStatus.loading;
   bool get hasMessages => messages.isNotEmpty;
@@ -59,6 +65,9 @@ class ChatState extends Equatable {
     bool? isTyping,
     String? currentMessageId,
     String? sessionId,
+    bool? isRecording,
+    String? recordingPath,
+    double? amplitude,
   }) {
     return ChatState(
       status: status ?? this.status,
@@ -67,6 +76,9 @@ class ChatState extends Equatable {
       isTyping: isTyping ?? this.isTyping,
       currentMessageId: currentMessageId ?? this.currentMessageId,
       sessionId: sessionId ?? this.sessionId,
+      isRecording: isRecording ?? this.isRecording,
+      recordingPath: recordingPath ?? this.recordingPath,
+      amplitude: amplitude ?? this.amplitude,
     );
   }
 
@@ -75,7 +87,7 @@ class ChatState extends Equatable {
   }
 
   @override
-  List<Object?> get props => [status, messages, error, isTyping, currentMessageId, sessionId];
+  List<Object?> get props => [status, messages, error, isTyping, currentMessageId, sessionId, isRecording, recordingPath, amplitude];
 }
 
 /// ✅ NEW ChatMessage with dual-mode support
@@ -92,6 +104,7 @@ class ChatMessage extends Equatable {
     this.isDualMode = false,
     this.quickAnswer,
     this.detailedAnswer,
+    this.audioUrl,
     this.latencyMs,
   });
 
@@ -107,6 +120,7 @@ class ChatMessage extends Equatable {
   final bool isDualMode;
   final String? quickAnswer;
   final String? detailedAnswer;
+  final String? audioUrl;
   final int? latencyMs;
 
   ChatMessage copyWith({
@@ -120,6 +134,7 @@ class ChatMessage extends Equatable {
     bool? isDualMode,
     String? quickAnswer,
     String? detailedAnswer,
+    String? audioUrl,
     int? latencyMs,
   }) {
     return ChatMessage(
@@ -133,6 +148,7 @@ class ChatMessage extends Equatable {
       isDualMode: isDualMode ?? this.isDualMode,
       quickAnswer: quickAnswer ?? this.quickAnswer,
       detailedAnswer: detailedAnswer ?? this.detailedAnswer,
+      audioUrl: audioUrl ?? this.audioUrl,
       latencyMs: latencyMs ?? this.latencyMs,
     );
   }
@@ -149,6 +165,7 @@ class ChatMessage extends Equatable {
     isDualMode,
     quickAnswer,
     detailedAnswer,
+    audioUrl,
     latencyMs,
   ];
 }

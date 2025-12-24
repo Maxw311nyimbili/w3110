@@ -1,5 +1,6 @@
 // lib/app/app_router.dart
 
+import 'package:flutter/cupertino.dart';
 import 'package:cap_project/features/auth/auth.dart';
 import 'package:cap_project/features/auth/view/settings_page.dart';
 import 'package:cap_project/features/chat/chat.dart';
@@ -22,43 +23,43 @@ class AppRouter {
   static Route<dynamic>? generateRoute(RouteSettings settings) {
     switch (settings.name) {
       case AppRouter.landing:
-        return MaterialPageRoute(
+        return CupertinoPageRoute(
           builder: (_) => const LandingPage(),
           settings: settings,
         );
 
       case AppRouter.auth:
-        return MaterialPageRoute(
+        return CupertinoPageRoute(
           builder: (_) => const AuthPage(),
           settings: settings,
         );
 
       case AppRouter.chat:
-        return MaterialPageRoute(
+        return CupertinoPageRoute(
           builder: (_) => const ChatPage(),
           settings: settings,
         );
 
       case AppRouter.scanner:
-        return MaterialPageRoute(
+        return CupertinoPageRoute(
           builder: (_) => const MedScannerPage(),
           settings: settings,
         );
 
       case AppRouter.forum:
-        return MaterialPageRoute(
+        return CupertinoPageRoute(
           builder: (_) => const ForumListPage(),
           settings: settings,
         );
 
       case AppRouter.settings:
-        return MaterialPageRoute(
+        return CupertinoPageRoute(
           builder: (_) => const SettingsPage(),
           settings: settings,
         );
 
       default:
-        return MaterialPageRoute(
+        return CupertinoPageRoute(
           builder: (_) => Scaffold(
             appBar: AppBar(title: const Text('404')),
             body: Center(

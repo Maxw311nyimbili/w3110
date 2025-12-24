@@ -20,21 +20,39 @@ class RefinedChatInput extends StatefulWidget {
   State<RefinedChatInput> createState() => _RefinedChatInputState();
 }
 
-class _RefinedChatInputState extends State<RefinedChatInput> {
+class _RefinedChatInputState extends State<RefinedChatInput> with TickerProviderStateMixin {
   final _controller = TextEditingController();
   final _focusNode = FocusNode();
   bool _hasText = false;
+  
+  late AnimationController _pulseController;
 
   @override
   void initState() {
     super.initState();
     _controller.addListener(_onTextChanged);
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    );
+    if (widget.isAudioMode) _pulseController.repeat(reverse: true);
+  }
+
+  @override
+  void didUpdateWidget(RefinedChatInput oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isAudioMode && !oldWidget.isAudioMode) {
+      _pulseController.repeat(reverse: true);
+    } else if (!widget.isAudioMode && oldWidget.isAudioMode) {
+      _pulseController.stop();
+    }
   }
 
   @override
   void dispose() {
     _controller.dispose();
     _focusNode.dispose();
+    _pulseController.dispose();
     super.dispose();
   }
 
@@ -138,24 +156,22 @@ class _RefinedChatInputState extends State<RefinedChatInput> {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-      padding: EdgeInsets.fromLTRB(16, 12, 16, MediaQuery.of(context).padding.bottom + 16),
+    return Container(
+      padding: EdgeInsets.fromLTRB(16, 8, 16, MediaQuery.of(context).padding.bottom + 8),
       decoration: BoxDecoration(
         color: AppColors.backgroundPrimary,
+        border: Border(
+          top: BorderSide(
+            color: AppColors.borderLight.withOpacity(0.5),
+            width: 0.5,
+          ),
+        ),
       ),
       child: Container(
         decoration: BoxDecoration(
           color: AppColors.backgroundSurface,
-          borderRadius: BorderRadius.circular(32),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 16,
-              offset: const Offset(0, 4),
-            ),
-          ],
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: AppColors.borderLight, width: 0.5),
         ),
         child: widget.isAudioMode ? _buildAudioBar() : _buildInputBar(),
       ),
@@ -230,43 +246,92 @@ class _RefinedChatInputState extends State<RefinedChatInput> {
   }
 
   Widget _buildAudioBar() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      child: Row(
-        children: [
-          IconButton(
-            icon: const Icon(Icons.close_rounded, color: AppColors.textTertiary),
-            onPressed: widget.onToggleAudio,
-          ),
-          const Expanded(
-            child: SizedBox(
-               height: 60,
-               child: Center(child: AudioWaveform()),
-            ),
-          ),
-          Stack(
-            alignment: Alignment.center,
+    return BlocBuilder<ChatCubit, ChatState>(
+      builder: (context, state) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          child: Row(
             children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: AppColors.error.withOpacity(0.05),
-                  shape: BoxShape.circle,
+              IconButton(
+                icon: const Icon(Icons.close_rounded, color: AppColors.textTertiary),
+                onPressed: () {
+                  context.read<ChatCubit>().cancelRecording();
+                  widget.onToggleAudio();
+                },
+              ),
+              Expanded(
+                child: SizedBox(
+                   height: 60,
+                   child: Center(
+                     child: AudioWaveform(
+                       isRecording: state.isRecording,
+                       amplitude: state.amplitude,
+                     ),
+                   ),
                 ),
               ),
+              GestureDetector(
+                onTap: () {
+                  if (state.isRecording) {
+                    context.read<ChatCubit>().stopRecording();
+                  } else {
+                    context.read<ChatCubit>().startRecording();
+                  }
+                },
+                child: state.isRecording 
+                  ? Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: AppColors.error.withOpacity(0.2),
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const Icon(
+                        Icons.stop_rounded,
+                        color: AppColors.error,
+                        size: 28,
+                      ),
+                    ],
+                  )
+                  : FadeTransition(
+                      opacity: _pulseController,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          ScaleTransition(
+                            scale: Tween(begin: 1.0, end: 1.2).animate(
+                              CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+                            ),
+                            child: Container(
+                              width: 44,
+                              height: 44,
+                              decoration: BoxDecoration(
+                                color: AppColors.accentPrimary.withOpacity(0.1),
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ),
+                          const Icon(
+                            Icons.mic_rounded,
+                            color: AppColors.accentPrimary,
+                            size: 28,
+                          ),
+                        ],
+                      ),
+                    ),
+              ),
               IconButton(
-                icon: const Icon(Icons.stop_rounded, color: AppColors.error, size: 28),
+                icon: const Icon(Icons.keyboard_outlined, color: AppColors.textSecondary),
                 onPressed: widget.onToggleAudio,
               ),
             ],
           ),
-          IconButton(
-            icon: const Icon(Icons.keyboard_outlined, color: AppColors.textSecondary),
-            onPressed: widget.onToggleAudio,
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

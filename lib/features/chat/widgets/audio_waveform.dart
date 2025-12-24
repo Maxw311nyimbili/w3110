@@ -3,7 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:cap_project/core/theme/app_colors.dart';
 
 class AudioWaveform extends StatefulWidget {
-  const AudioWaveform({super.key});
+  final bool isRecording;
+  final double amplitude;
+
+  const AudioWaveform({
+    super.key,
+    this.isRecording = false,
+    this.amplitude = -160.0,
+  });
 
   @override
   State<AudioWaveform> createState() => _AudioWaveformState();
@@ -11,7 +18,8 @@ class AudioWaveform extends StatefulWidget {
 
 class _AudioWaveformState extends State<AudioWaveform> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  final List<double> _baseHeights = [0.2, 0.5, 0.8, 0.4, 0.9, 0.6, 0.3, 0.7, 0.5, 0.9, 0.4, 0.6];
+  // Increase bar count for a smoother look
+  final int _barCount = 20;
 
   @override
   void initState() {
@@ -19,7 +27,18 @@ class _AudioWaveformState extends State<AudioWaveform> with SingleTickerProvider
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1500),
-    )..repeat();
+    );
+    if (widget.isRecording) _controller.repeat();
+  }
+
+  @override
+  void didUpdateWidget(AudioWaveform oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isRecording && !oldWidget.isRecording) {
+      _controller.repeat();
+    } else if (!widget.isRecording && oldWidget.isRecording) {
+      _controller.stop();
+    }
   }
 
   @override
@@ -35,24 +54,32 @@ class _AudioWaveformState extends State<AudioWaveform> with SingleTickerProvider
       builder: (context, child) {
         return Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: List.generate(_baseHeights.length, (index) {
-            // Create a "dancing" effect like NotebookLM
-            final double phase = (index * 0.4) + (_controller.value * 2 * pi);
-            final double oscillation = (sin(phase) + 1) / 2; // 0.0 to 1.0
+          children: List.generate(_barCount, (index) {
+            double heightFactor;
             
-            // Compose base height with oscillation
-            final double heightFactor = 0.1 + (oscillation * 0.9); 
+            if (widget.isRecording) {
+              // Reactive mode: Compose base oscillation with real amplitude
+              // Normalizing amplitude (-160 to 0) to a 0.1 - 1.0 range
+              final double normalizedAmp = (widget.amplitude + 160) / 160;
+              final double phase = (index * 0.5) + (_controller.value * 2 * pi);
+              final double oscillation = (sin(phase) + 1) / 2;
+              
+              heightFactor = 0.05 + (oscillation * normalizedAmp * 0.95);
+            } else {
+              // Idle mode: Flat dots
+              heightFactor = 0.02;
+            }
             
             return AnimatedContainer(
               duration: const Duration(milliseconds: 100),
               margin: const EdgeInsets.symmetric(horizontal: 2.5),
-              width: 4, // Thinner bars as requested
-              height: 8 + (heightFactor * 40),
+              width: 3, 
+              height: widget.isRecording ? 4 + (heightFactor * 40) : 4,
               decoration: BoxDecoration(
-                color: index % 2 == 0 
-                  ? AppColors.textPrimary.withOpacity(0.8)
-                  : AppColors.textPrimary.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(10),
+                color: widget.isRecording 
+                  ? AppColors.accentPrimary.withOpacity(index % 2 == 0 ? 0.8 : 0.4)
+                  : AppColors.textTertiary.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(2),
               ),
             );
           }),

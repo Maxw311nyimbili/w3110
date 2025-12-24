@@ -18,7 +18,7 @@ class ConsentStep extends StatelessWidget {
             backgroundColor: Colors.transparent,
             elevation: 0,
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back),
+              icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
               color: AppColors.textPrimary,
               onPressed: () => context.read<LandingCubit>().previousStep(),
             ),
