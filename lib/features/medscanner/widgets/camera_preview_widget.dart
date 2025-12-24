@@ -26,57 +26,70 @@ class CameraPreviewWidget extends StatelessWidget {
     }
 
     // Controller is ready - use it safely
-    return Stack(
-      children: [
-        // Live camera preview
-        CameraPreview(controller),
-
-        // Dark overlay
-        Container(
-          color: Colors.black.withOpacity(0.1),
-        ),
-
-        // Scanning frame overlay
-        Center(
-          child: _buildScanningFrame(context),
-        ),
-
-        // Top instruction banner
-        Positioned(
-          top: 16,
-          left: 16,
-          right: 16,
-          child: Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 12,
-            ),
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.7),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: const Row(
-              children: [
-                Icon(
-                  Icons.info_outline,
-                  color: Colors.white,
-                  size: 20,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Stack(
+          children: [
+            // Live camera preview - forced to cover
+            SizedBox.expand(
+              child: FittedBox(
+                fit: BoxFit.cover,
+                child: SizedBox(
+                  width: controller.value.previewSize?.height ?? 1,
+                  height: controller.value.previewSize?.width ?? 1,
+                  child: CameraPreview(controller),
                 ),
-                SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'Align label within the frame',
-                    style: TextStyle(
+              ),
+            ),
+
+            // Dark overlay
+            Container(
+              color: Colors.black.withOpacity(0.1),
+            ),
+
+            // Scanning frame overlay
+            Center(
+              child: _buildScanningFrame(context),
+            ),
+
+            // Top instruction banner
+            Positioned(
+              top: 16,
+              left: 16,
+              right: 16,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.7),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Row(
+                  children: [
+                    Icon(
+                      Icons.info_outline,
                       color: Colors.white,
-                      fontSize: 14,
+                      size: 20,
                     ),
-                  ),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Align label within the frame',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
-          ),
-        ),
-      ],
+          ],
+        );
+      },
     );
   }
 

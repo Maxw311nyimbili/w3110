@@ -54,6 +54,7 @@ class MedScannerView extends StatelessWidget {
               onPressed: () => Navigator.pop(context),
             ),
             title: const Text('Med Scanner'),
+            centerTitle: true,
             actions: [
               // Show info button
               IconButton(
@@ -72,52 +73,143 @@ class MedScannerView extends StatelessWidget {
   }
 
   void _showInfoDialog(BuildContext context) {
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
-        title: const Row(
-          children: [
-            Icon(Icons.camera_alt_rounded, color: Colors.blue),
-            SizedBox(width: 8),
-            Text('How to Use Med Scanner'),
-          ],
-        ),
-        content: const Column(
+        padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
+        child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              '1. Take a clear photo of your medication package',
-              style: TextStyle(fontSize: 15),
+            // Handle bar
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
             ),
-            SizedBox(height: 12),
-            Text(
-              '2. Make sure the text is readable',
-              style: TextStyle(fontSize: 15),
+            const SizedBox(height: 24),
+            
+            // Header
+            const Row(
+              children: [
+                Icon(Icons.center_focus_strong_rounded, color: AppColors.accentPrimary, size: 28),
+                SizedBox(width: 12),
+                Text(
+                  'Scanner Guide',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
             ),
-            SizedBox(height: 12),
-            Text(
-              '3. Our AI will identify the medication and provide information',
-              style: TextStyle(fontSize: 15),
+            const SizedBox(height: 24),
+
+            // Steps
+            _buildInfoStep(
+              context,
+              '1',
+              'Position package',
+              'Place the medication box or bottle on a flat surface with good lighting.',
             ),
-            SizedBox(height: 16),
-            Text(
-              '💡 Tip: Good lighting helps!',
-              style: TextStyle(
-                fontSize: 14,
-                fontStyle: FontStyle.italic,
-                color: Colors.grey,
+            _buildInfoStep(
+              context,
+              '2',
+              'Align in frame',
+              'Center the text or label within the scanning box relative to the camera.',
+            ),
+            _buildInfoStep(
+              context,
+              '3',
+              'Tap capture',
+              'Press the button or upload purely clear photo from gallery.',
+            ),
+
+            const SizedBox(height: 32),
+
+            // Close button
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: () => Navigator.pop(context),
+                style: FilledButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  backgroundColor: AppColors.accentPrimary,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+                child: const Text('Start Scanning'),
               ),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Got it!'),
+      ),
+    );
+  }
+
+  Widget _buildInfoStep(
+      BuildContext context,
+      String number,
+      String title,
+      String description,
+      ) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 24,
+            height: 24,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: AppColors.accentPrimary.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Text(
+              number,
+              style: const TextStyle(
+                color: AppColors.accentPrimary,
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+              ),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  description,
+                  style: TextStyle(
+                    color: Colors.grey[600],
+                    fontSize: 13,
+                    height: 1.4,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),

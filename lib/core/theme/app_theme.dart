@@ -14,6 +14,7 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
+      platform: TargetPlatform.iOS,
 
       // Color scheme
       colorScheme: const ColorScheme.light(
@@ -35,7 +36,7 @@ class AppTheme {
       appBarTheme: AppBarTheme(
         elevation: 0,
         scrolledUnderElevation: 0,
-        centerTitle: false,
+        centerTitle: true,
         backgroundColor: AppColors.backgroundPrimary, // Transparent feel
         foregroundColor: AppColors.textPrimary,
         systemOverlayStyle: SystemUiOverlayStyle.dark,
@@ -52,8 +53,8 @@ class AppTheme {
       cardTheme: CardThemeData(
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: AppColors.borderLight),
+          borderRadius: BorderRadius.circular(20),
+          side: const BorderSide(color: AppColors.borderLight, width: 0.5),
         ),
         color: AppColors.backgroundSurface,
         margin: EdgeInsets.zero,
@@ -102,7 +103,7 @@ class AppTheme {
             vertical: AppSpacing.lg,
           ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(24),
           ),
           textStyle: AppTextStyles.labelLarge,
         ),
@@ -130,7 +131,7 @@ class AppTheme {
             vertical: AppSpacing.lg,
           ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(24),
           ),
           textStyle: AppTextStyles.labelLarge,
         ),
@@ -178,6 +179,7 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
+      platform: TargetPlatform.iOS,
 
       // Color scheme for dark mode
       colorScheme: const ColorScheme.dark(
@@ -199,7 +201,7 @@ class AppTheme {
       appBarTheme: AppBarTheme(
         elevation: 0,
         scrolledUnderElevation: 0,
-        centerTitle: false,
+        centerTitle: true,
         backgroundColor: AppColors.darkBackgroundPrimary,
         foregroundColor: AppColors.darkTextPrimary,
         systemOverlayStyle: SystemUiOverlayStyle.light,
