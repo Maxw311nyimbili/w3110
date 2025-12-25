@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:cap_project/core/locale/cubit/locale_cubit.dart';
+import 'package:cap_project/core/locale/cubit/locale_state.dart';
+import 'package:cap_project/core/locale/widgets/language_selector_bottom_sheet.dart';
 import 'package:cap_project/core/theme/app_colors.dart';
 import 'package:cap_project/core/theme/app_text_styles.dart';
+import 'package:cap_project/l10n/l10n.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -13,10 +18,12 @@ class SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    
     return Scaffold(
       backgroundColor: AppColors.backgroundPrimary,
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: Text(l10n.settings),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
           onPressed: () => Navigator.pop(context),
@@ -25,50 +32,54 @@ class SettingsPage extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
         children: [
-          _buildSectionHeader('PREFERENCES'),
+          _buildSectionHeader(l10n.preferences),
           _buildGroup([
-            _buildSettingTile(
-              title: 'Language',
-              subtitle: 'English (US)',
-              icon: Icons.language_rounded,
-              showDivider: true,
-              onTap: () {},
+            BlocBuilder<LocaleCubit, LocaleState>(
+              builder: (context, state) {
+                return _buildSettingTile(
+                  title: l10n.language,
+                  subtitle: LocaleState.getLanguageName(state.locale),
+                  icon: Icons.language_rounded,
+                  showDivider: true,
+                  onTap: () => LanguageSelectorBottomSheet.show(context),
+                );
+              },
             ),
             _buildSettingTile(
-              title: 'Dark Mode',
-              subtitle: 'System Default',
+              title: l10n.darkMode,
+              subtitle: l10n.systemDefault,
               icon: Icons.dark_mode_outlined,
               onTap: () {},
             ),
           ]),
           const SizedBox(height: 32),
-          _buildSectionHeader('PROFILE'),
+          _buildSectionHeader(l10n.profile),
           _buildGroup([
             _buildSettingTile(
-              title: 'Account Info',
+              title: l10n.accountInfo,
               icon: Icons.person_outline_rounded,
               showDivider: true,
               onTap: () {},
             ),
             _buildSettingTile(
-              title: 'Sign Out',
+              title: l10n.signOut,
               icon: Icons.logout_rounded,
               textColor: AppColors.error,
               onTap: () {},
             ),
           ]),
           const SizedBox(height: 32),
-          _buildSectionHeader('ABOUT'),
+          _buildSectionHeader(l10n.about),
           _buildGroup([
             _buildSettingTile(
-              title: 'Privacy Policy',
+              title: l10n.privacyPolicy,
               icon: Icons.privacy_tip_outlined,
               showDivider: true,
               onTap: () {},
             ),
             _buildSettingTile(
-              title: 'Version',
-              subtitle: '1.0.0 (Thanzi Build)',
+              title: l10n.version,
+              subtitle: l10n.versionNumber,
               icon: Icons.info_outline_rounded,
               onTap: null,
             ),

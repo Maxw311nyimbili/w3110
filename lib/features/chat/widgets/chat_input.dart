@@ -1,5 +1,6 @@
 import 'package:cap_project/app/view/app_router.dart';
 import 'package:cap_project/features/chat/widgets/audio_waveform.dart';
+import 'package:cap_project/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../cubit/cubit.dart';
@@ -95,7 +96,7 @@ class _RefinedChatInputState extends State<RefinedChatInput> with TickerProvider
                 Expanded(
                   child: _buildSquarePickerOption(
                     icon: Icons.image_outlined,
-                    label: 'Image',
+                    label: AppLocalizations.of(context).image,
                     onTap: () {
                       Navigator.pop(context);
                       AppRouter.navigateTo(context, AppRouter.scanner, arguments: 'gallery');
@@ -106,7 +107,7 @@ class _RefinedChatInputState extends State<RefinedChatInput> with TickerProvider
                 Expanded(
                   child: _buildSquarePickerOption(
                     icon: Icons.camera_alt_outlined,
-                    label: 'Camera',
+                    label: AppLocalizations.of(context).camera,
                     onTap: () {
                       Navigator.pop(context);
                       AppRouter.navigateTo(context, AppRouter.scanner, arguments: 'camera');
@@ -191,7 +192,7 @@ class _RefinedChatInputState extends State<RefinedChatInput> with TickerProvider
             minLines: 1,
             style: AppTextStyles.bodyMedium,
             decoration: InputDecoration(
-              hintText: 'Ask anything...',
+              hintText: AppLocalizations.of(context).askAnything,
               hintStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.textTertiary),
               border: InputBorder.none,
               enabledBorder: InputBorder.none,

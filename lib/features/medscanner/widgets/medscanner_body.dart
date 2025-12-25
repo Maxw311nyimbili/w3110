@@ -1,5 +1,7 @@
 // lib/features/medscanner/widgets/medscanner_body.dart
 
+import 'package:cap_project/features/medscanner/widgets/widgets.dart';
+import 'package:cap_project/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../cubit/cubit.dart';
@@ -19,9 +21,33 @@ class MedScannerBody extends StatelessWidget {
       listener: (context, state) {
         // Show errors
         if (state.error != null) {
+          final l10n = AppLocalizations.of(context);
+          String message;
+
+          // Map error key to localized string
+          switch (state.error) {
+            case 'cameraPermissionDenied':
+              message = l10n.cameraPermissionDenied;
+              break;
+            case 'noCameraFound':
+              message = l10n.noCameraFound;
+              break;
+            case 'uploadFailed':
+              message = l10n.uploadFailed;
+              break;
+            case 'analysisFailed':
+              message = l10n.analysisFailed;
+              break;
+            case 'fileTooLarge':
+              message = l10n.fileTooLarge;
+              break;
+            default:
+              message = l10n.genericError;
+          }
+
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(state.error!),
+              content: Text(message),
               backgroundColor: AppColors.error,
               behavior: SnackBarBehavior.floating,
               margin: const EdgeInsets.all(16),
@@ -70,13 +96,13 @@ class MedScannerBody extends StatelessWidget {
             children: [
               // Instructions
               Text(
-                'Point at medicine label or barcode',
+                AppLocalizations.of(context).scanInstructions,
                 style: AppTextStyles.bodyLarge,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: AppSpacing.sm),
               Text(
-                'Ensure good lighting and hold steady',
+                AppLocalizations.of(context).scanTips,
                 style: AppTextStyles.bodySmall.copyWith(
                   color: AppColors.textSecondary,
                 ),
@@ -92,7 +118,7 @@ class MedScannerBody extends StatelessWidget {
                   // Gallery button
                   _ActionButton(
                     icon: Icons.photo_library,
-                    label: 'Gallery',
+                    label: AppLocalizations.of(context).gallery,
                     onPressed: state.isProcessing
                         ? null
                         : () => context
@@ -134,7 +160,7 @@ class MedScannerBody extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.lg),
             Text(
-              'Initializing camera...',
+              AppLocalizations.of(context).initializingCamera,
               style: AppTextStyles.bodyMedium.copyWith(
                 color: Colors.white,
               ),

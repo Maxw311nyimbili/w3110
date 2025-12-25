@@ -1,7 +1,418 @@
 {
     "@@locale": "en",
-    "counterAppBarTitle": "Counter",
-    "@counterAppBarTitle": {
-        "description": "Text shown in the AppBar of the Counter Page"
+    
+    "appName": "Thanzi",
+    "@appName": {
+        "description": "Application name"
+    },
+
+    "settings": "Settings",
+    "@settings": {
+        "description": "Settings page title"
+    },
+
+    "preferences": "PREFERENCES",
+    "@preferences": {
+        "description": "Preferences section header"
+    },
+
+    "language": "Language",
+    "@language": {
+        "description": "Language setting label"
+    },
+
+    "languageEnglish": "English",
+    "@languageEnglish": {
+        "description": "English language name"
+    },
+
+    "languageArabic": "العربية",
+    "@languageArabic": {
+        "description": "Arabic language name in Arabic"
+    },
+
+    "languageFrench": "Français",
+    "@languageFrench": {
+        "description": "French language name in French"
+    },
+
+    "darkMode": "Dark Mode",
+    "@darkMode": {
+        "description": "Dark mode setting label"
+    },
+
+    "systemDefault": "System Default",
+    "@systemDefault": {
+        "description": "System default theme option"
+    },
+
+    "profile": "PROFILE",
+    "@profile": {
+        "description": "Profile section header"
+    },
+
+    "accountInfo": "Account Info",
+    "@accountInfo": {
+        "description": "Account info menu item"
+    },
+
+    "signOut": "Sign Out",
+    "@signOut": {
+        "description": "Sign out button"
+    },
+
+    "about": "ABOUT",
+    "@about": {
+        "description": "About section header"
+    },
+
+    "privacyPolicy": "Privacy Policy",
+    "@privacyPolicy": {
+        "description": "Privacy policy menu item"
+    },
+
+    "version": "Version",
+    "@version": {
+        "description": "Version label"
+    },
+
+    "versionNumber": "1.0.0 (Thanzi Build)",
+    "@versionNumber": {
+        "description": "Current version number"
+    },
+
+    "selectLanguage": "Select Language",
+    "@selectLanguage": {
+        "description": "Language selector title"
+    },
+
+    "chat": "Chat",
+    "@chat": {
+        "description": "Chat page title"
+    },
+
+    "typeMessage": "Type a message...",
+    "@typeMessage": {
+        "description": "Chat input placeholder"
+    },
+
+    "send": "Send",
+    "@send": {
+        "description": "Send button"
+    },
+
+    "thinking": "Thinking...",
+    "@thinking": {
+        "description": "AI thinking indicator"
+    },
+
+    "forum": "Forum",
+    "@forum": {
+        "description": "Forum page title"
+    },
+
+    "medScanner": "Med Scanner",
+    "@medScanner": {
+        "description": "Med scanner page title"
+    },
+
+    "scanMedicine": "Scan Medicine",
+    "@scanMedicine": {
+        "description": "Scan medicine button"
+    },
+
+    "welcome": "Welcome",
+    "@welcome": {
+        "description": "Welcome message"
+    },
+
+    "getStarted": "Get Started",
+    "@getStarted": {
+        "description": "Get started button"
+    },
+
+    "signIn": "Sign In",
+    "@signIn": {
+        "description": "Sign in button"
+    },
+
+    "signUp": "Sign Up",
+    "@signUp": {
+        "description": "Sign up button"
+    },
+
+    "email": "Email",
+    "@email": {
+        "description": "Email field label"
+    },
+
+    "password": "Password",
+    "@password": {
+        "description": "Password field label"
+    },
+
+    "forgotPassword": "Forgot Password?",
+    "@forgotPassword": {
+        "description": "Forgot password link"
+    },
+
+    "cancel": "Cancel",
+    "@cancel": {
+        "description": "Cancel button"
+    },
+
+    "save": "Save",
+    "@save": {
+        "description": "Save button"
+    },
+
+    "delete": "Delete",
+    "@delete": {
+        "description": "Delete button"
+    },
+
+    "edit": "Edit",
+    "@edit": {
+        "description": "Edit button"
+    },
+
+    "error": "Error",
+    "@error": {
+        "description": "Generic error message"
+    },
+
+    "retry": "Retry",
+    "@retry": {
+        "description": "Retry button"
+    },
+
+    "loading": "Loading...",
+    "@loading": {
+        "description": "Loading indicator"
+    },
+
+    "askAnything": "Ask anything...",
+    "@askAnything": {
+        "description": "Chat input placeholder"
+    },
+
+    "community": "Community",
+    "@community": {
+        "description": "Community/Forum page title"
+    },
+
+    "newPost": "New Post",
+    "@newPost": {
+        "description": "New post button label"
+    },
+
+    "somethingWentWrong": "Something went wrong",
+    "@somethingWentWrong": {
+        "description": "Generic error message"
+    },
+
+    "tryAgain": "Try Again",
+    "@tryAgain": {
+        "description": "Try again button"
+    },
+
+    "noPostsYet": "No posts yet",
+    "@noPostsYet": {
+        "description": "Empty state message for forum"
+    },
+
+    "beTheFirst": "Be the first to start a discussion",
+    "@beTheFirst": {
+        "description": "Empty state subtitle for forum"
+    },
+
+    "image": "Image",
+    "@image": {
+        "description": "Image picker option"
+    },
+
+    "camera": "Camera",
+    "@camera": {
+        "description": "Camera picker option"
+    },
+
+    "chatWelcomeTitle": "How can Thanzi\nhelp you today?",
+    "@chatWelcomeTitle": {
+        "description": "Welcome title on empty chat screen"
+    },
+
+    "chatWelcomeSubtitle": "Ask about symptoms, medications, or health tips.",
+    "@chatWelcomeSubtitle": {
+        "description": "Welcome subtitle on empty chat screen"
+    },
+
+    "newDiscussion": "New Discussion",
+    "@newDiscussion": {
+        "description": "Title for new post sheet"
+    },
+
+    "discussionTitleHint": "What needs discussing?",
+    "@discussionTitleHint": {
+        "description": "Hint for discussion title field"
+    },
+
+    "discussionTitleError": "Please enter a title",
+    "@discussionTitleError": {
+        "description": "Error for empty discussion title"
+    },
+
+    "discussionContentHint": "Share your thoughts...",
+    "@discussionContentHint": {
+        "description": "Hint for discussion content field"
+    },
+
+    "post": "Post",
+    "@post": {
+        "description": "Post button label"
+    },
+
+    "howToUse": "How to use",
+    "@howToUse": {
+        "description": "Tooltip for scanner info"
+    },
+
+    "scannerGuide": "Scanner Guide",
+    "@scannerGuide": {
+        "description": "Title for scanner info modal"
+    },
+
+    "scannerStep1Title": "Position package",
+    "@scannerStep1Title": {
+        "description": "Title for scanner step 1"
+    },
+
+    "scannerStep1Desc": "Place the medication box or bottle on a flat surface with good lighting.",
+    "@scannerStep1Desc": {
+        "description": "Description for scanner step 1"
+    },
+
+    "scannerStep2Title": "Align in frame",
+    "@scannerStep2Title": {
+        "description": "Title for scanner step 2"
+    },
+
+    "scannerStep2Desc": "Center the text or label within the scanning box relative to the camera.",
+    "@scannerStep2Desc": {
+        "description": "Description for scanner step 2"
+    },
+
+    "scannerStep3Title": "Tap capture",
+    "@scannerStep3Title": {
+        "description": "Title for scanner step 3"
+    },
+
+    "scannerStep3Desc": "Press the button or upload purely clear photo from gallery.",
+    "@scannerStep3Desc": {
+        "description": "Description for scanner step 3"
+    },
+
+    "startScanning": "Start Scanning",
+    "@startScanning": {
+        "description": "Button to close info modal"
+    },
+
+    "scanInstructions": "Point at medicine label or barcode",
+    "@scanInstructions": {
+        "description": "Instruction text on scanner"
+    },
+
+    "scanTips": "Ensure good lighting and hold steady",
+    "@scanTips": {
+        "description": "Scanning tips text"
+    },
+
+    "initializingCamera": "Initializing camera...",
+    "@initializingCamera": {
+        "description": "Camera loading text"
+    },
+
+    "gallery": "Gallery",
+    "@gallery": {
+        "description": "Gallery button label"
+    },
+
+    "alignLabelWithinFrame": "Align label within the frame",
+    "@alignLabelWithinFrame": {
+        "description": "Camera overlay instruction"
+    },
+
+    "cameraPermissionDenied": "Camera permission denied. Enable it in app settings.",
+    "@cameraPermissionDenied": {
+        "description": "Error message for camera permission"
+    },
+
+    "noCameraFound": "No camera found on this device.",
+    "@noCameraFound": {
+        "description": "Error message when no camera is available"
+    },
+
+    "uploadFailed": "Failed to upload image. Check your internet connection.",
+    "@uploadFailed": {
+        "description": "Error message for image upload failure"
+    },
+
+    "analysisFailed": "Could not analyze medication. Try again.",
+    "@analysisFailed": {
+        "description": "Error message for medication analysis failure"
+    },
+
+    "fileTooLarge": "Image file is too large. Please select a smaller image.",
+    "@fileTooLarge": {
+        "description": "Error message for large image files"
+    },
+
+    "genericError": "An error occurred",
+    "@genericError": {
+        "description": "Generic error fallback"
+    },
+
+    "barcode": "Barcode",
+    "@barcode": {
+        "description": "Label for barcode"
+    },
+
+    "activeIngredients": "Active Ingredients",
+    "@activeIngredients": {
+        "description": "Label for active ingredients"
+    },
+
+    "dosage": "Dosage",
+    "@dosage": {
+        "description": "Label for dosage"
+    },
+
+    "discussWithAi": "Discuss with AI",
+    "@discussWithAi": {
+        "description": "Button to discuss scan results with AI"
+    },
+
+    "scanAnother": "Scan Another",
+    "@scanAnother": {
+        "description": "Button to scan another medicine"
+    },
+
+    "medicalDisclaimer": "This information is for reference only. Always consult your healthcare provider before taking any medication.",
+    "@medicalDisclaimer": {
+        "description": "Medical disclaimer text"
+    },
+
+    "matchConfidence": "Match Confidence",
+    "@matchConfidence": {
+        "description": "Label for match confidence percentage"
+    },
+
+    "importantWarnings": "Important Warnings",
+    "@importantWarnings": {
+        "description": "Title for warnings section"
+    },
+
+    "openingChat": "Opening chat with scan results...",
+    "@openingChat": {
+        "description": "SnackBar message when opening chat"
     }
 }

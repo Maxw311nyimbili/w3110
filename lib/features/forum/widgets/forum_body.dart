@@ -5,6 +5,7 @@ import 'package:cap_project/core/theme/app_text_styles.dart';
 import 'package:cap_project/features/forum/cubit/forum_cubit.dart';
 import 'package:cap_project/features/forum/cubit/forum_state.dart';
 import 'package:cap_project/features/forum/widgets/post_card.dart';
+import 'package:cap_project/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -35,7 +36,7 @@ class ForumBody extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Something went wrong',
+                  AppLocalizations.of(context).somethingWentWrong,
                   style: AppTextStyles.headlineSmall,
                 ),
                 const SizedBox(height: 8),
@@ -47,7 +48,7 @@ class ForumBody extends StatelessWidget {
                 const SizedBox(height: 24),
                 OutlinedButton(
                   onPressed: () => context.read<ForumCubit>().initialize(),
-                  child: const Text('Try Again'),
+                  child: Text(AppLocalizations.of(context).tryAgain),
                 ),
               ],
             ),
@@ -66,14 +67,14 @@ class ForumBody extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'No posts yet',
+                  AppLocalizations.of(context).noPostsYet,
                   style: AppTextStyles.headlineSmall.copyWith(
                     color: AppColors.textSecondary,
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Be the first to start a discussion',
+                  AppLocalizations.of(context).beTheFirst,
                   style: AppTextStyles.bodyMedium.copyWith(
                     color: AppColors.textTertiary,
                   ),

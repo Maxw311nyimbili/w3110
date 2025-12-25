@@ -3,9 +3,9 @@
 import 'package:cap_project/core/theme/app_colors.dart';
 import 'package:cap_project/core/theme/app_text_styles.dart';
 import 'package:cap_project/features/forum/cubit/forum_cubit.dart';
+import 'package:cap_project/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:uuid/uuid.dart';
 
 class NewPostSheet extends StatefulWidget {
   const NewPostSheet({super.key});
@@ -63,28 +63,51 @@ class _NewPostSheetState extends State<NewPostSheet> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text(
-                    'Cancel',
-                    style: AppTextStyles.labelLarge.copyWith(
-                      color: AppColors.textSecondary,
+                SizedBox(
+                  width: 80,
+                  child: TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      alignment: Alignment.centerLeft,
+                    ),
+                    child: Text(
+                      AppLocalizations.of(context).cancel,
+                      style: AppTextStyles.labelLarge.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ),
-                Text(
-                  'New Discussion',
-                  style: AppTextStyles.headlineSmall,
-                ),
-                ElevatedButton(
-                  onPressed: _submit,
-                  style: ElevatedButton.styleFrom(
-                    shape: const StadiumBorder(),
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                Expanded(
+                  child: Text(
+                    AppLocalizations.of(context).newDiscussion,
+                    style: AppTextStyles.headlineSmall,
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  child: const Text('Post'),
+                ),
+                SizedBox(
+                  width: 80,
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: ElevatedButton(
+                      onPressed: _submit,
+                      style: ElevatedButton.styleFrom(
+                        shape: const StadiumBorder(),
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        minimumSize: const Size(0, 36),
+                      ),
+                      child: Text(
+                        AppLocalizations.of(context).post,
+                        maxLines: 1,
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -95,8 +118,8 @@ class _NewPostSheetState extends State<NewPostSheet> {
               style: AppTextStyles.headlineSmall.copyWith(
                 fontWeight: FontWeight.w600,
               ),
-              decoration: const InputDecoration(
-                hintText: 'What needs discussing?',
+              decoration: InputDecoration(
+                hintText: AppLocalizations.of(context).discussionTitleHint,
                 border: InputBorder.none,
                 enabledBorder: InputBorder.none,
                 focusedBorder: InputBorder.none,
@@ -104,7 +127,7 @@ class _NewPostSheetState extends State<NewPostSheet> {
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter a title';
+                  return AppLocalizations.of(context).discussionTitleError;
                 }
                 return null;
               },
@@ -119,8 +142,8 @@ class _NewPostSheetState extends State<NewPostSheet> {
                 controller: _contentController,
                 maxLines: null,
                 style: AppTextStyles.bodyLarge,
-                decoration: const InputDecoration(
-                  hintText: 'Share your thoughts...',
+                decoration: InputDecoration(
+                  hintText: AppLocalizations.of(context).discussionContentHint,
                   border: InputBorder.none,
                   enabledBorder: InputBorder.none,
                   focusedBorder: InputBorder.none,
@@ -135,3 +158,4 @@ class _NewPostSheetState extends State<NewPostSheet> {
     );
   }
 }
+

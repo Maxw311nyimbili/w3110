@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:cap_project/l10n/l10n.dart';
 import '../cubit/cubit.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
@@ -18,11 +19,11 @@ class CameraPreviewWidget extends StatelessWidget {
 
     // Simple check: if controller is null OR not initialized
     if (controller == null) {
-      return _buildLoadingState();
+      return _buildLoadingState(context);
     }
 
     if (controller.value.isInitialized == false) {
-      return _buildLoadingState();
+      return _buildLoadingState(context);
     }
 
     // Controller is ready - use it safely
@@ -66,18 +67,18 @@ class CameraPreviewWidget extends StatelessWidget {
                   color: Colors.black.withOpacity(0.7),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Row(
+                child: Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.info_outline,
                       color: Colors.white,
                       size: 20,
                     ),
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'Align label within the frame',
-                        style: TextStyle(
+                        AppLocalizations.of(context).alignLabelWithinFrame,
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 14,
                         ),
@@ -93,7 +94,7 @@ class CameraPreviewWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildLoadingState() {
+  Widget _buildLoadingState(BuildContext context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -105,7 +106,7 @@ class CameraPreviewWidget extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'Initializing camera...',
+            AppLocalizations.of(context).initializingCamera,
             style: AppTextStyles.bodyMedium,
           ),
         ],

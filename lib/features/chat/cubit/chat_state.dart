@@ -43,6 +43,7 @@ class ChatState extends Equatable {
     this.isRecording = false,
     this.recordingPath,
     this.amplitude = -160.0,
+    this.loadingMessage,
   });
 
   final ChatStatus status;
@@ -54,6 +55,7 @@ class ChatState extends Equatable {
   final bool isRecording;
   final String? recordingPath;
   final double amplitude;
+  final String? loadingMessage;
 
   bool get isLoading => status == ChatStatus.loading;
   bool get hasMessages => messages.isNotEmpty;
@@ -68,26 +70,54 @@ class ChatState extends Equatable {
     bool? isRecording,
     String? recordingPath,
     double? amplitude,
+    String? loadingMessage,
   }) {
     return ChatState(
       status: status ?? this.status,
       messages: messages ?? this.messages,
-      error: error,
+      error: error ?? this.error,
       isTyping: isTyping ?? this.isTyping,
       currentMessageId: currentMessageId ?? this.currentMessageId,
       sessionId: sessionId ?? this.sessionId,
       isRecording: isRecording ?? this.isRecording,
       recordingPath: recordingPath ?? this.recordingPath,
       amplitude: amplitude ?? this.amplitude,
+      loadingMessage: loadingMessage ?? this.loadingMessage,
     );
   }
 
   ChatState clearError() {
-    return copyWith(error: null);
+    return ChatState(
+      status: status,
+      messages: messages,
+      error: null,
+      isTyping: isTyping,
+      currentMessageId: currentMessageId,
+      sessionId: sessionId,
+      isRecording: isRecording,
+      recordingPath: recordingPath,
+      amplitude: amplitude,
+      loadingMessage: loadingMessage,
+    );
+  }
+
+  ChatState resetLoadingMessage() {
+    return ChatState(
+      status: status,
+      messages: messages,
+      error: error,
+      isTyping: isTyping,
+      currentMessageId: currentMessageId,
+      sessionId: sessionId,
+      isRecording: isRecording,
+      recordingPath: recordingPath,
+      amplitude: amplitude,
+      loadingMessage: null,
+    );
   }
 
   @override
-  List<Object?> get props => [status, messages, error, isTyping, currentMessageId, sessionId, isRecording, recordingPath, amplitude];
+  List<Object?> get props => [status, messages, error, isTyping, currentMessageId, sessionId, isRecording, recordingPath, amplitude, loadingMessage];
 }
 
 /// ✅ NEW ChatMessage with dual-mode support

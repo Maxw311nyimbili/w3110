@@ -14,7 +14,8 @@ class ApiClient {
     bool enableLogging = true,
     Duration? connectTimeout,
     Duration? receiveTimeout,
-  }) {
+    String? locale,
+  }) : _currentLocale = locale ?? 'en' {
     _dio = Dio(
       BaseOptions(
         baseUrl: baseUrl,
@@ -24,6 +25,7 @@ class ApiClient {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
+          'Accept-Language': _currentLocale,
         },
       ),
     );
@@ -40,12 +42,22 @@ class ApiClient {
   }
 
   late final Dio _dio;
+  String _currentLocale;
 
   /// Function to get current access token
   final Future<String?> Function() getAccessToken;
 
   /// Function to refresh access token
   final Future<void> Function() refreshToken;
+
+  /// Set the current locale for API requests
+  void setLocale(String locale) {
+    _currentLocale = locale;
+    _dio.options.headers['Accept-Language'] = locale;
+  }
+
+  /// Get the current locale
+  String get currentLocale => _currentLocale;
 
   /// GET request
   Future<Response<T>> get<T>(

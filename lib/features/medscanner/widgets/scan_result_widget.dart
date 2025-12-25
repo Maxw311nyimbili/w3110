@@ -1,5 +1,6 @@
 // lib/features/medscanner/widgets/scan_result_widget.dart
 
+import 'package:cap_project/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../cubit/cubit.dart';
@@ -61,7 +62,7 @@ class ScanResultWidget extends StatelessWidget {
             _buildInfoCard(
               context,
               icon: Icons.qr_code,
-              title: 'Barcode',
+              title: AppLocalizations.of(context).barcode,
               content: result.barcode!,
             ),
             const SizedBox(height: AppSpacing.lg),
@@ -72,7 +73,7 @@ class ScanResultWidget extends StatelessWidget {
             _buildInfoCard(
               context,
               icon: Icons.science_outlined,
-              title: 'Active Ingredients',
+              title: AppLocalizations.of(context).activeIngredients,
               content: result.activeIngredients.join(', '),
             ),
             const SizedBox(height: AppSpacing.lg),
@@ -83,7 +84,7 @@ class ScanResultWidget extends StatelessWidget {
             _buildInfoCard(
               context,
               icon: Icons.medication_outlined,
-              title: 'Dosage',
+              title: AppLocalizations.of(context).dosage,
               content: result.dosageInfo!,
             ),
             const SizedBox(height: AppSpacing.lg),
@@ -107,14 +108,14 @@ class ScanResultWidget extends StatelessWidget {
               // Navigator.pushNamed(context, '/chat', arguments: result);
 
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Opening chat with scan results...'),
-                  duration: Duration(seconds: 2),
+                SnackBar(
+                  content: Text(AppLocalizations.of(context).openingChat),
+                  duration: const Duration(seconds: 2),
                 ),
               );
             },
             icon: const Icon(Icons.chat_bubble_outline),
-            label: const Text('Discuss with AI'),
+            label: Text(AppLocalizations.of(context).discussWithAi),
           ),
 
           const SizedBox(height: AppSpacing.md),
@@ -125,7 +126,7 @@ class ScanResultWidget extends StatelessWidget {
               context.read<MedScannerCubit>().clearScan();
             },
             icon: const Icon(Icons.camera_alt),
-            label: const Text('Scan Another'),
+            label: Text(AppLocalizations.of(context).scanAnother),
           ),
 
           const SizedBox(height: AppSpacing.lg),
@@ -151,7 +152,7 @@ class ScanResultWidget extends StatelessWidget {
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Text(
-                    'This information is for reference only. Always consult your healthcare provider before taking any medication.',
+                    AppLocalizations.of(context).medicalDisclaimer,
                     style: AppTextStyles.bodySmall.copyWith(
                       color: AppColors.textSecondary,
                     ),
@@ -185,7 +186,7 @@ class ScanResultWidget extends StatelessWidget {
             ),
             const SizedBox(width: AppSpacing.sm),
             Text(
-              '$percentage% Match Confidence',
+              '${percentage}% ${AppLocalizations.of(context).matchConfidence}',
               style: AppTextStyles.labelMedium.copyWith(
                 color: color,
                 fontWeight: FontWeight.w600,
@@ -272,7 +273,7 @@ class ScanResultWidget extends StatelessWidget {
               ),
               const SizedBox(width: AppSpacing.md),
               Text(
-                'Important Warnings',
+                AppLocalizations.of(context).importantWarnings,
                 style: AppTextStyles.headlineMedium.copyWith(
                   color: AppColors.error,
                 ),
