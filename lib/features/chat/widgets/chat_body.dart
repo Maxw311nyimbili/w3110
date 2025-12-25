@@ -1,6 +1,8 @@
 import 'package:cap_project/features/chat/widgets/audio_waveform.dart';
 import 'package:cap_project/features/chat/widgets/chat_input.dart';
 import 'package:cap_project/features/chat/widgets/message_bubble.dart';
+import 'package:cap_project/features/chat/widgets/thinking_indicator.dart';
+import 'package:cap_project/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../cubit/cubit.dart';
@@ -23,11 +25,31 @@ class ChatBody extends StatefulWidget {
 
 class _ChatBodyState extends State<ChatBody> {
   final ScrollController _scrollController = ScrollController();
+  bool _showScrollToBottom = false;
+  int _unreadCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
 
   @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.hasClients && _scrollController.offset < 50) {
+      if (_showScrollToBottom) {
+        setState(() {
+          _showScrollToBottom = false;
+          _unreadCount = 0;
+        });
+      }
+    }
   }
 
   void _scrollToLatestMessage() {
@@ -45,6 +67,9 @@ class _ChatBodyState extends State<ChatBody> {
   @override
   Widget build(BuildContext context) {
     return BlocListener<ChatCubit, ChatState>(
+      listenWhen: (previous, current) => 
+          previous.messages.length != current.messages.length ||
+          (previous.error == null && current.error != null),
       listener: (context, state) {
         if (state.error != null) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -61,14 +86,32 @@ class _ChatBodyState extends State<ChatBody> {
           );
           context.read<ChatCubit>().clearError();
         }
+        
         if (state.hasMessages) {
-          _scrollToLatestMessage();
+          final lastMessage = state.messages.last;
+          final isUserMessage = lastMessage.isUser;
+          
+          if (isUserMessage) {
+            _scrollToLatestMessage();
+          } else {
+            // AI message arrived
+            if (_scrollController.hasClients && _scrollController.offset > 100) {
+              setState(() {
+                _showScrollToBottom = true;
+                _unreadCount++;
+              });
+            } else {
+              _scrollToLatestMessage();
+            }
+          }
         }
       },
-      child: Scaffold(
-        backgroundColor: AppColors.backgroundPrimary,
-        body: Column(
+      child: Container(
+        color: AppColors.backgroundPrimary,
+        child: Stack(
           children: [
+            Column(
+              children: [
             Expanded(
               child: BlocBuilder<ChatCubit, ChatState>(
                 builder: (context, state) {
@@ -94,19 +137,59 @@ class _ChatBodyState extends State<ChatBody> {
             BlocBuilder<ChatCubit, ChatState>(
               builder: (context, state) {
                 if (state.isTyping) {
-                  return _buildTypingIndicator();
+                  return state.loadingMessage != null
+                    ? ThinkingIndicator(message: state.loadingMessage!)
+                    : _buildTypingIndicator();
                 }
                 return const SizedBox.shrink();
               },
             ),
+            RefinedChatInput(
+              isAudioMode: widget.isAudioMode,
+              onToggleAudio: widget.onToggleAudio,
+            ),
           ],
         ),
-        bottomSheet: Container(
-          color: AppColors.backgroundPrimary,
-          child: RefinedChatInput(
-            isAudioMode: widget.isAudioMode,
-            onToggleAudio: widget.onToggleAudio,
-          ),
+            if (_showScrollToBottom)
+              Positioned(
+                bottom: 100,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: GestureDetector(
+                    onTap: _scrollToLatestMessage,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: AppColors.accentPrimary.withOpacity(0.95),
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.arrow_downward_rounded, color: Colors.white, size: 18),
+                          const SizedBox(width: 8),
+                          Text(
+                            _unreadCount > 1 ? '$_unreadCount New Messages' : 'New Message',
+                            style: AppTextStyles.labelMedium.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     );
@@ -140,7 +223,7 @@ class _ChatBodyState extends State<ChatBody> {
             ),
             const SizedBox(height: 32),
             Text(
-              'How can Thanzi\nhelp you today?',
+              AppLocalizations.of(context).chatWelcomeTitle,
               style: AppTextStyles.displayMedium.copyWith(
                 color: AppColors.textPrimary,
                 fontWeight: FontWeight.w800,
@@ -151,7 +234,7 @@ class _ChatBodyState extends State<ChatBody> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Ask about symptoms, medications, or health tips.',
+              AppLocalizations.of(context).chatWelcomeSubtitle,
               style: AppTextStyles.bodyMedium.copyWith(
                 color: AppColors.textSecondary,
                 letterSpacing: 0.2,

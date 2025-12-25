@@ -14,11 +14,13 @@ class ChatCubit extends Cubit<ChatState> {
   ChatCubit({
     required repo.ChatRepository chatRepository,
     required AudioRecordingService audioRecordingService,
+    String? locale,
   })  : _chatRepository = chatRepository,
         _audioRecordingService = audioRecordingService,
         _audioPlayer = AudioPlayer(),
         _uuid = const Uuid(),
         _dio = Dio(),
+        _currentLocale = locale ?? 'en',
         super(const ChatState());
 
   final repo.ChatRepository _chatRepository;
@@ -26,7 +28,14 @@ class ChatCubit extends Cubit<ChatState> {
   final AudioPlayer _audioPlayer;
   final Uuid _uuid;
   final Dio _dio;
+  String _currentLocale;
   StreamSubscription<Amplitude>? _amplitudeSubscription;
+  Timer? _loadingTimer;
+
+  /// Update the locale for API requests
+  void setLocale(String locale) {
+    _currentLocale = locale;
+  }
 
   Future<void> initialize() async {
     try {
@@ -95,12 +104,15 @@ class ChatCubit extends Cubit<ChatState> {
         'session_id': state.sessionId ?? DateTime.now().millisecondsSinceEpoch.toString(),
       });
 
+      _startLoadingRotation();
+
       final response = await _dio.post(
         'http://172.26.80.1:8000/chat/voice',
         data: formData,
         options: Options(
           sendTimeout: const Duration(seconds: 30),
           receiveTimeout: const Duration(seconds: 120),
+          headers: {'Accept-Language': _currentLocale},
         ),
       );
 
@@ -115,7 +127,6 @@ class ChatCubit extends Cubit<ChatState> {
         );
         emit(state.copyWith(messages: [...state.messages, userMessage]));
       }
-
       _handleChatResponse(responseData);
       
     } on DioException catch (e) {
@@ -136,6 +147,8 @@ class ChatCubit extends Cubit<ChatState> {
   }
 
   void _handleChatResponse(Map<String, dynamic> responseData) {
+    _loadingTimer?.cancel();
+    emit(state.resetLoadingMessage());
     final status = responseData['status'] as String? ?? 'error';
 
     if (status == 'out_of_scope') {
@@ -220,9 +233,29 @@ class ChatCubit extends Cubit<ChatState> {
   @override
   Future<void> close() {
     _amplitudeSubscription?.cancel();
+    _loadingTimer?.cancel();
     _audioPlayer.dispose();
     _audioRecordingService.dispose();
     return super.close();
+  }
+
+  void _startLoadingRotation() {
+    _loadingTimer?.cancel();
+    final messages = [
+      'Processing your request...',
+      'Analyzing context...',
+      'Consulting medical guidelines...',
+      'Ensuring safety protocols...',
+      'Finalizing your answer...',
+    ];
+    int index = 0;
+    
+    emit(state.copyWith(loadingMessage: messages[0]));
+    
+    _loadingTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
+      index = (index + 1) % messages.length;
+      emit(state.copyWith(loadingMessage: messages[index]));
+    });
   }
 
   // Main send message method - use this
@@ -242,6 +275,8 @@ class ChatCubit extends Cubit<ChatState> {
       isTyping: true,
     ));
 
+    _startLoadingRotation();
+
     try {
       final response = await _dio.post(
         'http://172.26.80.1:8000/chat/validate',
@@ -249,10 +284,12 @@ class ChatCubit extends Cubit<ChatState> {
           'query': content.trim(),
           'session_id': state.sessionId ??
               DateTime.now().millisecondsSinceEpoch.toString(),
+          'locale': _currentLocale,
         },
         options: Options(
           sendTimeout: const Duration(seconds: 30),
           receiveTimeout: const Duration(seconds: 120),
+          headers: {'Accept-Language': _currentLocale},
         ),
       );
 
@@ -370,6 +407,8 @@ class ChatCubit extends Cubit<ChatState> {
                 DateTime.now().millisecondsSinceEpoch.toString()),
       ));
     } on DioException catch (e) {
+      _loadingTimer?.cancel();
+      emit(state.resetLoadingMessage());
       final errorMessage = ChatMessage(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         content: _getDioErrorMessage(e),
@@ -386,6 +425,8 @@ class ChatCubit extends Cubit<ChatState> {
         isTyping: false,
       ));
     } catch (e) {
+      _loadingTimer?.cancel();
+      emit(state.resetLoadingMessage());
       final errorMessage = ChatMessage(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         content: 'Unexpected error: $e',

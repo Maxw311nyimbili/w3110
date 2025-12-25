@@ -4,6 +4,7 @@ import 'package:cap_project/features/forum/cubit/forum_cubit.dart';
 import 'package:cap_project/features/forum/cubit/forum_state.dart';
 import 'package:cap_project/features/forum/widgets/forum_body.dart';
 import 'package:cap_project/features/forum/widgets/new_post_sheet.dart';
+import 'package:cap_project/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:forum_repository/forum_repository.dart';
@@ -37,7 +38,7 @@ class ForumListView extends StatelessWidget {
               icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
               onPressed: () => Navigator.pop(context),
             ),
-            title: const Text('Community'),
+            title: Text(AppLocalizations.of(context).community),
             centerTitle: true,
             actions: [
                if (state.hasPendingSync)
@@ -53,7 +54,7 @@ class ForumListView extends StatelessWidget {
           floatingActionButton: FloatingActionButton.extended(
             onPressed: () => _showNewPostSheet(context),
             icon: const Icon(Icons.add),
-            label: const Text('New Post'),
+            label: Text(AppLocalizations.of(context).newPost),
             backgroundColor: AppColors.accentPrimary,
             foregroundColor: Colors.white,
             shape: const StadiumBorder(),

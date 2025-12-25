@@ -3,6 +3,7 @@
 import 'package:cap_project/core/theme/app_colors.dart';
 import 'package:cap_project/features/medscanner/cubit/cubit.dart';
 import 'package:cap_project/features/medscanner/widgets/widgets.dart';
+import 'package:cap_project/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:media_repository/media_repository.dart';
 
@@ -53,13 +54,13 @@ class MedScannerView extends StatelessWidget {
               icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
               onPressed: () => Navigator.pop(context),
             ),
-            title: const Text('Med Scanner'),
+            title: Text(AppLocalizations.of(context).medScanner),
             centerTitle: true,
             actions: [
               // Show info button
               IconButton(
                 icon: const Icon(Icons.info_outline_rounded),
-                tooltip: 'How to use',
+                tooltip: AppLocalizations.of(context).howToUse,
                 onPressed: () => _showInfoDialog(context),
               ),
             ],
@@ -101,13 +102,13 @@ class MedScannerView extends StatelessWidget {
             const SizedBox(height: 24),
             
             // Header
-            const Row(
+            Row(
               children: [
-                Icon(Icons.center_focus_strong_rounded, color: AppColors.accentPrimary, size: 28),
-                SizedBox(width: 12),
+                const Icon(Icons.center_focus_strong_rounded, color: AppColors.accentPrimary, size: 28),
+                const SizedBox(width: 12),
                 Text(
-                  'Scanner Guide',
-                  style: TextStyle(
+                  AppLocalizations.of(context).scannerGuide,
+                  style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w600,
                   ),
@@ -120,20 +121,20 @@ class MedScannerView extends StatelessWidget {
             _buildInfoStep(
               context,
               '1',
-              'Position package',
-              'Place the medication box or bottle on a flat surface with good lighting.',
+              AppLocalizations.of(context).scannerStep1Title,
+              AppLocalizations.of(context).scannerStep1Desc,
             ),
             _buildInfoStep(
               context,
               '2',
-              'Align in frame',
-              'Center the text or label within the scanning box relative to the camera.',
+              AppLocalizations.of(context).scannerStep2Title,
+              AppLocalizations.of(context).scannerStep2Desc,
             ),
             _buildInfoStep(
               context,
               '3',
-              'Tap capture',
-              'Press the button or upload purely clear photo from gallery.',
+              AppLocalizations.of(context).scannerStep3Title,
+              AppLocalizations.of(context).scannerStep3Desc,
             ),
 
             const SizedBox(height: 32),
@@ -150,7 +151,7 @@ class MedScannerView extends StatelessWidget {
                     borderRadius: BorderRadius.circular(16),
                   ),
                 ),
-                child: const Text('Start Scanning'),
+                child: Text(AppLocalizations.of(context).startScanning),
               ),
             ),
           ],

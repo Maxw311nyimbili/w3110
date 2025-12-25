@@ -224,19 +224,19 @@ class MedScannerCubit extends Cubit<MedScannerState> {
     return super.close();
   }
 
-  /// Format error messages for user display
+  /// Format error messages for user display - RETURNS TRANSLATION KEYS
   String _formatErrorMessage(String error) {
     if (error.contains('permission')) {
-      return 'Camera permission denied. Please enable it in app settings.';
+      return 'cameraPermissionDenied';
     } else if (error.contains('no camera')) {
-      return 'No camera found on this device.';
+      return 'noCameraFound';
     } else if (error.contains('upload')) {
-      return 'Failed to upload image. Check your internet connection.';
-    } else if (error.contains('analysis')) {
-      return 'Could not analyze medication. Try again.';
+      return 'uploadFailed';
+    } else if (error.contains('analyze') || error.contains('analysis')) {
+      return 'analysisFailed';
     } else if (error.contains('too large')) {
-      return 'Image file is too large. Please select a smaller image.';
+      return 'fileTooLarge';
     }
-    return 'An error occurred: $error';
+    return 'genericError';
   }
 }
