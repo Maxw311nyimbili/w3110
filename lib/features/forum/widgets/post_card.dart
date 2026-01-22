@@ -1,8 +1,8 @@
-// lib/features/forum/widgets/post_card.dart
-
 import 'package:cap_project/core/theme/app_colors.dart';
 import 'package:cap_project/core/theme/app_text_styles.dart';
+import 'package:cap_project/features/forum/cubit/forum_cubit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:forum_repository/forum_repository.dart';
 
 class PostCard extends StatelessWidget {
@@ -32,49 +32,77 @@ class PostCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(16),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
           color: AppColors.backgroundSurface,
-          border: Border(
-            bottom: BorderSide(
-              color: Theme.of(context).dividerColor.withOpacity(0.5),
-              width: 1,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.textPrimary.withOpacity(0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
-          ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header: Avatar + Name + Time
+            // Header: Avatar + Name + Time + More
             Row(
               children: [
                 CircleAvatar(
-                  radius: 10,
-                  backgroundColor: AppColors.backgroundPrimary,
+                  radius: 12,
+                  backgroundColor: AppColors.accentPrimary.withOpacity(0.1),
                   child: Text(
                     post.authorName.isNotEmpty ? post.authorName[0].toUpperCase() : '?',
                     style: const TextStyle(
-                      fontSize: 10,
+                      fontSize: 12,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
+                      color: AppColors.accentPrimary,
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  post.authorName,
-                  style: AppTextStyles.labelMedium.copyWith(
-                    fontWeight: FontWeight.w600,
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        post.authorName,
+                        style: AppTextStyles.labelMedium.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      Text(
+                        _formatTime(post.createdAt),
+                        style: AppTextStyles.caption.copyWith(color: AppColors.textTertiary),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(width: 4),
-                Text(
-                  '•',
-                  style: AppTextStyles.caption.copyWith(color: AppColors.textTertiary),
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  _formatTime(post.createdAt),
-                  style: AppTextStyles.caption.copyWith(color: AppColors.textTertiary),
+                PopupMenuButton<String>(
+                  icon: Icon(Icons.more_horiz_rounded, size: 20, color: AppColors.textTertiary),
+                  onSelected: (value) {
+                    if (value == 'report') {
+                      context.read<ForumCubit>().flagPost(post.id);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Post reported for review')),
+                      );
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    const PopupMenuItem(
+                      value: 'report',
+                      child: Row(
+                        children: [
+                          Icon(Icons.flag_outlined, size: 18, color: AppColors.error),
+                          SizedBox(width: 8),
+                          Text('Report Post', style: TextStyle(color: AppColors.error)),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -83,11 +111,12 @@ class PostCard extends StatelessWidget {
             Text(
               post.title,
               style: AppTextStyles.headlineSmall.copyWith(
-                fontWeight: FontWeight.w700,
-                fontSize: 17,
+                fontWeight: FontWeight.w800,
+                fontSize: 18,
+                letterSpacing: -0.2,
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 6),
             // Content Preview
             Text(
               post.content,
@@ -95,6 +124,7 @@ class PostCard extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: AppTextStyles.bodyMedium.copyWith(
                 color: AppColors.textSecondary,
+                height: 1.5,
               ),
             ),
             const SizedBox(height: 16),
@@ -102,18 +132,27 @@ class PostCard extends StatelessWidget {
             Row(
               children: [
                 _buildAction(
-                  Icons.arrow_upward_rounded,
+                  context,
+                  post.isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
                   post.likeCount.toString(),
                   isActive: post.isLiked,
+                  onTap: () => context.read<ForumCubit>().togglePostLike(post.id),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 20),
                 _buildAction(
+                  context,
                   Icons.chat_bubble_outline_rounded,
                   post.commentCount.toString(),
                 ),
+                const SizedBox(width: 20),
+                _buildAction(
+                  context,
+                  Icons.visibility_outlined,
+                  '${post.viewCount} views',
+                ),
                 const Spacer(),
-                if (post.syncStatus != 'synced')
-                  Icon(
+                if (post.syncStatus != SyncStatus.synced)
+                  const Icon(
                     Icons.cloud_upload_outlined,
                     size: 16,
                     color: AppColors.textTertiary,
@@ -126,23 +165,35 @@ class PostCard extends StatelessWidget {
     );
   }
 
-  Widget _buildAction(IconData icon, String label, {bool isActive = false}) {
-    return Row(
-      children: [
-        Icon(
-          icon,
-          size: 18,
-          color: isActive ? AppColors.textPrimary : AppColors.textTertiary,
+  Widget _buildAction(
+    BuildContext context, 
+    IconData icon, 
+    String label, 
+    {bool isActive = false, VoidCallback? onTap}
+  ) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              size: 20,
+              color: isActive ? Colors.pink : AppColors.textTertiary,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: AppTextStyles.labelSmall.copyWith(
+                color: isActive ? Colors.pink : AppColors.textTertiary,
+                fontWeight: isActive ? FontWeight.w700 : FontWeight.w600,
+              ),
+            ),
+          ],
         ),
-        const SizedBox(width: 4),
-        Text(
-          label,
-          style: AppTextStyles.labelSmall.copyWith(
-            color: isActive ? AppColors.textPrimary : AppColors.textTertiary,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
+      ),
     );
   }
 }

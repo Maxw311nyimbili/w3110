@@ -20,13 +20,10 @@ class LandingPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => LandingCubit(
-        landingRepository: context.read<LandingRepository>(),
-        authRepository: context.read<AuthRepository>(), // ← ADD THIS
-      )..initialize(),
-      child: const LandingView(),
-    );
+    // Trigger initialization on first build
+    context.read<LandingCubit>().initialize();
+    
+    return const LandingView();
   }
 }
 

@@ -6,7 +6,6 @@ import 'package:cap_project/core/services/audio_recording_service.dart';
 import 'package:record/record.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:chat_repository/chat_repository.dart' as repo;
-import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:uuid/uuid.dart';
 
@@ -15,20 +14,24 @@ class ChatCubit extends Cubit<ChatState> {
     required repo.ChatRepository chatRepository,
     required AudioRecordingService audioRecordingService,
     String? locale,
+    String? userRole,
+    List<String>? interests,
   })  : _chatRepository = chatRepository,
         _audioRecordingService = audioRecordingService,
         _audioPlayer = AudioPlayer(),
         _uuid = const Uuid(),
-        _dio = Dio(),
         _currentLocale = locale ?? 'en',
+        _userRole = userRole,
+        _interests = interests,
         super(const ChatState());
 
   final repo.ChatRepository _chatRepository;
   final AudioRecordingService _audioRecordingService;
   final AudioPlayer _audioPlayer;
   final Uuid _uuid;
-  final Dio _dio;
   String _currentLocale;
+  final String? _userRole;
+  final List<String>? _interests;
   StreamSubscription<Amplitude>? _amplitudeSubscription;
   Timer? _loadingTimer;
 
@@ -99,24 +102,14 @@ class ChatCubit extends Cubit<ChatState> {
 
   Future<void> _sendAudioMessage(String path) async {
     try {
-      final formData = FormData.fromMap({
-        'audio': await MultipartFile.fromFile(path, filename: 'voice_query.m4a'),
-        'session_id': state.sessionId ?? DateTime.now().millisecondsSinceEpoch.toString(),
-      });
-
       _startLoadingRotation();
 
-      final response = await _dio.post(
-        'http://172.26.80.1:8000/chat/voice',
-        data: formData,
-        options: Options(
-          sendTimeout: const Duration(seconds: 30),
-          receiveTimeout: const Duration(seconds: 120),
-          headers: {'Accept-Language': _currentLocale},
-        ),
+      final responseData = await _chatRepository.sendVoiceMessage(
+        audioPath: path,
+        sessionId: state.sessionId ?? DateTime.now().millisecondsSinceEpoch.toString(),
+        userRole: _userRole,
+        interests: _interests,
       );
-
-      final responseData = response.data as Map<String, dynamic>;
       
       if (responseData['transcript'] != null) {
         final userMessage = ChatMessage(
@@ -129,20 +122,15 @@ class ChatCubit extends Cubit<ChatState> {
       }
       _handleChatResponse(responseData);
       
-    } on DioException catch (e) {
-      if (e.response?.statusCode == 404) {
+    } catch (e) {
+      if (e.toString().contains('404')) {
          emit(state.copyWith(
            isTyping: false,
            error: 'Audio chat endpoint not found. Please use text for now.',
          ));
       } else {
-        emit(state.copyWith(
-          isTyping: false,
-          error: _getDioErrorMessage(e),
-        ));
+        emit(state.copyWith(isTyping: false, error: 'Failed to send audio: ${e.toString()}'));
       }
-    } catch (e) {
-      emit(state.copyWith(isTyping: false, error: 'Unexpected error: $e'));
     }
   }
 
@@ -278,31 +266,22 @@ class ChatCubit extends Cubit<ChatState> {
     _startLoadingRotation();
 
     try {
-      final response = await _dio.post(
-        'http://172.26.80.1:8000/chat/validate',
-        data: {
-          'query': content.trim(),
-          'session_id': state.sessionId ??
-              DateTime.now().millisecondsSinceEpoch.toString(),
-          'locale': _currentLocale,
-        },
-        options: Options(
-          sendTimeout: const Duration(seconds: 30),
-          receiveTimeout: const Duration(seconds: 120),
-          headers: {'Accept-Language': _currentLocale},
-        ),
+      final request = repo.ChatQueryRequest(
+        query: content.trim(),
+        conversationId: state.sessionId ?? DateTime.now().millisecondsSinceEpoch.toString(),
+        userRole: _userRole,
+        interests: _interests,
       );
 
-      final responseData = response.data as Map<String, dynamic>;
-      final status = responseData['status'] as String? ?? 'error';
+      final response = await _chatRepository.sendMessageValidated(request);
+
+      final status = response.status;
 
       // Handle out-of-scope
       if (status == 'out_of_scope') {
         final aiMessage = ChatMessage(
-          id: responseData['audit_id'] as String? ??
-              DateTime.now().millisecondsSinceEpoch.toString(),
-          content: responseData['message'] as String? ??
-              'This query is outside the scope of medical information.',
+          id: response.sessionId,
+          content: response.message ?? 'This query is outside the scope of medical information.',
           isUser: false,
           timestamp: DateTime.now(),
           isRefusal: true,
@@ -320,7 +299,7 @@ class ChatCubit extends Cubit<ChatState> {
       if (status == 'error') {
         final aiMessage = ChatMessage(
           id: DateTime.now().millisecondsSinceEpoch.toString(),
-          content: responseData['error'] as String? ?? 'An error occurred',
+          content: response.message ?? 'An error occurred',
           isUser: false,
           timestamp: DateTime.now(),
           isRefusal: true,
@@ -329,45 +308,37 @@ class ChatCubit extends Cubit<ChatState> {
         emit(state.copyWith(
           messages: [...state.messages, aiMessage],
           status: ChatStatus.error,
-          error: responseData['error'] as String? ?? 'Unknown error',
+          error: response.message ?? 'Unknown error',
           isTyping: false,
         ));
         return;
       }
 
       // Extract validated answer
-      final validatedAnswer =
-          responseData['validated_answer'] as Map<String, dynamic>? ?? {};
+      final validatedAnswer = response.validatedAnswer;
 
       // Get quick answer (from original_answer)
-      final quickAnswer = validatedAnswer['original_answer'] as String? ?? '';
+      final quickAnswer = validatedAnswer?.originalAnswer ?? '';
 
       // Get detailed answer (from first sentence's rewritten field)
       String detailedAnswer = '';
       List<SourceReference> sources = [];
 
-      if (validatedAnswer['validated_sentences'] is List &&
-          (validatedAnswer['validated_sentences'] as List).isNotEmpty) {
-        final firstSentence = (validatedAnswer['validated_sentences'] as List)[0]
-        as Map<String, dynamic>;
+      if (validatedAnswer?.validatedSentences != null &&
+          validatedAnswer!.validatedSentences.isNotEmpty) {
+        final firstSentence = validatedAnswer.validatedSentences[0];
 
-        detailedAnswer = firstSentence['rewritten'] as String? ?? '';
+        detailedAnswer = firstSentence.rewritten;
 
         // Extract sources from citations
-        if (firstSentence['citations'] is List) {
-          sources = (firstSentence['citations'] as List)
-              .map((c) {
-            final citation = c as Map<String, dynamic>;
-            final sourceData = citation['source'] as Map<String, dynamic>?;
-
-            return SourceReference(
-              title: (sourceData?['title'] ?? citation['title'] ?? 'No title').toString(),
-              url: (sourceData?['url'] ?? citation['url'] ?? '').toString(),
-              domain: (sourceData?['domain'] ?? citation['domain'] ?? 'Unknown').toString(),
-              authority: (sourceData?['authority'] ?? citation['authority'] ?? 'UNKNOWN').toString(),
-              snippet: citation['fragment_text'] is String
-                  ? citation['fragment_text'] as String
-                  : null,
+        if (firstSentence.citations.isNotEmpty) {
+          sources = firstSentence.citations.map((citation) {
+             return SourceReference(
+              title: citation.source.title,
+              url: citation.source.url,
+              domain: citation.source.domain,
+              authority: citation.source.authority,
+              snippet: citation.fragmentText,
             );
           }).toList();
         }
@@ -384,8 +355,7 @@ class ChatCubit extends Cubit<ChatState> {
       print('Debug: isDualMode=$hasDualMode, sources=${sources.length}');
 
       final aiMessage = ChatMessage(
-        id: responseData['audit_id'] as String? ??
-            DateTime.now().millisecondsSinceEpoch.toString(),
+        id: validatedAnswer?.auditId ?? response.sessionId,
         content: primaryContent,
         isUser: false,
         timestamp: DateTime.now(),
@@ -395,23 +365,21 @@ class ChatCubit extends Cubit<ChatState> {
         quickAnswer.trim().isNotEmpty ? quickAnswer.trim() : null,
         detailedAnswer:
         detailedAnswer.trim().isNotEmpty ? detailedAnswer.trim() : null,
-        latencyMs: responseData['processing_time_ms'] as int? ?? 0,
+        latencyMs: response.processingTimeMs,
       );
 
       emit(state.copyWith(
         messages: [...state.messages, aiMessage],
         status: ChatStatus.success,
         isTyping: false,
-        sessionId: state.sessionId ??
-            (responseData['session_id'] as String? ??
-                DateTime.now().millisecondsSinceEpoch.toString()),
+        sessionId: state.sessionId ?? (response.sessionId ?? DateTime.now().millisecondsSinceEpoch.toString()),
       ));
-    } on DioException catch (e) {
+    } catch (e) {
       _loadingTimer?.cancel();
       emit(state.resetLoadingMessage());
       final errorMessage = ChatMessage(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
-        content: _getDioErrorMessage(e),
+        content: 'Error: ${e.toString()}',
         isUser: false,
         timestamp: DateTime.now(),
         isRefusal: true,
@@ -421,25 +389,7 @@ class ChatCubit extends Cubit<ChatState> {
       emit(state.copyWith(
         messages: [...state.messages, errorMessage],
         status: ChatStatus.error,
-        error: _getDioErrorMessage(e),
-        isTyping: false,
-      ));
-    } catch (e) {
-      _loadingTimer?.cancel();
-      emit(state.resetLoadingMessage());
-      final errorMessage = ChatMessage(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        content: 'Unexpected error: $e',
-        isUser: false,
-        timestamp: DateTime.now(),
-        isRefusal: true,
-        refusalReason: 'Unexpected error',
-      );
-
-      emit(state.copyWith(
-        messages: [...state.messages, errorMessage],
-        status: ChatStatus.error,
-        error: 'Unexpected error: $e',
+        error: e.toString(),
         isTyping: false,
       ));
     }
@@ -464,6 +414,8 @@ class ChatCubit extends Cubit<ChatState> {
       final request = repo.ChatQueryRequest(
         query: content.trim(),
         imageUrl: imageUrl,
+        userRole: _userRole,
+        interests: _interests,
       );
 
       final response = await _chatRepository.sendMessage(request);
@@ -524,6 +476,17 @@ class ChatCubit extends Cubit<ChatState> {
     emit(state.clearError());
   }
 
+  void toggleMessageView(String messageId) {
+    final updatedMessages = state.messages.map((msg) {
+      if (msg.id == messageId) {
+        return msg.copyWith(showingDetailedView: !msg.showingDetailedView);
+      }
+      return msg;
+    }).toList();
+    
+    emit(state.copyWith(messages: updatedMessages));
+  }
+
   String _extractDomain(String url) {
     try {
       final uri = Uri.parse(url);
@@ -532,23 +495,5 @@ class ChatCubit extends Cubit<ChatState> {
       return 'Unknown';
     }
   }
-
-  String _getDioErrorMessage(DioException e) {
-    switch (e.type) {
-      case DioExceptionType.connectionTimeout:
-        return 'Connection timeout. Please check your internet and try again.';
-      case DioExceptionType.sendTimeout:
-        return 'Request timeout. The server took too long to respond.';
-      case DioExceptionType.receiveTimeout:
-        return 'Response timeout. The server took too long to respond.';
-      case DioExceptionType.badResponse:
-        return 'Server error: ${e.response?.statusCode ?? 'Unknown'}';
-      case DioExceptionType.cancel:
-        return 'Request cancelled.';
-      case DioExceptionType.unknown:
-        return 'Network error. Please check your connection.';
-      default:
-        return 'An error occurred. Please try again.';
-    }
-  }
 }
+

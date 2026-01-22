@@ -15,6 +15,8 @@ class ForumComment extends Equatable {
     required this.content,
     required this.createdAt,
     this.updatedAt,
+    this.likeCount = 0,
+    this.isLiked = false,
     this.syncStatus = SyncStatus.synced,
   });
 
@@ -26,6 +28,8 @@ class ForumComment extends Equatable {
   final String content;
   final DateTime createdAt;
   final DateTime? updatedAt;
+  final int likeCount;
+  final bool isLiked;
   final SyncStatus syncStatus;
 
   bool get isPendingSync => syncStatus == SyncStatus.pending;
@@ -41,6 +45,8 @@ class ForumComment extends Equatable {
       content: data.content,
       createdAt: data.createdAt,
       updatedAt: data.updatedAt,
+      likeCount: data.likeCount,
+      isLiked: data.isLiked,
       syncStatus: _parseSyncStatus(data.syncStatus),
     );
   }
@@ -58,6 +64,8 @@ class ForumComment extends Equatable {
       updatedAt: json['updated_at'] != null
           ? DateTime.parse(json['updated_at'] as String)
           : null,
+      likeCount: json['like_count'] as int? ?? 0,
+      isLiked: json['is_liked'] as bool? ?? false,
       syncStatus: SyncStatus.synced, // From server = already synced
     );
   }
@@ -71,6 +79,8 @@ class ForumComment extends Equatable {
     String? content,
     DateTime? createdAt,
     DateTime? updatedAt,
+    int? likeCount,
+    bool? isLiked,
     SyncStatus? syncStatus,
   }) {
     return ForumComment(
@@ -82,6 +92,8 @@ class ForumComment extends Equatable {
       content: content ?? this.content,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      likeCount: likeCount ?? this.likeCount,
+      isLiked: isLiked ?? this.isLiked,
       syncStatus: syncStatus ?? this.syncStatus,
     );
   }
@@ -105,6 +117,8 @@ class ForumComment extends Equatable {
     content,
     createdAt,
     updatedAt,
+    likeCount,
+    isLiked,
     syncStatus,
   ];
 }

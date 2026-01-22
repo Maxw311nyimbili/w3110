@@ -5,93 +5,102 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cap_project/core/theme/app_colors.dart';
 
 class AppTextStyles {
-  // Use Inter from Google Fonts for that premium, clean look
+  // Primary font for body
   static TextStyle get _baseFont => GoogleFonts.inter();
+  
+  // High-performance display font for headlines
+  static TextStyle get _displayFont => GoogleFonts.plusJakartaSans();
 
-  // Display - for empty states, major headings
-  static TextStyle get displayLarge => _baseFont.copyWith(
+  // Display
+  static TextStyle get displayLarge => _displayFont.copyWith(
+    fontSize: 40,
+    fontWeight: FontWeight.w700,
+    height: 1.1,
+    letterSpacing: -1.0,
+    color: AppColors.textPrimary,
+  );
+
+  static TextStyle get displayMedium => _displayFont.copyWith(
     fontSize: 32,
     fontWeight: FontWeight.w700,
     height: 1.2,
     letterSpacing: -0.5,
+    color: AppColors.textPrimary,
   );
 
-  static TextStyle get displayMedium => _baseFont.copyWith(
-    fontSize: 28,
-    fontWeight: FontWeight.w700,
-    height: 1.25,
-    letterSpacing: -0.3,
-  );
-
-  // Headline - section headers
-  static TextStyle get headlineLarge => _baseFont.copyWith(
+  static TextStyle get displaySmall => _displayFont.copyWith(
     fontSize: 24,
-    fontWeight: FontWeight.w600,
-    height: 1.3,
-    letterSpacing: -0.2,
+    fontWeight: FontWeight.w700,
+    height: 1.2,
+    color: AppColors.textPrimary,
   );
 
-  static TextStyle get headlineMedium => _baseFont.copyWith(
+  // Headline
+  static TextStyle get headlineLarge => _displayFont.copyWith(
     fontSize: 20,
     fontWeight: FontWeight.w600,
-    height: 1.35,
-    letterSpacing: -0.1,
+    height: 1.3,
+    color: AppColors.textPrimary,
   );
 
-  static TextStyle get headlineSmall => _baseFont.copyWith(
+  static TextStyle get headlineMedium => _displayFont.copyWith(
     fontSize: 18,
     fontWeight: FontWeight.w600,
-    height: 1.4,
+    height: 1.3,
+    color: AppColors.textPrimary,
   );
 
-  // Body - main content text
+  static TextStyle get headlineSmall => _displayFont.copyWith(
+    fontSize: 16,
+    fontWeight: FontWeight.w600,
+    height: 1.3,
+    color: AppColors.textPrimary,
+  );
+
+  // Body
   static TextStyle get bodyLarge => _baseFont.copyWith(
     fontSize: 16,
-    fontWeight: FontWeight.w400,
-    height: 1.6, // Taller line height for readability
-    letterSpacing: 0,
+    fontWeight: FontWeight.w500,
+    height: 1.6,
   );
 
   static TextStyle get bodyMedium => _baseFont.copyWith(
     fontSize: 15,
     fontWeight: FontWeight.w400,
     height: 1.6,
-    letterSpacing: 0,
   );
 
   static TextStyle get bodySmall => _baseFont.copyWith(
     fontSize: 13,
     fontWeight: FontWeight.w400,
     height: 1.5,
-    letterSpacing: 0.2,
   );
 
-  // Label - UI elements, badges
+  // Label
   static TextStyle get labelLarge => _baseFont.copyWith(
     fontSize: 14,
-    fontWeight: FontWeight.w500,
+    fontWeight: FontWeight.w600,
     height: 1.4,
     letterSpacing: 0.1,
   );
 
   static TextStyle get labelMedium => _baseFont.copyWith(
     fontSize: 12,
-    fontWeight: FontWeight.w500,
+    fontWeight: FontWeight.w600,
     height: 1.35,
-    letterSpacing: 0.1,
   );
 
   static TextStyle get labelSmall => _baseFont.copyWith(
     fontSize: 11,
-    fontWeight: FontWeight.w500,
+    fontWeight: FontWeight.w600,
     height: 1.3,
     letterSpacing: 0.2,
   );
 
-  // Caption - smallest, for timestamps and meta
+  // Caption
   static TextStyle get caption => _baseFont.copyWith(
     fontSize: 10,
-    fontWeight: FontWeight.w400,
+    fontWeight: FontWeight.w500,
     height: 1.2,
     letterSpacing: 0.3,
   );

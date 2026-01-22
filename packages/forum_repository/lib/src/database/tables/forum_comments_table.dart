@@ -19,6 +19,10 @@ class ForumComments extends Table {
   TextColumn get authorName => text()();
   TextColumn get content => text()();
 
+  // Engagement metrics
+  IntColumn get likeCount => integer().withDefault(const Constant(0))();
+  BoolColumn get isLiked => boolean().withDefault(const Constant(false))();
+
   // Timestamps
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime().nullable()();

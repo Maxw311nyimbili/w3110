@@ -4,68 +4,91 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_colors.dart';
 import '../cubit/cubit.dart';
 
-class WelcomeStep extends StatelessWidget {
+import 'package:cap_project/core/widgets/premium_button.dart';
+
+class WelcomeStep extends StatefulWidget {
   const WelcomeStep({super.key});
+
+  @override
+  State<WelcomeStep> createState() => _WelcomeStepState();
+}
+
+class _WelcomeStepState extends State<WelcomeStep> with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+    _fadeAnimation = CurvedAnimation(parent: _animationController, curve: Curves.easeIn);
+    _slideAnimation = Tween<Offset>(begin: const Offset(0, 0.1), end: Offset.zero).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOutCubic),
+    );
+    _animationController.forward();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundPrimary,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Spacer(flex: 2),
-              // Minimalist Header
-              Text(
-                'Where knowledge\nmeets health.',
-                style: AppTextStyles.displayLarge.copyWith(
-                  color: AppColors.textPrimary,
-                  height: 1.1,
-                  letterSpacing: -1.0,
-                ),
-                textAlign: TextAlign.left,
-              ),
-              const SizedBox(height: 24),
-              // Subtitle
-              Text(
-                'Instant, accurate answers to your medical questions. Powered by advanced AI.',
-                style: AppTextStyles.bodyLarge.copyWith(
-                  color: AppColors.textSecondary,
-                  fontWeight: FontWeight.w400,
-                  height: 1.5,
-                ),
-                textAlign: TextAlign.left,
-              ),
-              const Spacer(flex: 3),
-              // Clean Action Button
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: () => context.read<LandingCubit>().nextStep(),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.textPrimary, // Dark button for contrast
-                    foregroundColor: AppColors.backgroundSurface,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
+        child: FadeTransition(
+          opacity: _fadeAnimation,
+          child: SlideTransition(
+            position: _slideAnimation,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Spacer(),
+                  Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: AppColors.accentPrimary.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.shield_rounded,
+                      size: 64,
+                      color: AppColors.accentPrimary,
                     ),
                   ),
-                  child: Text(
-                    'Get Started',
-                    style: AppTextStyles.labelLarge.copyWith(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
+                  const SizedBox(height: 48),
+                  Text(
+                    'Welcome to Thanzi',
+                    style: AppTextStyles.displayMedium.copyWith(
+                      color: AppColors.textPrimary,
+                      fontSize: 32,
                     ),
+                    textAlign: TextAlign.center,
                   ),
-                ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Your AI-powered health assistant for evidence-based medicine.',
+                    style: AppTextStyles.bodyLarge.copyWith(color: AppColors.textSecondary),
+                    textAlign: TextAlign.center,
+                  ),
+                  const Spacer(),
+                  PremiumButton(
+                    onPressed: () => context.read<LandingCubit>().nextStep(),
+                    text: 'Get Started',
+                  ),
+                  const SizedBox(height: 32),
+                ],
               ),
-              const SizedBox(height: 32),
-            ],
+            ),
           ),
         ),
       ),

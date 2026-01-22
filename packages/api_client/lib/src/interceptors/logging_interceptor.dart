@@ -1,5 +1,6 @@
 // packages/api_client/lib/src/interceptors/logging_interceptor.dart
 
+import 'dart:developer' as developer;
 import 'package:dio/dio.dart';
 
 /// Logging interceptor - logs all HTTP requests and responses
@@ -8,27 +9,34 @@ class LoggingInterceptor extends Interceptor {
 
   final bool enabled;
 
+  void _log(String message) {
+    print(message);
+    developer.log(message, name: 'api_client');
+  }
+
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     if (enabled) {
-      print('╔══════════════════════════════════════════════════════════');
-      print('║ 📤 REQUEST');
-      print('║ ${options.method} ${options.uri}');
+      final buffer = StringBuffer();
+      buffer.writeln('╔══════════════════════════════════════════════════════════');
+      buffer.writeln('║ 📤 REQUEST');
+      buffer.writeln('║ ${options.method} ${options.uri}');
       if (options.headers.isNotEmpty) {
-        print('║ Headers:');
+        buffer.writeln('║ Headers:');
         options.headers.forEach((key, value) {
           // Don't log sensitive data
           if (key.toLowerCase() == 'authorization') {
-            print('║   $key: Bearer ***');
+            buffer.writeln('║   $key: Bearer ***');
           } else {
-            print('║   $key: $value');
+            buffer.writeln('║   $key: $value');
           }
         });
       }
       if (options.data != null) {
-        print('║ Body: ${options.data}');
+        buffer.writeln('║ Body: ${options.data}');
       }
-      print('╚══════════════════════════════════════════════════════════');
+      buffer.writeln('╚══════════════════════════════════════════════════════════');
+      _log(buffer.toString());
     }
     handler.next(options);
   }
@@ -36,12 +44,14 @@ class LoggingInterceptor extends Interceptor {
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
     if (enabled) {
-      print('╔══════════════════════════════════════════════════════════');
-      print('║ 📥 RESPONSE');
-      print('║ ${response.requestOptions.method} ${response.requestOptions.uri}');
-      print('║ Status: ${response.statusCode}');
-      print('║ Data: ${response.data}');
-      print('╚══════════════════════════════════════════════════════════');
+      final buffer = StringBuffer();
+      buffer.writeln('╔══════════════════════════════════════════════════════════');
+      buffer.writeln('║ 📥 RESPONSE');
+      buffer.writeln('║ ${response.requestOptions.method} ${response.requestOptions.uri}');
+      buffer.writeln('║ Status: ${response.statusCode}');
+      buffer.writeln('║ Data: ${response.data}');
+      buffer.writeln('╚══════════════════════════════════════════════════════════');
+      _log(buffer.toString());
     }
     handler.next(response);
   }
@@ -49,15 +59,17 @@ class LoggingInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
     if (enabled) {
-      print('╔══════════════════════════════════════════════════════════');
-      print('║ ❌ ERROR');
-      print('║ ${err.requestOptions.method} ${err.requestOptions.uri}');
-      print('║ Status: ${err.response?.statusCode}');
-      print('║ Message: ${err.message}');
+      final buffer = StringBuffer();
+      buffer.writeln('╔══════════════════════════════════════════════════════════');
+      buffer.writeln('║ ❌ ERROR');
+      buffer.writeln('║ ${err.requestOptions.method} ${err.requestOptions.uri}');
+      buffer.writeln('║ Status: ${err.response?.statusCode}');
+      buffer.writeln('║ Message: ${err.message}');
       if (err.response?.data != null) {
-        print('║ Error Data: ${err.response?.data}');
+        buffer.writeln('║ Error Data: ${err.response?.data}');
       }
-      print('╚══════════════════════════════════════════════════════════');
+      buffer.writeln('╚══════════════════════════════════════════════════════════');
+      _log(buffer.toString());
     }
     handler.next(err);
   }

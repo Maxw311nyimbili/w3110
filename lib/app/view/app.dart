@@ -12,6 +12,7 @@ import 'package:cap_project/features/landing/cubit/landing_cubit.dart';
 import 'package:cap_project/l10n/l10n.dart';
 import 'package:chat_repository/chat_repository.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:forum_repository/forum_repository.dart';
 import 'package:landing_repository/landing_repository.dart';
@@ -22,10 +23,12 @@ import 'package:media_repository/media_repository.dart';
 class App extends StatefulWidget {
   const App({
     required this.config,
+    this.localPreferences,
     super.key,
   });
 
   final AppConfig config;
+  final LocalPreferences? localPreferences;
 
   @override
   State<App> createState() => _AppState();
@@ -50,6 +53,16 @@ class _AppState extends State<App> {
   }
 
   void _initializeRepositories() {
+    // Enable edge-to-edge display
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        systemNavigationBarColor: Colors.transparent,
+        systemNavigationBarDividerColor: Colors.transparent,
+        statusBarColor: Colors.transparent,
+      ),
+    );
+
     // Initialize API client
     _apiClient = ApiClient(
       baseUrl: widget.config.apiBaseUrl,
@@ -80,7 +93,7 @@ class _AppState extends State<App> {
 
     _landingRepository = LandingRepository(
       apiClient: _apiClient,
-      localPreferences: LocalPreferences(),
+      localPreferences: widget.localPreferences ?? LocalPreferences(),
     );
 
     _mediaRepository = MediaRepository(
@@ -95,6 +108,7 @@ class _AppState extends State<App> {
     _landingCubit = LandingCubit(
       landingRepository: _landingRepository,
       authRepository: _authRepository,
+      isDevelopment: widget.config.isDevelopment,
     );
 
     // Initialize global LocaleCubit
@@ -146,6 +160,16 @@ class _AppState extends State<App> {
               },
               onGenerateRoute: AppRouter.generateRoute,
               initialRoute: AppRouter.landing,
+              builder: (context, child) {
+                // Wrap app with environment banner if not production
+                if (!widget.config.isProduction) {
+                  return FlavorBanner(
+                    config: widget.config,
+                    child: child ?? const SizedBox(),
+                  );
+                }
+                return child ?? const SizedBox();
+              },
             );
           },
         ),
@@ -159,5 +183,46 @@ class _AppState extends State<App> {
     _landingCubit.close();
     _localeCubit.close();
     super.dispose();
+  }
+}
+
+/// Banner to display current environment overlay
+class FlavorBanner extends StatelessWidget {
+  const FlavorBanner({
+    required this.config,
+    required this.child,
+    super.key,
+  });
+
+  final AppConfig config;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      textDirection: TextDirection.ltr,
+      children: [
+        child,
+        _buildBanner(context),
+      ],
+    );
+  }
+
+  Widget _buildBanner(BuildContext context) {
+    return Positioned(
+      top: 0,
+      right: 0,
+      child: CustomPaint(
+        painter: BannerPainter(
+          message: config.isDevelopment ? 'DEV' : 'STAGING',
+          textDirection: TextDirection.ltr,
+          layoutDirection: TextDirection.ltr,
+          location: BannerLocation.topEnd,
+          color: config.isDevelopment 
+              ? Colors.green.withOpacity(0.6) 
+              : Colors.orange.withOpacity(0.6),
+        ),
+      ),
+    );
   }
 }

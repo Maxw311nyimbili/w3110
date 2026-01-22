@@ -120,6 +120,18 @@ class $ForumPostsTable extends ForumPosts
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _viewCountMeta = const VerificationMeta(
+    'viewCount',
+  );
+  @override
+  late final GeneratedColumn<int> viewCount = GeneratedColumn<int>(
+    'view_count',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   static const VerificationMeta _isLikedMeta = const VerificationMeta(
     'isLiked',
   );
@@ -146,6 +158,17 @@ class $ForumPostsTable extends ForumPosts
     type: DriftSqlType.string,
     requiredDuringInsert: false,
     defaultValue: const Constant('synced'),
+  );
+  static const VerificationMeta _sourcesMeta = const VerificationMeta(
+    'sources',
+  );
+  @override
+  late final GeneratedColumn<String> sources = GeneratedColumn<String>(
+    'sources',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _lastSyncAttemptMeta = const VerificationMeta(
     'lastSyncAttempt',
@@ -183,8 +206,10 @@ class $ForumPostsTable extends ForumPosts
     updatedAt,
     commentCount,
     likeCount,
+    viewCount,
     isLiked,
     syncStatus,
+    sources,
     lastSyncAttempt,
     syncRetryCount,
   ];
@@ -275,6 +300,12 @@ class $ForumPostsTable extends ForumPosts
         likeCount.isAcceptableOrUnknown(data['like_count']!, _likeCountMeta),
       );
     }
+    if (data.containsKey('view_count')) {
+      context.handle(
+        _viewCountMeta,
+        viewCount.isAcceptableOrUnknown(data['view_count']!, _viewCountMeta),
+      );
+    }
     if (data.containsKey('is_liked')) {
       context.handle(
         _isLikedMeta,
@@ -285,6 +316,12 @@ class $ForumPostsTable extends ForumPosts
       context.handle(
         _syncStatusMeta,
         syncStatus.isAcceptableOrUnknown(data['sync_status']!, _syncStatusMeta),
+      );
+    }
+    if (data.containsKey('sources')) {
+      context.handle(
+        _sourcesMeta,
+        sources.isAcceptableOrUnknown(data['sources']!, _sourcesMeta),
       );
     }
     if (data.containsKey('last_sync_attempt')) {
@@ -358,6 +395,10 @@ class $ForumPostsTable extends ForumPosts
         DriftSqlType.int,
         data['${effectivePrefix}like_count'],
       )!,
+      viewCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}view_count'],
+      ),
       isLiked: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}is_liked'],
@@ -366,6 +407,10 @@ class $ForumPostsTable extends ForumPosts
         DriftSqlType.string,
         data['${effectivePrefix}sync_status'],
       )!,
+      sources: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sources'],
+      ),
       lastSyncAttempt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}last_sync_attempt'],
@@ -394,8 +439,10 @@ class ForumPostData extends DataClass implements Insertable<ForumPostData> {
   final DateTime? updatedAt;
   final int commentCount;
   final int likeCount;
+  final int? viewCount;
   final bool isLiked;
   final String syncStatus;
+  final String? sources;
   final DateTime? lastSyncAttempt;
   final int syncRetryCount;
   const ForumPostData({
@@ -409,8 +456,10 @@ class ForumPostData extends DataClass implements Insertable<ForumPostData> {
     this.updatedAt,
     required this.commentCount,
     required this.likeCount,
+    this.viewCount,
     required this.isLiked,
     required this.syncStatus,
+    this.sources,
     this.lastSyncAttempt,
     required this.syncRetryCount,
   });
@@ -429,8 +478,14 @@ class ForumPostData extends DataClass implements Insertable<ForumPostData> {
     }
     map['comment_count'] = Variable<int>(commentCount);
     map['like_count'] = Variable<int>(likeCount);
+    if (!nullToAbsent || viewCount != null) {
+      map['view_count'] = Variable<int>(viewCount);
+    }
     map['is_liked'] = Variable<bool>(isLiked);
     map['sync_status'] = Variable<String>(syncStatus);
+    if (!nullToAbsent || sources != null) {
+      map['sources'] = Variable<String>(sources);
+    }
     if (!nullToAbsent || lastSyncAttempt != null) {
       map['last_sync_attempt'] = Variable<DateTime>(lastSyncAttempt);
     }
@@ -452,8 +507,14 @@ class ForumPostData extends DataClass implements Insertable<ForumPostData> {
           : Value(updatedAt),
       commentCount: Value(commentCount),
       likeCount: Value(likeCount),
+      viewCount: viewCount == null && nullToAbsent
+          ? const Value.absent()
+          : Value(viewCount),
       isLiked: Value(isLiked),
       syncStatus: Value(syncStatus),
+      sources: sources == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sources),
       lastSyncAttempt: lastSyncAttempt == null && nullToAbsent
           ? const Value.absent()
           : Value(lastSyncAttempt),
@@ -477,8 +538,10 @@ class ForumPostData extends DataClass implements Insertable<ForumPostData> {
       updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
       commentCount: serializer.fromJson<int>(json['commentCount']),
       likeCount: serializer.fromJson<int>(json['likeCount']),
+      viewCount: serializer.fromJson<int?>(json['viewCount']),
       isLiked: serializer.fromJson<bool>(json['isLiked']),
       syncStatus: serializer.fromJson<String>(json['syncStatus']),
+      sources: serializer.fromJson<String?>(json['sources']),
       lastSyncAttempt: serializer.fromJson<DateTime?>(json['lastSyncAttempt']),
       syncRetryCount: serializer.fromJson<int>(json['syncRetryCount']),
     );
@@ -497,8 +560,10 @@ class ForumPostData extends DataClass implements Insertable<ForumPostData> {
       'updatedAt': serializer.toJson<DateTime?>(updatedAt),
       'commentCount': serializer.toJson<int>(commentCount),
       'likeCount': serializer.toJson<int>(likeCount),
+      'viewCount': serializer.toJson<int?>(viewCount),
       'isLiked': serializer.toJson<bool>(isLiked),
       'syncStatus': serializer.toJson<String>(syncStatus),
+      'sources': serializer.toJson<String?>(sources),
       'lastSyncAttempt': serializer.toJson<DateTime?>(lastSyncAttempt),
       'syncRetryCount': serializer.toJson<int>(syncRetryCount),
     };
@@ -515,8 +580,10 @@ class ForumPostData extends DataClass implements Insertable<ForumPostData> {
     Value<DateTime?> updatedAt = const Value.absent(),
     int? commentCount,
     int? likeCount,
+    Value<int?> viewCount = const Value.absent(),
     bool? isLiked,
     String? syncStatus,
+    Value<String?> sources = const Value.absent(),
     Value<DateTime?> lastSyncAttempt = const Value.absent(),
     int? syncRetryCount,
   }) => ForumPostData(
@@ -530,8 +597,10 @@ class ForumPostData extends DataClass implements Insertable<ForumPostData> {
     updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
     commentCount: commentCount ?? this.commentCount,
     likeCount: likeCount ?? this.likeCount,
+    viewCount: viewCount.present ? viewCount.value : this.viewCount,
     isLiked: isLiked ?? this.isLiked,
     syncStatus: syncStatus ?? this.syncStatus,
+    sources: sources.present ? sources.value : this.sources,
     lastSyncAttempt: lastSyncAttempt.present
         ? lastSyncAttempt.value
         : this.lastSyncAttempt,
@@ -553,10 +622,12 @@ class ForumPostData extends DataClass implements Insertable<ForumPostData> {
           ? data.commentCount.value
           : this.commentCount,
       likeCount: data.likeCount.present ? data.likeCount.value : this.likeCount,
+      viewCount: data.viewCount.present ? data.viewCount.value : this.viewCount,
       isLiked: data.isLiked.present ? data.isLiked.value : this.isLiked,
       syncStatus: data.syncStatus.present
           ? data.syncStatus.value
           : this.syncStatus,
+      sources: data.sources.present ? data.sources.value : this.sources,
       lastSyncAttempt: data.lastSyncAttempt.present
           ? data.lastSyncAttempt.value
           : this.lastSyncAttempt,
@@ -579,8 +650,10 @@ class ForumPostData extends DataClass implements Insertable<ForumPostData> {
           ..write('updatedAt: $updatedAt, ')
           ..write('commentCount: $commentCount, ')
           ..write('likeCount: $likeCount, ')
+          ..write('viewCount: $viewCount, ')
           ..write('isLiked: $isLiked, ')
           ..write('syncStatus: $syncStatus, ')
+          ..write('sources: $sources, ')
           ..write('lastSyncAttempt: $lastSyncAttempt, ')
           ..write('syncRetryCount: $syncRetryCount')
           ..write(')'))
@@ -599,8 +672,10 @@ class ForumPostData extends DataClass implements Insertable<ForumPostData> {
     updatedAt,
     commentCount,
     likeCount,
+    viewCount,
     isLiked,
     syncStatus,
+    sources,
     lastSyncAttempt,
     syncRetryCount,
   );
@@ -618,8 +693,10 @@ class ForumPostData extends DataClass implements Insertable<ForumPostData> {
           other.updatedAt == this.updatedAt &&
           other.commentCount == this.commentCount &&
           other.likeCount == this.likeCount &&
+          other.viewCount == this.viewCount &&
           other.isLiked == this.isLiked &&
           other.syncStatus == this.syncStatus &&
+          other.sources == this.sources &&
           other.lastSyncAttempt == this.lastSyncAttempt &&
           other.syncRetryCount == this.syncRetryCount);
 }
@@ -635,8 +712,10 @@ class ForumPostsCompanion extends UpdateCompanion<ForumPostData> {
   final Value<DateTime?> updatedAt;
   final Value<int> commentCount;
   final Value<int> likeCount;
+  final Value<int?> viewCount;
   final Value<bool> isLiked;
   final Value<String> syncStatus;
+  final Value<String?> sources;
   final Value<DateTime?> lastSyncAttempt;
   final Value<int> syncRetryCount;
   final Value<int> rowid;
@@ -651,8 +730,10 @@ class ForumPostsCompanion extends UpdateCompanion<ForumPostData> {
     this.updatedAt = const Value.absent(),
     this.commentCount = const Value.absent(),
     this.likeCount = const Value.absent(),
+    this.viewCount = const Value.absent(),
     this.isLiked = const Value.absent(),
     this.syncStatus = const Value.absent(),
+    this.sources = const Value.absent(),
     this.lastSyncAttempt = const Value.absent(),
     this.syncRetryCount = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -668,8 +749,10 @@ class ForumPostsCompanion extends UpdateCompanion<ForumPostData> {
     this.updatedAt = const Value.absent(),
     this.commentCount = const Value.absent(),
     this.likeCount = const Value.absent(),
+    this.viewCount = const Value.absent(),
     this.isLiked = const Value.absent(),
     this.syncStatus = const Value.absent(),
+    this.sources = const Value.absent(),
     this.lastSyncAttempt = const Value.absent(),
     this.syncRetryCount = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -690,8 +773,10 @@ class ForumPostsCompanion extends UpdateCompanion<ForumPostData> {
     Expression<DateTime>? updatedAt,
     Expression<int>? commentCount,
     Expression<int>? likeCount,
+    Expression<int>? viewCount,
     Expression<bool>? isLiked,
     Expression<String>? syncStatus,
+    Expression<String>? sources,
     Expression<DateTime>? lastSyncAttempt,
     Expression<int>? syncRetryCount,
     Expression<int>? rowid,
@@ -707,8 +792,10 @@ class ForumPostsCompanion extends UpdateCompanion<ForumPostData> {
       if (updatedAt != null) 'updated_at': updatedAt,
       if (commentCount != null) 'comment_count': commentCount,
       if (likeCount != null) 'like_count': likeCount,
+      if (viewCount != null) 'view_count': viewCount,
       if (isLiked != null) 'is_liked': isLiked,
       if (syncStatus != null) 'sync_status': syncStatus,
+      if (sources != null) 'sources': sources,
       if (lastSyncAttempt != null) 'last_sync_attempt': lastSyncAttempt,
       if (syncRetryCount != null) 'sync_retry_count': syncRetryCount,
       if (rowid != null) 'rowid': rowid,
@@ -726,8 +813,10 @@ class ForumPostsCompanion extends UpdateCompanion<ForumPostData> {
     Value<DateTime?>? updatedAt,
     Value<int>? commentCount,
     Value<int>? likeCount,
+    Value<int?>? viewCount,
     Value<bool>? isLiked,
     Value<String>? syncStatus,
+    Value<String?>? sources,
     Value<DateTime?>? lastSyncAttempt,
     Value<int>? syncRetryCount,
     Value<int>? rowid,
@@ -743,8 +832,10 @@ class ForumPostsCompanion extends UpdateCompanion<ForumPostData> {
       updatedAt: updatedAt ?? this.updatedAt,
       commentCount: commentCount ?? this.commentCount,
       likeCount: likeCount ?? this.likeCount,
+      viewCount: viewCount ?? this.viewCount,
       isLiked: isLiked ?? this.isLiked,
       syncStatus: syncStatus ?? this.syncStatus,
+      sources: sources ?? this.sources,
       lastSyncAttempt: lastSyncAttempt ?? this.lastSyncAttempt,
       syncRetryCount: syncRetryCount ?? this.syncRetryCount,
       rowid: rowid ?? this.rowid,
@@ -784,11 +875,17 @@ class ForumPostsCompanion extends UpdateCompanion<ForumPostData> {
     if (likeCount.present) {
       map['like_count'] = Variable<int>(likeCount.value);
     }
+    if (viewCount.present) {
+      map['view_count'] = Variable<int>(viewCount.value);
+    }
     if (isLiked.present) {
       map['is_liked'] = Variable<bool>(isLiked.value);
     }
     if (syncStatus.present) {
       map['sync_status'] = Variable<String>(syncStatus.value);
+    }
+    if (sources.present) {
+      map['sources'] = Variable<String>(sources.value);
     }
     if (lastSyncAttempt.present) {
       map['last_sync_attempt'] = Variable<DateTime>(lastSyncAttempt.value);
@@ -815,8 +912,10 @@ class ForumPostsCompanion extends UpdateCompanion<ForumPostData> {
           ..write('updatedAt: $updatedAt, ')
           ..write('commentCount: $commentCount, ')
           ..write('likeCount: $likeCount, ')
+          ..write('viewCount: $viewCount, ')
           ..write('isLiked: $isLiked, ')
           ..write('syncStatus: $syncStatus, ')
+          ..write('sources: $sources, ')
           ..write('lastSyncAttempt: $lastSyncAttempt, ')
           ..write('syncRetryCount: $syncRetryCount, ')
           ..write('rowid: $rowid')
@@ -896,6 +995,33 @@ class $ForumCommentsTable extends ForumComments
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _likeCountMeta = const VerificationMeta(
+    'likeCount',
+  );
+  @override
+  late final GeneratedColumn<int> likeCount = GeneratedColumn<int>(
+    'like_count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _isLikedMeta = const VerificationMeta(
+    'isLiked',
+  );
+  @override
+  late final GeneratedColumn<bool> isLiked = GeneratedColumn<bool>(
+    'is_liked',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_liked" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -962,6 +1088,8 @@ class $ForumCommentsTable extends ForumComments
     authorId,
     authorName,
     content,
+    likeCount,
+    isLiked,
     createdAt,
     updatedAt,
     syncStatus,
@@ -1025,6 +1153,18 @@ class $ForumCommentsTable extends ForumComments
       );
     } else if (isInserting) {
       context.missing(_contentMeta);
+    }
+    if (data.containsKey('like_count')) {
+      context.handle(
+        _likeCountMeta,
+        likeCount.isAcceptableOrUnknown(data['like_count']!, _likeCountMeta),
+      );
+    }
+    if (data.containsKey('is_liked')) {
+      context.handle(
+        _isLikedMeta,
+        isLiked.isAcceptableOrUnknown(data['is_liked']!, _isLikedMeta),
+      );
     }
     if (data.containsKey('created_at')) {
       context.handle(
@@ -1101,6 +1241,14 @@ class $ForumCommentsTable extends ForumComments
         DriftSqlType.string,
         data['${effectivePrefix}content'],
       )!,
+      likeCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}like_count'],
+      )!,
+      isLiked: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_liked'],
+      )!,
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -1138,6 +1286,8 @@ class ForumCommentData extends DataClass
   final String authorId;
   final String authorName;
   final String content;
+  final int likeCount;
+  final bool isLiked;
   final DateTime createdAt;
   final DateTime? updatedAt;
   final String syncStatus;
@@ -1150,6 +1300,8 @@ class ForumCommentData extends DataClass
     required this.authorId,
     required this.authorName,
     required this.content,
+    required this.likeCount,
+    required this.isLiked,
     required this.createdAt,
     this.updatedAt,
     required this.syncStatus,
@@ -1165,6 +1317,8 @@ class ForumCommentData extends DataClass
     map['author_id'] = Variable<String>(authorId);
     map['author_name'] = Variable<String>(authorName);
     map['content'] = Variable<String>(content);
+    map['like_count'] = Variable<int>(likeCount);
+    map['is_liked'] = Variable<bool>(isLiked);
     map['created_at'] = Variable<DateTime>(createdAt);
     if (!nullToAbsent || updatedAt != null) {
       map['updated_at'] = Variable<DateTime>(updatedAt);
@@ -1185,6 +1339,8 @@ class ForumCommentData extends DataClass
       authorId: Value(authorId),
       authorName: Value(authorName),
       content: Value(content),
+      likeCount: Value(likeCount),
+      isLiked: Value(isLiked),
       createdAt: Value(createdAt),
       updatedAt: updatedAt == null && nullToAbsent
           ? const Value.absent()
@@ -1209,6 +1365,8 @@ class ForumCommentData extends DataClass
       authorId: serializer.fromJson<String>(json['authorId']),
       authorName: serializer.fromJson<String>(json['authorName']),
       content: serializer.fromJson<String>(json['content']),
+      likeCount: serializer.fromJson<int>(json['likeCount']),
+      isLiked: serializer.fromJson<bool>(json['isLiked']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
       syncStatus: serializer.fromJson<String>(json['syncStatus']),
@@ -1226,6 +1384,8 @@ class ForumCommentData extends DataClass
       'authorId': serializer.toJson<String>(authorId),
       'authorName': serializer.toJson<String>(authorName),
       'content': serializer.toJson<String>(content),
+      'likeCount': serializer.toJson<int>(likeCount),
+      'isLiked': serializer.toJson<bool>(isLiked),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime?>(updatedAt),
       'syncStatus': serializer.toJson<String>(syncStatus),
@@ -1241,6 +1401,8 @@ class ForumCommentData extends DataClass
     String? authorId,
     String? authorName,
     String? content,
+    int? likeCount,
+    bool? isLiked,
     DateTime? createdAt,
     Value<DateTime?> updatedAt = const Value.absent(),
     String? syncStatus,
@@ -1253,6 +1415,8 @@ class ForumCommentData extends DataClass
     authorId: authorId ?? this.authorId,
     authorName: authorName ?? this.authorName,
     content: content ?? this.content,
+    likeCount: likeCount ?? this.likeCount,
+    isLiked: isLiked ?? this.isLiked,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
     syncStatus: syncStatus ?? this.syncStatus,
@@ -1271,6 +1435,8 @@ class ForumCommentData extends DataClass
           ? data.authorName.value
           : this.authorName,
       content: data.content.present ? data.content.value : this.content,
+      likeCount: data.likeCount.present ? data.likeCount.value : this.likeCount,
+      isLiked: data.isLiked.present ? data.isLiked.value : this.isLiked,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       syncStatus: data.syncStatus.present
@@ -1294,6 +1460,8 @@ class ForumCommentData extends DataClass
           ..write('authorId: $authorId, ')
           ..write('authorName: $authorName, ')
           ..write('content: $content, ')
+          ..write('likeCount: $likeCount, ')
+          ..write('isLiked: $isLiked, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('syncStatus: $syncStatus, ')
@@ -1311,6 +1479,8 @@ class ForumCommentData extends DataClass
     authorId,
     authorName,
     content,
+    likeCount,
+    isLiked,
     createdAt,
     updatedAt,
     syncStatus,
@@ -1327,6 +1497,8 @@ class ForumCommentData extends DataClass
           other.authorId == this.authorId &&
           other.authorName == this.authorName &&
           other.content == this.content &&
+          other.likeCount == this.likeCount &&
+          other.isLiked == this.isLiked &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.syncStatus == this.syncStatus &&
@@ -1341,6 +1513,8 @@ class ForumCommentsCompanion extends UpdateCompanion<ForumCommentData> {
   final Value<String> authorId;
   final Value<String> authorName;
   final Value<String> content;
+  final Value<int> likeCount;
+  final Value<bool> isLiked;
   final Value<DateTime> createdAt;
   final Value<DateTime?> updatedAt;
   final Value<String> syncStatus;
@@ -1354,6 +1528,8 @@ class ForumCommentsCompanion extends UpdateCompanion<ForumCommentData> {
     this.authorId = const Value.absent(),
     this.authorName = const Value.absent(),
     this.content = const Value.absent(),
+    this.likeCount = const Value.absent(),
+    this.isLiked = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.syncStatus = const Value.absent(),
@@ -1368,6 +1544,8 @@ class ForumCommentsCompanion extends UpdateCompanion<ForumCommentData> {
     required String authorId,
     required String authorName,
     required String content,
+    this.likeCount = const Value.absent(),
+    this.isLiked = const Value.absent(),
     required DateTime createdAt,
     this.updatedAt = const Value.absent(),
     this.syncStatus = const Value.absent(),
@@ -1387,6 +1565,8 @@ class ForumCommentsCompanion extends UpdateCompanion<ForumCommentData> {
     Expression<String>? authorId,
     Expression<String>? authorName,
     Expression<String>? content,
+    Expression<int>? likeCount,
+    Expression<bool>? isLiked,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<String>? syncStatus,
@@ -1401,6 +1581,8 @@ class ForumCommentsCompanion extends UpdateCompanion<ForumCommentData> {
       if (authorId != null) 'author_id': authorId,
       if (authorName != null) 'author_name': authorName,
       if (content != null) 'content': content,
+      if (likeCount != null) 'like_count': likeCount,
+      if (isLiked != null) 'is_liked': isLiked,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (syncStatus != null) 'sync_status': syncStatus,
@@ -1417,6 +1599,8 @@ class ForumCommentsCompanion extends UpdateCompanion<ForumCommentData> {
     Value<String>? authorId,
     Value<String>? authorName,
     Value<String>? content,
+    Value<int>? likeCount,
+    Value<bool>? isLiked,
     Value<DateTime>? createdAt,
     Value<DateTime?>? updatedAt,
     Value<String>? syncStatus,
@@ -1431,6 +1615,8 @@ class ForumCommentsCompanion extends UpdateCompanion<ForumCommentData> {
       authorId: authorId ?? this.authorId,
       authorName: authorName ?? this.authorName,
       content: content ?? this.content,
+      likeCount: likeCount ?? this.likeCount,
+      isLiked: isLiked ?? this.isLiked,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       syncStatus: syncStatus ?? this.syncStatus,
@@ -1460,6 +1646,12 @@ class ForumCommentsCompanion extends UpdateCompanion<ForumCommentData> {
     }
     if (content.present) {
       map['content'] = Variable<String>(content.value);
+    }
+    if (likeCount.present) {
+      map['like_count'] = Variable<int>(likeCount.value);
+    }
+    if (isLiked.present) {
+      map['is_liked'] = Variable<bool>(isLiked.value);
     }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
@@ -1491,6 +1683,8 @@ class ForumCommentsCompanion extends UpdateCompanion<ForumCommentData> {
           ..write('authorId: $authorId, ')
           ..write('authorName: $authorName, ')
           ..write('content: $content, ')
+          ..write('likeCount: $likeCount, ')
+          ..write('isLiked: $isLiked, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('syncStatus: $syncStatus, ')
@@ -2138,8 +2332,10 @@ typedef $$ForumPostsTableCreateCompanionBuilder =
       Value<DateTime?> updatedAt,
       Value<int> commentCount,
       Value<int> likeCount,
+      Value<int?> viewCount,
       Value<bool> isLiked,
       Value<String> syncStatus,
+      Value<String?> sources,
       Value<DateTime?> lastSyncAttempt,
       Value<int> syncRetryCount,
       Value<int> rowid,
@@ -2156,8 +2352,10 @@ typedef $$ForumPostsTableUpdateCompanionBuilder =
       Value<DateTime?> updatedAt,
       Value<int> commentCount,
       Value<int> likeCount,
+      Value<int?> viewCount,
       Value<bool> isLiked,
       Value<String> syncStatus,
+      Value<String?> sources,
       Value<DateTime?> lastSyncAttempt,
       Value<int> syncRetryCount,
       Value<int> rowid,
@@ -2222,6 +2420,11 @@ class $$ForumPostsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<int> get viewCount => $composableBuilder(
+    column: $table.viewCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<bool> get isLiked => $composableBuilder(
     column: $table.isLiked,
     builder: (column) => ColumnFilters(column),
@@ -2229,6 +2432,11 @@ class $$ForumPostsTableFilterComposer
 
   ColumnFilters<String> get syncStatus => $composableBuilder(
     column: $table.syncStatus,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sources => $composableBuilder(
+    column: $table.sources,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2302,6 +2510,11 @@ class $$ForumPostsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get viewCount => $composableBuilder(
+    column: $table.viewCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<bool> get isLiked => $composableBuilder(
     column: $table.isLiked,
     builder: (column) => ColumnOrderings(column),
@@ -2309,6 +2522,11 @@ class $$ForumPostsTableOrderingComposer
 
   ColumnOrderings<String> get syncStatus => $composableBuilder(
     column: $table.syncStatus,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sources => $composableBuilder(
+    column: $table.sources,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -2366,6 +2584,9 @@ class $$ForumPostsTableAnnotationComposer
   GeneratedColumn<int> get likeCount =>
       $composableBuilder(column: $table.likeCount, builder: (column) => column);
 
+  GeneratedColumn<int> get viewCount =>
+      $composableBuilder(column: $table.viewCount, builder: (column) => column);
+
   GeneratedColumn<bool> get isLiked =>
       $composableBuilder(column: $table.isLiked, builder: (column) => column);
 
@@ -2373,6 +2594,9 @@ class $$ForumPostsTableAnnotationComposer
     column: $table.syncStatus,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get sources =>
+      $composableBuilder(column: $table.sources, builder: (column) => column);
 
   GeneratedColumn<DateTime> get lastSyncAttempt => $composableBuilder(
     column: $table.lastSyncAttempt,
@@ -2426,8 +2650,10 @@ class $$ForumPostsTableTableManager
                 Value<DateTime?> updatedAt = const Value.absent(),
                 Value<int> commentCount = const Value.absent(),
                 Value<int> likeCount = const Value.absent(),
+                Value<int?> viewCount = const Value.absent(),
                 Value<bool> isLiked = const Value.absent(),
                 Value<String> syncStatus = const Value.absent(),
+                Value<String?> sources = const Value.absent(),
                 Value<DateTime?> lastSyncAttempt = const Value.absent(),
                 Value<int> syncRetryCount = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -2442,8 +2668,10 @@ class $$ForumPostsTableTableManager
                 updatedAt: updatedAt,
                 commentCount: commentCount,
                 likeCount: likeCount,
+                viewCount: viewCount,
                 isLiked: isLiked,
                 syncStatus: syncStatus,
+                sources: sources,
                 lastSyncAttempt: lastSyncAttempt,
                 syncRetryCount: syncRetryCount,
                 rowid: rowid,
@@ -2460,8 +2688,10 @@ class $$ForumPostsTableTableManager
                 Value<DateTime?> updatedAt = const Value.absent(),
                 Value<int> commentCount = const Value.absent(),
                 Value<int> likeCount = const Value.absent(),
+                Value<int?> viewCount = const Value.absent(),
                 Value<bool> isLiked = const Value.absent(),
                 Value<String> syncStatus = const Value.absent(),
+                Value<String?> sources = const Value.absent(),
                 Value<DateTime?> lastSyncAttempt = const Value.absent(),
                 Value<int> syncRetryCount = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -2476,8 +2706,10 @@ class $$ForumPostsTableTableManager
                 updatedAt: updatedAt,
                 commentCount: commentCount,
                 likeCount: likeCount,
+                viewCount: viewCount,
                 isLiked: isLiked,
                 syncStatus: syncStatus,
+                sources: sources,
                 lastSyncAttempt: lastSyncAttempt,
                 syncRetryCount: syncRetryCount,
                 rowid: rowid,
@@ -2515,6 +2747,8 @@ typedef $$ForumCommentsTableCreateCompanionBuilder =
       required String authorId,
       required String authorName,
       required String content,
+      Value<int> likeCount,
+      Value<bool> isLiked,
       required DateTime createdAt,
       Value<DateTime?> updatedAt,
       Value<String> syncStatus,
@@ -2530,6 +2764,8 @@ typedef $$ForumCommentsTableUpdateCompanionBuilder =
       Value<String> authorId,
       Value<String> authorName,
       Value<String> content,
+      Value<int> likeCount,
+      Value<bool> isLiked,
       Value<DateTime> createdAt,
       Value<DateTime?> updatedAt,
       Value<String> syncStatus,
@@ -2574,6 +2810,16 @@ class $$ForumCommentsTableFilterComposer
 
   ColumnFilters<String> get content => $composableBuilder(
     column: $table.content,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get likeCount => $composableBuilder(
+    column: $table.likeCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isLiked => $composableBuilder(
+    column: $table.isLiked,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2642,6 +2888,16 @@ class $$ForumCommentsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get likeCount => $composableBuilder(
+    column: $table.likeCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isLiked => $composableBuilder(
+    column: $table.isLiked,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -2696,6 +2952,12 @@ class $$ForumCommentsTableAnnotationComposer
 
   GeneratedColumn<String> get content =>
       $composableBuilder(column: $table.content, builder: (column) => column);
+
+  GeneratedColumn<int> get likeCount =>
+      $composableBuilder(column: $table.likeCount, builder: (column) => column);
+
+  GeneratedColumn<bool> get isLiked =>
+      $composableBuilder(column: $table.isLiked, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -2762,6 +3024,8 @@ class $$ForumCommentsTableTableManager
                 Value<String> authorId = const Value.absent(),
                 Value<String> authorName = const Value.absent(),
                 Value<String> content = const Value.absent(),
+                Value<int> likeCount = const Value.absent(),
+                Value<bool> isLiked = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime?> updatedAt = const Value.absent(),
                 Value<String> syncStatus = const Value.absent(),
@@ -2775,6 +3039,8 @@ class $$ForumCommentsTableTableManager
                 authorId: authorId,
                 authorName: authorName,
                 content: content,
+                likeCount: likeCount,
+                isLiked: isLiked,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 syncStatus: syncStatus,
@@ -2790,6 +3056,8 @@ class $$ForumCommentsTableTableManager
                 required String authorId,
                 required String authorName,
                 required String content,
+                Value<int> likeCount = const Value.absent(),
+                Value<bool> isLiked = const Value.absent(),
                 required DateTime createdAt,
                 Value<DateTime?> updatedAt = const Value.absent(),
                 Value<String> syncStatus = const Value.absent(),
@@ -2803,6 +3071,8 @@ class $$ForumCommentsTableTableManager
                 authorId: authorId,
                 authorName: authorName,
                 content: content,
+                likeCount: likeCount,
+                isLiked: isLiked,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 syncStatus: syncStatus,

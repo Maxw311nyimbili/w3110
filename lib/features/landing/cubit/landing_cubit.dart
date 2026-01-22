@@ -16,37 +16,50 @@ class LandingCubit extends Cubit<LandingState> {
   LandingCubit({
     required LandingRepository landingRepository,
     required AuthRepository authRepository,
+    bool isDevelopment = false,
   })  : _landingRepository = landingRepository,
         _authRepository = authRepository,
-        super(const LandingState());
+        _isDevelopment = isDevelopment,
+        super(LandingState(isDemoAvailable: isDevelopment));
 
   final LandingRepository _landingRepository;
   final AuthRepository _authRepository;
+  final bool _isDevelopment;
 
   /// Initialize - check if onboarding already completed
   Future<void> initialize() async {
     try {
+      print('🚀 Initializing LandingCubit...');
       emit(state.copyWith(isLoading: true));
 
       final status = await _landingRepository.getOnboardingStatus();
+      print('  - Onboarding complete: ${status.isComplete}');
+      
+      final isAuthenticated = await _authRepository.isAuthenticated();
+      print('  - User authenticated: $isAuthenticated');
 
-      if (status.isComplete) {
-        // Onboarding already done, go straight to complete
+      if (status.isComplete && isAuthenticated) {
+        print('✅ Onboarding already done, moving to complete');
         emit(state.copyWith(
           currentStep: OnboardingStep.complete,
           selectedRole: _mapStringToRole(status.userRole),
+          userName: status.userName,
+          accountNickname: status.accountNickname,
+          interests: status.interests,
           consentGiven: status.consentGiven,
           consentVersion: status.consentVersion,
           isLoading: false,
         ));
       } else {
-        // Start onboarding from welcome
+        print('ℹ️ Starting onboarding flow');
         emit(state.copyWith(isLoading: false));
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('❌ ERROR in LandingCubit.initialize: $e');
+      print(stackTrace);
       emit(state.copyWith(
         isLoading: false,
-        error: 'Failed to load onboarding status',
+        error: 'Failed to load onboarding status: ${e.toString()}',
       ));
     }
   }
@@ -105,11 +118,12 @@ class LandingCubit extends Cubit<LandingState> {
       }
 
       print('✓ Authentication complete: ${user.email}');
-
-      // Authentication successful - move to role selection
+      
+      // Update state with Google user info
       emit(state.copyWith(
         isAuthenticating: false,
         authError: null,
+        userName: user.displayName,
       ));
 
       // Move to next step (role selection)
@@ -129,6 +143,34 @@ class LandingCubit extends Cubit<LandingState> {
     }
   }
 
+  /// Authenticate as demo user (Bypass)
+  Future<void> authenticateAsDemo() async {
+    try {
+      emit(state.copyWith(isAuthenticating: true, authError: null));
+
+      // Sign in as demo user via repo
+      final user = await _authRepository.signInAsDemo();
+
+      print('✓ Demo Authentication complete: ${user.email}');
+      
+      // Update state with Demo user info
+      emit(state.copyWith(
+        isAuthenticating: false,
+        authError: null,
+        userName: user.displayName,
+      ));
+
+      // Move to next step (role selection)
+      nextStep();
+    } catch (e) {
+      print('❌ Demo Sign-in error: $e');
+      emit(state.copyWith(
+        isAuthenticating: false,
+        authError: 'Demo Sign-in failed: ${e.toString()}',
+      ));
+    }
+  }
+
   /// Skip optional steps
   void skipStep() {
     if (state.currentStep == OnboardingStep.contextGathering) {
@@ -138,7 +180,27 @@ class LandingCubit extends Cubit<LandingState> {
 
   /// Select user role
   void selectRole(UserRole role) {
-    emit(state.copyWith(selectedRole: role));
+    // Professional roles start as unverified
+    final isProfessional = role == UserRole.doctor || 
+                          role == UserRole.midwife || 
+                          role == UserRole.clinician;
+    
+    emit(state.copyWith(
+      selectedRole: role,
+      isVerified: !isProfessional,
+      verificationStatus: isProfessional ? 'pending' : 'none',
+      // Suggest account nickname based on role
+      accountNickname: _suggestNickname(role, state.userName),
+    ));
+  }
+
+  String _suggestNickname(UserRole role, String? name) {
+    final roleName = _mapRoleToString(role).replaceAll('_', ' ');
+    final capitalized = roleName[0].toUpperCase() + roleName.substring(1);
+    if (name != null && name.isNotEmpty) {
+      return '$capitalized Profile - $name';
+    }
+    return '$capitalized Profile';
   }
 
   /// Add interest/topic
@@ -159,6 +221,11 @@ class LandingCubit extends Cubit<LandingState> {
     emit(state.copyWith(userName: name));
   }
 
+  /// Set account nickname
+  void setAccountNickname(String name) {
+    emit(state.copyWith(accountNickname: name));
+  }
+
   /// Give consent
   void giveConsent(bool given, String version) {
     emit(state.copyWith(
@@ -175,6 +242,9 @@ class LandingCubit extends Cubit<LandingState> {
       final onboardingStatus = OnboardingStatus(
         isComplete: true,
         userRole: _mapRoleToString(state.selectedRole),
+        userName: state.userName,
+        accountNickname: state.accountNickname,
+        interests: state.interests,
         consentGiven: state.consentGiven,
         consentVersion: state.consentVersion ?? '1.0',
         completedAt: DateTime.now(),
@@ -197,7 +267,7 @@ class LandingCubit extends Cubit<LandingState> {
   /// Reset onboarding (for testing/debugging)
   Future<void> resetOnboarding() async {
     await _landingRepository.clearOnboardingStatus();
-    emit(const LandingState());
+    emit(LandingState(isDemoAvailable: _isDevelopment));
   }
 
   /// Clear error state
@@ -210,10 +280,12 @@ class LandingCubit extends Cubit<LandingState> {
   OnboardingStep _getNextStep(OnboardingStep current) {
     switch (current) {
       case OnboardingStep.welcome:
-        return OnboardingStep.authentication; // ← Auth is next after welcome
+        return OnboardingStep.authentication;
       case OnboardingStep.authentication:
         return OnboardingStep.roleSelection;
       case OnboardingStep.roleSelection:
+        return OnboardingStep.profileSetup;
+      case OnboardingStep.profileSetup:
         return OnboardingStep.contextGathering;
       case OnboardingStep.contextGathering:
         return OnboardingStep.consent;
@@ -229,11 +301,13 @@ class LandingCubit extends Cubit<LandingState> {
       case OnboardingStep.welcome:
         return null;
       case OnboardingStep.authentication:
-        return OnboardingStep.welcome; // ← Can go back to welcome
+        return OnboardingStep.welcome;
       case OnboardingStep.roleSelection:
-        return OnboardingStep.authentication; // ← Can go back to auth
-      case OnboardingStep.contextGathering:
+        return OnboardingStep.authentication;
+      case OnboardingStep.profileSetup:
         return OnboardingStep.roleSelection;
+      case OnboardingStep.contextGathering:
+        return OnboardingStep.profileSetup;
       case OnboardingStep.consent:
         return OnboardingStep.contextGathering;
       case OnboardingStep.complete:
@@ -243,29 +317,33 @@ class LandingCubit extends Cubit<LandingState> {
 
   String _mapRoleToString(UserRole? role) {
     switch (role) {
-      case UserRole.expectingMother:
-        return 'expecting_mother';
-      case UserRole.healthcareProvider:
-        return 'healthcare_provider';
-      case UserRole.parentCaregiver:
-        return 'parent_caregiver';
-      case UserRole.explorer:
-        return 'explorer';
+      case UserRole.mother:
+        return 'mother';
+      case UserRole.supportPartner:
+        return 'support_partner';
+      case UserRole.doctor:
+        return 'doctor';
+      case UserRole.midwife:
+        return 'midwife';
+      case UserRole.clinician:
+        return 'clinician';
       case null:
-        return 'explorer';
+        return 'mother';
     }
   }
 
   UserRole? _mapStringToRole(String? roleString) {
     switch (roleString) {
-      case 'expecting_mother':
-        return UserRole.expectingMother;
-      case 'healthcare_provider':
-        return UserRole.healthcareProvider;
-      case 'parent_caregiver':
-        return UserRole.parentCaregiver;
-      case 'explorer':
-        return UserRole.explorer;
+      case 'mother':
+        return UserRole.mother;
+      case 'support_partner':
+        return UserRole.supportPartner;
+      case 'doctor':
+        return UserRole.doctor;
+      case 'midwife':
+        return UserRole.midwife;
+      case 'clinician':
+        return UserRole.clinician;
       default:
         return null;
     }

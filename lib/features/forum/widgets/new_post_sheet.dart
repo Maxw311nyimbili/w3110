@@ -3,21 +3,40 @@
 import 'package:cap_project/core/theme/app_colors.dart';
 import 'package:cap_project/core/theme/app_text_styles.dart';
 import 'package:cap_project/features/forum/cubit/forum_cubit.dart';
+import 'package:cap_project/features/auth/cubit/auth_cubit.dart';
+import 'package:cap_project/features/auth/cubit/auth_state.dart';
+import 'package:forum_repository/forum_repository.dart';
 import 'package:cap_project/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class NewPostSheet extends StatefulWidget {
-  const NewPostSheet({super.key});
+  const NewPostSheet({
+    this.initialTitle,
+    this.initialContent,
+    this.sources = const [],
+    super.key,
+  });
+
+  final String? initialTitle;
+  final String? initialContent;
+  final List<ForumPostSource> sources;
 
   @override
   State<NewPostSheet> createState() => _NewPostSheetState();
 }
 
 class _NewPostSheetState extends State<NewPostSheet> {
-  final _titleController = TextEditingController();
-  final _contentController = TextEditingController();
+  late final TextEditingController _titleController;
+  late final TextEditingController _contentController;
   final _formKey = GlobalKey<FormState>();
+
+  @override
+  void initState() {
+    super.initState();
+    _titleController = TextEditingController(text: widget.initialTitle);
+    _contentController = TextEditingController(text: widget.initialContent);
+  }
 
   @override
   void dispose() {
@@ -31,16 +50,17 @@ class _NewPostSheetState extends State<NewPostSheet> {
       final title = _titleController.text.trim();
       final content = _contentController.text.trim();
 
-      // Assuming auth is handled elsewhere or anonymous
-      // In a real app, get currentUser ID
-      const fakeAuthorId = 'user_123'; 
-      const fakeAuthorName = 'You';
+      // Get real user information from AuthCubit
+      final authState = context.read<AuthCubit>().state;
+      final authorId = authState.user?.id ?? 'anonymous';
+      final authorName = authState.user?.displayName ?? 'Anonymous';
 
       context.read<ForumCubit>().createPost(
         title: title,
         content: content,
-        authorId: fakeAuthorId,
-        authorName: fakeAuthorName,
+        authorId: authorId,
+        authorName: authorName,
+        sources: widget.sources,
       );
 
       Navigator.pop(context);

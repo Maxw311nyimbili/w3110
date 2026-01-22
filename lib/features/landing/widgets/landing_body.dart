@@ -6,6 +6,7 @@ import '../cubit/cubit.dart';
 import 'welcome_step.dart';
 import 'authentication_step.dart';
 import 'role_selection_step.dart';
+import 'profile_setup_step.dart';
 import 'context_gathering_step.dart';
 import 'consent_step.dart';
 
@@ -43,6 +44,8 @@ class LandingBody extends StatelessWidget {
         return const AuthenticationStep(key: ValueKey('auth'));
       case OnboardingStep.roleSelection:
         return const RoleSelectionStep(key: ValueKey('role'));
+      case OnboardingStep.profileSetup:
+        return const ProfileSetupStep(key: ValueKey('profile_setup'));
       case OnboardingStep.contextGathering:
         return const ContextGatheringStep(key: ValueKey('context'));
       case OnboardingStep.consent:

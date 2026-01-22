@@ -1,8 +1,10 @@
 // packages/forum_repository/lib/src/models/forum_post.dart
 
 import 'package:equatable/equatable.dart';
-import 'sync_status.dart'; // Ensure this exists or is exported
+import 'sync_status.dart';
+import 'forum_post_source.dart';
 import '../database/forum_database.dart';
+import 'dart:convert';
 
 /// Forum post model - represents a forum post in the app
 class ForumPost extends Equatable {
@@ -17,8 +19,10 @@ class ForumPost extends Equatable {
     this.updatedAt,
     this.commentCount = 0,
     this.likeCount = 0,
+    this.viewCount = 0,
     this.isLiked = false,
     this.syncStatus = SyncStatus.synced,
+    this.sources = const [],
   });
 
   final String id; // Server ID
@@ -31,8 +35,10 @@ class ForumPost extends Equatable {
   final DateTime? updatedAt;
   final int commentCount;
   final int likeCount;
+  final int viewCount;
   final bool isLiked;
   final SyncStatus syncStatus;
+  final List<ForumPostSource> sources;
 
   // Helpers
   bool get isPendingSync => syncStatus == SyncStatus.pending;
@@ -53,8 +59,14 @@ class ForumPost extends Equatable {
       updatedAt: data.updatedAt,
       commentCount: data.commentCount,
       likeCount: data.likeCount,
+      viewCount: data.viewCount ?? 0,
       isLiked: data.isLiked,
       syncStatus: _parseSyncStatus(data.syncStatus),
+      sources: data.sources != null 
+          ? (jsonDecode(data.sources!) as List)
+              .map((e) => ForumPostSource.fromJson(e as Map<String, dynamic>))
+              .toList()
+          : const [],
     );
   }
 
@@ -73,7 +85,12 @@ class ForumPost extends Equatable {
           : null,
       commentCount: json['comment_count'] as int? ?? 0,
       likeCount: json['like_count'] as int? ?? 0,
+      viewCount: json['view_count'] as int? ?? 0,
+      isLiked: json['is_liked'] as bool? ?? false,
       syncStatus: SyncStatus.synced, // From server = already synced
+      sources: (json['sources'] as List? ?? [])
+          .map((e) => ForumPostSource.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
   }
 
@@ -88,6 +105,7 @@ class ForumPost extends Equatable {
     DateTime? updatedAt,
     int? commentCount,
     int? likeCount,
+    int? viewCount,
     bool? isLiked,
     SyncStatus? syncStatus,
   }) {
@@ -102,8 +120,10 @@ class ForumPost extends Equatable {
       updatedAt: updatedAt ?? this.updatedAt,
       commentCount: commentCount ?? this.commentCount,
       likeCount: likeCount ?? this.likeCount,
+      viewCount: viewCount ?? this.viewCount,
       isLiked: isLiked ?? this.isLiked,
       syncStatus: syncStatus ?? this.syncStatus,
+      sources: sources ?? this.sources,
     );
   }
 
@@ -128,7 +148,9 @@ class ForumPost extends Equatable {
     updatedAt,
     commentCount,
     likeCount,
+    viewCount,
     isLiked,
     syncStatus,
+    sources,
   ];
 }

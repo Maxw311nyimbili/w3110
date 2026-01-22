@@ -71,12 +71,14 @@ class SyncManager {
       // Backend endpoint: POST /forum/posts
       // Request: { "title": "...", "content": "...", "author_id": "..." }
       // Response: { "id": "server-uuid", ... }
+        final postModel = ForumPost.fromDatabase(post);
         final response = await _apiClient.post(
           '/forum/posts',
           data: {
-            'title': post.title,
-            'content': post.content,
-            'author_id': post.authorId,
+            'title': postModel.title,
+            'content': postModel.content,
+            'author_id': postModel.authorId,
+            'sources': postModel.sources.map((e) => e.toJson()).toList(),
           },
         );
 

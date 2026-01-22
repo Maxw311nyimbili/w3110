@@ -124,8 +124,6 @@ class SideMenu extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap ?? () {
-          // If in a drawer context, pop may be needed, but this is designed as a persistent side menu.
-          // We'll check if we CAN pop.
           if (Scaffold.of(context).hasDrawer && Scaffold.of(context).isDrawerOpen) {
              Navigator.pop(context);
           }
@@ -133,20 +131,21 @@ class SideMenu extends StatelessWidget {
             AppRouter.replaceTo(context, route);
           }
         },
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(12),
         child: Container(
           width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
           decoration: BoxDecoration(
-            color: isSelected ? AppColors.gray200 : Colors.transparent, // Subtle selection
-            borderRadius: BorderRadius.circular(8),
+            color: isSelected ? AppColors.backgroundElevated : Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
+            border: isSelected ? Border.all(color: AppColors.borderLight, width: 1.0) : null,
           ),
           child: Row(
             children: [
               if (icon != null) ...[
                 Icon(
                   icon,
-                  size: 18,
+                  size: 20,
                   color: isPrimary ? AppColors.accentPrimary : (isSelected ? AppColors.textPrimary : AppColors.textSecondary),
                 ),
                 const SizedBox(width: 12),
@@ -154,10 +153,10 @@ class SideMenu extends StatelessWidget {
               Text(
                 label,
                 style: isPrimary 
-                  ? AppTextStyles.labelLarge.copyWith(color: AppColors.accentPrimary, fontWeight: FontWeight.w600)
+                  ? AppTextStyles.labelLarge.copyWith(color: AppColors.accentPrimary, fontWeight: FontWeight.w700)
                   : AppTextStyles.bodyMedium.copyWith(
                       color: isSelected ? AppColors.textPrimary : AppColors.textSecondary,
-                      fontWeight: isSelected ? FontWeight.w500 : FontWeight.w400,
+                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                     ),
               ),
             ],

@@ -158,21 +158,31 @@ class _RefinedChatInputState extends State<RefinedChatInput> with TickerProvider
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.fromLTRB(16, 8, 16, MediaQuery.of(context).padding.bottom + 8),
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
       decoration: BoxDecoration(
         color: AppColors.backgroundPrimary,
         border: Border(
           top: BorderSide(
-            color: AppColors.borderLight.withOpacity(0.5),
-            width: 0.5,
+            color: AppColors.borderLight.withOpacity(0.8),
+            width: 1,
           ),
         ),
       ),
       child: Container(
         decoration: BoxDecoration(
           color: AppColors.backgroundSurface,
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: AppColors.borderLight, width: 0.5),
+          borderRadius: BorderRadius.circular(28),
+          border: Border.all(
+            color: AppColors.borderLight, 
+            width: 1.0,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: widget.isAudioMode ? _buildAudioBar() : _buildInputBar(),
       ),
@@ -184,24 +194,28 @@ class _RefinedChatInputState extends State<RefinedChatInput> with TickerProvider
       mainAxisSize: MainAxisSize.min,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: TextField(
-            controller: _controller,
-            focusNode: _focusNode,
-            maxLines: 5,
-            minLines: 1,
-            style: AppTextStyles.bodyMedium,
-            decoration: InputDecoration(
-              hintText: AppLocalizations.of(context).askAnything,
-              hintStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.textTertiary),
-              border: InputBorder.none,
-              enabledBorder: InputBorder.none,
-              focusedBorder: InputBorder.none,
-              errorBorder: InputBorder.none,
-              disabledBorder: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(vertical: 20),
+          padding: const EdgeInsets.fromLTRB(20, 4, 12, 0),
+            child: TextField(
+              controller: _controller,
+              focusNode: _focusNode,
+              maxLines: 6, // predictable growth limit
+              minLines: 1,
+              keyboardType: TextInputType.multiline,
+              textInputAction: TextInputAction.newline,
+              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary),
+              decoration: InputDecoration(
+                hintText: AppLocalizations.of(context).askAnything,
+                hintStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.textTertiary),
+                filled: false, // Override global theme
+                fillColor: Colors.transparent,
+                border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                errorBorder: InputBorder.none,
+                disabledBorder: InputBorder.none,
+                contentPadding: const EdgeInsets.symmetric(vertical: 12),
+              ),
             ),
-          ),
         ),
         Padding(
           padding: const EdgeInsets.only(left: 12, right: 12, bottom: 12),
@@ -223,17 +237,27 @@ class _RefinedChatInputState extends State<RefinedChatInput> with TickerProvider
                   final canSend = _hasText && !state.isTyping;
                   return GestureDetector(
                     onTap: canSend ? _sendMessage : null,
-                    child: AnimatedContainer(
+                    child: AnimatedScale(
+                      scale: canSend ? 1.0 : 0.9,
                       duration: const Duration(milliseconds: 200),
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: canSend ? AppColors.accentPrimary : AppColors.gray200,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.arrow_upward_rounded,
-                        size: 22,
-                        color: Colors.white,
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: canSend ? AppColors.accentPrimary : AppColors.borderLight,
+                          shape: BoxShape.circle,
+                          boxShadow: canSend ? [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            )
+                          ] : null,
+                        ),
+                        child: const Icon(
+                          Icons.arrow_upward_rounded,
+                          size: 20,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   );

@@ -231,15 +231,15 @@ class _CaptureButton extends StatelessWidget {
           border: Border.all(
             color: onPressed != null
                 ? AppColors.accentPrimary
-                : AppColors.gray200,
+                : AppColors.borderLight,
             width: 4,
           ),
           boxShadow: onPressed != null
               ? [
             BoxShadow(
-              color: AppColors.accentPrimary.withOpacity(0.3),
-              blurRadius: 8,
-              spreadRadius: 2,
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
           ]
               : [],
@@ -252,12 +252,12 @@ class _CaptureButton extends StatelessWidget {
             ),
           )
               : Container(
-            width: 64,
-            height: 64,
+            width: 62,
+            height: 62,
             decoration: BoxDecoration(
               color: onPressed != null
                   ? AppColors.accentPrimary
-                  : AppColors.gray200,
+                  : AppColors.borderLight,
               shape: BoxShape.circle,
             ),
           ),
