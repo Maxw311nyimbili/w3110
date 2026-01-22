@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "956333738143-unhj12q6ijj5k8687gk64c06daropdc7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.verygoodcore.cap_project",
+            "certificate_hash": "7321f45694be79cde8caa70648388fae270d773f"
+          }
+        },
+        {
           "client_id": "956333738143-2sr0rd0qfguchkrbbe9jg5bp9se565pq.apps.googleusercontent.com",
           "client_type": 3
         }

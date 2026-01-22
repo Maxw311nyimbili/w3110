@@ -64,7 +64,7 @@ class AuthenticationStep extends StatelessWidget {
                       height: 56,
                       width: double.infinity,
                       decoration: BoxDecoration(
-                        border: Border.all(color: AppColors.gray200),
+                        border: Border.all(color: AppColors.borderLight),
                         borderRadius: BorderRadius.circular(30),
                         color: AppColors.backgroundSurface,
                       ),
@@ -80,19 +80,20 @@ class AuthenticationStep extends StatelessWidget {
                     ),
                     
                     const Spacer(),
-                    Center(
-                      child: TextButton(
-                        onPressed: state.isAuthenticating 
-                            ? null 
-                            : () => context.read<LandingCubit>().nextStep(), // Bypass
-                        child: Text(
-                          'Skip for now (Dev)',
-                          style: AppTextStyles.labelSmall.copyWith(
-                            color: AppColors.textTertiary,
+                    if (state.isDemoAvailable)
+                      Center(
+                        child: TextButton(
+                          onPressed: state.isAuthenticating 
+                              ? null 
+                              : () => context.read<LandingCubit>().authenticateAsDemo(), 
+                          child: Text(
+                            'Demo Login (Dev)',
+                            style: AppTextStyles.labelSmall.copyWith(
+                              color: AppColors.textTertiary,
+                            ),
                           ),
                         ),
                       ),
-                    ),
                     const SizedBox(height: 16),
                   ],
                 ),

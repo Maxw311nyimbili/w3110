@@ -4,6 +4,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/constants/app_constants.dart';
 import '../cubit/cubit.dart';
+import 'package:cap_project/core/widgets/premium_button.dart';
 
 class ConsentStep extends StatelessWidget {
   const ConsentStep({super.key});
@@ -61,34 +62,97 @@ class ConsentStep extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 56,
-                    child: ElevatedButton(
-                      onPressed: state.consentGiven
-                          ? () => context.read<LandingCubit>().completeOnboarding()
-                          : null,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.textPrimary,
-                        foregroundColor: AppColors.backgroundSurface,
-                        disabledBackgroundColor: AppColors.gray300,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                      ),
-                      child: Text(
-                        state.isLoading ? 'Setting up...' : 'Get Started',
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ),
+                  PremiumButton(
+                    onPressed: state.consentGiven
+                        ? () => context.read<LandingCubit>().completeOnboarding()
+                        : null,
+                    text: 'Complete Setup',
                   ),
+                  const SizedBox(height: 24),
                 ],
               ),
             ),
           ),
         );
       },
+    );
+  }
+
+  Widget _buildConsentOption(
+    BuildContext context,
+    String title,
+    String description,
+    bool isSelected,
+    VoidCallback onTap,
+  ) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(24),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: AppColors.backgroundSurface,
+          border: Border.all(
+            color: isSelected ? AppColors.accentPrimary : AppColors.borderLight,
+            width: isSelected ? 2.0 : 1.0,
+          ),
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: isSelected 
+                  ? Colors.black.withOpacity(0.05) 
+                  : Colors.black.withOpacity(0.02),
+              blurRadius: isSelected ? 20 : 10,
+              offset: const Offset(0, 4),
+            )
+          ],
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: AppTextStyles.headlineSmall.copyWith(
+                      color: isSelected ? AppColors.accentPrimary : AppColors.textPrimary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    description,
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: AppColors.textSecondary,
+                      fontSize: 14,
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              width: 24,
+              height: 24,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: isSelected ? AppColors.accentPrimary : AppColors.borderLight,
+                  width: 2,
+                ),
+                color: isSelected ? AppColors.accentPrimary : Colors.transparent,
+              ),
+              child: isSelected 
+                  ? const Icon(Icons.check, size: 16, color: Colors.white)
+                  : null,
+            ),
+          ],
+        ),
+      ),
     );
   }
 

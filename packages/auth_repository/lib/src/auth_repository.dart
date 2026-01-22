@@ -90,13 +90,64 @@ class AuthRepository {
 
       return idToken;
     } on firebase_auth.FirebaseAuthException catch (e) {
-      print('Firebase Auth error: ${e.code} - ${e.message}');
+      print('❌ Firebase Auth error: [${e.code}] ${e.message}');
+      print('   - Full error: $e');
       throw AuthException(
           'Firebase authentication failed: ${e.message}');
-    } catch (e) {
-      print('Google Sign-In error: $e');
-      throw AuthException('Google Sign-In failed: ${e.toString()}');
+    } catch (e, stackTrace) {
+      print('❌ Unexpected Google Sign-In error: $e');
+      print(stackTrace);
+      
+      String message = e.toString();
+      if (message.contains('7:')) {
+        message = 'Network error (7). Please check your internet connection.';
+      } else if (message.contains('10:')) {
+        message = 'Developer error (10). This usually means the SHA-1 fingerprint or package name is incorrect in the Google Cloud Console.';
+      } else if (message.contains('12500')) {
+        message = 'Sign-in failed (12500). Please ensure Google Play Services is updated.';
+      } else if (message.contains('12501')) {
+        message = 'Sign-in cancelled by user (12501).';
+      }
+      
+      throw AuthException('Google Sign-In failed: $message');
     }
+  }
+
+  // ============ Demo Development Mode ============
+
+  /// Sign in as a demo user (Development only)
+  ///
+  /// Bypasses backend and Firebase authentication.
+  /// Creates a local session with fake tokens and user data.
+  Future<User> signInAsDemo() async {
+    print('Starting Demo Sign-In flow...');
+    
+    // Create a fake user
+    final demoUser = const User(
+        id: 'demo-user-id', 
+        email: 'demo@example.com', 
+        displayName: 'Demo User',
+        photoUrl: null, // Could add a placeholder image
+        role: 'user', 
+    );
+
+    // Create fake tokens
+    final fakeTokens = AuthTokens(
+        accessToken: 'fake-demo-access-token',
+        refreshToken: 'fake-demo-refresh-token',
+        expiresIn: 3600,
+    );
+
+    // Store fake tokens
+    await _secureStorage.saveAccessToken(fakeTokens.accessToken);
+    await _secureStorage.saveRefreshToken(fakeTokens.refreshToken);
+    
+    // Store user data
+    await _secureStorage.saveUserData(jsonEncode(demoUser.toJson()));
+    
+    print('✓ Demo session created: ${demoUser.email}');
+    
+    return demoUser;
   }
 
   // ============ Token Exchange ============

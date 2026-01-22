@@ -89,12 +89,9 @@ class _ChatBodyState extends State<ChatBody> {
         
         if (state.hasMessages) {
           final lastMessage = state.messages.last;
-          final isUserMessage = lastMessage.isUser;
-          
-          if (isUserMessage) {
+          if (lastMessage.isUser) {
             _scrollToLatestMessage();
           } else {
-            // AI message arrived
             if (_scrollController.hasClients && _scrollController.offset > 100) {
               setState(() {
                 _showScrollToBottom = true;
@@ -108,30 +105,74 @@ class _ChatBodyState extends State<ChatBody> {
       },
       child: Container(
         color: AppColors.backgroundPrimary,
-        child: Stack(
+        child: Column(
           children: [
-            Column(
-              children: [
             Expanded(
-              child: BlocBuilder<ChatCubit, ChatState>(
-                builder: (context, state) {
-                  if (state.isLoading && !state.hasMessages) {
-                    return const Center(
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          AppColors.accentPrimary,
+              child: SafeArea(
+                bottom: false,
+                child: Stack(
+                  children: [
+                    BlocBuilder<ChatCubit, ChatState>(
+                      builder: (context, state) {
+                        if (state.isLoading && !state.hasMessages) {
+                          return const Center(
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                AppColors.accentPrimary,
+                              ),
+                            ),
+                          );
+                        }
+
+                        if (!state.hasMessages) {
+                          return _buildEmptyState(context);
+                        }
+
+                        return _buildMessageList(context, state);
+                      },
+                    ),
+                    if (_showScrollToBottom)
+                      Positioned(
+                        bottom: 20,
+                        left: 0,
+                        right: 0,
+                        child: Center(
+                          child: GestureDetector(
+                            onTap: _scrollToLatestMessage,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: AppColors.accentPrimary.withOpacity(0.95),
+                                borderRadius: BorderRadius.circular(20),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.arrow_downward_rounded, color: Colors.white, size: 18),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    _unreadCount > 1 ? '$_unreadCount New Messages' : 'New Message',
+                                    style: AppTextStyles.labelMedium.copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
                         ),
                       ),
-                    );
-                  }
-
-                  if (!state.hasMessages) {
-                    return _buildEmptyState(context);
-                  }
-
-                  return _buildMessageList(context, state);
-                },
+                  ],
+                ),
               ),
             ),
             BlocBuilder<ChatCubit, ChatState>(
@@ -144,51 +185,13 @@ class _ChatBodyState extends State<ChatBody> {
                 return const SizedBox.shrink();
               },
             ),
-            RefinedChatInput(
-              isAudioMode: widget.isAudioMode,
-              onToggleAudio: widget.onToggleAudio,
-            ),
-          ],
-        ),
-            if (_showScrollToBottom)
-              Positioned(
-                bottom: 100,
-                left: 0,
-                right: 0,
-                child: Center(
-                  child: GestureDetector(
-                    onTap: _scrollToLatestMessage,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: AppColors.accentPrimary.withOpacity(0.95),
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.arrow_downward_rounded, color: Colors.white, size: 18),
-                          const SizedBox(width: 8),
-                          Text(
-                            _unreadCount > 1 ? '$_unreadCount New Messages' : 'New Message',
-                            style: AppTextStyles.labelMedium.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
+            SafeArea(
+              top: false,
+              child: RefinedChatInput(
+                isAudioMode: widget.isAudioMode,
+                onToggleAudio: widget.onToggleAudio,
               ),
+            ),
           ],
         ),
       ),
@@ -199,49 +202,51 @@ class _ChatBodyState extends State<ChatBody> {
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.backgroundSurface,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
-                  ),
-                ],
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppColors.backgroundSurface,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.shield_outlined,
+                  size: 32,
+                  color: AppColors.accentPrimary,
+                ),
               ),
-              child: const Icon(
-                Icons.shield_outlined,
-                size: 32,
-                color: AppColors.accentPrimary,
+              const SizedBox(height: 32),
+              Text(
+                AppLocalizations.of(context).chatWelcomeTitle,
+                style: AppTextStyles.displayMedium.copyWith(
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.w800,
+                  height: 1.2,
+                  letterSpacing: -1,
+                ),
+                textAlign: TextAlign.center,
               ),
-            ),
-            const SizedBox(height: 32),
-            Text(
-              AppLocalizations.of(context).chatWelcomeTitle,
-              style: AppTextStyles.displayMedium.copyWith(
-                color: AppColors.textPrimary,
-                fontWeight: FontWeight.w800,
-                height: 1.2,
-                letterSpacing: -1,
+              const SizedBox(height: 16),
+              Text(
+                AppLocalizations.of(context).chatWelcomeSubtitle,
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: AppColors.textSecondary,
+                  letterSpacing: 0.2,
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              AppLocalizations.of(context).chatWelcomeSubtitle,
-              style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.textSecondary,
-                letterSpacing: 0.2,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -250,11 +255,11 @@ class _ChatBodyState extends State<ChatBody> {
   Widget _buildMessageList(BuildContext context, ChatState state) {
     return ListView.builder(
       controller: _scrollController,
-      padding: EdgeInsets.only(
+      padding: const EdgeInsets.only(
         left: 8,
         right: 8,
         top: 12,
-        bottom: 180,
+        bottom: 24, // Reduced from 180 to allow input area to naturally push content
       ),
       reverse: true,
       itemCount: state.messages.length,

@@ -21,6 +21,8 @@ class AuthInterceptor extends Interceptor {
       RequestInterceptorHandler handler,
       ) async {
     print('🔑 AuthInterceptor: ${options.method} ${options.path}');
+    print('   Full URL: ${options.uri}');
+    print('   Timeouts - Connect: ${options.connectTimeout}, Receive: ${options.receiveTimeout}');
 
     // Skip auth for public endpoints
     if (_isPublicEndpoint(options.path)) {
@@ -49,6 +51,9 @@ class AuthInterceptor extends Interceptor {
       ErrorInterceptorHandler handler,
       ) async {
     print('❌ Request error: ${err.response?.statusCode} ${err.requestOptions.path}');
+    print('   Error type: ${err.type}');
+    print('   Error message: ${err.message}');
+    print('   Request: ${err.requestOptions.method} ${err.requestOptions.uri}');
 
     // Handle 401 Unauthorized - try to refresh token
     if (err.response?.statusCode == 401) {

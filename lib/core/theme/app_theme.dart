@@ -51,10 +51,11 @@ class AppTheme {
 
       // Card theme
       cardTheme: CardThemeData(
-        elevation: 0,
+        elevation: 2, // Subtle shadow
+        shadowColor: AppColors.borderLight.withOpacity(0.5), // Subtle shadow color
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-          side: const BorderSide(color: AppColors.borderLight, width: 0.5),
+          borderRadius: BorderRadius.circular(24),
+          // Removed border side as per instruction
         ),
         color: AppColors.backgroundSurface,
         margin: EdgeInsets.zero,
@@ -63,49 +64,38 @@ class AppTheme {
       // Input decoration theme
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.backgroundSurface,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.lg,
-          vertical: AppSpacing.md,
-        ),
+        fillColor: AppColors.backgroundElevated, // Flat white
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.borderLight),
+          borderRadius: BorderRadius.circular(20),
+          borderSide: const BorderSide(color: AppColors.borderLight, width: 1.0), // Thin border
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.borderLight),
+          borderRadius: BorderRadius.circular(20),
+          borderSide: const BorderSide(color: AppColors.borderLight, width: 1.0), // Thin border
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(
-            color: AppColors.accentPrimary,
-            width: 1.5,
-          ),
+          borderRadius: BorderRadius.circular(20),
+          borderSide: const BorderSide(color: AppColors.accentPrimary, width: 1.0), // Thin border
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(20),
           borderSide: const BorderSide(color: AppColors.error),
         ),
-        hintStyle: AppTextStyles.bodyMedium.copyWith(
-          color: AppColors.textTertiary,
-        ),
+        hintStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.textTertiary),
       ),
 
       // Elevated button theme
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          elevation: 0,
-          backgroundColor: AppColors.accentPrimary,
+          backgroundColor: AppColors.accentPrimary, // Use accentPrimary
           foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.xl,
-            vertical: AppSpacing.lg,
-          ),
+          elevation: 0,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(28),
           ),
-          textStyle: AppTextStyles.labelLarge,
+          textStyle: AppTextStyles.labelLarge.copyWith(fontWeight: FontWeight.w600),
         ),
       ),
 

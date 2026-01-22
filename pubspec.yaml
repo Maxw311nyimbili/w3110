@@ -69,6 +69,7 @@ dependencies:
   flutter_markdown: ^0.7.7+1
   record: ^6.1.2
   audioplayers: ^6.5.1
+  envied: ^1.3.2
 
 dev_dependencies:
   # Testing
@@ -79,10 +80,11 @@ dev_dependencies:
 
   # Code Generation
   drift_dev: ^2.24.0
-  build_runner: ^2.4.14
+  build_runner: ^2.7.1
 
   # Linting
   very_good_analysis: ^10.0.0
+  envied_generator: ^1.3.1
 
 flutter:
   generate: true

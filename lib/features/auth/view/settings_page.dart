@@ -6,6 +6,10 @@ import 'package:cap_project/core/locale/widgets/language_selector_bottom_sheet.d
 import 'package:cap_project/core/theme/app_colors.dart';
 import 'package:cap_project/core/theme/app_text_styles.dart';
 import 'package:cap_project/l10n/l10n.dart';
+import 'package:cap_project/features/auth/view/profile_page.dart';
+import 'package:cap_project/features/auth/cubit/auth_cubit.dart';
+import 'package:cap_project/features/landing/cubit/landing_cubit.dart';
+import 'package:cap_project/app/view/app_router.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -59,13 +63,53 @@ class SettingsPage extends StatelessWidget {
               title: l10n.accountInfo,
               icon: Icons.person_outline_rounded,
               showDivider: true,
-              onTap: () {},
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ProfilePage()),
+              ),
             ),
             _buildSettingTile(
               title: l10n.signOut,
               icon: Icons.logout_rounded,
               textColor: AppColors.error,
-              onTap: () {},
+              onTap: () async {
+                final confirm = await showDialog<bool>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: Text(l10n.signOut),
+                    content: Text('Are you sure you want to sign out?'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, false),
+                        child: Text(l10n.cancel),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, true),
+                        child: Text(
+                          l10n.signOut, 
+                          style: TextStyle(color: AppColors.error),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+
+                if (confirm == true && context.mounted) {
+                  // 1. Sign out from AuthCubit
+                  await context.read<AuthCubit>().signOut();
+                  
+                  // 2. Clear LandingCubit (if using demo mode or just resetting)
+                  if (context.mounted) {
+                    await context.read<LandingCubit>().resetOnboarding();
+                    
+                    // 3. Navigate to Landing Page (Root)
+                    Navigator.of(context).pushNamedAndRemoveUntil(
+                      AppRouter.landing, 
+                      (route) => false,
+                    );
+                  }
+                }
+              },
             ),
           ]),
           const SizedBox(height: 32),
@@ -91,14 +135,14 @@ class SettingsPage extends StatelessWidget {
 
   Widget _buildSectionHeader(String title) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8, left: 16),
+      padding: const EdgeInsets.only(bottom: 12, left: 16),
       child: Text(
-        title,
-        style: AppTextStyles.caption.copyWith(
+        title.toUpperCase(),
+        style: AppTextStyles.labelSmall.copyWith(
           color: AppColors.textTertiary,
-          fontWeight: FontWeight.w500,
-          letterSpacing: 0.5,
-          fontSize: 13,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 1.2,
+          fontSize: 11,
         ),
       ),
     );
@@ -108,11 +152,21 @@ class SettingsPage extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.backgroundSurface,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppColors.borderLight, width: 0.5),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
-      child: Column(
-        children: children,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Column(
+          children: children,
+        ),
       ),
     );
   }
@@ -139,8 +193,12 @@ class SettingsPage extends StatelessWidget {
                     width: 32,
                     height: 32,
                     decoration: BoxDecoration(
-                      color: (textColor ?? AppColors.accentPrimary).withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
+                      color: (textColor ?? AppColors.accentPrimary).withOpacity(0.05),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: (textColor ?? AppColors.accentPrimary).withOpacity(0.1),
+                        width: 1,
+                      ),
                     ),
                     child: Icon(
                       icon, 

@@ -1,6 +1,7 @@
 // packages/chat_repository/lib/src/chat_repository.dart
 
 import 'package:api_client/api_client.dart';
+import 'package:dio/dio.dart'; // Needed for FormData
 import 'models/chat_message.dart';
 import 'models/chat_query_request.dart';
 import 'models/chat_response.dart';
@@ -59,6 +60,35 @@ class ChatRepository {
     } catch (e) {
       print('❌ Validation Error: $e');
       throw ChatException('Failed to validate message: ${e.toString()}');
+    }
+  }
+
+  /// Send voice message to backend
+  ///
+  /// Backend endpoint: POST /chat/voice
+  Future<Map<String, dynamic>> sendVoiceMessage({
+    required String audioPath,
+    String? sessionId,
+    String? userRole,
+    List<String>? interests,
+  }) async {
+    try {
+      final formData = FormData.fromMap({
+        'audio': await MultipartFile.fromFile(audioPath, filename: 'voice_query.m4a'),
+        'session_id': sessionId,
+        if (userRole != null) 'user_role': userRole,
+        if (interests != null) 'interests': interests,
+      });
+
+      final response = await _apiClient.post(
+        '/chat/voice',
+        data: formData,
+        receiveTimeout: const Duration(seconds: 120),
+      );
+
+      return response.data as Map<String, dynamic>;
+    } catch (e) {
+      throw ChatException('Failed to send voice message: ${e.toString()}');
     }
   }
 

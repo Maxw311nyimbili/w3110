@@ -88,6 +88,9 @@ class ForumCubit extends Cubit<ForumState> {
       emit(state.copyWith(
         status: ForumStatus.success,
         comments: comments,
+        // Also parse content into lines for discussion view
+        answerLines: _parsePostContentToLines(post),
+        currentAnswerId: postId,
       ));
 
       // Background sync comments
@@ -106,6 +109,9 @@ class ForumCubit extends Cubit<ForumState> {
       view: ForumView.list,
       selectedPost: null,
       comments: const [],
+      answerLines: [],
+      currentAnswerId: null,
+      selectedLineId: null,
     ));
   }
 
@@ -115,6 +121,7 @@ class ForumCubit extends Cubit<ForumState> {
     required String content,
     required String authorId,
     required String authorName,
+    List<ForumPostSource> sources = const [],
   }) async {
     try {
       final localId = _uuid.v4();
@@ -130,6 +137,7 @@ class ForumCubit extends Cubit<ForumState> {
         content: content,
         createdAt: now,
         syncStatus: SyncStatus.pending,
+        sources: sources,
       );
 
       // Save to local database
@@ -139,6 +147,7 @@ class ForumCubit extends Cubit<ForumState> {
         content: content,
         authorId: authorId,
         authorName: authorName,
+        sources: sources,
       );
 
       // Add to sync queue
@@ -228,27 +237,22 @@ class ForumCubit extends Cubit<ForumState> {
 
   /// Sync with backend (upload pending changes, download new content)
   Future<void> syncWithBackend() async {
-    if (state.isSyncing) return; // Prevent concurrent syncs
+    if (state.isSyncing) return;
 
     try {
       emit(state.copyWith(isSyncing: true));
 
-      // MOCK SYNC LOGIC for now (until backend)
-      await Future.delayed(const Duration(seconds: 2));
+      // Process pending local changes
+      await _forumRepository.processSyncQueue();
 
-      // Simulate syncing pending posts
-      final updatedPosts = state.posts.map((post) {
-        if (post.isPendingSync) {
-          return post.copyWith(
-            id: _uuid.v4(), // Mock server ID
-            syncStatus: SyncStatus.synced,
-          );
-        }
-        return post;
-      }).toList();
+      // Fetch latest posts from server
+      await _forumRepository.fetchPostsFromServer();
+
+      // Reload from local storage to get merged updates
+      final posts = await _forumRepository.getLocalPosts();
 
       emit(state.copyWith(
-        posts: updatedPosts,
+        posts: posts,
         isSyncing: false,
         hasPendingSync: false,
         lastSyncTime: DateTime.now(),
@@ -258,6 +262,96 @@ class ForumCubit extends Cubit<ForumState> {
         isSyncing: false,
         error: 'Sync failed: ${e.toString()}',
       ));
+    }
+  }
+
+  /// Search for posts
+  Future<void> searchPosts(String query) async {
+    if (query.isEmpty) {
+      emit(state.copyWith(searchQuery: '', searchResults: const []));
+      return;
+    }
+
+    try {
+      emit(state.copyWith(status: ForumStatus.loading, searchQuery: query));
+      
+      final results = await _forumRepository.searchPosts(query);
+      
+      emit(state.copyWith(
+        status: ForumStatus.success,
+        searchResults: results,
+      ));
+    } catch (e) {
+      emit(state.copyWith(
+        status: ForumStatus.error,
+        error: 'Search failed: ${e.toString()}',
+      ));
+    }
+  }
+
+  /// Toggle like on post (optimistic update)
+  Future<void> togglePostLike(String postId) async {
+    try {
+      // Find the post and update it locally first
+      final postIndex = state.posts.indexWhere((p) => p.id == postId);
+      if (postIndex == -1) return;
+
+      final post = state.posts[postIndex];
+      final updatedPost = post.copyWith(
+        isLiked: !post.isLiked,
+        likeCount: post.isLiked ? post.likeCount - 1 : post.likeCount + 1,
+      );
+
+      final updatedPosts = List<ForumPost>.from(state.posts)..[postIndex] = updatedPost;
+      
+      emit(state.copyWith(
+        posts: updatedPosts,
+        selectedPost: state.selectedPost?.id == postId ? updatedPost : state.selectedPost,
+      ));
+
+      // Call API
+      await _forumRepository.togglePostLike(postId);
+    } catch (e) {
+      // Revert on failure (simple implementation: reload posts)
+      loadPosts();
+      emit(state.copyWith(error: 'Failed to update like: ${e.toString()}'));
+    }
+  }
+
+  /// Toggle like on comment (optimistic update)
+  Future<void> toggleCommentLike(String commentId) async {
+    try {
+      final commentIndex = state.comments.indexWhere((c) => c.id == commentId);
+      if (commentIndex == -1) return;
+
+      final comment = state.comments[commentIndex];
+      final updatedComment = comment.copyWith(
+        isLiked: !comment.isLiked,
+        likeCount: comment.isLiked ? comment.likeCount - 1 : comment.likeCount + 1,
+      );
+
+      final updatedComments = List<ForumComment>.from(state.comments)..[commentIndex] = updatedComment;
+      
+      emit(state.copyWith(comments: updatedComments));
+
+      // Call API
+      await _forumRepository.toggleCommentLike(commentId);
+    } catch (e) {
+      // Revert (reload comments for current post)
+      if (state.selectedPost != null) {
+        selectPost(state.selectedPost!);
+      }
+      emit(state.copyWith(error: 'Failed to update comment like: ${e.toString()}'));
+    }
+  }
+
+  /// Flag a post
+  Future<void> flagPost(String postId) async {
+    try {
+      await _forumRepository.flagPost(postId);
+      // Optional: show a confirmation message in the UI
+    } catch (e) {
+      emit(state.copyWith(error: 'Failed to report post: ${e.toString()}'));
     }
   }
 
@@ -280,9 +374,167 @@ class ForumCubit extends Cubit<ForumState> {
     }
   }
 
+  // ============================================================
+  // LINE-LEVEL FORUM METHODS
+  // ============================================================
+
+  /// Load discussion lines for a specific answer
+  Future<void> loadAnswerLines(String answerId) async {
+    try {
+      emit(state.copyWith(
+        status: ForumStatus.loading,
+        currentAnswerId: answerId,
+      ));
+      
+      final lines = await _forumRepository.getLinesForAnswer(answerId);
+      
+      emit(state.copyWith(
+        status: ForumStatus.success,
+        answerLines: lines,
+        selectedLineId: null, // Clear selection on new answer load
+        lineComments: [],
+      ));
+    } catch (e) {
+      emit(state.copyWith(
+        status: ForumStatus.error,
+        error: 'Failed to load discussion lines: ${e.toString()}',
+      ));
+    }
+  }
+
+  /// Toggle the forum view for a specific message/answer.
+  /// If it's already the current one, we might want to "close" it, 
+  /// but usually the UI handles the visibility.
+  void toggleForumView(String answerId) {
+    if (state.currentAnswerId == answerId) {
+      emit(state.copyWith(currentAnswerId: null, answerLines: []));
+    } else {
+      loadAnswerLines(answerId);
+    }
+  }
+
+  /// Toggle selection of a line. If same line selected, deselect.
+  Future<void> toggleLineSelection(String lineId) async {
+    if (state.selectedLineId == lineId) {
+      // Deselect
+      emit(state.copyWithNullableLineId(clearLineId: true));
+    } else {
+      // Select new line and load comments
+      emit(state.copyWith(
+        selectedLineId: lineId,
+        status: ForumStatus.loading,
+      ));
+      
+      await _loadLineComments(lineId);
+    }
+  }
+  
+  /// Helper: Load comments for the currently selected line
+  Future<void> _loadLineComments(String lineId) async {
+    try {
+      final comments = await _forumRepository.getCommentsForLine(
+        lineId, 
+        filter: state.activeFilter,
+      );
+      
+      emit(state.copyWith(
+        status: ForumStatus.success,
+        lineComments: comments,
+      ));
+    } catch (e) {
+      emit(state.copyWith(
+        status: ForumStatus.error,
+        error: 'Failed to load comments: ${e.toString()}',
+      ));
+    }
+  }
+
+  /// Change filter for comments (e.g., 'all' -> 'clinician')
+  Future<void> filterComments(String filter) async {
+    if (filter == state.activeFilter) return;
+    
+    emit(state.copyWith(
+      activeFilter: filter,
+      status: ForumStatus.loading,
+    ));
+    
+    if (state.selectedLineId != null) {
+      await _loadLineComments(state.selectedLineId!);
+    }
+  }
+
+  /// Post a comment to the currently selected line
+  Future<void> postLineComment({
+    required String text,
+    required String commentType,
+  }) async {
+    final lineId = state.selectedLineId;
+    if (lineId == null) return;
+    
+    try {
+      // Optimistic update could happen here, but for simplicity we await response
+      
+      final newComment = await _forumRepository.postLineComment(
+        lineId: lineId,
+        text: text,
+        commentType: commentType,
+      );
+      
+      // Update local state by appending new comment (if matches filter or filter is all)
+      // Actually, simplest is to just append it if it matches, assuming server sync handles it.
+      // For now, let's just append it to UI list for instant feedback.
+      
+      final updatedComments = [...state.lineComments, newComment];
+      
+      // Also update line comment count locally
+      final updatedLines = state.answerLines.map((line) {
+        if (line.lineId == lineId) {
+          return line.copyWith(commentCount: line.commentCount + 1);
+        }
+        return line;
+      }).toList();
+      
+      emit(state.copyWith(
+        lineComments: updatedComments,
+        answerLines: updatedLines,
+      ));
+      
+    } catch (e) {
+      emit(state.copyWith(
+        status: ForumStatus.error,
+        error: 'Failed to post comment: ${e.toString()}',
+      ));
+    }
+  }
+
   /// Clear error state
   void clearError() {
     emit(state.clearError());
+  }
+
+  /// Helper: Parse post content into selectable lines for discussion
+  List<ForumAnswerLine> _parsePostContentToLines(ForumPost post) {
+    final content = post.content;
+    final postId = post.id.isEmpty ? post.localId : post.id;
+    
+    // Simple sentence splitter (can be improved with regex)
+    final sentences = content
+        .split(RegExp(r'(?<=[.!?])\s+'))
+        .where((s) => s.trim().isNotEmpty)
+        .toList();
+        
+    return sentences.asMap().entries.map((entry) {
+      final index = entry.key;
+      final text = entry.value;
+      return ForumAnswerLine(
+        lineId: '${postId}_L$index',
+        answerId: postId,
+        lineNumber: index + 1,
+        text: text,
+        discussionTitle: text.length > 30 ? '${text.substring(0, 30)}...' : text,
+        commentCount: 0, // In a real app, fetch these counts
+      );
+    }).toList();
   }
 
   @override

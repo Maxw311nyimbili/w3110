@@ -1,56 +1,65 @@
 // packages/landing_repository/lib/src/local_preferences.dart
 
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Helper for storing onboarding data locally
 /// Uses shared_preferences package
 class LocalPreferences {
   LocalPreferences();
 
-  // TODO: Uncomment when shared_preferences is added
-  // late final SharedPreferences _prefs;
+  late final SharedPreferences _prefs;
+  bool _prefsInitialized = false;
 
   static const _onboardingKey = 'onboarding_status';
   static const _languageKey = 'app_language';
 
+  bool get isInitialized => _prefsInitialized;
+
   /// Initialize preferences
   Future<void> initialize() async {
-    // TODO: Uncomment when shared_preferences is added
-    // _prefs = await SharedPreferences.getInstance();
+    if (_prefsInitialized) return;
+    _prefs = await SharedPreferences.getInstance();
+    _prefsInitialized = true;
+  }
+
+  void _ensureInitialized() {
+    if (!_prefsInitialized) {
+      throw StateError('LocalPreferences not initialized. Call initialize() first.');
+    }
   }
 
   /// Save onboarding status
   Future<void> saveOnboardingStatus(Map<String, dynamic> status) async {
-    // TODO: Uncomment when shared_preferences is added
-    // await _prefs.setString(_onboardingKey, jsonEncode(status));
+    _ensureInitialized();
+    await _prefs.setString(_onboardingKey, jsonEncode(status));
   }
 
   /// Get onboarding status
   Future<Map<String, dynamic>?> getOnboardingStatus() async {
-    // TODO: Uncomment when shared_preferences is added
-    // final data = _prefs.getString(_onboardingKey);
-    // if (data != null) {
-    //   return jsonDecode(data) as Map<String, dynamic>;
-    // }
-    return null; // Temporary
+    _ensureInitialized();
+    final data = _prefs.getString(_onboardingKey);
+    if (data != null) {
+      return jsonDecode(data) as Map<String, dynamic>;
+    }
+    return null;
   }
 
   /// Clear onboarding status
   Future<void> clearOnboardingStatus() async {
-    // TODO: Uncomment when shared_preferences is added
-    // await _prefs.remove(_onboardingKey);
+    _ensureInitialized();
+    await _prefs.remove(_onboardingKey);
   }
 
   /// Save language preference
   Future<void> saveLanguage(String languageCode) async {
-    // TODO: Uncomment when shared_preferences is added
-    // await _prefs.setString(_languageKey, languageCode);
+    _ensureInitialized();
+    await _prefs.setString(_languageKey, languageCode);
   }
 
   /// Get language preference
   Future<String?> getLanguage() async {
-    // TODO: Uncomment when shared_preferences is added
-    // return _prefs.getString(_languageKey);
-    return null; // Temporary
+    _ensureInitialized();
+    return _prefs.getString(_languageKey);
   }
 }

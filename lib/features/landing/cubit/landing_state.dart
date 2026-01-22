@@ -2,18 +2,20 @@ import 'package:equatable/equatable.dart';
 
 enum OnboardingStep {
   welcome,
-  authentication, // ← NEW: Auth step happens before customization
+  authentication,
   roleSelection,
+  profileSetup, // ← NEW: Capture name and account nickname
   contextGathering,
   consent,
   complete,
 }
 
 enum UserRole {
-  expectingMother,
-  healthcareProvider,
-  parentCaregiver,
-  explorer,
+  mother,
+  supportPartner,
+  doctor,
+  midwife,
+  clinician,
 }
 
 /// Immutable state for landing/onboarding flow
@@ -25,24 +27,32 @@ class LandingState extends Equatable {
     this.selectedRole,
     this.interests = const [],
     this.userName,
+    this.accountNickname,
     this.consentGiven = false,
     this.consentVersion,
     this.isLoading = false,
     this.error,
-    this.authError, // ← NEW: Track auth errors separately
-    this.isAuthenticating = false, // ← NEW: Track auth loading state
+    this.authError,
+    this.isAuthenticating = false,
+    this.isVerified = false,
+    this.verificationStatus = 'none',
+    this.isDemoAvailable = false,
   });
 
   final OnboardingStep currentStep;
   final UserRole? selectedRole;
   final List<String> interests;
   final String? userName;
+  final String? accountNickname;
   final bool consentGiven;
   final String? consentVersion;
   final bool isLoading;
   final String? error;
-  final String? authError; // ← NEW
-  final bool isAuthenticating; // ← NEW
+  final String? authError;
+  final bool isAuthenticating;
+  final bool isVerified;
+  final String verificationStatus;
+  final bool isDemoAvailable;
 
   bool get isComplete => currentStep == OnboardingStep.complete;
   bool get canProceed {
@@ -53,6 +63,9 @@ class LandingState extends Equatable {
         return true; // Auth button always enabled
       case OnboardingStep.roleSelection:
         return selectedRole != null;
+      case OnboardingStep.profileSetup:
+        return userName != null && userName!.isNotEmpty && 
+               accountNickname != null && accountNickname!.isNotEmpty;
       case OnboardingStep.contextGathering:
         return true; // Optional step
       case OnboardingStep.consent:
@@ -67,24 +80,32 @@ class LandingState extends Equatable {
     UserRole? selectedRole,
     List<String>? interests,
     String? userName,
+    String? accountNickname,
     bool? consentGiven,
     String? consentVersion,
     bool? isLoading,
     String? error,
     String? authError,
     bool? isAuthenticating,
+    bool? isVerified,
+    String? verificationStatus,
+    bool? isDemoAvailable,
   }) {
     return LandingState(
       currentStep: currentStep ?? this.currentStep,
       selectedRole: selectedRole ?? this.selectedRole,
       interests: interests ?? this.interests,
       userName: userName ?? this.userName,
+      accountNickname: accountNickname ?? this.accountNickname,
       consentGiven: consentGiven ?? this.consentGiven,
       consentVersion: consentVersion ?? this.consentVersion,
       isLoading: isLoading ?? this.isLoading,
       error: error,
       authError: authError,
       isAuthenticating: isAuthenticating ?? this.isAuthenticating,
+      isVerified: isVerified ?? this.isVerified,
+      verificationStatus: verificationStatus ?? this.verificationStatus,
+      isDemoAvailable: isDemoAvailable ?? this.isDemoAvailable,
     );
   }
 
@@ -98,11 +119,15 @@ class LandingState extends Equatable {
     selectedRole,
     interests,
     userName,
+    accountNickname,
     consentGiven,
     consentVersion,
     isLoading,
     error,
     authError,
     isAuthenticating,
+    isVerified,
+    verificationStatus,
+    isDemoAvailable,
   ];
 }

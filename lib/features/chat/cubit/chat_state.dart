@@ -136,6 +136,7 @@ class ChatMessage extends Equatable {
     this.detailedAnswer,
     this.audioUrl,
     this.latencyMs,
+    this.showingDetailedView = false,
   });
 
   final String id;
@@ -152,6 +153,7 @@ class ChatMessage extends Equatable {
   final String? detailedAnswer;
   final String? audioUrl;
   final int? latencyMs;
+  final bool showingDetailedView;
 
   ChatMessage copyWith({
     String? id,
@@ -166,6 +168,7 @@ class ChatMessage extends Equatable {
     String? detailedAnswer,
     String? audioUrl,
     int? latencyMs,
+    bool? showingDetailedView,
   }) {
     return ChatMessage(
       id: id ?? this.id,
@@ -180,6 +183,7 @@ class ChatMessage extends Equatable {
       detailedAnswer: detailedAnswer ?? this.detailedAnswer,
       audioUrl: audioUrl ?? this.audioUrl,
       latencyMs: latencyMs ?? this.latencyMs,
+      showingDetailedView: showingDetailedView ?? this.showingDetailedView,
     );
   }
 
@@ -197,6 +201,7 @@ class ChatMessage extends Equatable {
     detailedAnswer,
     audioUrl,
     latencyMs,
+    showingDetailedView,
   ];
 }
 
