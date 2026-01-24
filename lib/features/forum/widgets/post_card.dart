@@ -18,11 +18,11 @@ class PostCard extends StatelessWidget {
   String _formatTime(DateTime time) {
     final difference = DateTime.now().difference(time);
     if (difference.inMinutes < 60) {
-      return '${difference.inMinutes}m ago';
+      return '${difference.inMinutes}m';
     } else if (difference.inHours < 24) {
-      return '${difference.inHours}h ago';
+      return '${difference.inHours}h';
     } else {
-      return '${difference.inDays}d ago';
+      return '${difference.inDays}d';
     }
   }
 
@@ -31,169 +31,110 @@ class PostCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(16),
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        decoration: const BoxDecoration(
           color: AppColors.backgroundSurface,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.textPrimary.withOpacity(0.03),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
+          border: Border(
+            bottom: BorderSide(color: AppColors.borderLight, width: 1),
+          ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header: Avatar + Name + Time + More
+            // Header: Clean Byline
             Row(
               children: [
                 CircleAvatar(
-                  radius: 12,
-                  backgroundColor: AppColors.accentPrimary.withOpacity(0.1),
+                  radius: 10,
+                  backgroundColor: AppColors.accentPrimary.withOpacity(0.04),
                   child: Text(
                     post.authorName.isNotEmpty ? post.authorName[0].toUpperCase() : '?',
                     style: const TextStyle(
-                      fontSize: 12,
+                      fontSize: 10,
                       fontWeight: FontWeight.bold,
                       color: AppColors.accentPrimary,
                     ),
                   ),
                 ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        post.authorName,
-                        style: AppTextStyles.labelMedium.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      Text(
-                        _formatTime(post.createdAt),
-                        style: AppTextStyles.caption.copyWith(color: AppColors.textTertiary),
-                      ),
-                    ],
+                const SizedBox(width: 8),
+                Text(
+                  post.authorName,
+                  style: AppTextStyles.labelSmall.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
                   ),
                 ),
-                PopupMenuButton<String>(
-                  icon: Icon(Icons.more_horiz_rounded, size: 20, color: AppColors.textTertiary),
-                  onSelected: (value) {
-                    if (value == 'report') {
-                      context.read<ForumCubit>().flagPost(post.id);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Post reported for review')),
-                      );
-                    }
-                  },
-                  itemBuilder: (context) => [
-                    const PopupMenuItem(
-                      value: 'report',
-                      child: Row(
-                        children: [
-                          Icon(Icons.flag_outlined, size: 18, color: AppColors.error),
-                          SizedBox(width: 8),
-                          Text('Report Post', style: TextStyle(color: AppColors.error)),
-                        ],
-                      ),
-                    ),
-                  ],
+                const SizedBox(width: 6),
+                Text(
+                  '•',
+                  style: const TextStyle(fontSize: 10, color: AppColors.textTertiary),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  _formatTime(post.createdAt),
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.textTertiary,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 12),
+            
             // Title
             Text(
               post.title,
               style: AppTextStyles.headlineSmall.copyWith(
                 fontWeight: FontWeight.w800,
-                fontSize: 18,
-                letterSpacing: -0.2,
+                fontSize: 17,
+                height: 1.3,
+                letterSpacing: -0.3,
+                color: AppColors.textPrimary,
               ),
             ),
             const SizedBox(height: 6),
+            
             // Content Preview
             Text(
               post.content,
-              maxLines: 3,
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: AppTextStyles.bodyMedium.copyWith(
                 color: AppColors.textSecondary,
                 height: 1.5,
+                fontSize: 15,
+                fontWeight: FontWeight.w400,
               ),
             ),
-            const SizedBox(height: 16),
-            // Footer: Actions
-            Row(
-              children: [
-                _buildAction(
-                  context,
-                  post.isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-                  post.likeCount.toString(),
-                  isActive: post.isLiked,
-                  onTap: () => context.read<ForumCubit>().togglePostLike(post.id),
+            
+            // Tags
+            if (post.tags.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: post.tags.map((tag) => Container(
+                    margin: const EdgeInsets.only(right: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.accentPrimary.withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      '#$tag',
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.accentPrimary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  )).toList(),
                 ),
-                const SizedBox(width: 20),
-                _buildAction(
-                  context,
-                  Icons.chat_bubble_outline_rounded,
-                  post.commentCount.toString(),
-                ),
-                const SizedBox(width: 20),
-                _buildAction(
-                  context,
-                  Icons.visibility_outlined,
-                  '${post.viewCount} views',
-                ),
-                const Spacer(),
-                if (post.syncStatus != SyncStatus.synced)
-                  const Icon(
-                    Icons.cloud_upload_outlined,
-                    size: 16,
-                    color: AppColors.textTertiary,
-                  ),
-              ],
-            ),
+              ),
+            ],
           ],
         ),
       ),
     );
   }
 
-  Widget _buildAction(
-    BuildContext context, 
-    IconData icon, 
-    String label, 
-    {bool isActive = false, VoidCallback? onTap}
-  ) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              size: 20,
-              color: isActive ? Colors.pink : AppColors.textTertiary,
-            ),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: AppTextStyles.labelSmall.copyWith(
-                color: isActive ? Colors.pink : AppColors.textTertiary,
-                fontWeight: isActive ? FontWeight.w700 : FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }

@@ -53,6 +53,7 @@ class ForumRepository {
     required String authorId,
     required String authorName,
     List<ForumPostSource> sources = const [],
+    List<String> tags = const [],
   }) async {
     await _database.insertPost(ForumPostsCompanion.insert(
       localId: localId,
@@ -63,6 +64,7 @@ class ForumRepository {
       createdAt: DateTime.now(),
       syncStatus: const Value('pending'),
       sources: Value(sources.isNotEmpty ? jsonEncode(sources.map((e) => e.toJson()).toList()) : null),
+      tags: Value(tags.isNotEmpty ? jsonEncode(tags) : null),
     ));
   }
 
@@ -339,6 +341,38 @@ class ForumRepository {
     return connectivityResult != ConnectivityResult.none;
     */
     return true; // Temporary - assume always online
+  }
+
+  /// Seed demo data for testing
+  Future<void> seedDemoData() async {
+    // await _database.deleteAllPosts(); // Optional: clear old data
+    
+    await createLocalPost(
+      localId: 'demo_1',
+      title: 'Is Paracetamol safe during 3rd trimester?',
+      content: 'I have heard mixed things about taking paracetamol late in pregnancy. My doctor said it is fine for high fever, but I am worried about asthma risks. Has anyone looked at the latest studies?',
+      authorId: 'u_demo_1',
+      authorName: 'Sarah K.',
+      tags: ['Pregnancy', 'Medication', 'Safety'],
+    );
+    
+    await createLocalPost(
+      localId: 'demo_2',
+      title: 'Alternative pain relief options',
+      content: 'Apart from paracetamol, what are safe natural remedies for headaches? I am trying to avoid pharmaceuticals if possible during my first trimester.',
+      authorId: 'u_demo_2',
+      authorName: 'Ama',
+      tags: ['Pregnancy', 'Natural', 'PainRelief'],
+    );
+    
+    await createLocalPost(
+      localId: 'demo_3',
+      title: 'Paracetamol dosing for infants',
+      content: 'Changing topics slightly - what is the correct dosage calculation for a 6-month-old? The bottle is confusing.',
+      authorId: 'u_demo_3',
+      authorName: 'Kwame',
+      tags: ['Medication', 'Pediatrics', 'Dosage'],
+    );
   }
 }
 

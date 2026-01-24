@@ -46,7 +46,7 @@ class _ReplyInputFieldForModalState extends State<ReplyInputFieldForModal> {
       _textController.clear();
       if (mounted) FocusScope.of(context).unfocus();
     } catch (e) {
-      // Error handling is managed by Cubit state, but we stop loading here
+      // Error handling is managed by Cubit state
     } finally {
       if (mounted) setState(() => _isPosting = false);
     }
@@ -55,123 +55,162 @@ class _ReplyInputFieldForModalState extends State<ReplyInputFieldForModal> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Row(
-            children: [
-              const Icon(Icons.comment_outlined, size: 14, color: AppColors.accentPrimary),
-              const SizedBox(width: 8),
-              Text(
-                'Share your thoughts',
-                style: AppTextStyles.labelSmall.copyWith(fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-
-          // Comment type dropdown
-          Container(
-            height: 44,
-            decoration: BoxDecoration(
-              border: Border.all(color: AppColors.gray200),
-              borderRadius: BorderRadius.circular(8),
-              color: AppColors.backgroundSurface,
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 12),
+          // Type Selection (Horizontal Pills)
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
             child: ValueListenableBuilder<String>(
               valueListenable: _typeController,
-              builder: (context, value, child) {
-                return DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    value: value,
-                    isExpanded: true,
-                    style: AppTextStyles.bodySmall.copyWith(color: AppColors.textPrimary),
-                    items: const [
-                      DropdownMenuItem(
-                        value: 'clinical',
-                        child: Text('⚕️ Clinical Interpretation'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'evidence',
-                        child: Text('📚 Supporting Evidence'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'experience',
-                        child: Text('💬 Lived Experience'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'concern',
-                        child: Text('⚠️ Concern / Clarification'),
-                      ),
-                    ],
-                    onChanged: (v) {
-                      if (v != null) _typeController.value = v;
-                    },
-                  ),
+              builder: (context, selectedType, child) {
+                return Row(
+                  children: [
+                    _TypeChoiceChip(
+                      label: 'Experience',
+                      icon: Icons.face_4_outlined,
+                      value: 'experience',
+                      groupValue: selectedType,
+                      onSelected: (val) => _typeController.value = val,
+                    ),
+                    const SizedBox(width: 8),
+                    _TypeChoiceChip(
+                      label: 'Clinical',
+                      icon: Icons.local_hospital_outlined,
+                      value: 'clinical',
+                      groupValue: selectedType,
+                      onSelected: (val) => _typeController.value = val,
+                    ),
+                    const SizedBox(width: 8),
+                    _TypeChoiceChip(
+                      label: 'Evidence',
+                      icon: Icons.library_books_outlined,
+                      value: 'evidence',
+                      groupValue: selectedType,
+                      onSelected: (val) => _typeController.value = val,
+                    ),
+                    const SizedBox(width: 8),
+                    _TypeChoiceChip(
+                      label: 'Concern',
+                      icon: Icons.help_outline_rounded,
+                      value: 'concern',
+                      groupValue: selectedType,
+                      onSelected: (val) => _typeController.value = val,
+                    ),
+                  ],
                 );
               },
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
 
-          // Text input
-          TextField(
-            controller: _textController,
-            minLines: 1,
-            maxLines: 4,
-            style: AppTextStyles.bodyMedium,
-            decoration: InputDecoration(
-              hintText: 'Share your perspective...',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: AppColors.gray200),
+          // Input Row
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.backgroundElevated,
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  child: TextField(
+                    controller: _textController,
+                    minLines: 1,
+                    maxLines: 4,
+                    style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary),
+                    decoration: InputDecoration(
+                      hintText: 'Share your perspective...',
+                      hintStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.textTertiary),
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    ),
+                  ),
+                ),
               ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: AppColors.gray200),
-              ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              filled: true,
-              fillColor: AppColors.backgroundPrimary,
-            ),
-          ),
-          const SizedBox(height: 8),
-
-          // Send button
-          Align(
-            alignment: Alignment.centerRight,
-            child: SizedBox(
-              height: 36,
-              child: _isPosting 
+              const SizedBox(width: 8),
+              
+              // Post Button
+              _isPosting 
                 ? const SizedBox(
-                    width: 36, 
-                    height: 36, 
+                    width: 40, 
+                    height: 40, 
                     child: Padding(
-                      padding: EdgeInsets.all(8.0),
+                      padding: EdgeInsets.all(10),
                       child: CircularProgressIndicator(strokeWidth: 2),
                     ),
                   )
-                : ElevatedButton.icon(
-                    onPressed: _handlePost,
-                    icon: const Icon(Icons.send_rounded, size: 14),
-                    label: const Text('Post'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.accentPrimary,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      textStyle: AppTextStyles.labelSmall.copyWith(fontWeight: FontWeight.bold),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
+                : Container(
+                    height: 40,
+                    width: 40,
+                    decoration: BoxDecoration(
+                      color: AppColors.accentPrimary,
+                      shape: BoxShape.circle,
+                    ),
+                    child: IconButton(
+                      icon: const Icon(Icons.arrow_upward_rounded, size: 20, color: Colors.white),
+                      onPressed: _handlePost,
+                      padding: EdgeInsets.zero,
                     ),
                   ),
-            ),
+            ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _TypeChoiceChip extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final String value;
+  final String groupValue;
+  final ValueChanged<String> onSelected;
+
+  const _TypeChoiceChip({
+    required this.label,
+    required this.icon,
+    required this.value,
+    required this.groupValue,
+    required this.onSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isSelected = value == groupValue;
+    return GestureDetector(
+      onTap: () => onSelected(value),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.accentPrimary : Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? Colors.transparent : AppColors.borderMedium,
+            width: 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              icon, 
+              size: 14, 
+              color: isSelected ? Colors.white : AppColors.textSecondary
+            ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: AppTextStyles.caption.copyWith(
+                color: isSelected ? Colors.white : AppColors.textSecondary,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

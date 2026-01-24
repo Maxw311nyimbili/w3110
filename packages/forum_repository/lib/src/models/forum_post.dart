@@ -23,6 +23,7 @@ class ForumPost extends Equatable {
     this.isLiked = false,
     this.syncStatus = SyncStatus.synced,
     this.sources = const [],
+    this.tags = const [],
   });
 
   final String id; // Server ID
@@ -39,6 +40,7 @@ class ForumPost extends Equatable {
   final bool isLiked;
   final SyncStatus syncStatus;
   final List<ForumPostSource> sources;
+  final List<String> tags;
 
   // Helpers
   bool get isPendingSync => syncStatus == SyncStatus.pending;
@@ -67,6 +69,9 @@ class ForumPost extends Equatable {
               .map((e) => ForumPostSource.fromJson(e as Map<String, dynamic>))
               .toList()
           : const [],
+      tags: data.tags != null
+          ? List<String>.from(jsonDecode(data.tags!) as List)
+          : const [],
     );
   }
 
@@ -91,6 +96,7 @@ class ForumPost extends Equatable {
       sources: (json['sources'] as List? ?? [])
           .map((e) => ForumPostSource.fromJson(e as Map<String, dynamic>))
           .toList(),
+      tags: (json['tags'] as List? ?? []).map((e) => e as String).toList(),
     );
   }
 
@@ -108,6 +114,7 @@ class ForumPost extends Equatable {
     int? viewCount,
     bool? isLiked,
     SyncStatus? syncStatus,
+    List<String>? tags,
   }) {
     return ForumPost(
       id: id ?? this.id,
@@ -124,6 +131,7 @@ class ForumPost extends Equatable {
       isLiked: isLiked ?? this.isLiked,
       syncStatus: syncStatus ?? this.syncStatus,
       sources: sources ?? this.sources,
+      tags: tags ?? this.tags,
     );
   }
 
@@ -152,5 +160,6 @@ class ForumPost extends Equatable {
     isLiked,
     syncStatus,
     sources,
+    tags,
   ];
 }

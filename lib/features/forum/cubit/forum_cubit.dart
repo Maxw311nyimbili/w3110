@@ -23,8 +23,14 @@ class ForumCubit extends Cubit<ForumState> {
     try {
       emit(state.copyWith(status: ForumStatus.loading));
 
-      // Load posts from local database (always available offline)
-      final posts = await _forumRepository.getLocalPosts();
+      // Load posts from local database
+      var posts = await _forumRepository.getLocalPosts();
+      
+      // Auto-seed if empty (Demo Mode)
+      if (posts.isEmpty) {
+        await _forumRepository.seedDemoData();
+        posts = await _forumRepository.getLocalPosts();
+      }
 
       // Check if there are pending sync items
       final hasPendingSync = await _forumRepository.hasPendingSyncItems();
