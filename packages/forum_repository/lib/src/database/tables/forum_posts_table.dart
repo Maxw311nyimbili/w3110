@@ -33,6 +33,9 @@ class ForumPosts extends Table {
   // Sources from Chat (serialized JSON)
   TextColumn get sources => text().nullable()();
 
+  // Tags (serialized JSON)
+  TextColumn get tags => text().nullable()();
+
   // Sync metadata
   DateTimeColumn get lastSyncAttempt => dateTime().nullable()();
   IntColumn get syncRetryCount => integer().withDefault(const Constant(0))();

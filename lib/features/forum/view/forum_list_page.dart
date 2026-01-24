@@ -36,9 +36,19 @@ class ForumListView extends StatelessWidget {
           appBar: AppBar(
             leading: IconButton(
               icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-              onPressed: () => Navigator.pop(context),
+              onPressed: () {
+                if (state.view == ForumView.detail) {
+                  context.read<ForumCubit>().backToList();
+                } else {
+                  Navigator.pop(context);
+                }
+              },
             ),
-            title: Text(AppLocalizations.of(context).community),
+            title: Text(
+              state.view == ForumView.detail 
+                  ? 'Discussion' 
+                  : AppLocalizations.of(context).community
+            ),
             centerTitle: true,
             actions: [
                if (state.hasPendingSync)
@@ -51,37 +61,8 @@ class ForumListView extends StatelessWidget {
           body: const SafeArea(
             child: ForumBody(),
           ),
-          floatingActionButton: FloatingActionButton.extended(
-            onPressed: () => _showNewPostSheet(context),
-            icon: const Icon(Icons.add),
-            label: Text(AppLocalizations.of(context).newPost),
-            backgroundColor: AppColors.accentPrimary,
-            foregroundColor: Colors.white,
-            shape: const StadiumBorder(),
-          ),
         );
       },
-    );
-  }
-
-  void _showNewPostSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (modalContext) => Container(
-        decoration: BoxDecoration(
-          color: AppColors.backgroundSurface,
-          borderRadius: const BorderRadius.vertical(
-            top: Radius.circular(20),
-          ),
-        ),
-        // Provide the same ForumCubit to the sheet
-        child: BlocProvider.value(
-          value: context.read<ForumCubit>(),
-          child: const NewPostSheet(),
-        ),
-      ),
     );
   }
 }

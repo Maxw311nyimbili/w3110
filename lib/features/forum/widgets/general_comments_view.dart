@@ -21,7 +21,7 @@ class GeneralCommentsView extends StatelessWidget {
       height: MediaQuery.of(context).size.height * 0.85,
       decoration: const BoxDecoration(
         color: AppColors.backgroundSurface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       clipBehavior: Clip.antiAlias,
       child: GestureDetector(
@@ -32,9 +32,22 @@ class GeneralCommentsView extends StatelessWidget {
           body: SafeArea(
             child: Column(
               children: [
+                // Handle bar
+                Center(
+                  child: Container(
+                    margin: const EdgeInsets.only(top: 12, bottom: 8),
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: AppColors.backgroundElevated,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+
                 // ========== HEADER ==========
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                   child: Row(
                     children: [
                       Expanded(
@@ -45,30 +58,20 @@ class GeneralCommentsView extends StatelessWidget {
                             Text(
                               'Discussion',
                               style: AppTextStyles.headlineSmall.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              post.title,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: AppTextStyles.caption.copyWith(
-                                color: AppColors.textTertiary,
+                                fontWeight: FontWeight.w800,
                               ),
                             ),
                           ],
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.close_rounded),
+                        icon: const Icon(Icons.close_rounded, color: AppColors.textSecondary),
                         onPressed: () => Navigator.pop(context),
                       ),
                     ],
                   ),
                 ),
-                const Divider(height: 1),
-
+                
                 // ========== COMMENTS LIST ==========
                 Expanded(
                   child: BlocBuilder<ForumCubit, ForumState>(
@@ -87,14 +90,19 @@ class GeneralCommentsView extends StatelessWidget {
                               Icon(
                                 Icons.chat_bubble_outline_rounded, 
                                 size: 48, 
-                                color: AppColors.gray300,
+                                color: AppColors.borderMedium,
                               ),
                               const SizedBox(height: 12),
                               Text(
-                                'Be the first to comment',
+                                'No discussions yet',
                                 style: AppTextStyles.bodyMedium.copyWith(
                                   color: AppColors.textTertiary,
                                 ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Tap below to start one',
+                                style: AppTextStyles.caption.copyWith(color: AppColors.textTertiary),
                               ),
                             ],
                           ),
@@ -102,29 +110,30 @@ class GeneralCommentsView extends StatelessWidget {
                       }
 
                       return ListView.separated(
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                         itemCount: comments.length,
-                        separatorBuilder: (context, index) => const Divider(height: 24),
+                        separatorBuilder: (context, index) => const Divider(height: 1, color: AppColors.borderLight),
                         itemBuilder: (context, index) {
                           final comment = comments[index];
-                          // Wrap ForumComment into ForumLineComment for CommentCard compatibility
-                          // or update CommentCard to handle both. For now, we reuse CommentCard
-                          // by adapting the data.
+                          // Adapt ForumComment to ForumLineComment for the card
                           final lineComment = ForumLineComment(
                             id: comment.id,
                             lineId: 'general',
                             authorId: comment.authorId,
                             authorName: comment.authorName,
-                            authorRole: CommentRole.community,
-                            commentType: CommentType.experience,
+                            authorRole: CommentRole.community, 
+                            commentType: CommentType.experience, // Defaulting for general comments
                             text: comment.content,
                             createdAt: comment.createdAt,
                             syncStatus: comment.syncStatus,
                           );
 
-                          return CommentCard(
-                            comment: lineComment,
-                            onReply: () {},
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            child: CommentCard(
+                              comment: lineComment,
+                              onReply: () {},
+                            ),
                           );
                         },
                       );
@@ -133,93 +142,12 @@ class GeneralCommentsView extends StatelessWidget {
                 ),
 
                 // ========== REPLY INPUT ==========
-                const Divider(height: 1),
-                _GeneralCommentInput(postId: post.id.isEmpty ? post.localId : post.id),
+                const Divider(height: 1, color: AppColors.borderLight),
+                ReplyInputFieldForModal(lineId: 'general'), 
               ],
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _GeneralCommentInput extends StatefulWidget {
-  final String postId;
-  const _GeneralCommentInput({required this.postId});
-
-  @override
-  State<_GeneralCommentInput> createState() => _GeneralCommentInputState();
-}
-
-class _GeneralCommentInputState extends State<_GeneralCommentInput> {
-  final _textController = TextEditingController();
-  bool _isPosting = false;
-
-  @override
-  void dispose() {
-    _textController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _handlePost() async {
-    if (_textController.text.trim().isEmpty || _isPosting) return;
-
-    setState(() => _isPosting = true);
-    
-    try {
-      // For general comments, we use the existing addComment method
-      // We need authorId and authorName (usually from AuthCubit, but ForumCubit handles some of it)
-      // In a real app, this should be fetched from state.
-      await context.read<ForumCubit>().addComment(
-        postId: widget.postId,
-        content: _textController.text,
-        authorId: 'me', // This should be dynamic
-        authorName: 'You',
-      );
-      _textController.clear();
-      FocusScope.of(context).unfocus();
-    } finally {
-      if (mounted) setState(() => _isPosting = false);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              controller: _textController,
-              minLines: 1,
-              maxLines: 4,
-              style: AppTextStyles.bodyMedium,
-              decoration: InputDecoration(
-                hintText: 'Add a comment...',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(24),
-                  borderSide: BorderSide(color: AppColors.gray300),
-                ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                filled: true,
-                fillColor: AppColors.backgroundPrimary,
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-          _isPosting 
-            ? const SizedBox(
-                width: 24, 
-                height: 24, 
-                child: CircularProgressIndicator(strokeWidth: 2),
-              )
-            : IconButton(
-                icon: const Icon(Icons.send_rounded, color: AppColors.accentPrimary),
-                onPressed: _handlePost,
-              ),
-        ],
       ),
     );
   }

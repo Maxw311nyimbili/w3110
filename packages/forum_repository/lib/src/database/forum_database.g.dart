@@ -170,6 +170,15 @@ class $ForumPostsTable extends ForumPosts
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _tagsMeta = const VerificationMeta('tags');
+  @override
+  late final GeneratedColumn<String> tags = GeneratedColumn<String>(
+    'tags',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _lastSyncAttemptMeta = const VerificationMeta(
     'lastSyncAttempt',
   );
@@ -210,6 +219,7 @@ class $ForumPostsTable extends ForumPosts
     isLiked,
     syncStatus,
     sources,
+    tags,
     lastSyncAttempt,
     syncRetryCount,
   ];
@@ -324,6 +334,12 @@ class $ForumPostsTable extends ForumPosts
         sources.isAcceptableOrUnknown(data['sources']!, _sourcesMeta),
       );
     }
+    if (data.containsKey('tags')) {
+      context.handle(
+        _tagsMeta,
+        tags.isAcceptableOrUnknown(data['tags']!, _tagsMeta),
+      );
+    }
     if (data.containsKey('last_sync_attempt')) {
       context.handle(
         _lastSyncAttemptMeta,
@@ -411,6 +427,10 @@ class $ForumPostsTable extends ForumPosts
         DriftSqlType.string,
         data['${effectivePrefix}sources'],
       ),
+      tags: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}tags'],
+      ),
       lastSyncAttempt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}last_sync_attempt'],
@@ -443,6 +463,7 @@ class ForumPostData extends DataClass implements Insertable<ForumPostData> {
   final bool isLiked;
   final String syncStatus;
   final String? sources;
+  final String? tags;
   final DateTime? lastSyncAttempt;
   final int syncRetryCount;
   const ForumPostData({
@@ -460,6 +481,7 @@ class ForumPostData extends DataClass implements Insertable<ForumPostData> {
     required this.isLiked,
     required this.syncStatus,
     this.sources,
+    this.tags,
     this.lastSyncAttempt,
     required this.syncRetryCount,
   });
@@ -485,6 +507,9 @@ class ForumPostData extends DataClass implements Insertable<ForumPostData> {
     map['sync_status'] = Variable<String>(syncStatus);
     if (!nullToAbsent || sources != null) {
       map['sources'] = Variable<String>(sources);
+    }
+    if (!nullToAbsent || tags != null) {
+      map['tags'] = Variable<String>(tags);
     }
     if (!nullToAbsent || lastSyncAttempt != null) {
       map['last_sync_attempt'] = Variable<DateTime>(lastSyncAttempt);
@@ -515,6 +540,7 @@ class ForumPostData extends DataClass implements Insertable<ForumPostData> {
       sources: sources == null && nullToAbsent
           ? const Value.absent()
           : Value(sources),
+      tags: tags == null && nullToAbsent ? const Value.absent() : Value(tags),
       lastSyncAttempt: lastSyncAttempt == null && nullToAbsent
           ? const Value.absent()
           : Value(lastSyncAttempt),
@@ -542,6 +568,7 @@ class ForumPostData extends DataClass implements Insertable<ForumPostData> {
       isLiked: serializer.fromJson<bool>(json['isLiked']),
       syncStatus: serializer.fromJson<String>(json['syncStatus']),
       sources: serializer.fromJson<String?>(json['sources']),
+      tags: serializer.fromJson<String?>(json['tags']),
       lastSyncAttempt: serializer.fromJson<DateTime?>(json['lastSyncAttempt']),
       syncRetryCount: serializer.fromJson<int>(json['syncRetryCount']),
     );
@@ -564,6 +591,7 @@ class ForumPostData extends DataClass implements Insertable<ForumPostData> {
       'isLiked': serializer.toJson<bool>(isLiked),
       'syncStatus': serializer.toJson<String>(syncStatus),
       'sources': serializer.toJson<String?>(sources),
+      'tags': serializer.toJson<String?>(tags),
       'lastSyncAttempt': serializer.toJson<DateTime?>(lastSyncAttempt),
       'syncRetryCount': serializer.toJson<int>(syncRetryCount),
     };
@@ -584,6 +612,7 @@ class ForumPostData extends DataClass implements Insertable<ForumPostData> {
     bool? isLiked,
     String? syncStatus,
     Value<String?> sources = const Value.absent(),
+    Value<String?> tags = const Value.absent(),
     Value<DateTime?> lastSyncAttempt = const Value.absent(),
     int? syncRetryCount,
   }) => ForumPostData(
@@ -601,6 +630,7 @@ class ForumPostData extends DataClass implements Insertable<ForumPostData> {
     isLiked: isLiked ?? this.isLiked,
     syncStatus: syncStatus ?? this.syncStatus,
     sources: sources.present ? sources.value : this.sources,
+    tags: tags.present ? tags.value : this.tags,
     lastSyncAttempt: lastSyncAttempt.present
         ? lastSyncAttempt.value
         : this.lastSyncAttempt,
@@ -628,6 +658,7 @@ class ForumPostData extends DataClass implements Insertable<ForumPostData> {
           ? data.syncStatus.value
           : this.syncStatus,
       sources: data.sources.present ? data.sources.value : this.sources,
+      tags: data.tags.present ? data.tags.value : this.tags,
       lastSyncAttempt: data.lastSyncAttempt.present
           ? data.lastSyncAttempt.value
           : this.lastSyncAttempt,
@@ -654,6 +685,7 @@ class ForumPostData extends DataClass implements Insertable<ForumPostData> {
           ..write('isLiked: $isLiked, ')
           ..write('syncStatus: $syncStatus, ')
           ..write('sources: $sources, ')
+          ..write('tags: $tags, ')
           ..write('lastSyncAttempt: $lastSyncAttempt, ')
           ..write('syncRetryCount: $syncRetryCount')
           ..write(')'))
@@ -676,6 +708,7 @@ class ForumPostData extends DataClass implements Insertable<ForumPostData> {
     isLiked,
     syncStatus,
     sources,
+    tags,
     lastSyncAttempt,
     syncRetryCount,
   );
@@ -697,6 +730,7 @@ class ForumPostData extends DataClass implements Insertable<ForumPostData> {
           other.isLiked == this.isLiked &&
           other.syncStatus == this.syncStatus &&
           other.sources == this.sources &&
+          other.tags == this.tags &&
           other.lastSyncAttempt == this.lastSyncAttempt &&
           other.syncRetryCount == this.syncRetryCount);
 }
@@ -716,6 +750,7 @@ class ForumPostsCompanion extends UpdateCompanion<ForumPostData> {
   final Value<bool> isLiked;
   final Value<String> syncStatus;
   final Value<String?> sources;
+  final Value<String?> tags;
   final Value<DateTime?> lastSyncAttempt;
   final Value<int> syncRetryCount;
   final Value<int> rowid;
@@ -734,6 +769,7 @@ class ForumPostsCompanion extends UpdateCompanion<ForumPostData> {
     this.isLiked = const Value.absent(),
     this.syncStatus = const Value.absent(),
     this.sources = const Value.absent(),
+    this.tags = const Value.absent(),
     this.lastSyncAttempt = const Value.absent(),
     this.syncRetryCount = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -753,6 +789,7 @@ class ForumPostsCompanion extends UpdateCompanion<ForumPostData> {
     this.isLiked = const Value.absent(),
     this.syncStatus = const Value.absent(),
     this.sources = const Value.absent(),
+    this.tags = const Value.absent(),
     this.lastSyncAttempt = const Value.absent(),
     this.syncRetryCount = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -777,6 +814,7 @@ class ForumPostsCompanion extends UpdateCompanion<ForumPostData> {
     Expression<bool>? isLiked,
     Expression<String>? syncStatus,
     Expression<String>? sources,
+    Expression<String>? tags,
     Expression<DateTime>? lastSyncAttempt,
     Expression<int>? syncRetryCount,
     Expression<int>? rowid,
@@ -796,6 +834,7 @@ class ForumPostsCompanion extends UpdateCompanion<ForumPostData> {
       if (isLiked != null) 'is_liked': isLiked,
       if (syncStatus != null) 'sync_status': syncStatus,
       if (sources != null) 'sources': sources,
+      if (tags != null) 'tags': tags,
       if (lastSyncAttempt != null) 'last_sync_attempt': lastSyncAttempt,
       if (syncRetryCount != null) 'sync_retry_count': syncRetryCount,
       if (rowid != null) 'rowid': rowid,
@@ -817,6 +856,7 @@ class ForumPostsCompanion extends UpdateCompanion<ForumPostData> {
     Value<bool>? isLiked,
     Value<String>? syncStatus,
     Value<String?>? sources,
+    Value<String?>? tags,
     Value<DateTime?>? lastSyncAttempt,
     Value<int>? syncRetryCount,
     Value<int>? rowid,
@@ -836,6 +876,7 @@ class ForumPostsCompanion extends UpdateCompanion<ForumPostData> {
       isLiked: isLiked ?? this.isLiked,
       syncStatus: syncStatus ?? this.syncStatus,
       sources: sources ?? this.sources,
+      tags: tags ?? this.tags,
       lastSyncAttempt: lastSyncAttempt ?? this.lastSyncAttempt,
       syncRetryCount: syncRetryCount ?? this.syncRetryCount,
       rowid: rowid ?? this.rowid,
@@ -887,6 +928,9 @@ class ForumPostsCompanion extends UpdateCompanion<ForumPostData> {
     if (sources.present) {
       map['sources'] = Variable<String>(sources.value);
     }
+    if (tags.present) {
+      map['tags'] = Variable<String>(tags.value);
+    }
     if (lastSyncAttempt.present) {
       map['last_sync_attempt'] = Variable<DateTime>(lastSyncAttempt.value);
     }
@@ -916,6 +960,7 @@ class ForumPostsCompanion extends UpdateCompanion<ForumPostData> {
           ..write('isLiked: $isLiked, ')
           ..write('syncStatus: $syncStatus, ')
           ..write('sources: $sources, ')
+          ..write('tags: $tags, ')
           ..write('lastSyncAttempt: $lastSyncAttempt, ')
           ..write('syncRetryCount: $syncRetryCount, ')
           ..write('rowid: $rowid')
@@ -2336,6 +2381,7 @@ typedef $$ForumPostsTableCreateCompanionBuilder =
       Value<bool> isLiked,
       Value<String> syncStatus,
       Value<String?> sources,
+      Value<String?> tags,
       Value<DateTime?> lastSyncAttempt,
       Value<int> syncRetryCount,
       Value<int> rowid,
@@ -2356,6 +2402,7 @@ typedef $$ForumPostsTableUpdateCompanionBuilder =
       Value<bool> isLiked,
       Value<String> syncStatus,
       Value<String?> sources,
+      Value<String?> tags,
       Value<DateTime?> lastSyncAttempt,
       Value<int> syncRetryCount,
       Value<int> rowid,
@@ -2437,6 +2484,11 @@ class $$ForumPostsTableFilterComposer
 
   ColumnFilters<String> get sources => $composableBuilder(
     column: $table.sources,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get tags => $composableBuilder(
+    column: $table.tags,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2530,6 +2582,11 @@ class $$ForumPostsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get tags => $composableBuilder(
+    column: $table.tags,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get lastSyncAttempt => $composableBuilder(
     column: $table.lastSyncAttempt,
     builder: (column) => ColumnOrderings(column),
@@ -2598,6 +2655,9 @@ class $$ForumPostsTableAnnotationComposer
   GeneratedColumn<String> get sources =>
       $composableBuilder(column: $table.sources, builder: (column) => column);
 
+  GeneratedColumn<String> get tags =>
+      $composableBuilder(column: $table.tags, builder: (column) => column);
+
   GeneratedColumn<DateTime> get lastSyncAttempt => $composableBuilder(
     column: $table.lastSyncAttempt,
     builder: (column) => column,
@@ -2654,6 +2714,7 @@ class $$ForumPostsTableTableManager
                 Value<bool> isLiked = const Value.absent(),
                 Value<String> syncStatus = const Value.absent(),
                 Value<String?> sources = const Value.absent(),
+                Value<String?> tags = const Value.absent(),
                 Value<DateTime?> lastSyncAttempt = const Value.absent(),
                 Value<int> syncRetryCount = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -2672,6 +2733,7 @@ class $$ForumPostsTableTableManager
                 isLiked: isLiked,
                 syncStatus: syncStatus,
                 sources: sources,
+                tags: tags,
                 lastSyncAttempt: lastSyncAttempt,
                 syncRetryCount: syncRetryCount,
                 rowid: rowid,
@@ -2692,6 +2754,7 @@ class $$ForumPostsTableTableManager
                 Value<bool> isLiked = const Value.absent(),
                 Value<String> syncStatus = const Value.absent(),
                 Value<String?> sources = const Value.absent(),
+                Value<String?> tags = const Value.absent(),
                 Value<DateTime?> lastSyncAttempt = const Value.absent(),
                 Value<int> syncRetryCount = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -2710,6 +2773,7 @@ class $$ForumPostsTableTableManager
                 isLiked: isLiked,
                 syncStatus: syncStatus,
                 sources: sources,
+                tags: tags,
                 lastSyncAttempt: lastSyncAttempt,
                 syncRetryCount: syncRetryCount,
                 rowid: rowid,

@@ -116,25 +116,47 @@ class ForumBody extends StatelessWidget {
 
   Widget _buildEmptyState(BuildContext context, ForumState state) {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            state.isSearching ? Icons.search_off_rounded : Icons.forum_outlined,
-            size: 64,
-            color: AppColors.textTertiary.withOpacity(0.5),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            state.isSearching ? 'No results found' : AppLocalizations.of(context).noPostsYet,
-            style: AppTextStyles.headlineSmall.copyWith(color: AppColors.textSecondary),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            state.isSearching ? 'Try another search term' : AppLocalizations.of(context).beTheFirst,
-            style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textTertiary),
-          ),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              state.isSearching ? Icons.search_off_rounded : Icons.forum_outlined,
+              size: 64,
+              color: AppColors.textTertiary.withOpacity(0.5),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              state.isSearching ? 'No results found' : 'Community is quiet',
+              style: AppTextStyles.headlineSmall.copyWith(color: AppColors.textSecondary),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              state.isSearching 
+                  ? 'Try another search term' 
+                  : 'Discussions start from your consultations. Chat with AI to share a finding.',
+              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textTertiary),
+              textAlign: TextAlign.center,
+            ),
+            if (!state.isSearching) ...[
+              const SizedBox(height: 24),
+              OutlinedButton(
+                onPressed: () {
+                  // TODO: Navigate to Chat Tab (index 1)
+                  // context.read<HomeCubit>().setTab(1);
+                },
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.accentPrimary,
+                  side: const BorderSide(color: AppColors.accentPrimary),
+                  shape: const StadiumBorder(),
+                ),
+                child: const Text('Go to Chat'),
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }

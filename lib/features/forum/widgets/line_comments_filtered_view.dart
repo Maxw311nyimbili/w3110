@@ -31,7 +31,7 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
       height: MediaQuery.of(context).size.height * 0.85,
       decoration: const BoxDecoration(
         color: AppColors.backgroundSurface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       clipBehavior: Clip.antiAlias,
       child: GestureDetector(
@@ -42,9 +42,22 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
           body: SafeArea(
             child: Column(
               children: [
-                // ========== FIXED HEADER ==========
+                // Handle bar
+                Center(
+                  child: Container(
+                    margin: const EdgeInsets.only(top: 12, bottom: 8),
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: AppColors.backgroundElevated,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+
+                // ========== HEADER ==========
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                   child: Row(
                     children: [
                       Expanded(
@@ -55,17 +68,9 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
-                                  'Sentence Discussion',
+                                  'Discussion',
                                   style: AppTextStyles.headlineSmall.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  'Line ${widget.lineNumber}',
-                                  style: AppTextStyles.caption.copyWith(
-                                    color: AppColors.textTertiary,
-                                    fontWeight: FontWeight.w600,
+                                    fontWeight: FontWeight.w800,
                                   ),
                                 ),
                               ],
@@ -74,14 +79,13 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.close_rounded),
+                        icon: const Icon(Icons.close_rounded, color: AppColors.textSecondary),
                         onPressed: () => Navigator.pop(context),
                       ),
                     ],
                   ),
                 ),
-                const Divider(height: 1),
-
+                
                 // ========== SCROLLABLE CONTENT ==========
                 Expanded(
                   child: BlocBuilder<ForumCubit, ForumState>(
@@ -98,54 +102,71 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
                         children: [
                           // 1. Quoted Line (Scrolls away)
                           Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                            padding: const EdgeInsets.all(12),
+                            margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                            padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: AppColors.accentPrimary.withOpacity(0.05),
-                              border: const Border(left: BorderSide(color: AppColors.accentPrimary, width: 3)),
-                              borderRadius: const BorderRadius.horizontal(right: Radius.circular(8)),
+                              color: AppColors.backgroundElevated,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: AppColors.borderLight),
                             ),
-                            child: Text(
-                              '"$lineText"',
-                              style: AppTextStyles.bodyMedium.copyWith(
-                                fontStyle: FontStyle.italic,
-                                color: AppColors.textSecondary,
-                              ),
-                              maxLines: 4,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(Icons.format_quote_rounded, size: 20, color: AppColors.accentPrimary),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Line ${widget.lineNumber}',
+                                      style: AppTextStyles.labelSmall.copyWith(
+                                        color: AppColors.textSecondary,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  lineText,
+                                  style: AppTextStyles.bodyMedium.copyWith(
+                                    color: AppColors.textPrimary,
+                                    height: 1.5,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
 
                           // 2. Filter Tabs (Scrolls away)
                           Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                             child: SingleChildScrollView(
                               scrollDirection: Axis.horizontal,
                               child: Row(
                                 children: [
                                   _FilterTab(
                                     label: 'All',
-                                    value: 'all',
                                     isActive: state.activeFilter == 'all',
                                     onTap: () => context.read<ForumCubit>().filterComments('all'),
                                   ),
                                   const SizedBox(width: 8),
                                   _FilterTab(
-                                    label: '⚕️ Clinician',
-                                    value: 'clinician',
+                                    label: 'Clinician',
+                                    icon: Icons.local_hospital_outlined,
                                     isActive: state.activeFilter == 'clinician',
                                     onTap: () => context.read<ForumCubit>().filterComments('clinician'),
                                   ),
                                   const SizedBox(width: 8),
                                   _FilterTab(
-                                    label: '💬 Experience',
-                                    value: 'experience',
+                                    label: 'Experience',
+                                    icon: Icons.face_4_outlined,
                                     isActive: state.activeFilter == 'experience',
                                     onTap: () => context.read<ForumCubit>().filterComments('experience'),
                                   ),
                                   const SizedBox(width: 8),
                                   _FilterTab(
-                                    label: '⚠️ Concern',
-                                    value: 'concern',
+                                    label: 'Concern',
+                                    icon: Icons.help_outline_rounded,
                                     isActive: state.activeFilter == 'concern',
                                     onTap: () => context.read<ForumCubit>().filterComments('concern'),
                                   ),
@@ -154,7 +175,7 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
                             ),
                           ),
 
-                          const Divider(height: 1),
+                          const Divider(height: 1, color: AppColors.borderLight),
 
                           // 3. Comments List
                           if (comments.isEmpty)
@@ -164,11 +185,16 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Icon(Icons.chat_bubble_outline_rounded, size: 48, color: AppColors.gray300),
+                                    Icon(Icons.chat_bubble_outline_rounded, size: 48, color: AppColors.borderMedium),
                                     const SizedBox(height: 12),
                                     Text(
-                                      'No comments yet',
+                                      'No discussions yet',
                                       style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textTertiary),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Tap below to start one',
+                                      style: AppTextStyles.caption.copyWith(color: AppColors.textTertiary),
                                     ),
                                   ],
                                 ),
@@ -177,7 +203,7 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
                           else
                             ...comments.expand((comment) => [
                               Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                                 child: CommentCard(
                                   comment: comment,
                                   onReply: () {
@@ -185,7 +211,7 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
                                   },
                                 ),
                               ),
-                              const Divider(height: 1, indent: 16, endIndent: 16),
+                              const Divider(height: 1, indent: 20, endIndent: 20, color: AppColors.borderLight),
                             ]),
                         ],
                       );
@@ -194,7 +220,7 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
                 ),
 
                 // ========== FIXED REPLY INPUT ==========
-                const Divider(height: 1),
+                const Divider(height: 1, color: AppColors.borderLight),
                 ReplyInputFieldForModal(lineId: widget.lineId),
               ],
             ),
@@ -207,13 +233,13 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
 
 class _FilterTab extends StatelessWidget {
   final String label;
-  final String value;
+  final IconData? icon;
   final bool isActive;
   final VoidCallback onTap;
 
   const _FilterTab({
     required this.label,
-    required this.value,
+    this.icon,
     required this.isActive,
     required this.onTap,
   });
@@ -222,22 +248,35 @@ class _FilterTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
         decoration: BoxDecoration(
-          color: isActive ? AppColors.accentPrimary.withOpacity(0.1) : AppColors.gray100,
+          color: isActive ? AppColors.accentPrimary : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isActive ? AppColors.accentPrimary : Colors.transparent,
+            color: isActive ? Colors.transparent : AppColors.borderMedium,
             width: 1,
           ),
         ),
-        child: Text(
-          label,
-          style: AppTextStyles.labelSmall.copyWith(
-            color: isActive ? AppColors.accentPrimary : AppColors.textSecondary,
-            fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-          ),
+        child: Row(
+          children: [
+            if (icon != null) ...[
+              Icon(
+                icon, 
+                size: 16, 
+                color: isActive ? Colors.white : AppColors.textSecondary
+              ),
+              const SizedBox(width: 8),
+            ],
+            Text(
+              label,
+              style: AppTextStyles.labelSmall.copyWith(
+                color: isActive ? Colors.white : AppColors.textSecondary,
+                fontWeight: isActive ? FontWeight.w700 : FontWeight.w600,
+              ),
+            ),
+          ],
         ),
       ),
     );

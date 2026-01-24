@@ -17,105 +17,115 @@ class CommentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final roleIcon = _getRoleIcon(comment.authorRole);
-    final typeLabel = comment.typeLabel;
+    final roleIconInfo = _getRoleIconInfo(comment.authorRole);
+    // Only show type label if it's not generic
+    final typeLabel = comment.commentType != CommentType.general ? comment.typeLabel : null;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Author + role
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppColors.gray100,
-                shape: BoxShape.circle,
-              ),
-              child: Text(roleIcon, style: const TextStyle(fontSize: 16)),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Minimal Avatar/Icon
+          Container(
+            width: 32,
+            height: 32,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: AppColors.backgroundElevated,
+              shape: BoxShape.circle,
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    comment.authorName,
-                    style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.bold),
-                  ),
-                  if (comment.authorProfession != null)
+            child: Icon(roleIconInfo, size: 18, color: AppColors.textSecondary),
+          ),
+          const SizedBox(width: 12),
+          
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header
+                Row(
+                  children: [
                     Text(
-                      comment.authorProfession!,
+                      comment.authorName,
+                      style: AppTextStyles.labelMedium.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    if (comment.authorProfession != null) ...[
+                      const SizedBox(width: 6),
+                      Text(
+                        '· ${comment.authorProfession}',
+                        style: AppTextStyles.caption.copyWith(color: AppColors.textTertiary),
+                      ),
+                    ],
+                    const Spacer(),
+                    Text(
+                      _formatTime(comment.createdAt),
                       style: AppTextStyles.caption.copyWith(color: AppColors.textTertiary),
                     ),
+                  ],
+                ),
+                
+                // Optional Type Badge (Subtle)
+                if (typeLabel != null && comment.lineId != 'general') ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    typeLabel.toUpperCase(),
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.accentPrimary.withOpacity(0.6),
+                      fontSize: 9,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
                 ],
-              ),
-            ),
-             Text(
-              _formatTime(comment.createdAt),
-              style: AppTextStyles.caption.copyWith(color: AppColors.textTertiary),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
+                const SizedBox(height: 6),
 
-        // Comment type badge
-        if (comment.lineId != 'general') ...[
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: AppColors.accentPrimary.withOpacity(0.08),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              typeLabel,
-              style: AppTextStyles.labelSmall.copyWith(
-                color: AppColors.accentPrimary,
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-              ),
+                // Content
+                Text(
+                  comment.text,
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    height: 1.5, 
+                    color: AppColors.textPrimary
+                  ),
+                ),
+                
+                // Footer (Reply)
+                const SizedBox(height: 8),
+                GestureDetector(
+                  onTap: onReply,
+                  child: Text(
+                    'Reply',
+                    style: AppTextStyles.labelSmall.copyWith(
+                      color: AppColors.textTertiary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 8),
         ],
-
-        // Comment text
-        Text(
-          comment.text,
-          style: AppTextStyles.bodyMedium.copyWith(height: 1.5, color: AppColors.textPrimary),
-        ),
-        const SizedBox(height: 12),
-
-        // Actions (Reply)
-        GestureDetector(
-          onTap: onReply,
-          child: Text(
-            'Reply',
-            style: AppTextStyles.labelSmall.copyWith(
-              color: AppColors.accentPrimary,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 
-  String _getRoleIcon(CommentRole role) {
+  IconData _getRoleIconInfo(CommentRole role) {
     switch (role) {
-      case CommentRole.clinician: return '⚕️';
-      case CommentRole.mother: return '👩‍🤰';
-      case CommentRole.community: return '👤';
-      default: return '💬';
+      case CommentRole.clinician: return Icons.local_hospital_outlined;
+      case CommentRole.mother: return Icons.face_4_outlined;
+      case CommentRole.community: return Icons.person_outline;
+      default: return Icons.chat_bubble_outline_rounded;
     }
   }
   
   String _formatTime(DateTime time) {
     final diff = DateTime.now().difference(time);
-    if (diff.inDays > 0) return '${diff.inDays}d ago';
-    if (diff.inHours > 0) return '${diff.inHours}h ago';
-    if (diff.inMinutes > 0) return '${diff.inMinutes}m ago';
-    return 'just now';
+    if (diff.inDays > 0) return '${diff.inDays}d';
+    if (diff.inHours > 0) return '${diff.inHours}h';
+    if (diff.inMinutes > 0) return '${diff.inMinutes}m';
+    return 'now';
   }
 }
