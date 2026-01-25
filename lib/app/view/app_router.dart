@@ -1,6 +1,7 @@
 // lib/app/app_router.dart
 
 import 'package:flutter/cupertino.dart';
+import 'package:cap_project/core/widgets/auth_guard.dart';
 import 'package:cap_project/features/auth/auth.dart';
 import 'package:cap_project/features/auth/view/settings_page.dart';
 import 'package:cap_project/features/chat/chat.dart';
@@ -23,8 +24,14 @@ class AppRouter {
   static Route<dynamic>? generateRoute(RouteSettings settings) {
     switch (settings.name) {
       case AppRouter.landing:
+        final args = settings.arguments as Map<String, dynamic>?;
+        final initialStep = args?['initialStep'] as OnboardingStep?;
+        final forceAuth = args?['forceAuth'] == true;
+        
         return CupertinoPageRoute(
-          builder: (_) => const LandingPage(),
+          builder: (_) => LandingPage(
+            initialStepOverride: initialStep ?? (forceAuth ? OnboardingStep.authentication : null),
+          ),
           settings: settings,
         );
 
@@ -42,20 +49,20 @@ class AppRouter {
 
       case AppRouter.scanner:
         return CupertinoPageRoute(
-          builder: (_) => const MedScannerPage(),
+          builder: (_) => const AuthGuard(child: MedScannerPage()),
           settings: settings,
         );
 
       case AppRouter.forum:
         return CupertinoPageRoute(
-          builder: (_) => const ForumListPage(),
+          builder: (_) => const AuthGuard(child: ForumListPage()),
           settings: settings,
         );
 
       case AppRouter.settings:
         return PageRouteBuilder(
           settings: settings,
-          pageBuilder: (_, __, ___) => const SettingsPage(),
+          pageBuilder: (_, __, ___) => const AuthGuard(child: SettingsPage()),
           transitionsBuilder: (_, animation, secondaryAnimation, child) {
             const begin = Offset(-1.0, 0.0); // Start from LEFT
             const end = Offset.zero;

@@ -108,6 +108,7 @@ class _AppState extends State<App> {
     _landingCubit = LandingCubit(
       landingRepository: _landingRepository,
       authRepository: _authRepository,
+      authCubit: _authCubit,
       isDevelopment: widget.config.isDevelopment,
     );
 
@@ -159,7 +160,7 @@ class _AppState extends State<App> {
                 return supportedLocales.first;
               },
               onGenerateRoute: AppRouter.generateRoute,
-              initialRoute: AppRouter.landing,
+              initialRoute: AppRouter.chat,
               builder: (context, child) {
                 // Wrap app with environment banner if not production
                 if (!widget.config.isProduction) {

@@ -1,13 +1,14 @@
-import 'package:cap_project/features/chat/widgets/audio_waveform.dart';
 import 'package:cap_project/features/chat/widgets/chat_input.dart';
 import 'package:cap_project/features/chat/widgets/message_bubble.dart';
 import 'package:cap_project/features/chat/widgets/thinking_indicator.dart';
-import 'package:cap_project/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../cubit/cubit.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../app/view/app_router.dart';
+import '../../auth/cubit/cubit.dart';
+import '../../landing/widgets/welcome_drawer.dart';
 
 class ChatBody extends StatefulWidget {
   final bool isAudioMode;
@@ -141,44 +142,20 @@ class _ChatBodyState extends State<ChatBody> with SingleTickerProviderStateMixin
                       },
                     ),
                     if (_showScrollToBottom)
-                      Positioned(
-                        bottom: 20,
-                        left: 0,
-                        right: 0,
-                        child: Center(
-                          child: GestureDetector(
-                            onTap: _scrollToLatestMessage,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                              decoration: BoxDecoration(
-                                color: AppColors.accentPrimary.withOpacity(0.95),
-                                borderRadius: BorderRadius.circular(20),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.1),
-                                    blurRadius: 10,
-                                    offset: const Offset(0, 4),
-                                  ),
-                                ],
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(Icons.arrow_downward_rounded, color: Colors.white, size: 18),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    _unreadCount > 1 ? '$_unreadCount New Messages' : 'New Message',
-                                    style: AppTextStyles.labelMedium.copyWith(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
+                      _buildScrollToBottomButton(),
+                    
+                    // Subtle Floating Sign-In Chip
+                    Positioned(
+                      bottom: 8,
+                      left: 0,
+                      right: 0,
+                      child: BlocBuilder<AuthCubit, AuthState>(
+                        builder: (context, state) {
+                          if (state.isAuthenticated) return const SizedBox.shrink();
+                          return _buildFloatingSignInChip(context);
+                        },
                       ),
+                    ),
                   ],
                 ),
               ),
@@ -207,7 +184,6 @@ class _ChatBodyState extends State<ChatBody> with SingleTickerProviderStateMixin
   }
 
   Widget _buildEmptyState(BuildContext context) {
-    // 1. Dynamic Greeting
     final hour = DateTime.now().hour;
     String greeting;
     if (hour >= 5 && hour < 12) {
@@ -235,14 +211,12 @@ class _ChatBodyState extends State<ChatBody> with SingleTickerProviderStateMixin
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       const Spacer(), 
-                      
-                      // 1. Premium Greeting Group
                       Column(
                         children: [
                           Text(
                             greeting,
                             textAlign: TextAlign.center,
-                            style: AppTextStyles.displayLarge.copyWith( // Even Bigger
+                            style: AppTextStyles.displayLarge.copyWith(
                               fontWeight: FontWeight.w800,
                               letterSpacing: -1.5,
                               color: AppColors.textPrimary,
@@ -263,25 +237,20 @@ class _ChatBodyState extends State<ChatBody> with SingleTickerProviderStateMixin
                           ),
                         ],
                       ),
-                      
-                      // Fixed spacing to visually group greeting + fact
                       const SizedBox(height: 56),
-
-                      // 2. Editorial Insight Widget (Now Breathing)
                       AnimatedBuilder(
                         animation: _breathingController,
                         builder: (context, child) {
                           return Transform.scale(
-                            scale: 0.98 + (0.02 * _breathingController.value), // Subtle beat
+                            scale: 0.98 + (0.02 * _breathingController.value),
                             child: Opacity(
-                              opacity: 0.5 + (0.5 * _breathingController.value), // Deep breathing
+                              opacity: 0.5 + (0.5 * _breathingController.value),
                               child: child,
                             ),
                           );
                         },
                         child: _buildDailyFact(context),
                       ),
-                      
                       const Spacer(), 
                     ],
                   ),
@@ -295,7 +264,6 @@ class _ChatBodyState extends State<ChatBody> with SingleTickerProviderStateMixin
   }
 
   Widget _buildDailyFact(BuildContext context) {
-    // Pregnancy-focused facts + General Health
     final facts = [
       'Take 400mcg of Folic Acid daily.',
       'Ginger is effective for morning sickness.',
@@ -323,26 +291,22 @@ class _ChatBodyState extends State<ChatBody> with SingleTickerProviderStateMixin
           child: Stack(
             alignment: Alignment.center,
             children: [
-              // 1. Giant Background Quote Mark
               Positioned(
                 top: -20,
                 left: 20,
                 child: Transform.rotate(
-                  angle: -0.2, // Slight tilt
+                  angle: -0.2,
                   child: Icon(
                     Icons.format_quote_rounded,
                     size: 140,
-                    color: AppColors.accentPrimary.withOpacity(0.06), // Very faint
+                    color: AppColors.accentPrimary.withOpacity(0.06),
                   ),
                 ),
               ),
-
-              // 2. Editorial Content
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 32),
                 child: Column(
                   children: [
-                    // Small Eyebrow Label
                     Text(
                       'DAILY INSIGHT',
                       style: AppTextStyles.labelSmall.copyWith(
@@ -353,12 +317,10 @@ class _ChatBodyState extends State<ChatBody> with SingleTickerProviderStateMixin
                       ),
                     ),
                     const SizedBox(height: 16),
-                    // High-End Serif Typography
                     Text(
                       dailyFact,
                       textAlign: TextAlign.center,
                       style: const TextStyle(
-                         // Fallback to Georgia or generic serif since GoogleFonts might not be fully loaded for 'Playfair'
                          fontFamily: 'Georgia', 
                          fontSize: 22,
                          height: 1.4,
@@ -368,7 +330,6 @@ class _ChatBodyState extends State<ChatBody> with SingleTickerProviderStateMixin
                       ),
                     ),
                     const SizedBox(height: 16),
-                    // Decorative Line
                     Container(
                       width: 40,
                       height: 2,
@@ -394,7 +355,7 @@ class _ChatBodyState extends State<ChatBody> with SingleTickerProviderStateMixin
         left: 8,
         right: 8,
         top: 12,
-        bottom: 24, // Reduced from 180 to allow input area to naturally push content
+        bottom: 24,
       ),
       reverse: true,
       itemCount: state.messages.length,
@@ -402,9 +363,9 @@ class _ChatBodyState extends State<ChatBody> with SingleTickerProviderStateMixin
         final reversedIndex = state.messages.length - 1 - index;
         final message = state.messages[reversedIndex];
         return RefinedMessageBubble(
-          message: message,
-          key: ValueKey(message.id),
-        );
+            message: message,
+            key: ValueKey(message.id),
+          );
       },
     );
   }
@@ -460,6 +421,96 @@ class _ChatBodyState extends State<ChatBody> with SingleTickerProviderStateMixin
           ),
         );
       },
+    );
+  }
+
+  Widget _buildScrollToBottomButton() {
+    return Positioned(
+      bottom: 20,
+      left: 0,
+      right: 0,
+      child: Center(
+        child: GestureDetector(
+          onTap: _scrollToLatestMessage,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: AppColors.accentPrimary.withOpacity(0.95),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.arrow_downward_rounded, color: Colors.white, size: 18),
+                const SizedBox(width: 8),
+                Text(
+                  _unreadCount > 1 ? '$_unreadCount New Messages' : 'New Message',
+                  style: AppTextStyles.labelMedium.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFloatingSignInChip(BuildContext context) {
+    return Center(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => WelcomeDrawer.show(context),
+          borderRadius: BorderRadius.circular(20),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: AppColors.backgroundSurface.withValues(alpha: 0.92),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: AppColors.accentPrimary.withValues(alpha: 0.2)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.06),
+                  blurRadius: 12,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.auto_awesome_rounded, size: 14, color: AppColors.accentPrimary),
+                const SizedBox(width: 6),
+                Text(
+                  'Sign In',
+                  style: AppTextStyles.labelSmall.copyWith(
+                    color: AppColors.accentPrimary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  'to save history',
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: AppColors.textSecondary,
+                    fontSize: 11,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

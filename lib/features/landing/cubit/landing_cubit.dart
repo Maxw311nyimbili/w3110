@@ -1,4 +1,5 @@
 import 'package:auth_repository/auth_repository.dart';
+import 'package:cap_project/features/auth/cubit/cubit.dart';
 import 'package:cap_project/features/landing/cubit/landing_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:landing_repository/landing_repository.dart';
@@ -6,9 +7,9 @@ import 'package:landing_repository/landing_repository.dart';
 /// Manages onboarding flow including authentication step
 ///
 /// Flow:
-/// 1. Welcome - intro screen
-/// 2. Authentication - Google sign-in (now part of landing)
-/// 3. Role Selection - user picks their primary role
+/// 1. Authentication - Google sign-in (now part of landing)
+/// 2. Role Selection - user picks their primary role
+/// 3. Profile Setup - name and account nickname
 /// 4. Context Gathering - interests/topics (optional)
 /// 5. Consent - medical disclaimer
 /// 6. Complete - onboarding finished, ready for chat
@@ -16,21 +17,34 @@ class LandingCubit extends Cubit<LandingState> {
   LandingCubit({
     required LandingRepository landingRepository,
     required AuthRepository authRepository,
+    required AuthCubit authCubit,
     bool isDevelopment = false,
   })  : _landingRepository = landingRepository,
         _authRepository = authRepository,
+        _authCubit = authCubit,
         _isDevelopment = isDevelopment,
         super(LandingState(isDemoAvailable: isDevelopment));
 
   final LandingRepository _landingRepository;
   final AuthRepository _authRepository;
+  final AuthCubit _authCubit;
   final bool _isDevelopment;
 
   /// Initialize - check if onboarding already completed
-  Future<void> initialize() async {
+  Future<void> initialize({OnboardingStep? initialStepOverride}) async {
     try {
       print('🚀 Initializing LandingCubit...');
       emit(state.copyWith(isLoading: true));
+
+      if (initialStepOverride != null) {
+        print('➡️ Jumping directly to step: $initialStepOverride');
+        emit(state.copyWith(
+          currentStep: initialStepOverride,
+          isLoading: false,
+          isGuest: false,
+        ));
+        return;
+      }
 
       final status = await _landingRepository.getOnboardingStatus();
       print('  - Onboarding complete: ${status.isComplete}');
@@ -42,6 +56,7 @@ class LandingCubit extends Cubit<LandingState> {
         print('✅ Onboarding already done, moving to complete');
         emit(state.copyWith(
           currentStep: OnboardingStep.complete,
+          isGuest: false,
           selectedRole: _mapStringToRole(status.userRole),
           userName: status.userName,
           accountNickname: status.accountNickname,
@@ -52,7 +67,10 @@ class LandingCubit extends Cubit<LandingState> {
         ));
       } else {
         print('ℹ️ Starting onboarding flow');
-        emit(state.copyWith(isLoading: false));
+        emit(state.copyWith(
+          isLoading: false,
+          isGuest: !isAuthenticated,
+        ));
       }
     } catch (e, stackTrace) {
       print('❌ ERROR in LandingCubit.initialize: $e');
@@ -65,11 +83,28 @@ class LandingCubit extends Cubit<LandingState> {
   }
 
   /// Move to next onboarding step
-  void nextStep() {
+  Future<void> nextStep() async {
     if (!state.canProceed) return;
 
     final nextStep = _getNextStep(state.currentStep);
-    emit(state.copyWith(currentStep: nextStep));
+    emit(state.copyWith(currentStep: nextStep, isGuest: false));
+  }
+
+  /// Continue as a guest (bypass onboarding for now)
+  void continueAsGuest() {
+    print('👤 Guest access: bypassing auth and jumping to complete');
+    emit(state.copyWith(
+      currentStep: OnboardingStep.complete,
+      isGuest: true,
+    ));
+  }
+
+  /// Manually start authentication (from CTA or restricted feature)
+  void startAuthentication() {
+    emit(state.copyWith(
+      currentStep: OnboardingStep.authentication,
+      isGuest: false,
+    ));
   }
 
   /// Move to previous onboarding step
@@ -81,7 +116,6 @@ class LandingCubit extends Cubit<LandingState> {
   }
 
   /// Authenticate with Google as part of onboarding
-  /// This is called from the authentication step
   Future<void> authenticateWithGoogle() async {
     try {
       emit(state.copyWith(isAuthenticating: true, authError: null));
@@ -148,8 +182,11 @@ class LandingCubit extends Cubit<LandingState> {
     try {
       emit(state.copyWith(isAuthenticating: true, authError: null));
 
-      // Sign in as demo user via repo
-      final user = await _authRepository.signInAsDemo();
+      // Sign in as demo user via AuthCubit
+      await _authCubit.signInAsDemo();
+      
+      final user = _authCubit.state.user;
+      if (user == null) throw Exception('Demo login failed');
 
       print('✓ Demo Authentication complete: ${user.email}');
       
@@ -279,8 +316,6 @@ class LandingCubit extends Cubit<LandingState> {
 
   OnboardingStep _getNextStep(OnboardingStep current) {
     switch (current) {
-      case OnboardingStep.welcome:
-        return OnboardingStep.authentication;
       case OnboardingStep.authentication:
         return OnboardingStep.roleSelection;
       case OnboardingStep.roleSelection:
@@ -298,10 +333,8 @@ class LandingCubit extends Cubit<LandingState> {
 
   OnboardingStep? _getPreviousStep(OnboardingStep current) {
     switch (current) {
-      case OnboardingStep.welcome:
-        return null;
       case OnboardingStep.authentication:
-        return OnboardingStep.welcome;
+        return null;
       case OnboardingStep.roleSelection:
         return OnboardingStep.authentication;
       case OnboardingStep.profileSetup:

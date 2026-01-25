@@ -130,6 +130,23 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
+  /// Sign in as a demo user (Development only)
+  Future<void> signInAsDemo() async {
+    try {
+      emit(state.copyWith(status: AuthStatus.loading));
+      final user = await _authRepository.signInAsDemo();
+      emit(state.copyWith(
+        status: AuthStatus.authenticated,
+        user: _mapToAuthUser(user),
+      ));
+    } catch (e) {
+      emit(state.copyWith(
+        status: AuthStatus.error,
+        error: 'Demo sign-in failed',
+      ));
+    }
+  }
+
   /// Sign out - clear tokens and user data
   ///
   /// Steps:

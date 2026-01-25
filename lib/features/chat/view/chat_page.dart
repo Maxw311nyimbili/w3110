@@ -3,11 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:chat_repository/chat_repository.dart';
 import 'package:cap_project/app/view/app_router.dart';
 import 'package:cap_project/core/locale/cubit/locale_cubit.dart';
-import 'package:cap_project/core/locale/cubit/locale_state.dart';
 import 'package:cap_project/core/theme/app_colors.dart';
 import 'package:cap_project/core/theme/app_text_styles.dart';
 import 'package:cap_project/features/auth/cubit/cubit.dart';
 import 'package:cap_project/core/services/audio_recording_service.dart';
+import 'package:cap_project/features/landing/widgets/welcome_drawer.dart';
+import 'package:cap_project/features/landing/cubit/cubit.dart';
 import '../cubit/cubit.dart';
 import '../widgets/widgets.dart';
 
@@ -35,10 +36,10 @@ class _ChatPageState extends State<ChatPage> {
   @override
   void initState() {
     super.initState();
-    _loadOnboarding();
+    _initializeApp();
   }
 
-  Future<void> _loadOnboarding() async {
+  Future<void> _initializeApp() async {
     try {
       final status = await context.read<LandingRepository>().getOnboardingStatus();
       if (mounted) {
@@ -46,11 +47,37 @@ class _ChatPageState extends State<ChatPage> {
           _onboardingStatus = status;
           _isLoading = false;
         });
+
+        // Handle initial entry (Popup or Onboarding)
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            _handleEntryStatus(status);
+          }
+        });
       }
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
       }
+    }
+  }
+
+  void _handleEntryStatus(OnboardingStatus status) {
+    final authState = context.read<AuthCubit>().state;
+    
+    // 1. If not authenticated, show the Welcome Drawer (Gate)
+    if (authState.status != AuthStatus.authenticated) {
+      WelcomeDrawer.show(context);
+      return;
+    }
+    
+    // 2. If authenticated but hasn't finished personalization, guide them back
+    if (!status.isComplete) {
+      AppRouter.replaceTo<void>(
+        context, 
+        AppRouter.landing, 
+        arguments: {'initialStep': OnboardingStep.roleSelection},
+      );
     }
   }
 
@@ -114,11 +141,10 @@ class _ChatViewState extends State<ChatView> {
 
   @override
   Widget build(BuildContext context) {
-    final user = context.watch<AuthCubit>().state.user;
+    final authState = context.watch<AuthCubit>().state;
+    final user = authState.user;
     final status = widget.onboardingStatus;
-    final initial = (status?.userName ?? user?.displayName ?? 'U')[0].toUpperCase();
-    final photoUrl = user?.photoUrl;
-
+    
     return Scaffold(
       resizeToAvoidBottomInset: true,
       backgroundColor: AppColors.backgroundPrimary,
@@ -142,7 +168,7 @@ class _ChatViewState extends State<ChatView> {
                   children: [
                     // Profile / Settings Button
                     GestureDetector(
-                      onTap: () => AppRouter.navigateTo(context, AppRouter.settings),
+                      onTap: () => AppRouter.navigateTo<void>(context, AppRouter.settings),
                       child: Container(
                         width: 40,
                         height: 40,
@@ -190,7 +216,7 @@ class _ChatViewState extends State<ChatView> {
                       ),
                       child: IconButton(
                         icon: const Icon(Icons.forum_outlined, size: 20, color: AppColors.textPrimary),
-                        onPressed: () => AppRouter.navigateTo(context, AppRouter.forum),
+                        onPressed: () => AppRouter.navigateTo<void>(context, AppRouter.forum),
                         tooltip: 'Community Forum',
                       ),
                     ),

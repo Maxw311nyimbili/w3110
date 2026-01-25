@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../core/theme/app_text_styles.dart';
-import '../../../core/theme/app_colors.dart';
-import '../cubit/cubit.dart';
-import '../../auth/widgets/google_sign_in_button.dart';
+import 'package:cap_project/core/theme/app_colors.dart';
+import 'package:cap_project/core/theme/app_text_styles.dart';
+import 'package:cap_project/core/widgets/brand_orb.dart';
+import 'package:cap_project/features/landing/cubit/cubit.dart';
+import 'package:cap_project/features/auth/widgets/google_sign_in_button.dart';
 
 class AuthenticationStep extends StatelessWidget {
   const AuthenticationStep({super.key});
@@ -27,34 +28,43 @@ class AuthenticationStep extends StatelessWidget {
             appBar: AppBar(
               backgroundColor: Colors.transparent,
               elevation: 0,
-              leading: IconButton(
-                icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-                color: AppColors.textPrimary,
-                onPressed: state.isAuthenticating
-                    ? null
-                    : () => context.read<LandingCubit>().previousStep(),
-              ),
+              automaticallyImplyLeading: false,
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.close_rounded, color: AppColors.textSecondary),
+                  onPressed: state.isAuthenticating 
+                      ? null 
+                      : () => context.read<LandingCubit>().continueAsGuest(),
+                ),
+                const SizedBox(width: 8),
+              ],
             ),
             body: SafeArea(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24.0),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Spacer(),
                     
-                    // Staggered Title
+                    // Brand Identity Character (Orb) & Welcome
                     _buildStaggeredEntrance(
                       delay: 100,
-                      child: Text(
-                        'Secure your health footprint',
-                        style: AppTextStyles.displayMedium.copyWith(
-                          color: AppColors.textPrimary,
-                          letterSpacing: -1.0,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 34,
-                        ),
+                      child: Column(
+                        children: [
+                          const BrandOrb(size: 140),
+                          const SizedBox(height: 32),
+                          Text(
+                            'Welcome to Thanzi',
+                            textAlign: TextAlign.center,
+                            style: AppTextStyles.displayMedium.copyWith(
+                              color: AppColors.textPrimary,
+                              letterSpacing: -1.0,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 34,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
 
@@ -64,7 +74,8 @@ class AuthenticationStep extends StatelessWidget {
                     _buildStaggeredEntrance(
                       delay: 300,
                       child: Text(
-                        'Continue with Google to sync your medical history and personalize your care path.',
+                        'Secure your medical history and personalize your health companion by signing in.',
+                        textAlign: TextAlign.center,
                         style: AppTextStyles.bodyLarge.copyWith(
                           color: AppColors.textSecondary,
                           fontSize: 17,
@@ -73,9 +84,9 @@ class AuthenticationStep extends StatelessWidget {
                       ),
                     ),
 
-                    const SizedBox(height: 56),
+                    const SizedBox(height: 48),
                     
-                    // Staggered Google Button
+                    // Main Sign-In Action
                     _buildStaggeredEntrance(
                       delay: 500,
                       child: Container(
@@ -105,6 +116,25 @@ class AuthenticationStep extends StatelessWidget {
                       ),
                     ),
                     
+                    const SizedBox(height: 20),
+
+                    // Guest / Dismiss Action
+                    _buildStaggeredEntrance(
+                      delay: 600,
+                      child: TextButton(
+                        onPressed: state.isAuthenticating 
+                            ? null 
+                            : () => context.read<LandingCubit>().continueAsGuest(),
+                        child: Text(
+                          'Continue as Guest',
+                          style: AppTextStyles.labelLarge.copyWith(
+                            color: AppColors.textSecondary,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ),
+                    
                     const Spacer(),
                     
                     if (state.isDemoAvailable)
@@ -116,7 +146,7 @@ class AuthenticationStep extends StatelessWidget {
                                 ? null 
                                 : () => context.read<LandingCubit>().authenticateAsDemo(), 
                             child: Text(
-                              'Demo Login (Developer)',
+                              'Demo Login (Developer Bypass)',
                               style: AppTextStyles.labelSmall.copyWith(
                                 color: AppColors.textTertiary,
                                 fontWeight: FontWeight.bold,
