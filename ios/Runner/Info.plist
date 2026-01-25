@@ -50,6 +50,12 @@
 	<false/>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>We need access to your photo library to select images for analysis.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>We need camera access to scan medications and take photos.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>We need microphone access for voice chat.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 </dict>

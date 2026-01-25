@@ -3,6 +3,7 @@
 // It adds dual-mode (quickAnswer + detailedAnswer) support
 
 import 'package:equatable/equatable.dart';
+import 'package:cap_project/features/medscanner/cubit/medscanner_state.dart' as scanner;
 import 'package:chat_repository/chat_repository.dart' hide ChatMessage;
 
 enum ChatStatus {
@@ -10,6 +11,30 @@ enum ChatStatus {
   loading,
   success,
   error,
+}
+
+enum AttachmentType {
+  image,
+  document,
+}
+
+class PendingAttachment extends Equatable {
+  final String path;
+  final String name;
+  final AttachmentType type;
+  final String? mimeType;
+  final int size;
+
+  const PendingAttachment({
+    required this.path,
+    required this.name,
+    required this.type,
+    this.mimeType,
+    required this.size,
+  });
+
+  @override
+  List<Object?> get props => [path, name, type, mimeType, size];
 }
 
 /// ✅ SourceReference model (for dual-mode)
@@ -44,6 +69,8 @@ class ChatState extends Equatable {
     this.recordingPath,
     this.amplitude = -160.0,
     this.loadingMessage,
+    this.pendingAttachments = const [],
+    this.medicineContext,
   });
 
   final ChatStatus status;
@@ -56,6 +83,8 @@ class ChatState extends Equatable {
   final String? recordingPath;
   final double amplitude;
   final String? loadingMessage;
+  final List<PendingAttachment> pendingAttachments;
+  final scanner.ScanResult? medicineContext;
 
   bool get isLoading => status == ChatStatus.loading;
   bool get hasMessages => messages.isNotEmpty;
@@ -71,6 +100,8 @@ class ChatState extends Equatable {
     String? recordingPath,
     double? amplitude,
     String? loadingMessage,
+    List<PendingAttachment>? pendingAttachments,
+    scanner.ScanResult? medicineContext,
   }) {
     return ChatState(
       status: status ?? this.status,
@@ -83,6 +114,8 @@ class ChatState extends Equatable {
       recordingPath: recordingPath ?? this.recordingPath,
       amplitude: amplitude ?? this.amplitude,
       loadingMessage: loadingMessage ?? this.loadingMessage,
+      pendingAttachments: pendingAttachments ?? this.pendingAttachments,
+      medicineContext: medicineContext ?? this.medicineContext,
     );
   }
 
@@ -98,7 +131,29 @@ class ChatState extends Equatable {
       recordingPath: recordingPath,
       amplitude: amplitude,
       loadingMessage: loadingMessage,
+      pendingAttachments: pendingAttachments,
     );
+  }
+
+  ChatState clearAttachments() {
+    return ChatState(
+      status: status,
+      messages: messages,
+      error: error,
+      isTyping: isTyping,
+      currentMessageId: currentMessageId,
+      sessionId: sessionId,
+      isRecording: isRecording,
+      recordingPath: recordingPath,
+      amplitude: amplitude,
+      loadingMessage: loadingMessage,
+      pendingAttachments: const [],
+      medicineContext: null,
+    );
+  }
+
+  ChatState clearMedicineContext() {
+    return copyWith(medicineContext: null);
   }
 
   ChatState resetLoadingMessage() {
@@ -117,7 +172,7 @@ class ChatState extends Equatable {
   }
 
   @override
-  List<Object?> get props => [status, messages, error, isTyping, currentMessageId, sessionId, isRecording, recordingPath, amplitude, loadingMessage];
+  List<Object?> get props => [status, messages, error, isTyping, currentMessageId, sessionId, isRecording, recordingPath, amplitude, loadingMessage, pendingAttachments];
 }
 
 /// ✅ NEW ChatMessage with dual-mode support
@@ -137,6 +192,7 @@ class ChatMessage extends Equatable {
     this.audioUrl,
     this.latencyMs,
     this.showingDetailedView = false,
+    this.medicineResult,
   });
 
   final String id;
@@ -154,6 +210,7 @@ class ChatMessage extends Equatable {
   final String? audioUrl;
   final int? latencyMs;
   final bool showingDetailedView;
+  final scanner.ScanResult? medicineResult;
 
   ChatMessage copyWith({
     String? id,
@@ -169,6 +226,7 @@ class ChatMessage extends Equatable {
     String? audioUrl,
     int? latencyMs,
     bool? showingDetailedView,
+    scanner.ScanResult? medicineResult,
   }) {
     return ChatMessage(
       id: id ?? this.id,
@@ -184,6 +242,7 @@ class ChatMessage extends Equatable {
       audioUrl: audioUrl ?? this.audioUrl,
       latencyMs: latencyMs ?? this.latencyMs,
       showingDetailedView: showingDetailedView ?? this.showingDetailedView,
+      medicineResult: medicineResult ?? this.medicineResult,
     );
   }
 
@@ -202,6 +261,7 @@ class ChatMessage extends Equatable {
     audioUrl,
     latencyMs,
     showingDetailedView,
+    medicineResult,
   ];
 }
 

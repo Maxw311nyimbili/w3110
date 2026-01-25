@@ -58,6 +58,15 @@ class MedScannerBody extends StatelessWidget {
           );
           context.read<MedScannerCubit>().clearError();
         }
+
+        // Handle success - navigate back to chat with result
+        if (state.status == MedScannerStatus.success && state.hasResult) {
+          final result = state.scanResult!;
+          // We need access to ChatCubit here. 
+          // Since MedScannerPage is usually pushed from ChatPage, 
+          // we can return the result via Navigator.pop
+          Navigator.pop(context, result);
+        }
       },
       child: BlocBuilder<MedScannerCubit, MedScannerState>(
         builder: (context, state) {
@@ -74,69 +83,80 @@ class MedScannerBody extends StatelessWidget {
   }
 
   Widget _buildCameraInterface(BuildContext context, MedScannerState state) {
-    return Column(
+    return Stack(
       children: [
-        // Camera preview
-        Expanded(
+        // 1. Camera Preview (Full Screen)
+        Positioned.fill(
           child: state.isCameraInitialized
               ? const CameraPreviewWidget()
               : _buildCameraInitializing(context),
         ),
 
-        // Instructions and controls
-        Container(
-          padding: const EdgeInsets.all(AppSpacing.xl),
-          decoration: BoxDecoration(
-            color: AppColors.backgroundSurface,
-            borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(20),
-            ),
+        // 2. Gradient Overlay for Text Readability at Bottom
+        Positioned(
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: 200,
+          child: Container(
+             decoration: BoxDecoration(
+               gradient: LinearGradient(
+                 begin: Alignment.bottomCenter,
+                 end: Alignment.topCenter,
+                 colors: [
+                   Colors.black.withOpacity(0.8),
+                   Colors.transparent,
+                 ],
+               ),
+             ),
           ),
+        ),
+
+        // 3. Floating Controls
+        Positioned(
+          bottom: 40,
+          left: 24,
+          right: 24,
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              // Instructions
-              Text(
-                AppLocalizations.of(context).scanInstructions,
-                style: AppTextStyles.bodyLarge,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: AppSpacing.sm),
+              // Tip Text
               Text(
                 AppLocalizations.of(context).scanTips,
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: AppColors.textSecondary,
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  shadows: [Shadow(color: Colors.black45, blurRadius: 4)],
                 ),
                 textAlign: TextAlign.center,
               ),
-
-              const SizedBox(height: AppSpacing.xl),
-
-              // Action buttons
+              const SizedBox(height: 24),
+              
+              // Controls Row
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  // Gallery button
-                  _ActionButton(
-                    icon: Icons.photo_library,
-                    label: AppLocalizations.of(context).gallery,
+                   // Gallery Button (Glassy)
+                  _GlassActionButton(
+                    icon: Icons.photo_library_rounded,
                     onPressed: state.isProcessing
                         ? null
-                        : () => context
-                        .read<MedScannerCubit>()
-                        .pickImageFromGallery(),
+                        : () => context.read<MedScannerCubit>().pickImageFromGallery(),
                   ),
 
-                  // Capture button (primary)
-                  _CaptureButton(
+                  // Shutter Button (Premium)
+                  _PremiumShutterButton(
                     onPressed: state.canCapture && !state.isProcessing
-                        ? () =>
-                        context.read<MedScannerCubit>().captureImage()
+                        ? () => context.read<MedScannerCubit>().captureImage()
                         : null,
                     isProcessing: state.isProcessing,
                   ),
 
-                  // Placeholder for symmetry
-                  const SizedBox(width: 80),
+                  // Spacer/Placeholder for symmetry (or maybe Flash?)
+                  // Let's add a placeholder glassy button or nothing for now.
+                  // Actually, let's keep it balanced.
+                  const SizedBox(width: 56), 
                 ],
               ),
             ],
@@ -172,46 +192,39 @@ class MedScannerBody extends StatelessWidget {
   }
 }
 
-/// Action button (Gallery, Flash, etc.)
-class _ActionButton extends StatelessWidget {
-  const _ActionButton({
+class _GlassActionButton extends StatelessWidget {
+  const _GlassActionButton({
     required this.icon,
-    required this.label,
-    required this.onPressed,
+    this.onPressed,
   });
 
   final IconData icon;
-  final String label;
   final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        IconButton(
-          icon: Icon(icon, size: 32),
-          onPressed: onPressed,
-          style: IconButton.styleFrom(
-            backgroundColor: AppColors.backgroundElevated,
-            foregroundColor: AppColors.accentPrimary,
-            disabledBackgroundColor: AppColors.gray200,
-            disabledForegroundColor: AppColors.textTertiary,
-          ),
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        width: 56,
+        height: 56,
+        decoration: BoxDecoration(
+          color: Colors.black.withOpacity(0.5),
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.white.withOpacity(0.2)),
         ),
-        const SizedBox(height: AppSpacing.xs),
-        Text(
-          label,
-          style: AppTextStyles.labelSmall,
+        child: Icon(
+          icon,
+          color: onPressed != null ? Colors.white : Colors.white38,
+          size: 24,
         ),
-      ],
+      ),
     );
   }
 }
 
-/// Large capture button
-class _CaptureButton extends StatelessWidget {
-  const _CaptureButton({
+class _PremiumShutterButton extends StatelessWidget {
+  const _PremiumShutterButton({
     required this.onPressed,
     this.isProcessing = false,
   });
@@ -221,47 +234,39 @@ class _CaptureButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isEnabled = onPressed != null;
+    
     return GestureDetector(
       onTap: onPressed,
       child: Container(
-        width: 80,
-        height: 80,
+        width: 84,
+        height: 84,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           border: Border.all(
-            color: onPressed != null
-                ? AppColors.accentPrimary
-                : AppColors.borderLight,
-            width: 4,
+            color: Colors.white,
+            width: 5,
           ),
-          boxShadow: onPressed != null
-              ? [
+          boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withOpacity(0.2),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
-          ]
-              : [],
+          ],
         ),
-        child: Center(
-          child: isProcessing
-              ? CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(
-              AppColors.accentPrimary,
-            ),
-          )
-              : Container(
-            width: 62,
-            height: 62,
-            decoration: BoxDecoration(
-              color: onPressed != null
-                  ? AppColors.accentPrimary
-                  : AppColors.borderLight,
-              shape: BoxShape.circle,
-            ),
-          ),
-        ),
+        padding: const EdgeInsets.all(4), // Gap between ring and button
+        child: isProcessing
+            ? const CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                strokeWidth: 3,
+              )
+            : Container(
+                decoration: BoxDecoration(
+                  color: isEnabled ? Colors.white : Colors.white24,
+                  shape: BoxShape.circle,
+                ),
+              ),
       ),
     );
   }

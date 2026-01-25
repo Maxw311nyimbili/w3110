@@ -5,6 +5,7 @@ import 'package:cap_project/features/medscanner/cubit/cubit.dart';
 import 'package:cap_project/features/medscanner/widgets/widgets.dart';
 import 'package:cap_project/l10n/l10n.dart';
 import 'package:flutter/material.dart';
+import 'package:cap_project/core/widgets/entry_animation.dart';
 import 'package:media_repository/media_repository.dart';
 
 /// MedScanner page - camera and image analysis
@@ -48,25 +49,71 @@ class MedScannerView extends StatelessWidget {
     return BlocBuilder<MedScannerCubit, MedScannerState>(
       builder: (context, state) {
         return Scaffold(
-          backgroundColor: AppColors.backgroundPrimary,
-          appBar: AppBar(
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-              onPressed: () => Navigator.pop(context),
-            ),
-            title: Text(AppLocalizations.of(context).medScanner),
-            centerTitle: true,
-            actions: [
-              // Show info button
-              IconButton(
-                icon: const Icon(Icons.info_outline_rounded),
-                tooltip: AppLocalizations.of(context).howToUse,
-                onPressed: () => _showInfoDialog(context),
+          backgroundColor: Colors.black, // Dark background for camera
+          body: Stack(
+            children: [
+              // 1. Main Content (Camera / Results)
+              const MedScannerBody(),
+
+              // 2. Floating Header (Top)
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: SafeArea(
+                  child: EntryAnimation(
+                    delay: const Duration(milliseconds: 200),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                      child: Row(
+                        children: [
+                          // Floating Back Button
+                          GestureDetector(
+                            onTap: () => Navigator.pop(context),
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withOpacity(0.4),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: Colors.white.withOpacity(0.1)),
+                              ),
+                              child: const Icon(
+                                Icons.arrow_back_ios_new_rounded,
+                                size: 20,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                          
+                          const Spacer(),
+                          
+                          // Title (Optional, maybe skip for lighter feel or center it?)
+                          // Let's keep it clean for now, or maybe a small pill.
+                          
+                          // Info Button
+                          GestureDetector(
+                            onTap: () => _showInfoDialog(context),
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withOpacity(0.4),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: Colors.white.withOpacity(0.1)),
+                              ),
+                              child: const Icon(
+                                Icons.info_outline_rounded,
+                                size: 22,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ],
-          ),
-          body: const SafeArea(
-            child: MedScannerBody(),
           ),
         );
       },

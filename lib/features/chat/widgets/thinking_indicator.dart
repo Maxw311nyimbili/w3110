@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cap_project/core/theme/app_colors.dart';
 import 'package:cap_project/core/theme/app_text_styles.dart';
+import 'package:cap_project/core/widgets/brand_orb.dart';
 
 class ThinkingIndicator extends StatefulWidget {
   final String message;
@@ -45,21 +46,7 @@ class _ThinkingIndicatorState extends State<ThinkingIndicator> with SingleTicker
         opacity: _pulseAnimation,
         child: Row(
           children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppColors.accentPrimary.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: const SizedBox(
-                width: 12,
-                height: 12,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.accentPrimary),
-                ),
-              ),
-            ),
+            const BrandOrb(size: 32, isThinking: true),
             const SizedBox(width: 12),
             Expanded(
               child: Column(

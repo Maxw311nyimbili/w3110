@@ -7,6 +7,7 @@ import 'package:cap_project/features/forum/widgets/new_post_sheet.dart';
 import 'package:cap_project/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:cap_project/core/widgets/entry_animation.dart';
 import 'package:forum_repository/forum_repository.dart';
 
 class ForumListPage extends StatelessWidget {
@@ -59,7 +60,9 @@ class ForumListView extends StatelessWidget {
             ],
           ),
           body: const SafeArea(
-            child: ForumBody(),
+            child: EntryAnimation(
+              child: ForumBody(),
+            ),
           ),
         );
       },

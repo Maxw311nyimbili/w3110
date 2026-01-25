@@ -30,45 +30,80 @@ class ConsentStep extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'One last thing',
-                    style: AppTextStyles.displayMedium.copyWith(
-                      color: AppColors.textPrimary,
-                      letterSpacing: -0.5,
+                  // Staggered Title
+                  _buildStaggeredEntrance(
+                    delay: 100,
+                    child: Text(
+                      'One final commitment',
+                      style: AppTextStyles.displayMedium.copyWith(
+                        color: AppColors.textPrimary,
+                        letterSpacing: -1.0,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 34,
+                      ),
                     ),
                   ),
+
                   const SizedBox(height: 32),
-                  _buildTermItem('AI Assistance', 'MedLink uses AI. It is not a substitute for professional medical advice.'),
-                  _buildTermItem('Emergency', 'If this is an emergency, call 911 immediately.'),
-                  _buildTermItem('Privacy', 'Your data is private and encrypted.'),
+                  
+                  // Staggered Items
+                  _buildStaggeredEntrance(
+                    delay: 200,
+                    child: _buildTermItem('AI Assistance', 'MedLink uses AI. It is not a substitute for professional medical advice.'),
+                  ),
+                  _buildStaggeredEntrance(
+                    delay: 300,
+                    child: _buildTermItem('Emergency', 'If this is an emergency, call 911 immediately.'),
+                  ),
+                  _buildStaggeredEntrance(
+                    delay: 400,
+                    child: _buildTermItem('Privacy', 'Your data is private and encrypted.'),
+                  ),
+
                   const Spacer(),
-                  Row(
-                    children: [
-                      Checkbox(
-                        value: state.consentGiven,
-                        onChanged: (value) {
-                          context.read<LandingCubit>().giveConsent(value ?? false, AppConstants.currentConsentVersion);
-                        },
-                        activeColor: AppColors.textPrimary,
-                        checkColor: AppColors.backgroundSurface,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+
+                  // Staggered Consent Box
+                  _buildStaggeredEntrance(
+                    delay: 500,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Row(
+                        children: [
+                          Checkbox(
+                            value: state.consentGiven,
+                            onChanged: (value) {
+                              context.read<LandingCubit>().giveConsent(value ?? false, AppConstants.currentConsentVersion);
+                            },
+                            activeColor: AppColors.accentPrimary,
+                            checkColor: Colors.white,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                          ),
+                          Expanded(
+                            child: Text(
+                              'I understand and agree to the terms',
+                              style: AppTextStyles.bodyMedium.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      Expanded(
-                        child: Text(
-                          'I understand and agree to the terms',
-                          style: AppTextStyles.bodyMedium,
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                  const SizedBox(height: 24),
-                  PremiumButton(
-                    onPressed: state.consentGiven
-                        ? () => context.read<LandingCubit>().completeOnboarding()
-                        : null,
-                    text: 'Complete Setup',
+
+                  const SizedBox(height: 16),
+
+                  _buildStaggeredEntrance(
+                    delay: 600,
+                    child: PremiumButton(
+                      onPressed: state.consentGiven
+                          ? () => context.read<LandingCubit>().completeOnboarding()
+                          : null,
+                      text: 'Complete Setup',
+                    ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 12),
                 ],
               ),
             ),
@@ -78,81 +113,20 @@ class ConsentStep extends StatelessWidget {
     );
   }
 
-  Widget _buildConsentOption(
-    BuildContext context,
-    String title,
-    String description,
-    bool isSelected,
-    VoidCallback onTap,
-  ) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(24),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: AppColors.backgroundSurface,
-          border: Border.all(
-            color: isSelected ? AppColors.accentPrimary : AppColors.borderLight,
-            width: isSelected ? 2.0 : 1.0,
+  Widget _buildStaggeredEntrance({required Widget child, required int delay}) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.0, end: 1.0),
+      duration: const Duration(milliseconds: 800),
+      curve: Curves.easeOutQuart,
+      builder: (context, value, _) {
+        return Opacity(
+          opacity: value,
+          child: Transform.translate(
+            offset: Offset(0, 24 * (1 - value)),
+            child: child,
           ),
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: [
-            BoxShadow(
-              color: isSelected 
-                  ? Colors.black.withOpacity(0.05) 
-                  : Colors.black.withOpacity(0.02),
-              blurRadius: isSelected ? 20 : 10,
-              offset: const Offset(0, 4),
-            )
-          ],
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: AppTextStyles.headlineSmall.copyWith(
-                      color: isSelected ? AppColors.accentPrimary : AppColors.textPrimary,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    description,
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.textSecondary,
-                      fontSize: 14,
-                      height: 1.4,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 12),
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              width: 24,
-              height: 24,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: isSelected ? AppColors.accentPrimary : AppColors.borderLight,
-                  width: 2,
-                ),
-                color: isSelected ? AppColors.accentPrimary : Colors.transparent,
-              ),
-              child: isSelected 
-                  ? const Icon(Icons.check, size: 16, color: Colors.white)
-                  : null,
-            ),
-          ],
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -162,7 +136,14 @@ class ConsentStep extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.info_outline, size: 20, color: AppColors.textSecondary),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppColors.accentPrimary.withOpacity(0.06),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.info_outline, size: 18, color: AppColors.accentPrimary),
+          ),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
@@ -170,12 +151,18 @@ class ConsentStep extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: AppTextStyles.labelLarge.copyWith(fontWeight: FontWeight.w600),
+                  style: AppTextStyles.labelLarge.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   desc,
-                  style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary, height: 1.4),
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: AppColors.textSecondary,
+                    height: 1.5,
+                  ),
                 ),
               ],
             ),

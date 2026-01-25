@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:cap_project/app/view/app_router.dart';
+import 'package:cap_project/features/medscanner/cubit/medscanner_state.dart' as scanner;
 import 'package:cap_project/features/chat/widgets/audio_waveform.dart';
 import 'package:cap_project/l10n/l10n.dart';
 import 'package:flutter/material.dart';
@@ -70,10 +72,13 @@ class _RefinedChatInputState extends State<RefinedChatInput> with TickerProvider
   }
 
   void _showPlusMenu() {
+    _focusNode.unfocus(); // Ensure keyboard is dismissed when menu opens
+    final chatCubit = context.read<ChatCubit>(); // Capture cubit from valid context
+
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
+      builder: (modalContext) => Container(
         decoration: BoxDecoration(
           color: AppColors.backgroundSurface,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
@@ -95,22 +100,57 @@ class _RefinedChatInputState extends State<RefinedChatInput> with TickerProvider
               children: [
                 Expanded(
                   child: _buildSquarePickerOption(
-                    icon: Icons.image_outlined,
-                    label: AppLocalizations.of(context).image,
-                    onTap: () {
-                      Navigator.pop(context);
-                      AppRouter.navigateTo(context, AppRouter.scanner, arguments: 'gallery');
+                    icon: Icons.center_focus_strong_rounded,
+                    label: 'Scan Medicine',
+                    color: AppColors.accentPrimary,
+                    onTap: () async {
+                      // Close the bottom sheet FIRST
+                      Navigator.pop(modalContext);
+                      _focusNode.unfocus(); // Ensure focus doesn't return
+                      
+                      // Then navigate to scanner
+                      final result = await AppRouter.navigateTo(context, AppRouter.scanner);
+                      
+                      // Handle result if we are still mounted
+                      if (context.mounted && result is scanner.ScanResult) {
+                        chatCubit.addMedicineResult(result);
+                      }
                     },
                   ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 12),
                 Expanded(
                   child: _buildSquarePickerOption(
-                    icon: Icons.camera_alt_outlined,
-                    label: AppLocalizations.of(context).camera,
+                    icon: Icons.description_outlined,
+                    label: 'Document',
+                    color: AppColors.accentSecondary,
                     onTap: () {
-                      Navigator.pop(context);
-                      AppRouter.navigateTo(context, AppRouter.scanner, arguments: 'camera');
+                      Navigator.pop(modalContext);
+                      _focusNode.unfocus(); // Ensure focus doesn't return
+                      // Use a slight delay to ensure the bottom sheet is closed before picking
+                      // which sometimes helps with overlay issues
+                      Future.delayed(const Duration(milliseconds: 200), () {
+                        if (context.mounted) {
+                          chatCubit.pickDocument();
+                        }
+                      });
+                    },
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildSquarePickerOption(
+                    icon: Icons.photo_library_outlined,
+                    label: 'Gallery',
+                    color: AppColors.accentSecondary,
+                    onTap: () {
+                      Navigator.pop(modalContext);
+                      _focusNode.unfocus(); // Ensure focus doesn't return
+                      Future.delayed(const Duration(milliseconds: 200), () {
+                        if (context.mounted) {
+                          chatCubit.pickImage();
+                        }
+                      });
                     },
                   ),
                 ),
@@ -127,12 +167,13 @@ class _RefinedChatInputState extends State<RefinedChatInput> with TickerProvider
     required IconData icon,
     required String label,
     required VoidCallback onTap,
+    Color? color,
   }) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(20),
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 24),
+        padding: const EdgeInsets.symmetric(vertical: 20),
         decoration: BoxDecoration(
           color: AppColors.backgroundPrimary,
           borderRadius: BorderRadius.circular(20),
@@ -140,11 +181,12 @@ class _RefinedChatInputState extends State<RefinedChatInput> with TickerProvider
         ),
         child: Column(
           children: [
-            Icon(icon, color: AppColors.textPrimary, size: 32),
-            const SizedBox(height: 12),
+            Icon(icon, color: color ?? AppColors.textPrimary, size: 28),
+            const SizedBox(height: 8),
             Text(
               label,
-              style: AppTextStyles.labelLarge.copyWith(
+              textAlign: TextAlign.center,
+              style: AppTextStyles.labelMedium.copyWith(
                 fontWeight: FontWeight.bold,
                 color: AppColors.textPrimary,
               ),
@@ -157,34 +199,49 @@ class _RefinedChatInputState extends State<RefinedChatInput> with TickerProvider
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-      decoration: BoxDecoration(
-        color: AppColors.backgroundPrimary,
-        border: Border(
-          top: BorderSide(
-            color: AppColors.borderLight.withOpacity(0.8),
-            width: 1,
-          ),
-        ),
-      ),
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppColors.backgroundSurface,
-          borderRadius: BorderRadius.circular(28),
-          border: Border.all(
-            color: AppColors.borderLight, 
-            width: 1.0,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.03),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
+    return BlocListener<ChatCubit, ChatState>(
+      listenWhen: (previous, current) => previous.error != current.error && current.error != null,
+      listener: (context, state) {
+        if (state.error != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.error!),
+              backgroundColor: AppColors.error,
+              behavior: SnackBarBehavior.floating,
             ),
-          ],
+          );
+          context.read<ChatCubit>().clearError();
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+        decoration: BoxDecoration(
+          color: AppColors.backgroundPrimary,
+          border: Border(
+            top: BorderSide(
+              color: AppColors.borderLight.withOpacity(0.8),
+              width: 1,
+            ),
+          ),
         ),
-        child: widget.isAudioMode ? _buildAudioBar() : _buildInputBar(),
+        child: Container(
+          decoration: BoxDecoration(
+            color: AppColors.backgroundSurface,
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(
+              color: AppColors.borderLight, 
+              width: 1.0,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.03),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: widget.isAudioMode ? _buildAudioBar() : _buildInputBar(),
+        ),
       ),
     );
   }
@@ -193,6 +250,7 @@ class _RefinedChatInputState extends State<RefinedChatInput> with TickerProvider
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
+        _buildAttachmentPreview(),
         Padding(
           padding: const EdgeInsets.fromLTRB(20, 4, 12, 0),
             child: TextField(
@@ -354,6 +412,82 @@ class _RefinedChatInputState extends State<RefinedChatInput> with TickerProvider
                 onPressed: widget.onToggleAudio,
               ),
             ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildAttachmentPreview() {
+    return BlocBuilder<ChatCubit, ChatState>(
+      builder: (context, state) {
+        if (state.pendingAttachments.isEmpty) return const SizedBox.shrink();
+
+        return Container(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: state.pendingAttachments.map((attachment) {
+                return Padding(
+                  padding: const EdgeInsets.only(right: 12),
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Container(
+                        width: 70,
+                        height: 70,
+                        decoration: BoxDecoration(
+                          color: AppColors.backgroundPrimary,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: AppColors.borderLight),
+                        ),
+                        child: attachment.type == AttachmentType.image
+                            ? ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.file(
+                                  File(attachment.path),
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) => const Icon(Icons.broken_image_outlined, size: 20),
+                                ),
+                              )
+                            : Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(Icons.description_rounded, color: Colors.blue),
+                                  const SizedBox(height: 4),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                                    child: Text(
+                                      attachment.name,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(fontSize: 10),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                      ),
+                      Positioned(
+                        top: -6,
+                        right: -6,
+                        child: GestureDetector(
+                          onTap: () => context.read<ChatCubit>().removeAttachment(attachment.path),
+                          child: Container(
+                            padding: const EdgeInsets.all(2),
+                            decoration: const BoxDecoration(
+                              color: Colors.red,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.close, color: Colors.white, size: 14),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+            ),
           ),
         );
       },

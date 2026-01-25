@@ -23,8 +23,9 @@ class ChatBody extends StatefulWidget {
   State<ChatBody> createState() => _ChatBodyState();
 }
 
-class _ChatBodyState extends State<ChatBody> {
+class _ChatBodyState extends State<ChatBody> with SingleTickerProviderStateMixin {
   final ScrollController _scrollController = ScrollController();
+  late AnimationController _breathingController;
   bool _showScrollToBottom = false;
   int _unreadCount = 0;
 
@@ -32,10 +33,17 @@ class _ChatBodyState extends State<ChatBody> {
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+    
+    // Breathing animation for Greeting
+    _breathingController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 4),
+    )..repeat(reverse: true);
   }
 
   @override
   void dispose() {
+    _breathingController.dispose();
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     super.dispose();
@@ -199,56 +207,183 @@ class _ChatBodyState extends State<ChatBody> {
   }
 
   Widget _buildEmptyState(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+    // 1. Dynamic Greeting
+    final hour = DateTime.now().hour;
+    String greeting;
+    if (hour >= 5 && hour < 12) {
+      greeting = 'Good Morning,';
+    } else if (hour >= 12 && hour < 17) {
+      greeting = 'Good Afternoon,';
+    } else {
+      greeting = 'Good Evening,';
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: constraints.maxHeight,
+            ),
+            child: IntrinsicHeight(
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const Spacer(), 
+                      
+                      // 1. Premium Greeting Group
+                      Column(
+                        children: [
+                          Text(
+                            greeting,
+                            textAlign: TextAlign.center,
+                            style: AppTextStyles.displayLarge.copyWith( // Even Bigger
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -1.5,
+                              color: AppColors.textPrimary,
+                              height: 1.1,
+                              fontSize: 40,
+                            ),
+                            key: ValueKey(greeting),
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            'Your personal health guide.',
+                            textAlign: TextAlign.center,
+                            style: AppTextStyles.bodyLarge.copyWith(
+                              color: AppColors.textSecondary,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
+                      ),
+                      
+                      // Fixed spacing to visually group greeting + fact
+                      const SizedBox(height: 56),
+
+                      // 2. Editorial Insight Widget (Now Breathing)
+                      AnimatedBuilder(
+                        animation: _breathingController,
+                        builder: (context, child) {
+                          return Transform.scale(
+                            scale: 0.98 + (0.02 * _breathingController.value), // Subtle beat
+                            child: Opacity(
+                              opacity: 0.5 + (0.5 * _breathingController.value), // Deep breathing
+                              child: child,
+                            ),
+                          );
+                        },
+                        child: _buildDailyFact(context),
+                      ),
+                      
+                      const Spacer(), 
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+    );
+  }
+
+  Widget _buildDailyFact(BuildContext context) {
+    // Pregnancy-focused facts + General Health
+    final facts = [
+      'Take 400mcg of Folic Acid daily.',
+      'Ginger is effective for morning sickness.',
+      'Blood volume increases 50% during pregnancy.',
+      'Staying hydrated forms the amniotic sac.',
+      'Iron needs double during pregnancy.',
+      'Walking is safe throughout pregnancy.',
+      'Babies hear sounds around 24 weeks.',
+      'Calcium is crucial for baby\'s bones.',
+      'Bananas help prevent leg cramps.',
+      'Stress affects baby’s development.',
+    ];
+
+    final dayOfYear = int.parse(DateTime.now().difference(DateTime(DateTime.now().year, 1, 1)).inDays.toString());
+    final factIndex = dayOfYear % facts.length;
+    final dailyFact = facts[factIndex];
+
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.0, end: 1.0),
+      duration: const Duration(milliseconds: 2000),
+      curve: Curves.easeOutQuart,
+      builder: (context, value, child) {
+        return Opacity(
+          opacity: value,
+          child: Stack(
+            alignment: Alignment.center,
             children: [
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppColors.backgroundSurface,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 20,
-                      offset: const Offset(0, 10),
+              // 1. Giant Background Quote Mark
+              Positioned(
+                top: -20,
+                left: 20,
+                child: Transform.rotate(
+                  angle: -0.2, // Slight tilt
+                  child: Icon(
+                    Icons.format_quote_rounded,
+                    size: 140,
+                    color: AppColors.accentPrimary.withOpacity(0.06), // Very faint
+                  ),
+                ),
+              ),
+
+              // 2. Editorial Content
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 32),
+                child: Column(
+                  children: [
+                    // Small Eyebrow Label
+                    Text(
+                      'DAILY INSIGHT',
+                      style: AppTextStyles.labelSmall.copyWith(
+                        color: AppColors.accentPrimary,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 2.0,
+                        fontSize: 10,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    // High-End Serif Typography
+                    Text(
+                      dailyFact,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                         // Fallback to Georgia or generic serif since GoogleFonts might not be fully loaded for 'Playfair'
+                         fontFamily: 'Georgia', 
+                         fontSize: 22,
+                         height: 1.4,
+                         color: AppColors.textPrimary,
+                         fontWeight: FontWeight.w500,
+                         fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    // Decorative Line
+                    Container(
+                      width: 40,
+                      height: 2,
+                      decoration: BoxDecoration(
+                        color: AppColors.accentPrimary.withOpacity(0.3),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
                     ),
                   ],
                 ),
-                child: const Icon(
-                  Icons.shield_outlined,
-                  size: 32,
-                  color: AppColors.accentPrimary,
-                ),
-              ),
-              const SizedBox(height: 32),
-              Text(
-                AppLocalizations.of(context).chatWelcomeTitle,
-                style: AppTextStyles.displayMedium.copyWith(
-                  color: AppColors.textPrimary,
-                  fontWeight: FontWeight.w800,
-                  height: 1.2,
-                  letterSpacing: -1,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                AppLocalizations.of(context).chatWelcomeSubtitle,
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: AppColors.textSecondary,
-                  letterSpacing: 0.2,
-                ),
-                textAlign: TextAlign.center,
               ),
             ],
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 

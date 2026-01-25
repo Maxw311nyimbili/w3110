@@ -53,9 +53,22 @@ class AppRouter {
         );
 
       case AppRouter.settings:
-        return CupertinoPageRoute(
-          builder: (_) => const SettingsPage(),
+        return PageRouteBuilder(
           settings: settings,
+          pageBuilder: (_, __, ___) => const SettingsPage(),
+          transitionsBuilder: (_, animation, secondaryAnimation, child) {
+            const begin = Offset(-1.0, 0.0); // Start from LEFT
+            const end = Offset.zero;
+            const curve = Curves.easeOutCubic;
+
+            var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+            var offsetAnimation = animation.drive(tween);
+
+            return SlideTransition(
+              position: offsetAnimation,
+              child: child,
+            );
+          },
         );
 
       default:
