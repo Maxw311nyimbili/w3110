@@ -3,6 +3,7 @@ import 'package:cap_project/core/theme/app_text_styles.dart';
 import 'package:cap_project/features/auth/cubit/cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:cap_project/core/widgets/entry_animation.dart';
 import 'package:landing_repository/landing_repository.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -59,44 +60,41 @@ class _ProfilePageState extends State<ProfilePage> {
     return Scaffold(
       backgroundColor: AppColors.backgroundPrimary,
       body: SafeArea(
-        child: CustomScrollView(
-          physics: const BouncingScrollPhysics(),
-          slivers: [
-            // Custom Header with Back Button and Large Avatar
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
-                child: Column(
-                  children: [
-                    // Top Bar
-                    Row(
-                      children: [
-                        InkWell(
-                          onTap: () => Navigator.pop(context),
-                          borderRadius: BorderRadius.circular(12),
-                          child: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: AppColors.backgroundSurface,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: AppColors.borderLight),
-                            ),
-                            child: const Icon(
-                              Icons.arrow_back_ios_new_rounded,
-                              size: 18,
-                              color: AppColors.textPrimary,
+        child: EntryAnimation(
+          child: CustomScrollView(
+            physics: const BouncingScrollPhysics(),
+            slivers: [
+              // Custom Header with Back Button and Large Avatar
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+                  child: Column(
+                    children: [
+                      // Top Bar
+                      Row(
+                        children: [
+                          InkWell(
+                            onTap: () => Navigator.of(context).pop(),
+                            borderRadius: BorderRadius.circular(12),
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              // No decoration
+                              child: const Icon(
+                                Icons.arrow_back_ios_new_rounded,
+                                size: 22,
+                                color: AppColors.textPrimary,
+                              ),
                             ),
                           ),
-                        ),
-                        const Spacer(),
-                        // Could add an 'Edit' button here later
-                      ],
-                    ),
-                    const SizedBox(height: 32),
-
-                    // Avatar
-                    Container(
-                      width: 120,
+                          const Spacer(),
+                          // Could add an 'Edit' button here later
+                        ],
+                      ),
+                      const SizedBox(height: 32),
+  
+                      // Avatar
+                      Container(
+                        width: 120,
                       height: 120,
                       padding: const EdgeInsets.all(4),
                       decoration: BoxDecoration(
@@ -260,6 +258,7 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ],
         ),
+      ),
       ),
     );
   }

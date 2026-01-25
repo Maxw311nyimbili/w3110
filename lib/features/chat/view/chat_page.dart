@@ -120,71 +120,93 @@ class _ChatViewState extends State<ChatView> {
     final photoUrl = user?.photoUrl;
 
     return Scaffold(
-      resizeToAvoidBottomInset: true, // Ensure layout adjusts for keyboard
+      resizeToAvoidBottomInset: true,
       backgroundColor: AppColors.backgroundPrimary,
-      appBar: _isAudioMode 
-        ? null 
-        : AppBar(
-            elevation: 0,
-            backgroundColor: AppColors.backgroundPrimary,
-            surfaceTintColor: Colors.transparent,
-            leadingWidth: 56,
-            leading: Padding(
-              padding: const EdgeInsets.only(left: 16),
-              child: Center(
-                child: GestureDetector(
-                  onTap: () => AppRouter.navigateTo(context, AppRouter.settings),
-                  child: Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: AppColors.accentPrimary.withOpacity(0.1),
-                      shape: BoxShape.circle,
-                      image: photoUrl != null 
-                        ? DecorationImage(image: NetworkImage(photoUrl), fit: BoxFit.cover)
-                        : null,
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Custom Header
+            if (!_isAudioMode)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                decoration: BoxDecoration(
+                  color: AppColors.backgroundPrimary,
+                  border: Border(
+                    bottom: BorderSide(
+                      color: AppColors.borderLight.withOpacity(0.5),
+                      width: 1,
                     ),
-                    child: photoUrl == null 
-                      ? Center(
-                          child: Text(
-                            initial,
-                            style: AppTextStyles.labelMedium.copyWith(
-                              color: AppColors.accentPrimary,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        )
-                      : null,
                   ),
                 ),
-              ),
-            ),
-            title: Text(
-                'Thanzi',
-                style: AppTextStyles.headlineSmall.copyWith(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 18,
+                child: Row(
+                  children: [
+                    // Profile / Settings Button
+                    GestureDetector(
+                      onTap: () => AppRouter.navigateTo(context, AppRouter.settings),
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: AppColors.backgroundSurface,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: AppColors.borderLight),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.menu_rounded,
+                          size: 20,
+                          color: AppColors.accentPrimary,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    // Title
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Thanzi',
+                            style: AppTextStyles.headlineSmall.copyWith(
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -0.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Actions
+                    Container(
+                      decoration: BoxDecoration(
+                        color: AppColors.backgroundSurface,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppColors.borderLight),
+                      ),
+                      child: IconButton(
+                        icon: const Icon(Icons.forum_outlined, size: 20, color: AppColors.textPrimary),
+                        onPressed: () => AppRouter.navigateTo(context, AppRouter.forum),
+                        tooltip: 'Community Forum',
+                      ),
+                    ),
+                  ],
                 ),
-            ),
-            centerTitle: true,
-            bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(1),
-              child: Divider(
-                height: 1, 
-                color: AppColors.borderLight.withOpacity(0.5)
+              ),
+
+            // Body
+            Expanded(
+              child: ChatBody(
+                isAudioMode: _isAudioMode,
+                onToggleAudio: _toggleAudioMode,
               ),
             ),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.forum_outlined, size: 22),
-                onPressed: () => AppRouter.navigateTo(context, AppRouter.forum),
-              ),
-              const SizedBox(width: 8),
-            ],
-          ),
-      body: ChatBody(
-        isAudioMode: _isAudioMode,
-        onToggleAudio: _toggleAudioMode,
+          ],
+        ),
       ),
     );
   }

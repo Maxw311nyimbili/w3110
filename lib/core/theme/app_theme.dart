@@ -15,6 +15,14 @@ class AppTheme {
       useMaterial3: true,
       brightness: Brightness.light,
       platform: TargetPlatform.iOS,
+      
+      // Force iOS-style slide transitions on all platforms for premium feel
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+          TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+        },
+      ),
 
       // Color scheme
       colorScheme: const ColorScheme.light(

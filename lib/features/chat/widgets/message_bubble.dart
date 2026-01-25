@@ -4,6 +4,7 @@ import 'package:cap_project/features/forum/cubit/forum_cubit.dart';
 import 'package:cap_project/features/forum/cubit/forum_state.dart';
 import 'package:cap_project/features/forum/widgets/answer_reader_with_comments.dart';
 import 'package:cap_project/features/forum/widgets/new_post_sheet.dart';
+import 'package:cap_project/features/chat/widgets/medicine_result_card.dart';
 import 'package:forum_repository/forum_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -36,17 +37,16 @@ class RefinedMessageBubble extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
             decoration: BoxDecoration(
-              color: AppColors.backgroundSurface,
+              color: AppColors.accentPrimary, // Vibrant accent color
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(24),
-                topRight: Radius.circular(24),
+                topRight: Radius.circular(4), // Rounded corner flip for right side
                 bottomLeft: Radius.circular(24),
-                bottomRight: Radius.circular(4),
+                bottomRight: Radius.circular(24),
               ),
-              border: Border.all(color: AppColors.borderLight, width: 1.0),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.02),
+                  color: AppColors.accentPrimary.withOpacity(0.25),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -55,8 +55,9 @@ class RefinedMessageBubble extends StatelessWidget {
             child: Text(
               message.content,
               style: AppTextStyles.bodyLarge.copyWith(
-                color: AppColors.textPrimary,
+                color: Colors.white, // White text on accent
                 fontWeight: FontWeight.w500,
+                height: 1.5,
               ),
             ),
           ),
@@ -145,6 +146,10 @@ class RefinedMessageBubble extends StatelessWidget {
             _buildSourceList(displaySources),
             const SizedBox(height: 16),
           ],
+
+          // Medicine Result Card (If present)
+          if (message.medicineResult != null)
+            MedicineResultCard(result: message.medicineResult!),
 
           // Content Area (Clean, no container)
           Padding(

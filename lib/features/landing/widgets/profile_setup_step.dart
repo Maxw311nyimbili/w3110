@@ -61,52 +61,112 @@ class _ProfileSetupStepState extends State<ProfileSetupStep> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 16),
-                  Text(
-                    'Set up your profile',
-                    style: AppTextStyles.displayMedium.copyWith(
-                      color: AppColors.textPrimary,
-                      letterSpacing: -0.5,
+                  
+                  // Staggered Title
+                  _buildStaggeredEntrance(
+                    delay: 100,
+                    child: Text(
+                      'Personalize your care',
+                      style: AppTextStyles.displayMedium.copyWith(
+                        color: AppColors.textPrimary,
+                        letterSpacing: -1.0,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 34,
+                      ),
                     ),
                   ),
+
                   const SizedBox(height: 12),
-                  Text(
-                    'This helps us personalize your experience.',
-                    style: AppTextStyles.bodyLarge.copyWith(color: AppColors.textSecondary),
+
+                  // Staggered Subtitle
+                  _buildStaggeredEntrance(
+                    delay: 200,
+                    child: Text(
+                      'This helps Thanzi provide more accurate medical context tailored to you.',
+                      style: AppTextStyles.bodyLarge.copyWith(
+                        color: AppColors.textSecondary,
+                        fontSize: 17,
+                      ),
+                    ),
                   ),
-                  const SizedBox(height: 40),
+
+                  const SizedBox(height: 48),
                   
-                  _buildLabel('YOUR NAME'),
-                  TextField(
-                    controller: _nameController,
-                    decoration: _buildInputDecoration('Enter your name'),
-                    style: AppTextStyles.bodyLarge,
+                  // Staggered Inputs
+                  _buildStaggeredEntrance(
+                    delay: 300,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildLabel('YOUR NAME'),
+                        TextField(
+                          controller: _nameController,
+                          decoration: _buildInputDecoration('Enter your name'),
+                          style: AppTextStyles.bodyLarge,
+                        ),
+                      ],
+                    ),
                   ),
                   
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 32),
                   
-                  _buildLabel('ACCOUNT NICKNAME'),
-                  TextField(
-                    controller: _nicknameController,
-                    decoration: _buildInputDecoration('e.g., Clinical Account, Personal'),
-                    style: AppTextStyles.bodyLarge,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Use this to distinguish this account from others.',
-                    style: AppTextStyles.caption.copyWith(color: AppColors.textTertiary),
+                  _buildStaggeredEntrance(
+                    delay: 400,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildLabel('ACCOUNT NICKNAME'),
+                        TextField(
+                          controller: _nicknameController,
+                          decoration: _buildInputDecoration('e.g., Clinical Account, Personal'),
+                          style: AppTextStyles.bodyLarge,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Use this to distinguish this account from others.',
+                          style: AppTextStyles.caption.copyWith(
+                            color: AppColors.textTertiary,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   
                   const Spacer(),
-                  PremiumButton(
-                    onPressed: state.canProceed 
-                        ? () => context.read<LandingCubit>().nextStep() 
-                        : null,
-                    text: 'Continue',
+
+                  _buildStaggeredEntrance(
+                    delay: 500,
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 24),
+                      child: PremiumButton(
+                        onPressed: state.canProceed 
+                            ? () => context.read<LandingCubit>().nextStep() 
+                            : null,
+                        text: 'Continue',
+                      ),
+                    ),
                   ),
-                  const SizedBox(height: 24),
                 ],
               ),
             ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildStaggeredEntrance({required Widget child, required int delay}) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.0, end: 1.0),
+      duration: const Duration(milliseconds: 800),
+      curve: Curves.easeOutQuart,
+      builder: (context, value, _) {
+        return Opacity(
+          opacity: value,
+          child: Transform.translate(
+            offset: Offset(0, 24 * (1 - value)),
+            child: child,
           ),
         );
       },

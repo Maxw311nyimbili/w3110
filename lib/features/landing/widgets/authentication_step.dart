@@ -43,58 +43,90 @@ class AuthenticationStep extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Spacer(),
-                    Text(
-                      'Sign in to sync your history',
-                      style: AppTextStyles.displayMedium.copyWith(
-                         color: AppColors.textPrimary,
-                         letterSpacing: -0.5,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Continue with Google to start asking questions.',
-                      style: AppTextStyles.bodyLarge.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                    const SizedBox(height: 48),
                     
-                    // Simple, clean Google Button wrapper
-                    Container(
-                      height: 56,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: AppColors.borderLight),
-                        borderRadius: BorderRadius.circular(30),
-                        color: AppColors.backgroundSurface,
+                    // Staggered Title
+                    _buildStaggeredEntrance(
+                      delay: 100,
+                      child: Text(
+                        'Secure your health footprint',
+                        style: AppTextStyles.displayMedium.copyWith(
+                          color: AppColors.textPrimary,
+                          letterSpacing: -1.0,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 34,
+                        ),
                       ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(30),
-                        child: GoogleSignInButton(
-                          onPressed: state.isAuthenticating
-                              ? null
-                              : () => context.read<LandingCubit>().authenticateWithGoogle(),
-                          isLoading: state.isAuthenticating,
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // Staggered Subtitle
+                    _buildStaggeredEntrance(
+                      delay: 300,
+                      child: Text(
+                        'Continue with Google to sync your medical history and personalize your care path.',
+                        style: AppTextStyles.bodyLarge.copyWith(
+                          color: AppColors.textSecondary,
+                          fontSize: 17,
+                          height: 1.5,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 56),
+                    
+                    // Staggered Google Button
+                    _buildStaggeredEntrance(
+                      delay: 500,
+                      child: Container(
+                        height: 60,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: AppColors.borderLight.withOpacity(0.5)),
+                          borderRadius: BorderRadius.circular(30),
+                          color: AppColors.backgroundSurface,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.04),
+                              blurRadius: 20,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(30),
+                          child: GoogleSignInButton(
+                            onPressed: state.isAuthenticating
+                                ? null
+                                : () => context.read<LandingCubit>().authenticateWithGoogle(),
+                            isLoading: state.isAuthenticating,
+                          ),
                         ),
                       ),
                     ),
                     
                     const Spacer(),
+                    
                     if (state.isDemoAvailable)
-                      Center(
-                        child: TextButton(
-                          onPressed: state.isAuthenticating 
-                              ? null 
-                              : () => context.read<LandingCubit>().authenticateAsDemo(), 
-                          child: Text(
-                            'Demo Login (Dev)',
-                            style: AppTextStyles.labelSmall.copyWith(
-                              color: AppColors.textTertiary,
+                      _buildStaggeredEntrance(
+                        delay: 700,
+                        child: Center(
+                          child: TextButton(
+                            onPressed: state.isAuthenticating 
+                                ? null 
+                                : () => context.read<LandingCubit>().authenticateAsDemo(), 
+                            child: Text(
+                              'Demo Login (Developer)',
+                              style: AppTextStyles.labelSmall.copyWith(
+                                color: AppColors.textTertiary,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 0.5,
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 24),
                   ],
                 ),
               ),
@@ -102,6 +134,23 @@ class AuthenticationStep extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+
+  Widget _buildStaggeredEntrance({required Widget child, required int delay}) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.0, end: 1.0),
+      duration: const Duration(milliseconds: 800),
+      curve: Curves.easeOutQuart,
+      builder: (context, value, _) {
+        return Opacity(
+          opacity: value,
+          child: Transform.translate(
+            offset: Offset(0, 24 * (1 - value)),
+            child: child,
+          ),
+        );
+      },
     );
   }
 }

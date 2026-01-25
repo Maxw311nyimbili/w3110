@@ -1,13 +1,17 @@
-// lib/features/chat/cubit/chat_cubit.dart
 import 'dart:async';
+import 'dart:io';
 
 import 'package:cap_project/features/chat/cubit/chat_state.dart';
+import 'package:cap_project/features/medscanner/cubit/medscanner_state.dart' as scanner;
 import 'package:cap_project/core/services/audio_recording_service.dart';
 import 'package:record/record.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:chat_repository/chat_repository.dart' as repo;
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class ChatCubit extends Cubit<ChatState> {
   ChatCubit({
@@ -257,17 +261,29 @@ class ChatCubit extends Cubit<ChatState> {
       timestamp: DateTime.now(),
     );
 
+    final attachments = state.pendingAttachments;
+    
     emit(state.copyWith(
       messages: [...state.messages, userMessage],
       status: ChatStatus.loading,
       isTyping: true,
+      pendingAttachments: const [], // Clear immediately for UI feedback
     ));
 
     _startLoadingRotation();
 
     try {
+      // NOTE: Current repository might need update to support multiple/mixed attachments.
+      // For now, if there is an image, we use sendMessageWithImage flow internally or similar.
+      // If we have just text, we proceed as normal.
+      
+      final String? imageUrl = attachments.isNotEmpty && attachments.any((a) => a.type == AttachmentType.image)
+          ? attachments.firstWhere((a) => a.type == AttachmentType.image).path
+          : null;
+
       final request = repo.ChatQueryRequest(
         query: content.trim(),
+        imageUrl: imageUrl, // Passing first image if exists
         conversationId: state.sessionId ?? DateTime.now().millisecondsSinceEpoch.toString(),
         userRole: _userRole,
         interests: _interests,
@@ -470,6 +486,100 @@ class ChatCubit extends Cubit<ChatState> {
         error: 'Failed to clear history',
       ));
     }
+  }
+
+  Future<void> pickImage() async {
+    try {
+      if (Platform.isAndroid || Platform.isIOS) {
+        var status = await Permission.photos.status;
+        if (status.isDenied) {
+          status = await Permission.photos.request();
+        }
+        
+        // On Android 13+, READ_MEDIA_IMAGES might be checking instead
+        if (Platform.isAndroid && await Permission.photos.isDenied) {
+           // Fallback or specific Android 13 check if needed, 
+           // but often image_picker handles this internal intent.
+        }
+        
+        if (status.isPermanentlyDenied) {
+           emit(state.copyWith(error: 'Photo library permission permanently denied. Please enable in settings.'));
+           return;
+        }
+      }
+
+      final picker = ImagePicker();
+      final image = await picker.pickImage(source: ImageSource.gallery);
+      
+      if (image != null) {
+        final attachment = PendingAttachment(
+          path: image.path,
+          name: image.name,
+          type: AttachmentType.image,
+          size: await image.length(),
+        );
+        emit(state.copyWith(
+          pendingAttachments: [...state.pendingAttachments, attachment],
+        ));
+      } else {
+        // User cancelled, do nothing
+      }
+    } catch (e) {
+      print('❌ Failed to pick image: $e');
+      emit(state.copyWith(error: 'Failed to pick image: $e'));
+    }
+  }
+
+  Future<void> pickDocument() async {
+    try {
+      print('📂 Picking document...');
+      // File picker often doesn't need explicit permission on newer Android/iOS for picking 
+      // as it uses system picker, but let's be safe.
+      
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['pdf', 'doc', 'docx', 'txt'],
+      );
+
+      if (result != null && result.files.single.path != null) {
+        final file = result.files.single;
+        final attachment = PendingAttachment(
+          path: file.path!,
+          name: file.name,
+          type: AttachmentType.document,
+          size: file.size,
+        );
+        emit(state.copyWith(
+          pendingAttachments: [...state.pendingAttachments, attachment],
+        ));
+      }
+    } catch (e) {
+      print('❌ Failed to pick document: $e');
+      emit(state.copyWith(error: 'Failed to pick document: $e'));
+    }
+  }
+
+  void removeAttachment(String path) {
+    final updated = state.pendingAttachments
+        .where((a) => a.path != path)
+        .toList();
+    emit(state.copyWith(pendingAttachments: updated));
+  }
+
+  void addMedicineResult(scanner.ScanResult result) {
+    final summaryMessage = ChatMessage(
+      id: _uuid.v4(),
+      content: 'I have successfully scanned: ${result.medicationName}. '
+          'How can I help you with this medication?',
+      isUser: false,
+      timestamp: DateTime.now(),
+      medicineResult: result,
+    );
+
+    emit(state.copyWith(
+      medicineContext: result,
+      messages: [...state.messages, summaryMessage],
+    ));
   }
 
   void clearError() {

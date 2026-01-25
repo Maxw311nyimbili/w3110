@@ -10,6 +10,7 @@ import 'package:cap_project/features/landing/cubit/landing_cubit.dart';
 import 'package:cap_project/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:cap_project/core/widgets/entry_animation.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -27,51 +28,48 @@ class SettingsPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.backgroundPrimary,
       body: SafeArea(
-        child: CustomScrollView(
-          physics: const BouncingScrollPhysics(),
-          slivers: [
-            // Custom Header with big title
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
-                child: Row(
-                  children: [
-                    InkWell(
-                      onTap: () => Navigator.pop(context),
-                      borderRadius: BorderRadius.circular(12),
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: AppColors.backgroundSurface,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: AppColors.borderLight),
-                        ),
-                        child: const Icon(
-                          Icons.arrow_back_ios_new_rounded,
-                          size: 18,
-                          color: AppColors.textPrimary,
+        child: EntryAnimation(
+          child: CustomScrollView(
+            physics: const BouncingScrollPhysics(),
+            slivers: [
+              // Custom Header with big title
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
+                  child: Row(
+                    children: [
+                      InkWell(
+                        onTap: () => Navigator.of(context).pop(),
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          // Removed white card decoration
+                          child: const Icon(
+                            Icons.arrow_back_ios_new_rounded,
+                            size: 22, // Slightly larger
+                            color: AppColors.textPrimary,
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 16),
-                    Text(
-                      l10n.settings,
-                      style: AppTextStyles.displaySmall.copyWith(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 28,
+                      const SizedBox(width: 8),
+                      Text(
+                        l10n.settings,
+                        style: AppTextStyles.displaySmall.copyWith(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 28,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-
-            // Content
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Column(
-                  children: [
+  
+              // Content
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Column(
+                    children: [
                     // --- Preferences Section ---
                     _buildSectionHeader(l10n.preferences),
                     _buildGroup([
@@ -148,6 +146,7 @@ class SettingsPage extends StatelessWidget {
             ),
           ],
         ),
+      ),
       ),
     );
   }

@@ -1,3 +1,4 @@
+import 'package:cap_project/core/widgets/brand_orb.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -29,7 +30,23 @@ class LandingBody extends StatelessWidget {
         }
 
         return AnimatedSwitcher(
-          duration: const Duration(milliseconds: 300),
+          duration: const Duration(milliseconds: 600),
+          switchInCurve: Curves.easeInOutCubic,
+          switchOutCurve: Curves.easeInOutCubic,
+          transitionBuilder: (Widget child, Animation<double> animation) {
+            final slideAnimation = Tween<Offset>(
+              begin: const Offset(0.05, 0),
+              end: Offset.zero,
+            ).animate(animation);
+
+            return FadeTransition(
+              opacity: animation,
+              child: SlideTransition(
+                position: slideAnimation,
+                child: child,
+              ),
+            );
+          },
           child: _buildStep(context, state.currentStep),
         );
       },
@@ -64,30 +81,53 @@ class _CompleteStep extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.backgroundPrimary,
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: AppColors.textPrimary, // Stark black/dark circle
-                shape: BoxShape.circle,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 40),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const BrandOrb(size: 140),
+              const SizedBox(height: 48),
+              TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0.0, end: 1.0),
+                duration: const Duration(milliseconds: 800),
+                curve: Curves.easeOutCubic,
+                builder: (context, value, _) => Opacity(
+                  opacity: value,
+                  child: Transform.translate(
+                    offset: Offset(0, 20 * (1 - value)),
+                    child: Column(
+                      children: [
+                        Text(
+                          'You\'re all set!',
+                          style: AppTextStyles.displayMedium.copyWith(
+                            color: AppColors.textPrimary,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -1.0,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Personalizing your health guide based on your role and preferences...',
+                          textAlign: TextAlign.center,
+                          style: AppTextStyles.bodyLarge.copyWith(
+                            color: AppColors.textSecondary,
+                            height: 1.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
-              child: const Icon(Icons.check, size: 48, color: AppColors.backgroundSurface),
-            ),
-            const SizedBox(height: 32),
-            const CircularProgressIndicator(
-              color: AppColors.textPrimary,
-              strokeWidth: 2,
-            ),
-            const SizedBox(height: 20),
-            Text(
-              'Personalizing your experience...',
-              style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.textSecondary,
+              const SizedBox(height: 64),
+              const CircularProgressIndicator(
+                color: AppColors.accentPrimary,
+                strokeWidth: 3,
+                strokeCap: StrokeCap.round,
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
