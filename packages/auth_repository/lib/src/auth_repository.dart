@@ -128,7 +128,7 @@ class AuthRepository {
         email: 'demo@example.com', 
         displayName: 'Demo User',
         photoUrl: null, // Could add a placeholder image
-        role: 'user', 
+        role: 'mother', 
     );
 
     // Create fake tokens

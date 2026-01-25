@@ -1,10 +1,9 @@
 import 'package:equatable/equatable.dart';
 
 enum OnboardingStep {
-  welcome,
   authentication,
   roleSelection,
-  profileSetup, // ← NEW: Capture name and account nickname
+  profileSetup,
   contextGathering,
   consent,
   complete,
@@ -19,11 +18,9 @@ enum UserRole {
 }
 
 /// Immutable state for landing/onboarding flow
-///
-/// Flow: Welcome → Auth → Role Selection → Context Gathering → Consent → Complete
 class LandingState extends Equatable {
   const LandingState({
-    this.currentStep = OnboardingStep.welcome,
+    this.currentStep = OnboardingStep.authentication,
     this.selectedRole,
     this.interests = const [],
     this.userName,
@@ -37,6 +34,7 @@ class LandingState extends Equatable {
     this.isVerified = false,
     this.verificationStatus = 'none',
     this.isDemoAvailable = false,
+    this.isGuest = false,
   });
 
   final OnboardingStep currentStep;
@@ -53,21 +51,20 @@ class LandingState extends Equatable {
   final bool isVerified;
   final String verificationStatus;
   final bool isDemoAvailable;
+  final bool isGuest;
 
   bool get isComplete => currentStep == OnboardingStep.complete;
   bool get canProceed {
     switch (currentStep) {
-      case OnboardingStep.welcome:
-        return true;
       case OnboardingStep.authentication:
-        return true; // Auth button always enabled
+        return true;
       case OnboardingStep.roleSelection:
         return selectedRole != null;
       case OnboardingStep.profileSetup:
         return userName != null && userName!.isNotEmpty && 
                accountNickname != null && accountNickname!.isNotEmpty;
       case OnboardingStep.contextGathering:
-        return true; // Optional step
+        return true;
       case OnboardingStep.consent:
         return consentGiven;
       case OnboardingStep.complete:
@@ -90,6 +87,7 @@ class LandingState extends Equatable {
     bool? isVerified,
     String? verificationStatus,
     bool? isDemoAvailable,
+    bool? isGuest,
   }) {
     return LandingState(
       currentStep: currentStep ?? this.currentStep,
@@ -106,6 +104,7 @@ class LandingState extends Equatable {
       isVerified: isVerified ?? this.isVerified,
       verificationStatus: verificationStatus ?? this.verificationStatus,
       isDemoAvailable: isDemoAvailable ?? this.isDemoAvailable,
+      isGuest: isGuest ?? this.isGuest,
     );
   }
 
@@ -129,5 +128,6 @@ class LandingState extends Equatable {
     isVerified,
     verificationStatus,
     isDemoAvailable,
+    isGuest,
   ];
 }

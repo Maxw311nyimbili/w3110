@@ -1,10 +1,11 @@
 import 'package:cap_project/core/widgets/brand_orb.dart';
+import 'package:cap_project/core/widgets/premium_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../app/view/app_router.dart';
 import '../cubit/cubit.dart';
-import 'welcome_step.dart';
 import 'authentication_step.dart';
 import 'role_selection_step.dart';
 import 'profile_setup_step.dart';
@@ -55,10 +56,6 @@ class LandingBody extends StatelessWidget {
 
   Widget _buildStep(BuildContext context, OnboardingStep step) {
     switch (step) {
-      case OnboardingStep.welcome:
-        return const WelcomeStep(key: ValueKey('welcome'));
-      case OnboardingStep.authentication:
-        return const AuthenticationStep(key: ValueKey('auth'));
       case OnboardingStep.roleSelection:
         return const RoleSelectionStep(key: ValueKey('role'));
       case OnboardingStep.profileSetup:
@@ -69,6 +66,9 @@ class LandingBody extends StatelessWidget {
         return const ConsentStep(key: ValueKey('consent'));
       case OnboardingStep.complete:
         return const _CompleteStep(key: ValueKey('complete'));
+      case OnboardingStep.authentication:
+        // This should not happen in the formal LandingPage anymore as per new flow
+        return const RoleSelectionStep(key: ValueKey('role'));
     }
   }
 }
@@ -121,10 +121,9 @@ class _CompleteStep extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 64),
-              const CircularProgressIndicator(
-                color: AppColors.accentPrimary,
-                strokeWidth: 3,
-                strokeCap: StrokeCap.round,
+              PremiumButton(
+                onPressed: () => AppRouter.replaceTo(context, AppRouter.chat),
+                text: 'Start Chatting',
               ),
             ],
           ),
