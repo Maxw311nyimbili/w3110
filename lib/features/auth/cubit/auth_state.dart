@@ -58,6 +58,7 @@ class AuthUser extends Equatable {
     this.displayName,
     this.photoUrl,
     this.role,
+    this.onboardingCompleted = false,
   });
 
   final String id;
@@ -65,7 +66,8 @@ class AuthUser extends Equatable {
   final String? displayName;
   final String? photoUrl;
   final String? role;
+  final bool onboardingCompleted;
 
   @override
-  List<Object?> get props => [id, email, displayName, photoUrl, role];
+  List<Object?> get props => [id, email, displayName, photoUrl, role, onboardingCompleted];
 }

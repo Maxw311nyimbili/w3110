@@ -34,6 +34,7 @@ class ConflictResolver {
           updatedAt: Value(serverPost.updatedAt),
           commentCount: Value(serverPost.commentCount),
           likeCount: Value(serverPost.likeCount),
+          isLiked: Value(serverPost.isLiked),
           syncStatus: const Value('synced'),
         ));
       } else {
@@ -54,11 +55,25 @@ class ConflictResolver {
             updatedAt: Value(serverPost.updatedAt),
             commentCount: Value(serverPost.commentCount),
             likeCount: Value(serverPost.likeCount),
+            isLiked: Value(serverPost.isLiked),
             syncStatus: const Value('synced'),
           ));
         }
         // If local is newer and pending sync, keep local version
         // (it will be synced to server later)
+      }
+    }
+
+    // --- PRUNING LOGIC ---
+    // Remove local posts that have been deleted from the server (pruning)
+    // Only prune posts that HAVE a serverId (meaning they are managed by the server)
+    final allLocalPosts = await _database.getAllPosts();
+    final serverIdsFromResponse = serverPosts.map((p) => p.id).toSet();
+    
+    for (final local in allLocalPosts) {
+      if (local.serverId.isNotEmpty && !serverIdsFromResponse.contains(local.serverId)) {
+        print('DEBUG: Pruning local post that no longer exists on server: ${local.title}');
+        await _database.deletePost(local.localId);
       }
     }
   }

@@ -179,6 +179,17 @@ class $ForumPostsTable extends ForumPosts
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _originalAnswerIdMeta = const VerificationMeta(
+    'originalAnswerId',
+  );
+  @override
+  late final GeneratedColumn<String> originalAnswerId = GeneratedColumn<String>(
+    'original_answer_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _lastSyncAttemptMeta = const VerificationMeta(
     'lastSyncAttempt',
   );
@@ -220,6 +231,7 @@ class $ForumPostsTable extends ForumPosts
     syncStatus,
     sources,
     tags,
+    originalAnswerId,
     lastSyncAttempt,
     syncRetryCount,
   ];
@@ -340,6 +352,15 @@ class $ForumPostsTable extends ForumPosts
         tags.isAcceptableOrUnknown(data['tags']!, _tagsMeta),
       );
     }
+    if (data.containsKey('original_answer_id')) {
+      context.handle(
+        _originalAnswerIdMeta,
+        originalAnswerId.isAcceptableOrUnknown(
+          data['original_answer_id']!,
+          _originalAnswerIdMeta,
+        ),
+      );
+    }
     if (data.containsKey('last_sync_attempt')) {
       context.handle(
         _lastSyncAttemptMeta,
@@ -363,10 +384,6 @@ class $ForumPostsTable extends ForumPosts
 
   @override
   Set<GeneratedColumn> get $primaryKey => {localId};
-  @override
-  List<Set<GeneratedColumn>> get uniqueKeys => [
-    {serverId},
-  ];
   @override
   ForumPostData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
@@ -431,6 +448,10 @@ class $ForumPostsTable extends ForumPosts
         DriftSqlType.string,
         data['${effectivePrefix}tags'],
       ),
+      originalAnswerId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}original_answer_id'],
+      ),
       lastSyncAttempt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}last_sync_attempt'],
@@ -464,6 +485,7 @@ class ForumPostData extends DataClass implements Insertable<ForumPostData> {
   final String syncStatus;
   final String? sources;
   final String? tags;
+  final String? originalAnswerId;
   final DateTime? lastSyncAttempt;
   final int syncRetryCount;
   const ForumPostData({
@@ -482,6 +504,7 @@ class ForumPostData extends DataClass implements Insertable<ForumPostData> {
     required this.syncStatus,
     this.sources,
     this.tags,
+    this.originalAnswerId,
     this.lastSyncAttempt,
     required this.syncRetryCount,
   });
@@ -510,6 +533,9 @@ class ForumPostData extends DataClass implements Insertable<ForumPostData> {
     }
     if (!nullToAbsent || tags != null) {
       map['tags'] = Variable<String>(tags);
+    }
+    if (!nullToAbsent || originalAnswerId != null) {
+      map['original_answer_id'] = Variable<String>(originalAnswerId);
     }
     if (!nullToAbsent || lastSyncAttempt != null) {
       map['last_sync_attempt'] = Variable<DateTime>(lastSyncAttempt);
@@ -541,6 +567,9 @@ class ForumPostData extends DataClass implements Insertable<ForumPostData> {
           ? const Value.absent()
           : Value(sources),
       tags: tags == null && nullToAbsent ? const Value.absent() : Value(tags),
+      originalAnswerId: originalAnswerId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(originalAnswerId),
       lastSyncAttempt: lastSyncAttempt == null && nullToAbsent
           ? const Value.absent()
           : Value(lastSyncAttempt),
@@ -569,6 +598,7 @@ class ForumPostData extends DataClass implements Insertable<ForumPostData> {
       syncStatus: serializer.fromJson<String>(json['syncStatus']),
       sources: serializer.fromJson<String?>(json['sources']),
       tags: serializer.fromJson<String?>(json['tags']),
+      originalAnswerId: serializer.fromJson<String?>(json['originalAnswerId']),
       lastSyncAttempt: serializer.fromJson<DateTime?>(json['lastSyncAttempt']),
       syncRetryCount: serializer.fromJson<int>(json['syncRetryCount']),
     );
@@ -592,6 +622,7 @@ class ForumPostData extends DataClass implements Insertable<ForumPostData> {
       'syncStatus': serializer.toJson<String>(syncStatus),
       'sources': serializer.toJson<String?>(sources),
       'tags': serializer.toJson<String?>(tags),
+      'originalAnswerId': serializer.toJson<String?>(originalAnswerId),
       'lastSyncAttempt': serializer.toJson<DateTime?>(lastSyncAttempt),
       'syncRetryCount': serializer.toJson<int>(syncRetryCount),
     };
@@ -613,6 +644,7 @@ class ForumPostData extends DataClass implements Insertable<ForumPostData> {
     String? syncStatus,
     Value<String?> sources = const Value.absent(),
     Value<String?> tags = const Value.absent(),
+    Value<String?> originalAnswerId = const Value.absent(),
     Value<DateTime?> lastSyncAttempt = const Value.absent(),
     int? syncRetryCount,
   }) => ForumPostData(
@@ -631,6 +663,9 @@ class ForumPostData extends DataClass implements Insertable<ForumPostData> {
     syncStatus: syncStatus ?? this.syncStatus,
     sources: sources.present ? sources.value : this.sources,
     tags: tags.present ? tags.value : this.tags,
+    originalAnswerId: originalAnswerId.present
+        ? originalAnswerId.value
+        : this.originalAnswerId,
     lastSyncAttempt: lastSyncAttempt.present
         ? lastSyncAttempt.value
         : this.lastSyncAttempt,
@@ -659,6 +694,9 @@ class ForumPostData extends DataClass implements Insertable<ForumPostData> {
           : this.syncStatus,
       sources: data.sources.present ? data.sources.value : this.sources,
       tags: data.tags.present ? data.tags.value : this.tags,
+      originalAnswerId: data.originalAnswerId.present
+          ? data.originalAnswerId.value
+          : this.originalAnswerId,
       lastSyncAttempt: data.lastSyncAttempt.present
           ? data.lastSyncAttempt.value
           : this.lastSyncAttempt,
@@ -686,6 +724,7 @@ class ForumPostData extends DataClass implements Insertable<ForumPostData> {
           ..write('syncStatus: $syncStatus, ')
           ..write('sources: $sources, ')
           ..write('tags: $tags, ')
+          ..write('originalAnswerId: $originalAnswerId, ')
           ..write('lastSyncAttempt: $lastSyncAttempt, ')
           ..write('syncRetryCount: $syncRetryCount')
           ..write(')'))
@@ -709,6 +748,7 @@ class ForumPostData extends DataClass implements Insertable<ForumPostData> {
     syncStatus,
     sources,
     tags,
+    originalAnswerId,
     lastSyncAttempt,
     syncRetryCount,
   );
@@ -731,6 +771,7 @@ class ForumPostData extends DataClass implements Insertable<ForumPostData> {
           other.syncStatus == this.syncStatus &&
           other.sources == this.sources &&
           other.tags == this.tags &&
+          other.originalAnswerId == this.originalAnswerId &&
           other.lastSyncAttempt == this.lastSyncAttempt &&
           other.syncRetryCount == this.syncRetryCount);
 }
@@ -751,6 +792,7 @@ class ForumPostsCompanion extends UpdateCompanion<ForumPostData> {
   final Value<String> syncStatus;
   final Value<String?> sources;
   final Value<String?> tags;
+  final Value<String?> originalAnswerId;
   final Value<DateTime?> lastSyncAttempt;
   final Value<int> syncRetryCount;
   final Value<int> rowid;
@@ -770,6 +812,7 @@ class ForumPostsCompanion extends UpdateCompanion<ForumPostData> {
     this.syncStatus = const Value.absent(),
     this.sources = const Value.absent(),
     this.tags = const Value.absent(),
+    this.originalAnswerId = const Value.absent(),
     this.lastSyncAttempt = const Value.absent(),
     this.syncRetryCount = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -790,6 +833,7 @@ class ForumPostsCompanion extends UpdateCompanion<ForumPostData> {
     this.syncStatus = const Value.absent(),
     this.sources = const Value.absent(),
     this.tags = const Value.absent(),
+    this.originalAnswerId = const Value.absent(),
     this.lastSyncAttempt = const Value.absent(),
     this.syncRetryCount = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -815,6 +859,7 @@ class ForumPostsCompanion extends UpdateCompanion<ForumPostData> {
     Expression<String>? syncStatus,
     Expression<String>? sources,
     Expression<String>? tags,
+    Expression<String>? originalAnswerId,
     Expression<DateTime>? lastSyncAttempt,
     Expression<int>? syncRetryCount,
     Expression<int>? rowid,
@@ -835,6 +880,7 @@ class ForumPostsCompanion extends UpdateCompanion<ForumPostData> {
       if (syncStatus != null) 'sync_status': syncStatus,
       if (sources != null) 'sources': sources,
       if (tags != null) 'tags': tags,
+      if (originalAnswerId != null) 'original_answer_id': originalAnswerId,
       if (lastSyncAttempt != null) 'last_sync_attempt': lastSyncAttempt,
       if (syncRetryCount != null) 'sync_retry_count': syncRetryCount,
       if (rowid != null) 'rowid': rowid,
@@ -857,6 +903,7 @@ class ForumPostsCompanion extends UpdateCompanion<ForumPostData> {
     Value<String>? syncStatus,
     Value<String?>? sources,
     Value<String?>? tags,
+    Value<String?>? originalAnswerId,
     Value<DateTime?>? lastSyncAttempt,
     Value<int>? syncRetryCount,
     Value<int>? rowid,
@@ -877,6 +924,7 @@ class ForumPostsCompanion extends UpdateCompanion<ForumPostData> {
       syncStatus: syncStatus ?? this.syncStatus,
       sources: sources ?? this.sources,
       tags: tags ?? this.tags,
+      originalAnswerId: originalAnswerId ?? this.originalAnswerId,
       lastSyncAttempt: lastSyncAttempt ?? this.lastSyncAttempt,
       syncRetryCount: syncRetryCount ?? this.syncRetryCount,
       rowid: rowid ?? this.rowid,
@@ -931,6 +979,9 @@ class ForumPostsCompanion extends UpdateCompanion<ForumPostData> {
     if (tags.present) {
       map['tags'] = Variable<String>(tags.value);
     }
+    if (originalAnswerId.present) {
+      map['original_answer_id'] = Variable<String>(originalAnswerId.value);
+    }
     if (lastSyncAttempt.present) {
       map['last_sync_attempt'] = Variable<DateTime>(lastSyncAttempt.value);
     }
@@ -961,6 +1012,7 @@ class ForumPostsCompanion extends UpdateCompanion<ForumPostData> {
           ..write('syncStatus: $syncStatus, ')
           ..write('sources: $sources, ')
           ..write('tags: $tags, ')
+          ..write('originalAnswerId: $originalAnswerId, ')
           ..write('lastSyncAttempt: $lastSyncAttempt, ')
           ..write('syncRetryCount: $syncRetryCount, ')
           ..write('rowid: $rowid')
@@ -1028,6 +1080,28 @@ class $ForumCommentsTable extends ForumComments
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: true,
+  );
+  static const VerificationMeta _authorRoleMeta = const VerificationMeta(
+    'authorRole',
+  );
+  @override
+  late final GeneratedColumn<String> authorRole = GeneratedColumn<String>(
+    'author_role',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _authorProfessionMeta = const VerificationMeta(
+    'authorProfession',
+  );
+  @override
+  late final GeneratedColumn<String> authorProfession = GeneratedColumn<String>(
+    'author_profession',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _contentMeta = const VerificationMeta(
     'content',
@@ -1132,6 +1206,8 @@ class $ForumCommentsTable extends ForumComments
     postId,
     authorId,
     authorName,
+    authorRole,
+    authorProfession,
     content,
     likeCount,
     isLiked,
@@ -1190,6 +1266,21 @@ class $ForumCommentsTable extends ForumComments
       );
     } else if (isInserting) {
       context.missing(_authorNameMeta);
+    }
+    if (data.containsKey('author_role')) {
+      context.handle(
+        _authorRoleMeta,
+        authorRole.isAcceptableOrUnknown(data['author_role']!, _authorRoleMeta),
+      );
+    }
+    if (data.containsKey('author_profession')) {
+      context.handle(
+        _authorProfessionMeta,
+        authorProfession.isAcceptableOrUnknown(
+          data['author_profession']!,
+          _authorProfessionMeta,
+        ),
+      );
     }
     if (data.containsKey('content')) {
       context.handle(
@@ -1255,10 +1346,6 @@ class $ForumCommentsTable extends ForumComments
   @override
   Set<GeneratedColumn> get $primaryKey => {localId};
   @override
-  List<Set<GeneratedColumn>> get uniqueKeys => [
-    {serverId},
-  ];
-  @override
   ForumCommentData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return ForumCommentData(
@@ -1282,6 +1369,14 @@ class $ForumCommentsTable extends ForumComments
         DriftSqlType.string,
         data['${effectivePrefix}author_name'],
       )!,
+      authorRole: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}author_role'],
+      ),
+      authorProfession: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}author_profession'],
+      ),
       content: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}content'],
@@ -1330,6 +1425,8 @@ class ForumCommentData extends DataClass
   final String postId;
   final String authorId;
   final String authorName;
+  final String? authorRole;
+  final String? authorProfession;
   final String content;
   final int likeCount;
   final bool isLiked;
@@ -1344,6 +1441,8 @@ class ForumCommentData extends DataClass
     required this.postId,
     required this.authorId,
     required this.authorName,
+    this.authorRole,
+    this.authorProfession,
     required this.content,
     required this.likeCount,
     required this.isLiked,
@@ -1361,6 +1460,12 @@ class ForumCommentData extends DataClass
     map['post_id'] = Variable<String>(postId);
     map['author_id'] = Variable<String>(authorId);
     map['author_name'] = Variable<String>(authorName);
+    if (!nullToAbsent || authorRole != null) {
+      map['author_role'] = Variable<String>(authorRole);
+    }
+    if (!nullToAbsent || authorProfession != null) {
+      map['author_profession'] = Variable<String>(authorProfession);
+    }
     map['content'] = Variable<String>(content);
     map['like_count'] = Variable<int>(likeCount);
     map['is_liked'] = Variable<bool>(isLiked);
@@ -1383,6 +1488,12 @@ class ForumCommentData extends DataClass
       postId: Value(postId),
       authorId: Value(authorId),
       authorName: Value(authorName),
+      authorRole: authorRole == null && nullToAbsent
+          ? const Value.absent()
+          : Value(authorRole),
+      authorProfession: authorProfession == null && nullToAbsent
+          ? const Value.absent()
+          : Value(authorProfession),
       content: Value(content),
       likeCount: Value(likeCount),
       isLiked: Value(isLiked),
@@ -1409,6 +1520,8 @@ class ForumCommentData extends DataClass
       postId: serializer.fromJson<String>(json['postId']),
       authorId: serializer.fromJson<String>(json['authorId']),
       authorName: serializer.fromJson<String>(json['authorName']),
+      authorRole: serializer.fromJson<String?>(json['authorRole']),
+      authorProfession: serializer.fromJson<String?>(json['authorProfession']),
       content: serializer.fromJson<String>(json['content']),
       likeCount: serializer.fromJson<int>(json['likeCount']),
       isLiked: serializer.fromJson<bool>(json['isLiked']),
@@ -1428,6 +1541,8 @@ class ForumCommentData extends DataClass
       'postId': serializer.toJson<String>(postId),
       'authorId': serializer.toJson<String>(authorId),
       'authorName': serializer.toJson<String>(authorName),
+      'authorRole': serializer.toJson<String?>(authorRole),
+      'authorProfession': serializer.toJson<String?>(authorProfession),
       'content': serializer.toJson<String>(content),
       'likeCount': serializer.toJson<int>(likeCount),
       'isLiked': serializer.toJson<bool>(isLiked),
@@ -1445,6 +1560,8 @@ class ForumCommentData extends DataClass
     String? postId,
     String? authorId,
     String? authorName,
+    Value<String?> authorRole = const Value.absent(),
+    Value<String?> authorProfession = const Value.absent(),
     String? content,
     int? likeCount,
     bool? isLiked,
@@ -1459,6 +1576,10 @@ class ForumCommentData extends DataClass
     postId: postId ?? this.postId,
     authorId: authorId ?? this.authorId,
     authorName: authorName ?? this.authorName,
+    authorRole: authorRole.present ? authorRole.value : this.authorRole,
+    authorProfession: authorProfession.present
+        ? authorProfession.value
+        : this.authorProfession,
     content: content ?? this.content,
     likeCount: likeCount ?? this.likeCount,
     isLiked: isLiked ?? this.isLiked,
@@ -1479,6 +1600,12 @@ class ForumCommentData extends DataClass
       authorName: data.authorName.present
           ? data.authorName.value
           : this.authorName,
+      authorRole: data.authorRole.present
+          ? data.authorRole.value
+          : this.authorRole,
+      authorProfession: data.authorProfession.present
+          ? data.authorProfession.value
+          : this.authorProfession,
       content: data.content.present ? data.content.value : this.content,
       likeCount: data.likeCount.present ? data.likeCount.value : this.likeCount,
       isLiked: data.isLiked.present ? data.isLiked.value : this.isLiked,
@@ -1504,6 +1631,8 @@ class ForumCommentData extends DataClass
           ..write('postId: $postId, ')
           ..write('authorId: $authorId, ')
           ..write('authorName: $authorName, ')
+          ..write('authorRole: $authorRole, ')
+          ..write('authorProfession: $authorProfession, ')
           ..write('content: $content, ')
           ..write('likeCount: $likeCount, ')
           ..write('isLiked: $isLiked, ')
@@ -1523,6 +1652,8 @@ class ForumCommentData extends DataClass
     postId,
     authorId,
     authorName,
+    authorRole,
+    authorProfession,
     content,
     likeCount,
     isLiked,
@@ -1541,6 +1672,8 @@ class ForumCommentData extends DataClass
           other.postId == this.postId &&
           other.authorId == this.authorId &&
           other.authorName == this.authorName &&
+          other.authorRole == this.authorRole &&
+          other.authorProfession == this.authorProfession &&
           other.content == this.content &&
           other.likeCount == this.likeCount &&
           other.isLiked == this.isLiked &&
@@ -1557,6 +1690,8 @@ class ForumCommentsCompanion extends UpdateCompanion<ForumCommentData> {
   final Value<String> postId;
   final Value<String> authorId;
   final Value<String> authorName;
+  final Value<String?> authorRole;
+  final Value<String?> authorProfession;
   final Value<String> content;
   final Value<int> likeCount;
   final Value<bool> isLiked;
@@ -1572,6 +1707,8 @@ class ForumCommentsCompanion extends UpdateCompanion<ForumCommentData> {
     this.postId = const Value.absent(),
     this.authorId = const Value.absent(),
     this.authorName = const Value.absent(),
+    this.authorRole = const Value.absent(),
+    this.authorProfession = const Value.absent(),
     this.content = const Value.absent(),
     this.likeCount = const Value.absent(),
     this.isLiked = const Value.absent(),
@@ -1588,6 +1725,8 @@ class ForumCommentsCompanion extends UpdateCompanion<ForumCommentData> {
     required String postId,
     required String authorId,
     required String authorName,
+    this.authorRole = const Value.absent(),
+    this.authorProfession = const Value.absent(),
     required String content,
     this.likeCount = const Value.absent(),
     this.isLiked = const Value.absent(),
@@ -1609,6 +1748,8 @@ class ForumCommentsCompanion extends UpdateCompanion<ForumCommentData> {
     Expression<String>? postId,
     Expression<String>? authorId,
     Expression<String>? authorName,
+    Expression<String>? authorRole,
+    Expression<String>? authorProfession,
     Expression<String>? content,
     Expression<int>? likeCount,
     Expression<bool>? isLiked,
@@ -1625,6 +1766,8 @@ class ForumCommentsCompanion extends UpdateCompanion<ForumCommentData> {
       if (postId != null) 'post_id': postId,
       if (authorId != null) 'author_id': authorId,
       if (authorName != null) 'author_name': authorName,
+      if (authorRole != null) 'author_role': authorRole,
+      if (authorProfession != null) 'author_profession': authorProfession,
       if (content != null) 'content': content,
       if (likeCount != null) 'like_count': likeCount,
       if (isLiked != null) 'is_liked': isLiked,
@@ -1643,6 +1786,8 @@ class ForumCommentsCompanion extends UpdateCompanion<ForumCommentData> {
     Value<String>? postId,
     Value<String>? authorId,
     Value<String>? authorName,
+    Value<String?>? authorRole,
+    Value<String?>? authorProfession,
     Value<String>? content,
     Value<int>? likeCount,
     Value<bool>? isLiked,
@@ -1659,6 +1804,8 @@ class ForumCommentsCompanion extends UpdateCompanion<ForumCommentData> {
       postId: postId ?? this.postId,
       authorId: authorId ?? this.authorId,
       authorName: authorName ?? this.authorName,
+      authorRole: authorRole ?? this.authorRole,
+      authorProfession: authorProfession ?? this.authorProfession,
       content: content ?? this.content,
       likeCount: likeCount ?? this.likeCount,
       isLiked: isLiked ?? this.isLiked,
@@ -1688,6 +1835,12 @@ class ForumCommentsCompanion extends UpdateCompanion<ForumCommentData> {
     }
     if (authorName.present) {
       map['author_name'] = Variable<String>(authorName.value);
+    }
+    if (authorRole.present) {
+      map['author_role'] = Variable<String>(authorRole.value);
+    }
+    if (authorProfession.present) {
+      map['author_profession'] = Variable<String>(authorProfession.value);
     }
     if (content.present) {
       map['content'] = Variable<String>(content.value);
@@ -1727,6 +1880,8 @@ class ForumCommentsCompanion extends UpdateCompanion<ForumCommentData> {
           ..write('postId: $postId, ')
           ..write('authorId: $authorId, ')
           ..write('authorName: $authorName, ')
+          ..write('authorRole: $authorRole, ')
+          ..write('authorProfession: $authorProfession, ')
           ..write('content: $content, ')
           ..write('likeCount: $likeCount, ')
           ..write('isLiked: $isLiked, ')
@@ -2348,12 +2503,1122 @@ class SyncQueueCompanion extends UpdateCompanion<SyncQueueData> {
   }
 }
 
+class $ForumAnswerLinesTable extends ForumAnswerLines
+    with TableInfo<$ForumAnswerLinesTable, ForumAnswerLineData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ForumAnswerLinesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _lineIdMeta = const VerificationMeta('lineId');
+  @override
+  late final GeneratedColumn<String> lineId = GeneratedColumn<String>(
+    'line_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _answerIdMeta = const VerificationMeta(
+    'answerId',
+  );
+  @override
+  late final GeneratedColumn<String> answerId = GeneratedColumn<String>(
+    'answer_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _postIdMeta = const VerificationMeta('postId');
+  @override
+  late final GeneratedColumn<int> postId = GeneratedColumn<int>(
+    'post_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _lineNumberMeta = const VerificationMeta(
+    'lineNumber',
+  );
+  @override
+  late final GeneratedColumn<int> lineNumber = GeneratedColumn<int>(
+    'line_number',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _textContentMeta = const VerificationMeta(
+    'textContent',
+  );
+  @override
+  late final GeneratedColumn<String> textContent = GeneratedColumn<String>(
+    'text_content',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _discussionTitleMeta = const VerificationMeta(
+    'discussionTitle',
+  );
+  @override
+  late final GeneratedColumn<String> discussionTitle = GeneratedColumn<String>(
+    'discussion_title',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _commentCountMeta = const VerificationMeta(
+    'commentCount',
+  );
+  @override
+  late final GeneratedColumn<int> commentCount = GeneratedColumn<int>(
+    'comment_count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    lineId,
+    answerId,
+    postId,
+    lineNumber,
+    textContent,
+    discussionTitle,
+    commentCount,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'forum_answer_lines';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ForumAnswerLineData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('line_id')) {
+      context.handle(
+        _lineIdMeta,
+        lineId.isAcceptableOrUnknown(data['line_id']!, _lineIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_lineIdMeta);
+    }
+    if (data.containsKey('answer_id')) {
+      context.handle(
+        _answerIdMeta,
+        answerId.isAcceptableOrUnknown(data['answer_id']!, _answerIdMeta),
+      );
+    }
+    if (data.containsKey('post_id')) {
+      context.handle(
+        _postIdMeta,
+        postId.isAcceptableOrUnknown(data['post_id']!, _postIdMeta),
+      );
+    }
+    if (data.containsKey('line_number')) {
+      context.handle(
+        _lineNumberMeta,
+        lineNumber.isAcceptableOrUnknown(data['line_number']!, _lineNumberMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_lineNumberMeta);
+    }
+    if (data.containsKey('text_content')) {
+      context.handle(
+        _textContentMeta,
+        textContent.isAcceptableOrUnknown(
+          data['text_content']!,
+          _textContentMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_textContentMeta);
+    }
+    if (data.containsKey('discussion_title')) {
+      context.handle(
+        _discussionTitleMeta,
+        discussionTitle.isAcceptableOrUnknown(
+          data['discussion_title']!,
+          _discussionTitleMeta,
+        ),
+      );
+    }
+    if (data.containsKey('comment_count')) {
+      context.handle(
+        _commentCountMeta,
+        commentCount.isAcceptableOrUnknown(
+          data['comment_count']!,
+          _commentCountMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {lineId};
+  @override
+  ForumAnswerLineData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ForumAnswerLineData(
+      lineId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}line_id'],
+      )!,
+      answerId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}answer_id'],
+      ),
+      postId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}post_id'],
+      ),
+      lineNumber: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}line_number'],
+      )!,
+      textContent: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}text_content'],
+      )!,
+      discussionTitle: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}discussion_title'],
+      ),
+      commentCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}comment_count'],
+      )!,
+    );
+  }
+
+  @override
+  $ForumAnswerLinesTable createAlias(String alias) {
+    return $ForumAnswerLinesTable(attachedDatabase, alias);
+  }
+}
+
+class ForumAnswerLineData extends DataClass
+    implements Insertable<ForumAnswerLineData> {
+  final String lineId;
+  final String? answerId;
+  final int? postId;
+  final int lineNumber;
+  final String textContent;
+  final String? discussionTitle;
+  final int commentCount;
+  const ForumAnswerLineData({
+    required this.lineId,
+    this.answerId,
+    this.postId,
+    required this.lineNumber,
+    required this.textContent,
+    this.discussionTitle,
+    required this.commentCount,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['line_id'] = Variable<String>(lineId);
+    if (!nullToAbsent || answerId != null) {
+      map['answer_id'] = Variable<String>(answerId);
+    }
+    if (!nullToAbsent || postId != null) {
+      map['post_id'] = Variable<int>(postId);
+    }
+    map['line_number'] = Variable<int>(lineNumber);
+    map['text_content'] = Variable<String>(textContent);
+    if (!nullToAbsent || discussionTitle != null) {
+      map['discussion_title'] = Variable<String>(discussionTitle);
+    }
+    map['comment_count'] = Variable<int>(commentCount);
+    return map;
+  }
+
+  ForumAnswerLinesCompanion toCompanion(bool nullToAbsent) {
+    return ForumAnswerLinesCompanion(
+      lineId: Value(lineId),
+      answerId: answerId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(answerId),
+      postId: postId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(postId),
+      lineNumber: Value(lineNumber),
+      textContent: Value(textContent),
+      discussionTitle: discussionTitle == null && nullToAbsent
+          ? const Value.absent()
+          : Value(discussionTitle),
+      commentCount: Value(commentCount),
+    );
+  }
+
+  factory ForumAnswerLineData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ForumAnswerLineData(
+      lineId: serializer.fromJson<String>(json['lineId']),
+      answerId: serializer.fromJson<String?>(json['answerId']),
+      postId: serializer.fromJson<int?>(json['postId']),
+      lineNumber: serializer.fromJson<int>(json['lineNumber']),
+      textContent: serializer.fromJson<String>(json['textContent']),
+      discussionTitle: serializer.fromJson<String?>(json['discussionTitle']),
+      commentCount: serializer.fromJson<int>(json['commentCount']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'lineId': serializer.toJson<String>(lineId),
+      'answerId': serializer.toJson<String?>(answerId),
+      'postId': serializer.toJson<int?>(postId),
+      'lineNumber': serializer.toJson<int>(lineNumber),
+      'textContent': serializer.toJson<String>(textContent),
+      'discussionTitle': serializer.toJson<String?>(discussionTitle),
+      'commentCount': serializer.toJson<int>(commentCount),
+    };
+  }
+
+  ForumAnswerLineData copyWith({
+    String? lineId,
+    Value<String?> answerId = const Value.absent(),
+    Value<int?> postId = const Value.absent(),
+    int? lineNumber,
+    String? textContent,
+    Value<String?> discussionTitle = const Value.absent(),
+    int? commentCount,
+  }) => ForumAnswerLineData(
+    lineId: lineId ?? this.lineId,
+    answerId: answerId.present ? answerId.value : this.answerId,
+    postId: postId.present ? postId.value : this.postId,
+    lineNumber: lineNumber ?? this.lineNumber,
+    textContent: textContent ?? this.textContent,
+    discussionTitle: discussionTitle.present
+        ? discussionTitle.value
+        : this.discussionTitle,
+    commentCount: commentCount ?? this.commentCount,
+  );
+  ForumAnswerLineData copyWithCompanion(ForumAnswerLinesCompanion data) {
+    return ForumAnswerLineData(
+      lineId: data.lineId.present ? data.lineId.value : this.lineId,
+      answerId: data.answerId.present ? data.answerId.value : this.answerId,
+      postId: data.postId.present ? data.postId.value : this.postId,
+      lineNumber: data.lineNumber.present
+          ? data.lineNumber.value
+          : this.lineNumber,
+      textContent: data.textContent.present
+          ? data.textContent.value
+          : this.textContent,
+      discussionTitle: data.discussionTitle.present
+          ? data.discussionTitle.value
+          : this.discussionTitle,
+      commentCount: data.commentCount.present
+          ? data.commentCount.value
+          : this.commentCount,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ForumAnswerLineData(')
+          ..write('lineId: $lineId, ')
+          ..write('answerId: $answerId, ')
+          ..write('postId: $postId, ')
+          ..write('lineNumber: $lineNumber, ')
+          ..write('textContent: $textContent, ')
+          ..write('discussionTitle: $discussionTitle, ')
+          ..write('commentCount: $commentCount')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    lineId,
+    answerId,
+    postId,
+    lineNumber,
+    textContent,
+    discussionTitle,
+    commentCount,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ForumAnswerLineData &&
+          other.lineId == this.lineId &&
+          other.answerId == this.answerId &&
+          other.postId == this.postId &&
+          other.lineNumber == this.lineNumber &&
+          other.textContent == this.textContent &&
+          other.discussionTitle == this.discussionTitle &&
+          other.commentCount == this.commentCount);
+}
+
+class ForumAnswerLinesCompanion extends UpdateCompanion<ForumAnswerLineData> {
+  final Value<String> lineId;
+  final Value<String?> answerId;
+  final Value<int?> postId;
+  final Value<int> lineNumber;
+  final Value<String> textContent;
+  final Value<String?> discussionTitle;
+  final Value<int> commentCount;
+  final Value<int> rowid;
+  const ForumAnswerLinesCompanion({
+    this.lineId = const Value.absent(),
+    this.answerId = const Value.absent(),
+    this.postId = const Value.absent(),
+    this.lineNumber = const Value.absent(),
+    this.textContent = const Value.absent(),
+    this.discussionTitle = const Value.absent(),
+    this.commentCount = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ForumAnswerLinesCompanion.insert({
+    required String lineId,
+    this.answerId = const Value.absent(),
+    this.postId = const Value.absent(),
+    required int lineNumber,
+    required String textContent,
+    this.discussionTitle = const Value.absent(),
+    this.commentCount = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : lineId = Value(lineId),
+       lineNumber = Value(lineNumber),
+       textContent = Value(textContent);
+  static Insertable<ForumAnswerLineData> custom({
+    Expression<String>? lineId,
+    Expression<String>? answerId,
+    Expression<int>? postId,
+    Expression<int>? lineNumber,
+    Expression<String>? textContent,
+    Expression<String>? discussionTitle,
+    Expression<int>? commentCount,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (lineId != null) 'line_id': lineId,
+      if (answerId != null) 'answer_id': answerId,
+      if (postId != null) 'post_id': postId,
+      if (lineNumber != null) 'line_number': lineNumber,
+      if (textContent != null) 'text_content': textContent,
+      if (discussionTitle != null) 'discussion_title': discussionTitle,
+      if (commentCount != null) 'comment_count': commentCount,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ForumAnswerLinesCompanion copyWith({
+    Value<String>? lineId,
+    Value<String?>? answerId,
+    Value<int?>? postId,
+    Value<int>? lineNumber,
+    Value<String>? textContent,
+    Value<String?>? discussionTitle,
+    Value<int>? commentCount,
+    Value<int>? rowid,
+  }) {
+    return ForumAnswerLinesCompanion(
+      lineId: lineId ?? this.lineId,
+      answerId: answerId ?? this.answerId,
+      postId: postId ?? this.postId,
+      lineNumber: lineNumber ?? this.lineNumber,
+      textContent: textContent ?? this.textContent,
+      discussionTitle: discussionTitle ?? this.discussionTitle,
+      commentCount: commentCount ?? this.commentCount,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (lineId.present) {
+      map['line_id'] = Variable<String>(lineId.value);
+    }
+    if (answerId.present) {
+      map['answer_id'] = Variable<String>(answerId.value);
+    }
+    if (postId.present) {
+      map['post_id'] = Variable<int>(postId.value);
+    }
+    if (lineNumber.present) {
+      map['line_number'] = Variable<int>(lineNumber.value);
+    }
+    if (textContent.present) {
+      map['text_content'] = Variable<String>(textContent.value);
+    }
+    if (discussionTitle.present) {
+      map['discussion_title'] = Variable<String>(discussionTitle.value);
+    }
+    if (commentCount.present) {
+      map['comment_count'] = Variable<int>(commentCount.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ForumAnswerLinesCompanion(')
+          ..write('lineId: $lineId, ')
+          ..write('answerId: $answerId, ')
+          ..write('postId: $postId, ')
+          ..write('lineNumber: $lineNumber, ')
+          ..write('textContent: $textContent, ')
+          ..write('discussionTitle: $discussionTitle, ')
+          ..write('commentCount: $commentCount, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ForumLineCommentsTable extends ForumLineComments
+    with TableInfo<$ForumLineCommentsTable, ForumLineCommentData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ForumLineCommentsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _localIdMeta = const VerificationMeta(
+    'localId',
+  );
+  @override
+  late final GeneratedColumn<String> localId = GeneratedColumn<String>(
+    'local_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _serverIdMeta = const VerificationMeta(
+    'serverId',
+  );
+  @override
+  late final GeneratedColumn<String> serverId = GeneratedColumn<String>(
+    'server_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _lineIdMeta = const VerificationMeta('lineId');
+  @override
+  late final GeneratedColumn<String> lineId = GeneratedColumn<String>(
+    'line_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _authorIdMeta = const VerificationMeta(
+    'authorId',
+  );
+  @override
+  late final GeneratedColumn<String> authorId = GeneratedColumn<String>(
+    'author_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _authorNameMeta = const VerificationMeta(
+    'authorName',
+  );
+  @override
+  late final GeneratedColumn<String> authorName = GeneratedColumn<String>(
+    'author_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _authorRoleMeta = const VerificationMeta(
+    'authorRole',
+  );
+  @override
+  late final GeneratedColumn<String> authorRole = GeneratedColumn<String>(
+    'author_role',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _commentTypeMeta = const VerificationMeta(
+    'commentType',
+  );
+  @override
+  late final GeneratedColumn<String> commentType = GeneratedColumn<String>(
+    'comment_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _contentMeta = const VerificationMeta(
+    'content',
+  );
+  @override
+  late final GeneratedColumn<String> content = GeneratedColumn<String>(
+    'content',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _syncStatusMeta = const VerificationMeta(
+    'syncStatus',
+  );
+  @override
+  late final GeneratedColumn<String> syncStatus = GeneratedColumn<String>(
+    'sync_status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('synced'),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    localId,
+    serverId,
+    lineId,
+    authorId,
+    authorName,
+    authorRole,
+    commentType,
+    content,
+    createdAt,
+    syncStatus,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'forum_line_comments';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ForumLineCommentData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('local_id')) {
+      context.handle(
+        _localIdMeta,
+        localId.isAcceptableOrUnknown(data['local_id']!, _localIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_localIdMeta);
+    }
+    if (data.containsKey('server_id')) {
+      context.handle(
+        _serverIdMeta,
+        serverId.isAcceptableOrUnknown(data['server_id']!, _serverIdMeta),
+      );
+    }
+    if (data.containsKey('line_id')) {
+      context.handle(
+        _lineIdMeta,
+        lineId.isAcceptableOrUnknown(data['line_id']!, _lineIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_lineIdMeta);
+    }
+    if (data.containsKey('author_id')) {
+      context.handle(
+        _authorIdMeta,
+        authorId.isAcceptableOrUnknown(data['author_id']!, _authorIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_authorIdMeta);
+    }
+    if (data.containsKey('author_name')) {
+      context.handle(
+        _authorNameMeta,
+        authorName.isAcceptableOrUnknown(data['author_name']!, _authorNameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_authorNameMeta);
+    }
+    if (data.containsKey('author_role')) {
+      context.handle(
+        _authorRoleMeta,
+        authorRole.isAcceptableOrUnknown(data['author_role']!, _authorRoleMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_authorRoleMeta);
+    }
+    if (data.containsKey('comment_type')) {
+      context.handle(
+        _commentTypeMeta,
+        commentType.isAcceptableOrUnknown(
+          data['comment_type']!,
+          _commentTypeMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_commentTypeMeta);
+    }
+    if (data.containsKey('content')) {
+      context.handle(
+        _contentMeta,
+        content.isAcceptableOrUnknown(data['content']!, _contentMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_contentMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('sync_status')) {
+      context.handle(
+        _syncStatusMeta,
+        syncStatus.isAcceptableOrUnknown(data['sync_status']!, _syncStatusMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {localId};
+  @override
+  ForumLineCommentData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ForumLineCommentData(
+      localId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}local_id'],
+      )!,
+      serverId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}server_id'],
+      )!,
+      lineId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}line_id'],
+      )!,
+      authorId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}author_id'],
+      )!,
+      authorName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}author_name'],
+      )!,
+      authorRole: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}author_role'],
+      )!,
+      commentType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}comment_type'],
+      )!,
+      content: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}content'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      syncStatus: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_status'],
+      )!,
+    );
+  }
+
+  @override
+  $ForumLineCommentsTable createAlias(String alias) {
+    return $ForumLineCommentsTable(attachedDatabase, alias);
+  }
+}
+
+class ForumLineCommentData extends DataClass
+    implements Insertable<ForumLineCommentData> {
+  final String localId;
+  final String serverId;
+  final String lineId;
+  final String authorId;
+  final String authorName;
+  final String authorRole;
+  final String commentType;
+  final String content;
+  final DateTime createdAt;
+  final String syncStatus;
+  const ForumLineCommentData({
+    required this.localId,
+    required this.serverId,
+    required this.lineId,
+    required this.authorId,
+    required this.authorName,
+    required this.authorRole,
+    required this.commentType,
+    required this.content,
+    required this.createdAt,
+    required this.syncStatus,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['local_id'] = Variable<String>(localId);
+    map['server_id'] = Variable<String>(serverId);
+    map['line_id'] = Variable<String>(lineId);
+    map['author_id'] = Variable<String>(authorId);
+    map['author_name'] = Variable<String>(authorName);
+    map['author_role'] = Variable<String>(authorRole);
+    map['comment_type'] = Variable<String>(commentType);
+    map['content'] = Variable<String>(content);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['sync_status'] = Variable<String>(syncStatus);
+    return map;
+  }
+
+  ForumLineCommentsCompanion toCompanion(bool nullToAbsent) {
+    return ForumLineCommentsCompanion(
+      localId: Value(localId),
+      serverId: Value(serverId),
+      lineId: Value(lineId),
+      authorId: Value(authorId),
+      authorName: Value(authorName),
+      authorRole: Value(authorRole),
+      commentType: Value(commentType),
+      content: Value(content),
+      createdAt: Value(createdAt),
+      syncStatus: Value(syncStatus),
+    );
+  }
+
+  factory ForumLineCommentData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ForumLineCommentData(
+      localId: serializer.fromJson<String>(json['localId']),
+      serverId: serializer.fromJson<String>(json['serverId']),
+      lineId: serializer.fromJson<String>(json['lineId']),
+      authorId: serializer.fromJson<String>(json['authorId']),
+      authorName: serializer.fromJson<String>(json['authorName']),
+      authorRole: serializer.fromJson<String>(json['authorRole']),
+      commentType: serializer.fromJson<String>(json['commentType']),
+      content: serializer.fromJson<String>(json['content']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      syncStatus: serializer.fromJson<String>(json['syncStatus']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'localId': serializer.toJson<String>(localId),
+      'serverId': serializer.toJson<String>(serverId),
+      'lineId': serializer.toJson<String>(lineId),
+      'authorId': serializer.toJson<String>(authorId),
+      'authorName': serializer.toJson<String>(authorName),
+      'authorRole': serializer.toJson<String>(authorRole),
+      'commentType': serializer.toJson<String>(commentType),
+      'content': serializer.toJson<String>(content),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'syncStatus': serializer.toJson<String>(syncStatus),
+    };
+  }
+
+  ForumLineCommentData copyWith({
+    String? localId,
+    String? serverId,
+    String? lineId,
+    String? authorId,
+    String? authorName,
+    String? authorRole,
+    String? commentType,
+    String? content,
+    DateTime? createdAt,
+    String? syncStatus,
+  }) => ForumLineCommentData(
+    localId: localId ?? this.localId,
+    serverId: serverId ?? this.serverId,
+    lineId: lineId ?? this.lineId,
+    authorId: authorId ?? this.authorId,
+    authorName: authorName ?? this.authorName,
+    authorRole: authorRole ?? this.authorRole,
+    commentType: commentType ?? this.commentType,
+    content: content ?? this.content,
+    createdAt: createdAt ?? this.createdAt,
+    syncStatus: syncStatus ?? this.syncStatus,
+  );
+  ForumLineCommentData copyWithCompanion(ForumLineCommentsCompanion data) {
+    return ForumLineCommentData(
+      localId: data.localId.present ? data.localId.value : this.localId,
+      serverId: data.serverId.present ? data.serverId.value : this.serverId,
+      lineId: data.lineId.present ? data.lineId.value : this.lineId,
+      authorId: data.authorId.present ? data.authorId.value : this.authorId,
+      authorName: data.authorName.present
+          ? data.authorName.value
+          : this.authorName,
+      authorRole: data.authorRole.present
+          ? data.authorRole.value
+          : this.authorRole,
+      commentType: data.commentType.present
+          ? data.commentType.value
+          : this.commentType,
+      content: data.content.present ? data.content.value : this.content,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      syncStatus: data.syncStatus.present
+          ? data.syncStatus.value
+          : this.syncStatus,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ForumLineCommentData(')
+          ..write('localId: $localId, ')
+          ..write('serverId: $serverId, ')
+          ..write('lineId: $lineId, ')
+          ..write('authorId: $authorId, ')
+          ..write('authorName: $authorName, ')
+          ..write('authorRole: $authorRole, ')
+          ..write('commentType: $commentType, ')
+          ..write('content: $content, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('syncStatus: $syncStatus')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    localId,
+    serverId,
+    lineId,
+    authorId,
+    authorName,
+    authorRole,
+    commentType,
+    content,
+    createdAt,
+    syncStatus,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ForumLineCommentData &&
+          other.localId == this.localId &&
+          other.serverId == this.serverId &&
+          other.lineId == this.lineId &&
+          other.authorId == this.authorId &&
+          other.authorName == this.authorName &&
+          other.authorRole == this.authorRole &&
+          other.commentType == this.commentType &&
+          other.content == this.content &&
+          other.createdAt == this.createdAt &&
+          other.syncStatus == this.syncStatus);
+}
+
+class ForumLineCommentsCompanion extends UpdateCompanion<ForumLineCommentData> {
+  final Value<String> localId;
+  final Value<String> serverId;
+  final Value<String> lineId;
+  final Value<String> authorId;
+  final Value<String> authorName;
+  final Value<String> authorRole;
+  final Value<String> commentType;
+  final Value<String> content;
+  final Value<DateTime> createdAt;
+  final Value<String> syncStatus;
+  final Value<int> rowid;
+  const ForumLineCommentsCompanion({
+    this.localId = const Value.absent(),
+    this.serverId = const Value.absent(),
+    this.lineId = const Value.absent(),
+    this.authorId = const Value.absent(),
+    this.authorName = const Value.absent(),
+    this.authorRole = const Value.absent(),
+    this.commentType = const Value.absent(),
+    this.content = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ForumLineCommentsCompanion.insert({
+    required String localId,
+    this.serverId = const Value.absent(),
+    required String lineId,
+    required String authorId,
+    required String authorName,
+    required String authorRole,
+    required String commentType,
+    required String content,
+    required DateTime createdAt,
+    this.syncStatus = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : localId = Value(localId),
+       lineId = Value(lineId),
+       authorId = Value(authorId),
+       authorName = Value(authorName),
+       authorRole = Value(authorRole),
+       commentType = Value(commentType),
+       content = Value(content),
+       createdAt = Value(createdAt);
+  static Insertable<ForumLineCommentData> custom({
+    Expression<String>? localId,
+    Expression<String>? serverId,
+    Expression<String>? lineId,
+    Expression<String>? authorId,
+    Expression<String>? authorName,
+    Expression<String>? authorRole,
+    Expression<String>? commentType,
+    Expression<String>? content,
+    Expression<DateTime>? createdAt,
+    Expression<String>? syncStatus,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (localId != null) 'local_id': localId,
+      if (serverId != null) 'server_id': serverId,
+      if (lineId != null) 'line_id': lineId,
+      if (authorId != null) 'author_id': authorId,
+      if (authorName != null) 'author_name': authorName,
+      if (authorRole != null) 'author_role': authorRole,
+      if (commentType != null) 'comment_type': commentType,
+      if (content != null) 'content': content,
+      if (createdAt != null) 'created_at': createdAt,
+      if (syncStatus != null) 'sync_status': syncStatus,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ForumLineCommentsCompanion copyWith({
+    Value<String>? localId,
+    Value<String>? serverId,
+    Value<String>? lineId,
+    Value<String>? authorId,
+    Value<String>? authorName,
+    Value<String>? authorRole,
+    Value<String>? commentType,
+    Value<String>? content,
+    Value<DateTime>? createdAt,
+    Value<String>? syncStatus,
+    Value<int>? rowid,
+  }) {
+    return ForumLineCommentsCompanion(
+      localId: localId ?? this.localId,
+      serverId: serverId ?? this.serverId,
+      lineId: lineId ?? this.lineId,
+      authorId: authorId ?? this.authorId,
+      authorName: authorName ?? this.authorName,
+      authorRole: authorRole ?? this.authorRole,
+      commentType: commentType ?? this.commentType,
+      content: content ?? this.content,
+      createdAt: createdAt ?? this.createdAt,
+      syncStatus: syncStatus ?? this.syncStatus,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (localId.present) {
+      map['local_id'] = Variable<String>(localId.value);
+    }
+    if (serverId.present) {
+      map['server_id'] = Variable<String>(serverId.value);
+    }
+    if (lineId.present) {
+      map['line_id'] = Variable<String>(lineId.value);
+    }
+    if (authorId.present) {
+      map['author_id'] = Variable<String>(authorId.value);
+    }
+    if (authorName.present) {
+      map['author_name'] = Variable<String>(authorName.value);
+    }
+    if (authorRole.present) {
+      map['author_role'] = Variable<String>(authorRole.value);
+    }
+    if (commentType.present) {
+      map['comment_type'] = Variable<String>(commentType.value);
+    }
+    if (content.present) {
+      map['content'] = Variable<String>(content.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (syncStatus.present) {
+      map['sync_status'] = Variable<String>(syncStatus.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ForumLineCommentsCompanion(')
+          ..write('localId: $localId, ')
+          ..write('serverId: $serverId, ')
+          ..write('lineId: $lineId, ')
+          ..write('authorId: $authorId, ')
+          ..write('authorName: $authorName, ')
+          ..write('authorRole: $authorRole, ')
+          ..write('commentType: $commentType, ')
+          ..write('content: $content, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$ForumDatabase extends GeneratedDatabase {
   _$ForumDatabase(QueryExecutor e) : super(e);
   $ForumDatabaseManager get managers => $ForumDatabaseManager(this);
   late final $ForumPostsTable forumPosts = $ForumPostsTable(this);
   late final $ForumCommentsTable forumComments = $ForumCommentsTable(this);
   late final $SyncQueueTable syncQueue = $SyncQueueTable(this);
+  late final $ForumAnswerLinesTable forumAnswerLines = $ForumAnswerLinesTable(
+    this,
+  );
+  late final $ForumLineCommentsTable forumLineComments =
+      $ForumLineCommentsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2362,6 +3627,8 @@ abstract class _$ForumDatabase extends GeneratedDatabase {
     forumPosts,
     forumComments,
     syncQueue,
+    forumAnswerLines,
+    forumLineComments,
   ];
 }
 
@@ -2382,6 +3649,7 @@ typedef $$ForumPostsTableCreateCompanionBuilder =
       Value<String> syncStatus,
       Value<String?> sources,
       Value<String?> tags,
+      Value<String?> originalAnswerId,
       Value<DateTime?> lastSyncAttempt,
       Value<int> syncRetryCount,
       Value<int> rowid,
@@ -2403,6 +3671,7 @@ typedef $$ForumPostsTableUpdateCompanionBuilder =
       Value<String> syncStatus,
       Value<String?> sources,
       Value<String?> tags,
+      Value<String?> originalAnswerId,
       Value<DateTime?> lastSyncAttempt,
       Value<int> syncRetryCount,
       Value<int> rowid,
@@ -2489,6 +3758,11 @@ class $$ForumPostsTableFilterComposer
 
   ColumnFilters<String> get tags => $composableBuilder(
     column: $table.tags,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get originalAnswerId => $composableBuilder(
+    column: $table.originalAnswerId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2587,6 +3861,11 @@ class $$ForumPostsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get originalAnswerId => $composableBuilder(
+    column: $table.originalAnswerId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get lastSyncAttempt => $composableBuilder(
     column: $table.lastSyncAttempt,
     builder: (column) => ColumnOrderings(column),
@@ -2658,6 +3937,11 @@ class $$ForumPostsTableAnnotationComposer
   GeneratedColumn<String> get tags =>
       $composableBuilder(column: $table.tags, builder: (column) => column);
 
+  GeneratedColumn<String> get originalAnswerId => $composableBuilder(
+    column: $table.originalAnswerId,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<DateTime> get lastSyncAttempt => $composableBuilder(
     column: $table.lastSyncAttempt,
     builder: (column) => column,
@@ -2715,6 +3999,7 @@ class $$ForumPostsTableTableManager
                 Value<String> syncStatus = const Value.absent(),
                 Value<String?> sources = const Value.absent(),
                 Value<String?> tags = const Value.absent(),
+                Value<String?> originalAnswerId = const Value.absent(),
                 Value<DateTime?> lastSyncAttempt = const Value.absent(),
                 Value<int> syncRetryCount = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -2734,6 +4019,7 @@ class $$ForumPostsTableTableManager
                 syncStatus: syncStatus,
                 sources: sources,
                 tags: tags,
+                originalAnswerId: originalAnswerId,
                 lastSyncAttempt: lastSyncAttempt,
                 syncRetryCount: syncRetryCount,
                 rowid: rowid,
@@ -2755,6 +4041,7 @@ class $$ForumPostsTableTableManager
                 Value<String> syncStatus = const Value.absent(),
                 Value<String?> sources = const Value.absent(),
                 Value<String?> tags = const Value.absent(),
+                Value<String?> originalAnswerId = const Value.absent(),
                 Value<DateTime?> lastSyncAttempt = const Value.absent(),
                 Value<int> syncRetryCount = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -2774,6 +4061,7 @@ class $$ForumPostsTableTableManager
                 syncStatus: syncStatus,
                 sources: sources,
                 tags: tags,
+                originalAnswerId: originalAnswerId,
                 lastSyncAttempt: lastSyncAttempt,
                 syncRetryCount: syncRetryCount,
                 rowid: rowid,
@@ -2810,6 +4098,8 @@ typedef $$ForumCommentsTableCreateCompanionBuilder =
       required String postId,
       required String authorId,
       required String authorName,
+      Value<String?> authorRole,
+      Value<String?> authorProfession,
       required String content,
       Value<int> likeCount,
       Value<bool> isLiked,
@@ -2827,6 +4117,8 @@ typedef $$ForumCommentsTableUpdateCompanionBuilder =
       Value<String> postId,
       Value<String> authorId,
       Value<String> authorName,
+      Value<String?> authorRole,
+      Value<String?> authorProfession,
       Value<String> content,
       Value<int> likeCount,
       Value<bool> isLiked,
@@ -2869,6 +4161,16 @@ class $$ForumCommentsTableFilterComposer
 
   ColumnFilters<String> get authorName => $composableBuilder(
     column: $table.authorName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get authorRole => $composableBuilder(
+    column: $table.authorRole,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get authorProfession => $composableBuilder(
+    column: $table.authorProfession,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2947,6 +4249,16 @@ class $$ForumCommentsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get authorRole => $composableBuilder(
+    column: $table.authorRole,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get authorProfession => $composableBuilder(
+    column: $table.authorProfession,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get content => $composableBuilder(
     column: $table.content,
     builder: (column) => ColumnOrderings(column),
@@ -3011,6 +4323,16 @@ class $$ForumCommentsTableAnnotationComposer
 
   GeneratedColumn<String> get authorName => $composableBuilder(
     column: $table.authorName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get authorRole => $composableBuilder(
+    column: $table.authorRole,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get authorProfession => $composableBuilder(
+    column: $table.authorProfession,
     builder: (column) => column,
   );
 
@@ -3087,6 +4409,8 @@ class $$ForumCommentsTableTableManager
                 Value<String> postId = const Value.absent(),
                 Value<String> authorId = const Value.absent(),
                 Value<String> authorName = const Value.absent(),
+                Value<String?> authorRole = const Value.absent(),
+                Value<String?> authorProfession = const Value.absent(),
                 Value<String> content = const Value.absent(),
                 Value<int> likeCount = const Value.absent(),
                 Value<bool> isLiked = const Value.absent(),
@@ -3102,6 +4426,8 @@ class $$ForumCommentsTableTableManager
                 postId: postId,
                 authorId: authorId,
                 authorName: authorName,
+                authorRole: authorRole,
+                authorProfession: authorProfession,
                 content: content,
                 likeCount: likeCount,
                 isLiked: isLiked,
@@ -3119,6 +4445,8 @@ class $$ForumCommentsTableTableManager
                 required String postId,
                 required String authorId,
                 required String authorName,
+                Value<String?> authorRole = const Value.absent(),
+                Value<String?> authorProfession = const Value.absent(),
                 required String content,
                 Value<int> likeCount = const Value.absent(),
                 Value<bool> isLiked = const Value.absent(),
@@ -3134,6 +4462,8 @@ class $$ForumCommentsTableTableManager
                 postId: postId,
                 authorId: authorId,
                 authorName: authorName,
+                authorRole: authorRole,
+                authorProfession: authorProfession,
                 content: content,
                 likeCount: likeCount,
                 isLiked: isLiked,
@@ -3466,6 +4796,578 @@ typedef $$SyncQueueTableProcessedTableManager =
       SyncQueueData,
       PrefetchHooks Function()
     >;
+typedef $$ForumAnswerLinesTableCreateCompanionBuilder =
+    ForumAnswerLinesCompanion Function({
+      required String lineId,
+      Value<String?> answerId,
+      Value<int?> postId,
+      required int lineNumber,
+      required String textContent,
+      Value<String?> discussionTitle,
+      Value<int> commentCount,
+      Value<int> rowid,
+    });
+typedef $$ForumAnswerLinesTableUpdateCompanionBuilder =
+    ForumAnswerLinesCompanion Function({
+      Value<String> lineId,
+      Value<String?> answerId,
+      Value<int?> postId,
+      Value<int> lineNumber,
+      Value<String> textContent,
+      Value<String?> discussionTitle,
+      Value<int> commentCount,
+      Value<int> rowid,
+    });
+
+class $$ForumAnswerLinesTableFilterComposer
+    extends Composer<_$ForumDatabase, $ForumAnswerLinesTable> {
+  $$ForumAnswerLinesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get lineId => $composableBuilder(
+    column: $table.lineId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get answerId => $composableBuilder(
+    column: $table.answerId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get postId => $composableBuilder(
+    column: $table.postId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get lineNumber => $composableBuilder(
+    column: $table.lineNumber,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get textContent => $composableBuilder(
+    column: $table.textContent,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get discussionTitle => $composableBuilder(
+    column: $table.discussionTitle,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get commentCount => $composableBuilder(
+    column: $table.commentCount,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ForumAnswerLinesTableOrderingComposer
+    extends Composer<_$ForumDatabase, $ForumAnswerLinesTable> {
+  $$ForumAnswerLinesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get lineId => $composableBuilder(
+    column: $table.lineId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get answerId => $composableBuilder(
+    column: $table.answerId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get postId => $composableBuilder(
+    column: $table.postId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get lineNumber => $composableBuilder(
+    column: $table.lineNumber,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get textContent => $composableBuilder(
+    column: $table.textContent,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get discussionTitle => $composableBuilder(
+    column: $table.discussionTitle,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get commentCount => $composableBuilder(
+    column: $table.commentCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ForumAnswerLinesTableAnnotationComposer
+    extends Composer<_$ForumDatabase, $ForumAnswerLinesTable> {
+  $$ForumAnswerLinesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get lineId =>
+      $composableBuilder(column: $table.lineId, builder: (column) => column);
+
+  GeneratedColumn<String> get answerId =>
+      $composableBuilder(column: $table.answerId, builder: (column) => column);
+
+  GeneratedColumn<int> get postId =>
+      $composableBuilder(column: $table.postId, builder: (column) => column);
+
+  GeneratedColumn<int> get lineNumber => $composableBuilder(
+    column: $table.lineNumber,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get textContent => $composableBuilder(
+    column: $table.textContent,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get discussionTitle => $composableBuilder(
+    column: $table.discussionTitle,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get commentCount => $composableBuilder(
+    column: $table.commentCount,
+    builder: (column) => column,
+  );
+}
+
+class $$ForumAnswerLinesTableTableManager
+    extends
+        RootTableManager<
+          _$ForumDatabase,
+          $ForumAnswerLinesTable,
+          ForumAnswerLineData,
+          $$ForumAnswerLinesTableFilterComposer,
+          $$ForumAnswerLinesTableOrderingComposer,
+          $$ForumAnswerLinesTableAnnotationComposer,
+          $$ForumAnswerLinesTableCreateCompanionBuilder,
+          $$ForumAnswerLinesTableUpdateCompanionBuilder,
+          (
+            ForumAnswerLineData,
+            BaseReferences<
+              _$ForumDatabase,
+              $ForumAnswerLinesTable,
+              ForumAnswerLineData
+            >,
+          ),
+          ForumAnswerLineData,
+          PrefetchHooks Function()
+        > {
+  $$ForumAnswerLinesTableTableManager(
+    _$ForumDatabase db,
+    $ForumAnswerLinesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ForumAnswerLinesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ForumAnswerLinesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ForumAnswerLinesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> lineId = const Value.absent(),
+                Value<String?> answerId = const Value.absent(),
+                Value<int?> postId = const Value.absent(),
+                Value<int> lineNumber = const Value.absent(),
+                Value<String> textContent = const Value.absent(),
+                Value<String?> discussionTitle = const Value.absent(),
+                Value<int> commentCount = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ForumAnswerLinesCompanion(
+                lineId: lineId,
+                answerId: answerId,
+                postId: postId,
+                lineNumber: lineNumber,
+                textContent: textContent,
+                discussionTitle: discussionTitle,
+                commentCount: commentCount,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String lineId,
+                Value<String?> answerId = const Value.absent(),
+                Value<int?> postId = const Value.absent(),
+                required int lineNumber,
+                required String textContent,
+                Value<String?> discussionTitle = const Value.absent(),
+                Value<int> commentCount = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ForumAnswerLinesCompanion.insert(
+                lineId: lineId,
+                answerId: answerId,
+                postId: postId,
+                lineNumber: lineNumber,
+                textContent: textContent,
+                discussionTitle: discussionTitle,
+                commentCount: commentCount,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ForumAnswerLinesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$ForumDatabase,
+      $ForumAnswerLinesTable,
+      ForumAnswerLineData,
+      $$ForumAnswerLinesTableFilterComposer,
+      $$ForumAnswerLinesTableOrderingComposer,
+      $$ForumAnswerLinesTableAnnotationComposer,
+      $$ForumAnswerLinesTableCreateCompanionBuilder,
+      $$ForumAnswerLinesTableUpdateCompanionBuilder,
+      (
+        ForumAnswerLineData,
+        BaseReferences<
+          _$ForumDatabase,
+          $ForumAnswerLinesTable,
+          ForumAnswerLineData
+        >,
+      ),
+      ForumAnswerLineData,
+      PrefetchHooks Function()
+    >;
+typedef $$ForumLineCommentsTableCreateCompanionBuilder =
+    ForumLineCommentsCompanion Function({
+      required String localId,
+      Value<String> serverId,
+      required String lineId,
+      required String authorId,
+      required String authorName,
+      required String authorRole,
+      required String commentType,
+      required String content,
+      required DateTime createdAt,
+      Value<String> syncStatus,
+      Value<int> rowid,
+    });
+typedef $$ForumLineCommentsTableUpdateCompanionBuilder =
+    ForumLineCommentsCompanion Function({
+      Value<String> localId,
+      Value<String> serverId,
+      Value<String> lineId,
+      Value<String> authorId,
+      Value<String> authorName,
+      Value<String> authorRole,
+      Value<String> commentType,
+      Value<String> content,
+      Value<DateTime> createdAt,
+      Value<String> syncStatus,
+      Value<int> rowid,
+    });
+
+class $$ForumLineCommentsTableFilterComposer
+    extends Composer<_$ForumDatabase, $ForumLineCommentsTable> {
+  $$ForumLineCommentsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get localId => $composableBuilder(
+    column: $table.localId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get serverId => $composableBuilder(
+    column: $table.serverId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lineId => $composableBuilder(
+    column: $table.lineId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get authorId => $composableBuilder(
+    column: $table.authorId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get authorName => $composableBuilder(
+    column: $table.authorName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get authorRole => $composableBuilder(
+    column: $table.authorRole,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get commentType => $composableBuilder(
+    column: $table.commentType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get content => $composableBuilder(
+    column: $table.content,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ForumLineCommentsTableOrderingComposer
+    extends Composer<_$ForumDatabase, $ForumLineCommentsTable> {
+  $$ForumLineCommentsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get localId => $composableBuilder(
+    column: $table.localId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get serverId => $composableBuilder(
+    column: $table.serverId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get lineId => $composableBuilder(
+    column: $table.lineId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get authorId => $composableBuilder(
+    column: $table.authorId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get authorName => $composableBuilder(
+    column: $table.authorName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get authorRole => $composableBuilder(
+    column: $table.authorRole,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get commentType => $composableBuilder(
+    column: $table.commentType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get content => $composableBuilder(
+    column: $table.content,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ForumLineCommentsTableAnnotationComposer
+    extends Composer<_$ForumDatabase, $ForumLineCommentsTable> {
+  $$ForumLineCommentsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get localId =>
+      $composableBuilder(column: $table.localId, builder: (column) => column);
+
+  GeneratedColumn<String> get serverId =>
+      $composableBuilder(column: $table.serverId, builder: (column) => column);
+
+  GeneratedColumn<String> get lineId =>
+      $composableBuilder(column: $table.lineId, builder: (column) => column);
+
+  GeneratedColumn<String> get authorId =>
+      $composableBuilder(column: $table.authorId, builder: (column) => column);
+
+  GeneratedColumn<String> get authorName => $composableBuilder(
+    column: $table.authorName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get authorRole => $composableBuilder(
+    column: $table.authorRole,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get commentType => $composableBuilder(
+    column: $table.commentType,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get content =>
+      $composableBuilder(column: $table.content, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => column,
+  );
+}
+
+class $$ForumLineCommentsTableTableManager
+    extends
+        RootTableManager<
+          _$ForumDatabase,
+          $ForumLineCommentsTable,
+          ForumLineCommentData,
+          $$ForumLineCommentsTableFilterComposer,
+          $$ForumLineCommentsTableOrderingComposer,
+          $$ForumLineCommentsTableAnnotationComposer,
+          $$ForumLineCommentsTableCreateCompanionBuilder,
+          $$ForumLineCommentsTableUpdateCompanionBuilder,
+          (
+            ForumLineCommentData,
+            BaseReferences<
+              _$ForumDatabase,
+              $ForumLineCommentsTable,
+              ForumLineCommentData
+            >,
+          ),
+          ForumLineCommentData,
+          PrefetchHooks Function()
+        > {
+  $$ForumLineCommentsTableTableManager(
+    _$ForumDatabase db,
+    $ForumLineCommentsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ForumLineCommentsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ForumLineCommentsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ForumLineCommentsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> localId = const Value.absent(),
+                Value<String> serverId = const Value.absent(),
+                Value<String> lineId = const Value.absent(),
+                Value<String> authorId = const Value.absent(),
+                Value<String> authorName = const Value.absent(),
+                Value<String> authorRole = const Value.absent(),
+                Value<String> commentType = const Value.absent(),
+                Value<String> content = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<String> syncStatus = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ForumLineCommentsCompanion(
+                localId: localId,
+                serverId: serverId,
+                lineId: lineId,
+                authorId: authorId,
+                authorName: authorName,
+                authorRole: authorRole,
+                commentType: commentType,
+                content: content,
+                createdAt: createdAt,
+                syncStatus: syncStatus,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String localId,
+                Value<String> serverId = const Value.absent(),
+                required String lineId,
+                required String authorId,
+                required String authorName,
+                required String authorRole,
+                required String commentType,
+                required String content,
+                required DateTime createdAt,
+                Value<String> syncStatus = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ForumLineCommentsCompanion.insert(
+                localId: localId,
+                serverId: serverId,
+                lineId: lineId,
+                authorId: authorId,
+                authorName: authorName,
+                authorRole: authorRole,
+                commentType: commentType,
+                content: content,
+                createdAt: createdAt,
+                syncStatus: syncStatus,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ForumLineCommentsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$ForumDatabase,
+      $ForumLineCommentsTable,
+      ForumLineCommentData,
+      $$ForumLineCommentsTableFilterComposer,
+      $$ForumLineCommentsTableOrderingComposer,
+      $$ForumLineCommentsTableAnnotationComposer,
+      $$ForumLineCommentsTableCreateCompanionBuilder,
+      $$ForumLineCommentsTableUpdateCompanionBuilder,
+      (
+        ForumLineCommentData,
+        BaseReferences<
+          _$ForumDatabase,
+          $ForumLineCommentsTable,
+          ForumLineCommentData
+        >,
+      ),
+      ForumLineCommentData,
+      PrefetchHooks Function()
+    >;
 
 class $ForumDatabaseManager {
   final _$ForumDatabase _db;
@@ -3476,4 +5378,8 @@ class $ForumDatabaseManager {
       $$ForumCommentsTableTableManager(_db, _db.forumComments);
   $$SyncQueueTableTableManager get syncQueue =>
       $$SyncQueueTableTableManager(_db, _db.syncQueue);
+  $$ForumAnswerLinesTableTableManager get forumAnswerLines =>
+      $$ForumAnswerLinesTableTableManager(_db, _db.forumAnswerLines);
+  $$ForumLineCommentsTableTableManager get forumLineComments =>
+      $$ForumLineCommentsTableTableManager(_db, _db.forumLineComments);
 }

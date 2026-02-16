@@ -67,6 +67,10 @@ class ForumState extends Equatable {
   bool get isSearching => searchQuery.isNotEmpty;
   List<ForumPost> get displayPosts => isSearching ? searchResults : posts;
   
+  // Return either general comments or line comments based on view context
+  // BUT UI expects a simple list for ThreadSummaryHeader
+  List<ForumComment> get displayComments => comments;
+  
   // COMPATIBILITY GETTER for UI
   String? get errorMessage => error; 
 

@@ -1,6 +1,7 @@
 // packages/forum_repository/lib/src/sync/sync_manager.dart
 
 import 'package:api_client/api_client.dart';
+import 'package:drift/drift.dart';
 import '../database/forum_database.dart';
 import '../models/forum_post.dart';
 import '../models/forum_comment.dart';
@@ -20,9 +21,11 @@ class SyncManager {
   /// Uses exponential backoff for failed items
   Future<void> processSyncQueue() async {
     final pendingItems = await _database.getPendingSyncItems();
+    print('DEBUG: SyncManager.processSyncQueue - found ${pendingItems.length} pending items');
 
     for (final item in pendingItems) {
       try {
+        print('DEBUG: SyncManager.processSyncQueue - processing item: ${item.entityType} ${item.action} for ${item.entityId}');
         // Mark as syncing
         await _database.updateSyncQueueStatus(
           id: item.id,
@@ -37,13 +40,18 @@ class SyncManager {
           case 'comment':
             await _syncComment(item);
             break;
+          case 'line_comment':
+            await _syncLineComment(item);
+            break;
           default:
             throw SyncException('Unknown entity type: ${item.entityType}');
         }
 
         // Remove from queue on success
         await _database.removeSyncQueueItem(item.id);
+        print('DEBUG: SyncManager.processSyncQueue - successfully synced item: ${item.id}');
       } catch (e) {
+        print('DEBUG: SyncManager.processSyncQueue - ERROR syncing item: ${item.id} - $e');
         // Calculate next retry time with exponential backoff
         final backoffSeconds = _calculateBackoff(item.retryCount);
         final nextRetryAt = DateTime.now().add(Duration(seconds: backoffSeconds));
@@ -77,13 +85,14 @@ class SyncManager {
           data: {
             'title': postModel.title,
             'content': postModel.content,
-            'author_id': postModel.authorId,
+            'client_id': postModel.localId,
             'sources': postModel.sources.map((e) => e.toJson()).toList(),
+            'original_answer_id': postModel.originalAnswerId,
           },
         );
 
         // Update local post with server ID
-        final serverId = response.data['id'] as String;
+        final serverId = response.data['id'].toString();
         await _database.updatePostSyncStatus(
           localId: post.localId,
           syncStatus: 'synced',
@@ -120,11 +129,10 @@ class SyncManager {
 
   /// Sync a comment to backend
   Future<void> _syncComment(SyncQueueData item) async {
-    final comments = await _database.getCommentsForPost(''); // TODO: Get by localId
-    final comment = comments.firstWhere(
-          (c) => c.localId == item.entityId,
-      orElse: () => throw SyncException('Comment not found: ${item.entityId}'),
-    );
+    final comment = await _database.getCommentByLocalId(item.entityId);
+    if (comment == null) {
+      throw SyncException('Comment not found: ${item.entityId}');
+    }
 
     switch (item.action) {
       case 'create':
@@ -147,7 +155,7 @@ class SyncManager {
         );
 
         // Update local comment with server ID
-        final serverId = response.data['id'] as String;
+        final serverId = response.data['id'].toString();
         await _database.updateCommentSyncStatus(
           localId: comment.localId,
           syncStatus: 'synced',
@@ -178,6 +186,33 @@ class SyncManager {
 
       default:
         throw SyncException('Unknown action: ${item.action}');
+    }
+  }
+
+  /// Sync a line-level comment to backend
+  Future<void> _syncLineComment(SyncQueueData item) async {
+    final comment = await _database.getLineCommentByLocalId(item.entityId);
+    if (comment == null) {
+      throw SyncException('Line comment not found: ${item.entityId}');
+    }
+
+    if (item.action == 'create') {
+      final response = await _apiClient.post(
+        '/api/v1/forum/lines/${comment.lineId}/comments',
+        data: {
+          'text': comment.content,
+          'comment_type': comment.commentType,
+        },
+      );
+
+      final serverId = response.data['comment_id'].toString();
+      await _database.updateLineCommentSyncStatus(
+        localId: comment.localId,
+        syncStatus: 'synced',
+        serverId: serverId,
+      );
+    } else {
+      throw SyncException('Action ${item.action} not supported for line comments');
     }
   }
 

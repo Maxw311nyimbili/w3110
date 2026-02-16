@@ -52,10 +52,27 @@ class LandingCubit extends Cubit<LandingState> {
       final isAuthenticated = await _authRepository.isAuthenticated();
       print('  - User authenticated: $isAuthenticated');
 
-      if (status.isComplete && isAuthenticated) {
+      // Prefer backend's source of truth for onboarding status if authenticated
+      final bool isBackendOnboarded = _authCubit.state.user?.onboardingCompleted ?? false;
+      final bool isOnboarded = (status.isComplete || isBackendOnboarded) && isAuthenticated;
+
+      if (isOnboarded) {
         print('✅ Onboarding already done, moving to complete');
         emit(state.copyWith(
           currentStep: OnboardingStep.complete,
+          isGuest: false,
+          selectedRole: _mapStringToRole(status.userRole),
+          userName: status.userName,
+          accountNickname: status.accountNickname,
+          interests: status.interests,
+          consentGiven: status.consentGiven,
+          consentVersion: status.consentVersion,
+          isLoading: false,
+        ));
+      } else if (isAuthenticated) {
+        print('ℹ️ User authenticated but onboarding incomplete. Jumping to role selection.');
+        emit(state.copyWith(
+          currentStep: OnboardingStep.roleSelection,
           isGuest: false,
           selectedRole: _mapStringToRole(status.userRole),
           userName: status.userName,
@@ -151,14 +168,23 @@ class LandingCubit extends Cubit<LandingState> {
         throw Exception('Failed to get user after authentication');
       }
 
-      print('✓ Authentication complete: ${user.email}');
-      
       // Update state with Google user info
+      final authUser = AuthUser(
+        id: user.id,
+        email: user.email,
+        displayName: user.displayName,
+        photoUrl: user.photoUrl,
+        role: user.role,
+      );
+
       emit(state.copyWith(
         isAuthenticating: false,
         authError: null,
         userName: user.displayName,
       ));
+
+      // Sync global AuthCubit state immediately
+      _authCubit.onUserAuthenticated(authUser);
 
       // Move to next step (role selection)
       nextStep();
@@ -196,6 +222,9 @@ class LandingCubit extends Cubit<LandingState> {
         authError: null,
         userName: user.displayName,
       ));
+
+      // Sync global AuthCubit state immediately
+      _authCubit.onUserAuthenticated(user);
 
       // Move to next step (role selection)
       nextStep();
@@ -301,9 +330,9 @@ class LandingCubit extends Cubit<LandingState> {
     }
   }
 
-  /// Reset onboarding (for testing/debugging)
+  /// Reset all local app data (for testing/debugging or deep logout)
   Future<void> resetOnboarding() async {
-    await _landingRepository.clearOnboardingStatus();
+    await _landingRepository.clearAllLocalData();
     emit(LandingState(isDemoAvailable: _isDevelopment));
   }
 

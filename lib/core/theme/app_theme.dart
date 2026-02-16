@@ -16,6 +16,14 @@ class AppTheme {
       brightness: Brightness.light,
       platform: TargetPlatform.iOS,
       
+      // Disable text scaling for consistent rendering across platforms
+      // Android respects this and won't apply device text size multipliers
+      textSelectionTheme: const TextSelectionThemeData(
+        selectionColor: AppColors.accentPrimary,
+        selectionHandleColor: AppColors.accentPrimary,
+        cursorColor: AppColors.accentPrimary,
+      ),
+      
       // Force iOS-style slide transitions on all platforms for premium feel
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: {
@@ -28,7 +36,7 @@ class AppTheme {
       colorScheme: const ColorScheme.light(
         primary: AppColors.accentPrimary,
         onPrimary: Colors.white,
-        secondary: AppColors.accentPrimary,
+        secondary: AppColors.accentSecondary,
         onSecondary: Colors.white,
         error: AppColors.error,
         onError: Colors.white,
@@ -60,7 +68,7 @@ class AppTheme {
       // Card theme
       cardTheme: CardThemeData(
         elevation: 2, // Subtle shadow
-        shadowColor: AppColors.borderLight.withOpacity(0.5), // Subtle shadow color
+        shadowColor: AppColors.shadow, // Warm rust-based shadow
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(24),
           // Removed border side as per instruction
@@ -101,7 +109,7 @@ class AppTheme {
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(28),
+            borderRadius: BorderRadius.circular(16),
           ),
           textStyle: AppTextStyles.labelLarge.copyWith(fontWeight: FontWeight.w600),
         ),
@@ -183,7 +191,7 @@ class AppTheme {
       colorScheme: const ColorScheme.dark(
         primary: AppColors.accentPrimary,
         onPrimary: Colors.white,
-        secondary: AppColors.accentPrimary,
+        secondary: AppColors.accentSecondary,
         onSecondary: Colors.white,
         error: AppColors.error,
         onError: Colors.white,
@@ -266,7 +274,7 @@ class AppTheme {
             vertical: AppSpacing.lg,
           ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(16),
           ),
           textStyle: AppTextStyles.labelLarge,
         ),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cap_project/core/theme/app_colors.dart';
 import 'package:cap_project/core/theme/app_text_styles.dart';
-import 'package:cap_project/core/widgets/brand_orb.dart';
+import 'package:cap_project/core/widgets/brand_logo.dart';
 import 'package:cap_project/features/landing/cubit/cubit.dart';
 import 'package:cap_project/features/auth/widgets/google_sign_in_button.dart';
 
@@ -52,7 +52,7 @@ class AuthenticationStep extends StatelessWidget {
                       delay: 100,
                       child: Column(
                         children: [
-                          const BrandOrb(size: 140),
+                          const BrandLogo(size: 140),
                           const SizedBox(height: 32),
                           Text(
                             'Welcome to Thanzi',

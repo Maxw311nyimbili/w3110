@@ -8,8 +8,13 @@ import 'package:cap_project/features/forum/cubit/forum_cubit.dart';
 
 class ReplyInputFieldForModal extends StatefulWidget {
   final String lineId;
+  final String? postId;
 
-  const ReplyInputFieldForModal({super.key, required this.lineId});
+  const ReplyInputFieldForModal({
+    super.key, 
+    required this.lineId,
+    this.postId,
+  });
 
   @override
   State<ReplyInputFieldForModal> createState() => _ReplyInputFieldForModalState();
@@ -42,6 +47,8 @@ class _ReplyInputFieldForModalState extends State<ReplyInputFieldForModal> {
       await context.read<ForumCubit>().postLineComment(
         text: _textController.text,
         commentType: _typeController.value,
+        lineId: widget.lineId,
+        postId: widget.postId,
       );
       _textController.clear();
       if (mounted) FocusScope.of(context).unfocus();

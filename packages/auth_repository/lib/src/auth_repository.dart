@@ -208,29 +208,27 @@ class AuthRepository {
   // ============ User Session ============
 
   /// Get current authenticated user
-  /// First checks local storage, then fetches from backend if needed
+  /// First checks local storage (unless forceRefresh is true), 
+  /// then fetches from backend if needed.
   ///
-  /// Backend endpoint: GET /auth/me (requires access token)
-  /// Response: { "id": "...", "email": "...", "display_name": "...", ... }
-  ///
-  /// Returns:
-  ///   User: Authenticated user info
-  ///   null: If not authenticated
-  Future<User?> getCurrentUser() async {
+  /// Returns null if user no longer exists or token is invalid.
+  Future<User?> getCurrentUser({bool forceRefresh = false}) async {
     try {
-      // Step 1: Check if we have cached user data
-      final userData = await _secureStorage.getUserData();
-      if (userData != null && userData.isNotEmpty) {
-        print('Using cached user data');
-        final userMap = jsonDecode(userData) as Map<String, dynamic>;
-        return User.fromJson(userMap);
+      // Step 1: Check if we have cached user data (and not forcing refresh)
+      if (!forceRefresh) {
+        final userData = await _secureStorage.getUserData();
+        if (userData != null && userData.isNotEmpty) {
+          print('Using cached user data');
+          final userMap = jsonDecode(userData) as Map<String, dynamic>;
+          return User.fromJson(userMap);
+        }
       }
 
       // Step 2: Check if we have an access token
       final accessToken = await _secureStorage.getAccessToken();
       if (accessToken == null) {
         print('No authentication tokens found');
-        return null; // Not authenticated
+        return null;
       }
 
       // Step 3: Fetch user from backend using access token
@@ -307,9 +305,10 @@ class AuthRepository {
       await _firebaseAuth.signOut();
       print('✓ Signed out from Firebase');
 
-      // Sign out from Google
+      // Sign out from Google and clear account caching
       await _googleSignIn.signOut();
-      print('✓ Signed out from Google');
+      await _googleSignIn.disconnect();
+      print('✓ Signed out and disconnected from Google');
 
       // Clear stored tokens and user data
       await _secureStorage.clearAll();

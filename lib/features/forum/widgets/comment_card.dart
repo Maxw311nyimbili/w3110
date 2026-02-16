@@ -18,96 +18,156 @@ class CommentCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final roleIconInfo = _getRoleIconInfo(comment.authorRole);
-    // Only show type label if it's not generic
     final typeLabel = comment.commentType != CommentType.general ? comment.typeLabel : null;
+    final isExpert = comment.authorRole == CommentRole.clinician;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Minimal Avatar/Icon
-          Container(
-            width: 32,
-            height: 32,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: AppColors.backgroundElevated,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(roleIconInfo, size: 18, color: AppColors.textSecondary),
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Container(
+        decoration: BoxDecoration(
+          color: isExpert ? AppColors.success.withOpacity(0.04) : AppColors.backgroundSurface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isExpert ? AppColors.success.withOpacity(0.15) : AppColors.borderLight,
+            width: isExpert ? 1.5 : 1,
           ),
-          const SizedBox(width: 12),
-          
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+        ),
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Avatar with expert highlight
+            Stack(
               children: [
-                // Header
-                Row(
-                  children: [
-                    Text(
-                      comment.authorName,
-                      style: AppTextStyles.labelMedium.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
+                Container(
+                  width: 36,
+                  height: 36,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: isExpert 
+                        ? AppColors.success.withOpacity(0.15)
+                        : AppColors.backgroundElevated,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    roleIconInfo, 
+                    size: 18, 
+                    color: isExpert ? AppColors.success : AppColors.textSecondary,
+                  ),
+                ),
+                if (isExpert)
+                  Positioned(
+                    right: 0,
+                    bottom: 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(2),
+                      decoration: const BoxDecoration(
+                        color: AppColors.success,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.check,
+                        size: 10,
+                        color: Colors.white,
                       ),
                     ),
-                    if (comment.authorProfession != null) ...[
-                      const SizedBox(width: 6),
+                  ),
+              ],
+            ),
+            const SizedBox(width: 12),
+            
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header with expert badge
+                  Row(
+                    children: [
                       Text(
-                        '· ${comment.authorProfession}',
+                        comment.authorName,
+                        style: AppTextStyles.labelMedium.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: isExpert ? AppColors.success : AppColors.textPrimary,
+                        ),
+                      ),
+                      if (isExpert) ...[
+                        const SizedBox(width: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: AppColors.success.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            'Expert',
+                            style: AppTextStyles.caption.copyWith(
+                              color: AppColors.success,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                      const Spacer(),
+                      Text(
+                        _formatTime(comment.createdAt),
                         style: AppTextStyles.caption.copyWith(color: AppColors.textTertiary),
                       ),
                     ],
-                    const Spacer(),
+                  ),
+
+                  // Profession (if available)
+                  if (comment.authorProfession != null) ...[
+                    const SizedBox(height: 4),
                     Text(
-                      _formatTime(comment.createdAt),
-                      style: AppTextStyles.caption.copyWith(color: AppColors.textTertiary),
+                      comment.authorProfession!,
+                      style: AppTextStyles.caption.copyWith(
+                        color: isExpert ? AppColors.success : AppColors.textSecondary,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ],
-                ),
-                
-                // Optional Type Badge (Subtle)
-                if (typeLabel != null && comment.lineId != 'general') ...[
-                  const SizedBox(height: 4),
+                  
+                  // Optional Type Badge
+                  if (typeLabel != null && comment.lineId != 'general') ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      typeLabel.toUpperCase(),
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.accentPrimary.withOpacity(0.6),
+                        fontSize: 9,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 8),
+
+                  // Content
                   Text(
-                    typeLabel.toUpperCase(),
-                    style: AppTextStyles.caption.copyWith(
-                      color: AppColors.accentPrimary.withOpacity(0.6),
-                      fontSize: 9,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 0.5,
+                    comment.text,
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      height: 1.5, 
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  
+                  // Footer (Reply)
+                  const SizedBox(height: 8),
+                  GestureDetector(
+                    onTap: onReply,
+                    child: Text(
+                      'Reply',
+                      style: AppTextStyles.labelSmall.copyWith(
+                        color: AppColors.textTertiary,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ],
-                const SizedBox(height: 6),
-
-                // Content
-                Text(
-                  comment.text,
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    height: 1.5, 
-                    color: AppColors.textPrimary
-                  ),
-                ),
-                
-                // Footer (Reply)
-                const SizedBox(height: 8),
-                GestureDetector(
-                  onTap: onReply,
-                  child: Text(
-                    'Reply',
-                    style: AppTextStyles.labelSmall.copyWith(
-                      color: AppColors.textTertiary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

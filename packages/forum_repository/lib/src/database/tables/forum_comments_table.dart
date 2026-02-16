@@ -17,6 +17,8 @@ class ForumComments extends Table {
   // Comment content
   TextColumn get authorId => text()();
   TextColumn get authorName => text()();
+  TextColumn get authorRole => text().nullable()();
+  TextColumn get authorProfession => text().nullable()();
   TextColumn get content => text()();
 
   // Engagement metrics
@@ -36,9 +38,4 @@ class ForumComments extends Table {
 
   @override
   Set<Column> get primaryKey => {localId};
-
-  @override
-  List<Set<Column>> get uniqueKeys => [
-    {serverId}, // Server ID should be unique when present
-  ];
 }

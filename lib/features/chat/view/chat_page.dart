@@ -9,6 +9,7 @@ import 'package:cap_project/features/auth/cubit/cubit.dart';
 import 'package:cap_project/core/services/audio_recording_service.dart';
 import 'package:cap_project/features/landing/widgets/welcome_drawer.dart';
 import 'package:cap_project/features/landing/cubit/cubit.dart';
+import 'package:cap_project/features/medscanner/cubit/medscanner_state.dart' as scanner;
 import '../cubit/cubit.dart';
 import '../widgets/widgets.dart';
 
@@ -17,7 +18,9 @@ import 'package:cap_project/features/forum/cubit/forum_cubit.dart';
 import 'package:forum_repository/forum_repository.dart';
 
 class ChatPage extends StatefulWidget {
-  const ChatPage({super.key});
+  const ChatPage({this.initialScanResult, super.key});
+
+  final scanner.ScanResult? initialScanResult;
 
   static Route<void> route() {
     return MaterialPageRoute(
@@ -102,6 +105,10 @@ class _ChatPageState extends State<ChatPage> {
               userRole: _onboardingStatus?.userRole,
               interests: _onboardingStatus?.interests,
             )..initialize();
+
+            if (widget.initialScanResult != null) {
+              cubit.addMedicineResult(widget.initialScanResult!);
+            }
             
             context.read<LocaleCubit>().stream.listen((localeState) {
               cubit.setLocale(localeState.locale.languageCode);

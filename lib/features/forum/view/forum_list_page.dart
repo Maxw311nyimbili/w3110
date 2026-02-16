@@ -51,7 +51,12 @@ class ForumListView extends StatelessWidget {
                   : AppLocalizations.of(context).community
             ),
             centerTitle: true,
-            actions: [
+             actions: [
+                IconButton(
+                  icon: const Icon(Icons.refresh_rounded, size: 20),
+                  onPressed: () => context.read<ForumCubit>().resetAndReload(),
+                  tooltip: 'Reset Forum Data',
+                ),
                if (state.hasPendingSync)
                  IconButton(
                     icon: const Icon(Icons.cloud_upload_outlined, color: AppColors.warning),

@@ -7,6 +7,7 @@ import '../cubit/cubit.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../app/view/app_router.dart';
 
 /// Scan result display - shows medication information after scanning
 class ScanResultWidget extends StatelessWidget {
@@ -102,10 +103,12 @@ class ScanResultWidget extends StatelessWidget {
           // Send to chat button (primary action)
           ElevatedButton.icon(
             onPressed: () {
-              // TODO: Navigate to chat with scan result
-              // Pass medication info as context to chat
-              Navigator.of(context).pop(); // Close scanner
-              // Navigator.pushNamed(context, '/chat', arguments: result);
+              // Smooth transition to Chat with the scan result context
+              AppRouter.replaceTo<void>(
+                context,
+                AppRouter.chat,
+                arguments: result,
+              );
 
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(

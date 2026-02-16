@@ -33,8 +33,9 @@ class AuthCubit extends Cubit<AuthState> {
       final isAuthenticated = await _authRepository.isAuthenticated();
 
       if (isAuthenticated) {
-        // User has tokens, fetch their info
-        final user = await _authRepository.getCurrentUser();
+        // Force a backend check to ensure the user still exists
+        // (Handles the case where user was deleted from DB but tokens still exist locally)
+        final user = await _authRepository.getCurrentUser(forceRefresh: true);
 
         if (user != null) {
           print('✓ User session restored: ${user.email}');
@@ -43,6 +44,9 @@ class AuthCubit extends Cubit<AuthState> {
             user: _mapToAuthUser(user),
           ));
           return;
+        } else {
+          print('⚠️ Session tokens valid but user not found on backend. Clearing stale session.');
+          await _authRepository.signOut();
         }
       }
 
@@ -224,6 +228,15 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
+  /// Called externally when user authenticates via another flow (e.g. Landing/Onboarding)
+  /// to sync the global authentication state immediately.
+  void onUserAuthenticated(AuthUser user) {
+    emit(state.copyWith(
+      status: AuthStatus.authenticated,
+      user: user,
+    ));
+  }
+
   /// Clear error state
   void clearError() {
     emit(state.clearError());
@@ -239,6 +252,7 @@ class AuthCubit extends Cubit<AuthState> {
       displayName: user.displayName,
       photoUrl: user.photoUrl,
       role: user.role,
+      onboardingCompleted: user.onboardingCompleted,
     );
   }
 }

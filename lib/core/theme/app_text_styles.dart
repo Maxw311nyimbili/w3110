@@ -13,18 +13,18 @@ class AppTextStyles {
 
   // Display
   static TextStyle get displayLarge => _displayFont.copyWith(
-    fontSize: 40,
+    fontSize: 36,
     fontWeight: FontWeight.w700,
-    height: 1.1,
-    letterSpacing: -1.0,
+    height: 1.2,
+    letterSpacing: -0.5,
     color: AppColors.textPrimary,
   );
 
   static TextStyle get displayMedium => _displayFont.copyWith(
-    fontSize: 32,
+    fontSize: 30,
     fontWeight: FontWeight.w700,
     height: 1.2,
-    letterSpacing: -0.5,
+    letterSpacing: -0.4,
     color: AppColors.textPrimary,
   );
 
@@ -39,14 +39,14 @@ class AppTextStyles {
   static TextStyle get headlineLarge => _displayFont.copyWith(
     fontSize: 20,
     fontWeight: FontWeight.w600,
-    height: 1.3,
+    height: 1.4,
     color: AppColors.textPrimary,
   );
 
   static TextStyle get headlineMedium => _displayFont.copyWith(
     fontSize: 18,
     fontWeight: FontWeight.w600,
-    height: 1.3,
+    height: 1.4,
     color: AppColors.textPrimary,
   );
 
@@ -60,20 +60,23 @@ class AppTextStyles {
   // Body
   static TextStyle get bodyLarge => _baseFont.copyWith(
     fontSize: 16,
-    fontWeight: FontWeight.w500,
-    height: 1.6,
+    fontWeight: FontWeight.w400,
+    height: 1.7, // Substack-style line height
+    color: AppColors.textPrimary,
   );
 
   static TextStyle get bodyMedium => _baseFont.copyWith(
     fontSize: 15,
     fontWeight: FontWeight.w400,
-    height: 1.6,
+    height: 1.7,
+    color: AppColors.textPrimary,
   );
 
   static TextStyle get bodySmall => _baseFont.copyWith(
     fontSize: 13,
     fontWeight: FontWeight.w400,
-    height: 1.5,
+    height: 1.6,
+    color: AppColors.textSecondary,
   );
 
   // Label
@@ -82,12 +85,14 @@ class AppTextStyles {
     fontWeight: FontWeight.w600,
     height: 1.4,
     letterSpacing: 0.1,
+    color: AppColors.textPrimary,
   );
 
   static TextStyle get labelMedium => _baseFont.copyWith(
     fontSize: 12,
     fontWeight: FontWeight.w600,
     height: 1.35,
+    color: AppColors.textSecondary,
   );
 
   static TextStyle get labelSmall => _baseFont.copyWith(
@@ -95,6 +100,7 @@ class AppTextStyles {
     fontWeight: FontWeight.w600,
     height: 1.3,
     letterSpacing: 0.2,
+    color: AppColors.textTertiary,
   );
 
   // Caption

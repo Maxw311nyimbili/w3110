@@ -28,15 +28,21 @@ class PostCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return _PressableScale(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        decoration: const BoxDecoration(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
           color: AppColors.backgroundSurface,
-          border: Border(
-            bottom: BorderSide(color: AppColors.borderLight, width: 1),
-          ),
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -44,55 +50,50 @@ class PostCard extends StatelessWidget {
             // Header: Clean Byline
             Row(
               children: [
-                CircleAvatar(
-                  radius: 10,
-                  backgroundColor: AppColors.accentPrimary.withOpacity(0.04),
-                  child: Text(
-                    post.authorName.isNotEmpty ? post.authorName[0].toUpperCase() : '?',
-                    style: const TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.accentPrimary,
-                    ),
+                _buildAuthorAvatar(post.authorName),
+                const SizedBox(width: 10),
+                Text(
+                  post.authorName,
+                  style: AppTextStyles.labelMedium.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  width: 3,
+                  height: 3,
+                  decoration: const BoxDecoration(
+                    color: AppColors.textTertiary,
+                    shape: BoxShape.circle,
                   ),
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  post.authorName,
-                  style: AppTextStyles.labelSmall.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  '•',
-                  style: const TextStyle(fontSize: 10, color: AppColors.textTertiary),
-                ),
-                const SizedBox(width: 6),
-                Text(
                   _formatTime(post.createdAt),
                   style: AppTextStyles.caption.copyWith(
                     color: AppColors.textTertiary,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
+                const Spacer(),
+                _buildDeleteAction(context),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             
             // Title
             Text(
               post.title,
               style: AppTextStyles.headlineSmall.copyWith(
-                fontWeight: FontWeight.w800,
-                fontSize: 17,
-                height: 1.3,
-                letterSpacing: -0.3,
+                fontWeight: FontWeight.w900,
+                fontSize: 18,
+                height: 1.2,
+                letterSpacing: -0.5,
                 color: AppColors.textPrimary,
               ),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 8),
             
             // Content Preview
             Text(
@@ -107,32 +108,156 @@ class PostCard extends StatelessWidget {
               ),
             ),
             
-            // Tags
-            if (post.tags.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: post.tags.map((tag) => Container(
-                    margin: const EdgeInsets.only(right: 8),
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: AppColors.accentPrimary.withOpacity(0.08),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      '#$tag',
-                      style: AppTextStyles.caption.copyWith(
-                        color: AppColors.accentPrimary,
-                        fontWeight: FontWeight.w700,
+            // Footer: Tags and Comments Count
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                if (post.tags.isNotEmpty)
+                  Expanded(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      physics: const BouncingScrollPhysics(),
+                      child: Row(
+                        children: post.tags.map((tag) => _buildTag(tag)).toList(),
                       ),
                     ),
-                  )).toList(),
+                  ),
+                if (post.commentCount > 0) ...[
+                  const SizedBox(width: 12),
+                  _buildStat(Icons.chat_bubble_outline_rounded, post.commentCount.toString()),
+                ],
+                const SizedBox(width: 12),
+                                _buildStat(
+                  post.isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded, 
+                  post.likeCount.toString(),
+                  color: post.isLiked ? AppColors.error : AppColors.textTertiary,
                 ),
-              ),
-            ],
+              ],
+            ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildAuthorAvatar(String name) {
+    return Container(
+      width: 24,
+      height: 24,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: AppColors.accentPrimary.withOpacity(0.08),
+        shape: BoxShape.circle,
+        border: Border.all(color: AppColors.accentPrimary.withOpacity(0.1)),
+      ),
+      child: Text(
+        name.isNotEmpty ? name[0].toUpperCase() : '?',
+        style: const TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w900,
+          color: AppColors.accentPrimary,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDeleteAction(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          showDialog(
+            context: context,
+            builder: (dialogContext) => AlertDialog(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              title: const Text('Delete Post'),
+              content: const Text('Are you sure you want to delete this post?'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(dialogContext),
+                  child: const Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    context.read<ForumCubit>().deletePost(post.localId);
+                    Navigator.pop(dialogContext);
+                  },
+                  child: const Text('Delete', style: TextStyle(color: Colors.red)),
+                ),
+              ],
+            ),
+          );
+        },
+        borderRadius: BorderRadius.circular(20),
+        child: const Padding(
+          padding: EdgeInsets.all(4),
+          child: Icon(Icons.more_vert_rounded, size: 18, color: AppColors.textTertiary),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTag(String tag) {
+    return Container(
+      margin: const EdgeInsets.only(right: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: AppColors.accentPrimary.withOpacity(0.06),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.accentPrimary.withOpacity(0.05)),
+      ),
+      child: Text(
+        '#$tag',
+        style: AppTextStyles.caption.copyWith(
+          color: AppColors.accentPrimary,
+          fontWeight: FontWeight.w800,
+          fontSize: 11,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStat(IconData icon, String value, {Color? color}) {
+    return Row(
+      children: [
+        Icon(icon, size: 14, color: color ?? AppColors.textTertiary),
+        const SizedBox(width: 4),
+        Text(
+          value,
+          style: AppTextStyles.caption.copyWith(
+            color: color ?? AppColors.textTertiary,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _PressableScale extends StatefulWidget {
+  const _PressableScale({required this.child, this.onTap});
+  final Widget child;
+  final VoidCallback? onTap;
+
+  @override
+  State<_PressableScale> createState() => _PressableScaleState();
+}
+
+class _PressableScaleState extends State<_PressableScale> {
+  bool _isPressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _isPressed = true),
+      onTapUp: (_) => setState(() => _isPressed = false),
+      onTapCancel: () => setState(() => _isPressed = false),
+      onTap: widget.onTap,
+      child: AnimatedScale(
+        scale: _isPressed ? 0.98 : 1.0,
+        duration: const Duration(milliseconds: 100),
+        curve: Curves.easeOutCubic,
+        child: widget.child,
       ),
     );
   }

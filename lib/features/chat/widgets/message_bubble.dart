@@ -1,5 +1,5 @@
 import 'package:cap_project/features/chat/cubit/chat_cubit.dart';
-import 'package:cap_project/features/chat/cubit/chat_state.dart';
+import 'package:cap_project/features/chat/cubit/chat_state.dart' as models;
 import 'package:cap_project/features/forum/cubit/forum_cubit.dart';
 import 'package:cap_project/features/forum/cubit/forum_state.dart';
 import 'package:cap_project/features/forum/widgets/answer_reader_with_comments.dart';
@@ -10,14 +10,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:chat_repository/chat_repository.dart' hide ChatMessage, SourceReference;
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
 class RefinedMessageBubble extends StatelessWidget {
   const RefinedMessageBubble({required this.message, super.key});
 
-  final ChatMessage message;
+  final models.ChatMessage message;
 
   @override
   Widget build(BuildContext context) {
@@ -37,25 +36,25 @@ class RefinedMessageBubble extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
             decoration: BoxDecoration(
-              color: AppColors.accentPrimary, // Vibrant accent color
+              color: AppColors.accentPrimary, // Warm Rust
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(24),
-                topRight: Radius.circular(4), // Rounded corner flip for right side
+                topRight: Radius.circular(4),
                 bottomLeft: Radius.circular(24),
                 bottomRight: Radius.circular(24),
               ),
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.accentPrimary.withOpacity(0.25),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
+                  color: AppColors.accentPrimary.withOpacity(0.15),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
                 ),
               ],
             ),
             child: Text(
               message.content,
               style: AppTextStyles.bodyLarge.copyWith(
-                color: Colors.white, // White text on accent
+                color: Colors.white,
                 fontWeight: FontWeight.w500,
                 height: 1.5,
               ),
@@ -77,7 +76,7 @@ class RefinedMessageBubble extends StatelessWidget {
     // 1. Calculate Sources Globally
     // We want sources to be available regardless of which view (Quick/Detailed) is active.
     // Priority: Structured sources -> Detailed Answer Text -> Quick Answer Text -> Content
-    List<SourceReference> displaySources = List.from(message.sources);
+    List<models.SourceReference> displaySources = List.from(message.sources);
     
     if (displaySources.isEmpty) {
       if (message.detailedAnswer != null) {
@@ -116,7 +115,7 @@ class RefinedMessageBubble extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: AppColors.accentPrimary.withOpacity(0.1),
+                  color: AppColors.accentPrimary.withOpacity(0.12),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
@@ -130,7 +129,7 @@ class RefinedMessageBubble extends StatelessWidget {
                 'Thanzi AI',
                 style: AppTextStyles.labelMedium.copyWith(
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+                  color: AppColors.accentPrimary,
                 ),
               ),
               const Spacer(),
@@ -212,8 +211,8 @@ class RefinedMessageBubble extends StatelessWidget {
     );
   }
 
-  List<SourceReference> _extractSourcesFromText(String text) {
-    final List<SourceReference> sources = [];
+  List<models.SourceReference> _extractSourcesFromText(String text) {
+    final List<models.SourceReference> sources = [];
     final referencesRegex = RegExp(r'(?:^|\n)(?:References|Sources):', caseSensitive: false);
     final match = referencesRegex.firstMatch(text);
     
@@ -252,17 +251,17 @@ class RefinedMessageBubble extends StatelessWidget {
                  ? (_extractDomain(url) ?? 'Source') 
                  : 'Google Search';
 
-             sources.add(SourceReference(
-               title: title.isEmpty ? 'Reference' : title,
-               url: finalUrl,
-               domain: finalDomain,
-             ));
-           }
-        }
-      }
-    }
-    return sources;
-  }
+              sources.add(models.SourceReference(
+                title: title.isEmpty ? 'Reference' : title,
+                url: finalUrl,
+                domain: finalDomain,
+              ));
+            }
+         }
+       }
+     }
+     return sources;
+   }
 
   Future<void> _launchURL(String url) async {
     if (url.isEmpty) return;
@@ -278,7 +277,7 @@ class RefinedMessageBubble extends StatelessWidget {
     }
   }
 
-  Widget _buildSourceList(List<SourceReference> sources) {
+  Widget _buildSourceList(List<models.SourceReference> sources) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -437,7 +436,7 @@ class RefinedMessageBubble extends StatelessWidget {
     );
   }
 
-  Widget _buildFooter(BuildContext context, List<SourceReference> sources) {
+  Widget _buildFooter(BuildContext context, List<models.SourceReference> sources) {
     return Row(
       children: [
         _buildActionIcon(Icons.thumb_up_alt_outlined, () {}),
@@ -497,36 +496,53 @@ class RefinedMessageBubble extends StatelessWidget {
     );
   }
 
-  void _shareToForum(BuildContext context, List<SourceReference> sources) {
+  Future<void> _shareToForum(BuildContext context, List<models.SourceReference> sources) async {
+    final forumCubit = context.read<ForumCubit>();
     final content = message.content;
     
-    // Map Chat sources to Forum sources
-    final forumSources = sources.map((s) => ForumPostSource(
-      title: s.title,
-      url: s.url,
-      snippet: s.snippet,
-    )).toList();
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (modalContext) => Container(
-        decoration: BoxDecoration(
-          color: AppColors.backgroundSurface,
-          borderRadius: const BorderRadius.vertical(
-            top: Radius.circular(20),
-          ),
-        ),
-        child: BlocProvider.value(
-          value: context.read<ForumCubit>(),
-          child: NewPostSheet(
-            initialTitle: 'Discussion on: ${content.length > 30 ? '${content.substring(0, 30)}...' : content}',
-            initialContent: content,
-            sources: forumSources,
-          ),
-        ),
+    // Show a quick loading snackbar
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Preparing AI discussion...'),
+        duration: Duration(milliseconds: 1500),
       ),
     );
+
+    try {
+      // Use the new AI-driven preparation endpoint
+      final prepared = await forumCubit.preparePost(
+        // Extract query from chat if possible, or fallback
+        'Question about medical details', // Placeholder query
+        content,
+      );
+
+      if (!context.mounted) return;
+
+      final forumSources = sources.map((s) => ForumPostSource(
+        title: s.title,
+        url: s.url,
+        snippet: s.snippet,
+      )).toList();
+
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (modalContext) => BlocProvider.value(
+          value: forumCubit,
+          child: NewPostSheet(
+            initialTitle: prepared['title'] ?? '',
+            initialContent: prepared['content'] ?? content,
+            sources: forumSources,
+            originalAnswerId: message.id,
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error preparing share: $e')),
+      );
+    }
   }
 }

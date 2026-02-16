@@ -2,7 +2,7 @@ import 'dart:ui';
 import 'package:cap_project/app/view/app_router.dart';
 import 'package:cap_project/core/theme/app_colors.dart';
 import 'package:cap_project/core/theme/app_text_styles.dart';
-import 'package:cap_project/core/widgets/brand_orb.dart';
+import 'package:cap_project/core/widgets/brand_logo.dart';
 import 'package:cap_project/features/auth/widgets/google_sign_in_button.dart';
 import 'package:cap_project/features/landing/cubit/cubit.dart';
 import 'package:cap_project/features/landing/cubit/landing_state.dart';
@@ -64,17 +64,25 @@ class WelcomeDrawer extends StatelessWidget {
                     
                     if (state.userName != null && !state.isGuest) {
                       Navigator.of(context).pop(); // Close drawer
-                      AppRouter.navigateTo<void>(
-                        context, 
-                        AppRouter.landing, 
-                        arguments: {'initialStep': OnboardingStep.roleSelection},
-                      );
+                      
+                      // If onboarding is already marked complete in the state,
+                      // we don't need to go to landing again.
+                      if (state.currentStep == OnboardingStep.complete) {
+                        // User is already done, just stay on Chat (the page under the drawer)
+                        print('✅ User already onboarded, staying on current page');
+                      } else {
+                        AppRouter.replaceTo<void>(
+                          context, 
+                          AppRouter.landing, 
+                          arguments: {'initialStep': OnboardingStep.roleSelection},
+                        );
+                      }
                     }
                   },
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const BrandOrb(size: 80),
+                      const BrandLogo(size: 80),
                       const SizedBox(height: 24),
                       Text(
                         'Welcome to Thanzi',

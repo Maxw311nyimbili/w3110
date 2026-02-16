@@ -1,4 +1,4 @@
-import 'package:cap_project/core/widgets/brand_orb.dart';
+import 'package:cap_project/core/widgets/brand_logo.dart';
 import 'package:cap_project/core/widgets/premium_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -67,8 +67,7 @@ class LandingBody extends StatelessWidget {
       case OnboardingStep.complete:
         return const _CompleteStep(key: ValueKey('complete'));
       case OnboardingStep.authentication:
-        // This should not happen in the formal LandingPage anymore as per new flow
-        return const RoleSelectionStep(key: ValueKey('role'));
+        return const AuthenticationStep(key: ValueKey('auth'));
     }
   }
 }
@@ -86,7 +85,7 @@ class _CompleteStep extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const BrandOrb(size: 140),
+              const BrandLogo(size: 140),
               const SizedBox(height: 48),
               TweenAnimationBuilder<double>(
                 tween: Tween(begin: 0.0, end: 1.0),

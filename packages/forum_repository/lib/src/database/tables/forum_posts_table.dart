@@ -36,15 +36,13 @@ class ForumPosts extends Table {
   // Tags (serialized JSON)
   TextColumn get tags => text().nullable()();
 
+  // Link to original chat answer (if created from chat)
+  TextColumn get originalAnswerId => text().nullable()();
+
   // Sync metadata
   DateTimeColumn get lastSyncAttempt => dateTime().nullable()();
   IntColumn get syncRetryCount => integer().withDefault(const Constant(0))();
 
   @override
   Set<Column> get primaryKey => {localId};
-
-  @override
-  List<Set<Column>> get uniqueKeys => [
-    {serverId}, // Server ID should be unique when present
-  ];
 }

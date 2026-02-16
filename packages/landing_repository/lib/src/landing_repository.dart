@@ -30,10 +30,29 @@ class LandingRepository {
     }
   }
 
-  /// Save onboarding status to local storage
+  /// Save onboarding status to local storage and sync with backend if possible
   Future<void> saveOnboardingStatus(OnboardingStatus status) async {
     try {
+      // 1. Save locally first (immediate feedback)
       await _localPreferences.saveOnboardingStatus(status.toJson());
+      
+      // 2. Try to sync with backend
+      // We don't check for token here explicitly because ApiClient will handle it
+      // but we wrap in a try-catch to avoid blocking local success if backend fails
+      try {
+        await _apiClient.put(
+          '/landing/preferences',
+          data: {
+            'role': status.userRole,
+            'onboarding_completed': status.isComplete,
+          },
+        );
+        print('✅ Onboarding status synced to backend');
+      } catch (e) {
+        print('⚠️ Failed to sync onboarding status to backend: $e');
+        // We don't throw here to ensure local storage remains the source of truth
+        // and doesn't break the UI flow if the user is offline or session expired
+      }
     } catch (e) {
       throw LandingException('Failed to save onboarding status: ${e.toString()}');
     }
@@ -111,6 +130,15 @@ class LandingRepository {
       return await _localPreferences.getLanguage();
     } catch (e) {
       return null; // Return null if no preference set
+    }
+  }
+
+  /// Completely clear all local data (onboarding, language, etc.)
+  Future<void> clearAllLocalData() async {
+    try {
+      await _localPreferences.clearAll();
+    } catch (e) {
+      throw LandingException('Failed to clear local data: ${e.toString()}');
     }
   }
 }

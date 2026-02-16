@@ -51,6 +51,12 @@ class LocalPreferences {
     await _prefs.remove(_onboardingKey);
   }
 
+  /// Clear all app preferences
+  Future<void> clearAll() async {
+    _ensureInitialized();
+    await _prefs.clear();
+  }
+
   /// Save language preference
   Future<void> saveLanguage(String languageCode) async {
     _ensureInitialized();
