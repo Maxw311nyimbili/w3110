@@ -7,12 +7,16 @@ import 'package:cap_project/features/auth/view/settings_page.dart';
 import 'package:cap_project/features/chat/chat.dart';
 import 'package:cap_project/features/forum/forum.dart';
 import 'package:cap_project/features/landing/landing.dart';
+import 'package:cap_project/features/landing/view/splash_page.dart';
+import 'package:cap_project/features/landing/view/feature_choice_page.dart';
 import 'package:cap_project/features/medscanner/medscanner.dart';
 import 'package:flutter/material.dart';
 
 /// App router - handles navigation between features
 class AppRouter {
   // Route names
+  static const String splash = '/splash';
+  static const String featureChoice = '/feature-choice';
   static const String landing = '/';
   static const String auth = '/auth';
   static const String chat = '/chat';
@@ -23,6 +27,18 @@ class AppRouter {
   /// Generate routes
   static Route<dynamic>? generateRoute(RouteSettings settings) {
     switch (settings.name) {
+      case AppRouter.splash:
+        return CupertinoPageRoute(
+          builder: (_) => const SplashPage(),
+          settings: settings,
+        );
+
+      case AppRouter.featureChoice:
+        return CupertinoPageRoute(
+          builder: (_) => const FeatureChoicePage(),
+          settings: settings,
+        );
+
       case AppRouter.landing:
         final args = settings.arguments as Map<String, dynamic>?;
         final initialStep = args?['initialStep'] as OnboardingStep?;
@@ -42,8 +58,9 @@ class AppRouter {
         );
 
       case AppRouter.chat:
+        final scanResult = settings.arguments as ScanResult?;
         return CupertinoPageRoute(
-          builder: (_) => const ChatPage(),
+          builder: (_) => ChatPage(initialScanResult: scanResult),
           settings: settings,
         );
 

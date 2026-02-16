@@ -45,7 +45,6 @@ class ForumRepository {
     return comments.map((data) => ForumComment.fromDatabase(data)).toList();
   }
 
-  /// Create post locally (instant feedback)
   Future<void> createLocalPost({
     required String localId,
     required String title,
@@ -54,7 +53,9 @@ class ForumRepository {
     required String authorName,
     List<ForumPostSource> sources = const [],
     List<String> tags = const [],
+    String? originalAnswerId,
   }) async {
+    print('DEBUG: ForumRepository.createLocalPost - localId: $localId');
     await _database.insertPost(ForumPostsCompanion.insert(
       localId: localId,
       authorId: authorId,
@@ -65,7 +66,9 @@ class ForumRepository {
       syncStatus: const Value('pending'),
       sources: Value(sources.isNotEmpty ? jsonEncode(sources.map((e) => e.toJson()).toList()) : null),
       tags: Value(tags.isNotEmpty ? jsonEncode(tags) : null),
+      originalAnswerId: Value(originalAnswerId),
     ));
+    print('DEBUG: ForumRepository.createLocalPost - SUCCESS');
   }
 
   /// Create comment locally (instant feedback)
@@ -75,16 +78,22 @@ class ForumRepository {
     required String content,
     required String authorId,
     required String authorName,
+    String? authorRole,
+    String? authorProfession,
   }) async {
+    print('DEBUG: ForumRepository.createLocalComment - localId: $localId');
     await _database.insertComment(ForumCommentsCompanion.insert(
       localId: localId,
       postId: postId,
       authorId: authorId,
       authorName: authorName,
+      authorRole: Value(authorRole),
+      authorProfession: Value(authorProfession),
       content: content,
       createdAt: DateTime.now(),
       syncStatus: const Value('pending'),
     ));
+    print('DEBUG: ForumRepository.createLocalComment - SUCCESS');
   }
 
   // ============================================================
@@ -97,11 +106,18 @@ class ForumRepository {
     required String entityId,
     required String action,
   }) async {
+    print('DEBUG: ForumRepository.addToSyncQueue - $entityType $action for $entityId');
     await _database.addToSyncQueue(
       entityType: entityType,
       entityId: entityId,
       action: action,
     );
+    print('DEBUG: ForumRepository.addToSyncQueue - SUCCESS');
+  }
+
+  /// Delete a post from local database
+  Future<void> deletePost(String localId) async {
+    await _database.deletePost(localId);
   }
 
   /// Process sync queue (upload pending changes)
@@ -119,17 +135,59 @@ class ForumRepository {
   Future<List<ForumPost>> searchPosts(String query) async {
     try {
       final response = await _apiClient.get('/forum/search', queryParameters: {'q': query});
-      final List<dynamic> postsJson = response.data as List<dynamic>;
+      final List<dynamic> postsJson = response.data['posts'] as List<dynamic>;
       return postsJson.map((json) => ForumPost.fromJson(json as Map<String, dynamic>)).toList();
     } catch (e) {
       throw ForumException('Failed to search posts: ${e.toString()}');
     }
   }
 
-  /// Toggle like on post
-  Future<void> togglePostLike(String postId) async {
+  /// Prepare post content (LLM Title + Formatting)
+  Future<Map<String, String>> preparePost(String query, String content) async {
     try {
-      await _apiClient.post('/forum/posts/$postId/like');
+      final response = await _apiClient.post(
+        '/forum/prepare',
+        data: {'query': query, 'content': content},
+      );
+      return {
+        'title': response.data['title'] as String,
+        'content': response.data['content'] as String,
+      };
+    } catch (e) {
+      // Fallback to simple title
+      return {
+        'title': 'Discussion on: ${query.length > 40 ? '${query.substring(0, 40)}...' : query}',
+        'content': content,
+      };
+    }
+  }
+
+  /// Toggle like on post
+  Future<void> togglePostLike(String postId, {bool? isLiked, int? likeCount}) async {
+    try {
+      // 1. Update local database immediately for resilience
+      if (isLiked != null && likeCount != null) {
+        await _database.updatePostLike(
+          postId: postId,
+          isLiked: isLiked,
+          likeCount: likeCount,
+        );
+      }
+      
+      // 2. Hit API
+      final response = await _apiClient.post('/forum/posts/$postId/like');
+      
+      if (response.statusCode == 200) {
+        final serverLiked = response.data['liked'] as bool;
+        final serverCount = response.data['like_count'] as int;
+        
+        // 3. Sync with actual server state
+        await _database.updatePostLike(
+          postId: postId,
+          isLiked: serverLiked,
+          likeCount: serverCount,
+        );
+      }
     } catch (e) {
       throw ForumException('Failed to like post: ${e.toString()}');
     }
@@ -171,9 +229,24 @@ class ForumRepository {
   final bool _useMock = false; 
 
   /// Publish (or get) lines for a specific answer
+  /// Checks local cache first, then server
   Future<List<ForumAnswerLine>> getLinesForAnswer(String answerId) async {
-    if (_useMock) {
-      await Future.delayed(const Duration(milliseconds: 800)); // Simulate net
+    // 1. Check local cache
+    final localLines = await _database.getLinesForAnswer(answerId);
+    if (localLines.isNotEmpty) {
+      print('DEBUG: getLinesForAnswer - using local cache for $answerId');
+      return localLines.map((l) => ForumAnswerLine(
+        lineId: l.lineId,
+        answerId: l.answerId ?? '',
+        lineNumber: l.lineNumber,
+        text: l.textContent,
+        discussionTitle: l.discussionTitle ?? '',
+        commentCount: l.commentCount,
+      )).toList();
+    }
+
+    if (_useMock || answerId.startsWith('demo_')) {
+      await Future.delayed(const Duration(milliseconds: 800));
       return _generateMockLines(answerId);
     }
     
@@ -183,18 +256,49 @@ class ForumRepository {
         data: {'answer_id': answerId, 'share_to_forum': true},
       );
       final list = response.data['lines'] as List;
-      return list.map((e) => ForumAnswerLine.fromJson(e as Map<String, dynamic>)).toList();
+      final lines = list.map((e) => ForumAnswerLine.fromJson(e as Map<String, dynamic>)).toList();
+
+      // 2. Cache locally
+      await _database.batchInsertLines(lines.map((l) => ForumAnswerLinesCompanion.insert(
+        lineId: l.lineId,
+        answerId: Value(l.answerId),
+        lineNumber: l.lineNumber,
+        textContent: l.text,
+        discussionTitle: Value(l.discussionTitle),
+        commentCount: Value(l.commentCount),
+      )).toList());
+
+      return lines;
     } catch (e) {
       rethrow;
     }
   }
 
   /// Get comments for a specific line
+  /// Checks local cache first
   Future<List<ForumLineComment>> getCommentsForLine(
     String lineId, {
     String filter = 'all',
+    String? postId,
   }) async {
-    if (_useMock) {
+    // 1. Check local cache
+    final localComments = await _database.getCommentsForLine(lineId);
+    if (localComments.isNotEmpty) {
+      print('DEBUG: getCommentsForLine - using local cache for $lineId');
+      return localComments.map((c) => ForumLineComment(
+        id: c.localId,
+        lineId: c.lineId,
+        authorId: c.authorId,
+        authorName: c.authorName,
+        authorRole: _parseAuthorRole(c.authorRole),
+        commentType: _parseCommentType(c.commentType),
+        text: c.content,
+        createdAt: c.createdAt,
+        syncStatus: _parseSyncStatus(c.syncStatus),
+      )).toList();
+    }
+
+    if (_useMock || lineId.startsWith('demo_')) {
       await Future.delayed(const Duration(milliseconds: 600));
       return _generateMockComments(lineId, filter);
     }
@@ -202,10 +306,29 @@ class ForumRepository {
     try {
       final response = await _apiClient.get(
         '/api/v1/forum/lines/$lineId/comments',
-        queryParameters: {'filter': filter},
+        queryParameters: {
+          'filter': filter,
+          if (postId != null) 'post_id': postId,
+        },
       );
       final list = response.data['comments'] as List;
-      return list.map((e) => ForumLineComment.fromJson(e as Map<String, dynamic>)).toList();
+      final comments = list.map((e) => ForumLineComment.fromJson(e as Map<String, dynamic>)).toList();
+
+      // 2. Cache locally
+      await _database.batchInsertLineComments(comments.map((c) => ForumLineCommentsCompanion.insert(
+        localId: c.id,
+        serverId: Value(c.id),
+        lineId: c.lineId,
+        authorId: c.authorId,
+        authorName: c.authorName,
+        authorRole: c.authorRole.name,
+        commentType: c.commentType.name,
+        content: c.text,
+        createdAt: c.createdAt,
+        syncStatus: const Value('synced'),
+      )).toList());
+
+      return comments;
     } catch (e) {
       rethrow;
     }
@@ -216,6 +339,7 @@ class ForumRepository {
     required String lineId,
     required String text,
     required String commentType,
+    String? postId,
   }) async {
     if (_useMock) {
       await Future.delayed(const Duration(seconds: 1));
@@ -238,11 +362,49 @@ class ForumRepository {
         data: {
           'text': text,
           'comment_type': commentType,
+          if (postId != null) 'post_id': postId,
         },
       );
-      return ForumLineComment.fromJson(response.data as Map<String, dynamic>);
+      final comment = ForumLineComment.fromJson(response.data as Map<String, dynamic>);
+      
+      // Save locally as well
+      await _database.insertLineComment(ForumLineCommentsCompanion.insert(
+        localId: comment.id,
+        serverId: Value(comment.id),
+        lineId: comment.lineId,
+        authorId: comment.authorId,
+        authorName: comment.authorName,
+        authorRole: comment.authorRole.name,
+        commentType: comment.commentType.name,
+        content: comment.text,
+        createdAt: comment.createdAt,
+        syncStatus: const Value('synced'),
+      ));
+
+      return comment;
     } catch (e) {
+      // Fallback: Save as pending for sync
+      final localId = 'pending_${DateTime.now().millisecondsSinceEpoch}';
+      // I need user info here... assuming we have a way to get it or wait for login status
+      // For now, rethrow as we don't have a background sync for line comments yet
       throw ForumException('Failed to post comment: ${e.toString()}');
+    }
+  }
+
+  CommentRole _parseAuthorRole(String role) {
+    switch (role.toLowerCase()) {
+      case 'clinician': return CommentRole.clinician;
+      case 'mother': return CommentRole.mother;
+      default: return CommentRole.community;
+    }
+  }
+
+  SyncStatus _parseSyncStatus(String status) {
+    switch (status) {
+      case 'synced': return SyncStatus.synced;
+      case 'pending': return SyncStatus.pending;
+      case 'syncing': return SyncStatus.syncing;
+      default: return SyncStatus.error;
     }
   }
 
@@ -302,21 +464,32 @@ class ForumRepository {
         id: 'c2',
         lineId: lineId,
         authorId: 'u2',
-        authorName: 'Ama',
+        authorName: 'Sarah K.',
         authorRole: CommentRole.mother,
+        authorProfession: 'Patient',
         commentType: CommentType.experience,
-        text: 'My OB told me to avoid it unless I have a fever.',
+        text: 'I used it during my 28th week and it really helped with the migraines.',
         createdAt: DateTime.now().subtract(const Duration(minutes: 45)),
       ),
       ForumLineComment(
         id: 'c3',
         lineId: lineId,
         authorId: 'u3',
+        authorName: 'Health Council',
+        authorRole: CommentRole.clinician,
+        commentType: CommentType.evidence,
+        text: 'Large systematic reviews support the safety profile described here.',
+        createdAt: DateTime.now().subtract(const Duration(days: 1)),
+      ),
+      ForumLineComment(
+        id: 'c4',
+        lineId: lineId,
+        authorId: 'u4',
         authorName: 'Kwame',
         authorRole: CommentRole.community,
         commentType: CommentType.concern,
-        text: 'Are there any herbal alternatives?',
-        createdAt: DateTime.now().subtract(const Duration(days: 1)),
+        text: 'What about the potential link to childhood asthma? Some studies suggest caution.',
+        createdAt: DateTime.now().subtract(const Duration(hours: 5)),
       ),
     ];
 
@@ -332,6 +505,11 @@ class ForumRepository {
       case 'concern': return CommentType.concern;
       default: return CommentType.general;
     }
+  }
+
+  /// Clear all cached forum data
+  Future<void> clearCache() async {
+    await _database.clearCache();
   }
 
   Future<bool> checkConnectivity() async {

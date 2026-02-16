@@ -35,6 +35,7 @@ class App extends StatefulWidget {
 }
 
 class _AppState extends State<App> {
+  late final SecureStorageHelper _secureStorage;
   late final ApiClient _apiClient;
   late final AuthRepository _authRepository;
   late final ChatRepository _chatRepository;
@@ -50,6 +51,9 @@ class _AppState extends State<App> {
     super.initState();
     _initializeRepositories();
     _setupLocaleListener();
+    
+    // Restore authentication session on startup
+    _authCubit.initialize();
   }
 
   void _initializeRepositories() {
@@ -63,6 +67,9 @@ class _AppState extends State<App> {
       ),
     );
 
+    // Initialize Secure Storage
+    _secureStorage = SecureStorageHelper();
+
     // Initialize API client
     _apiClient = ApiClient(
       baseUrl: widget.config.apiBaseUrl,
@@ -70,15 +77,29 @@ class _AppState extends State<App> {
       connectTimeout: widget.config.apiTimeout,
       receiveTimeout: widget.config.apiTimeout,
       getAccessToken: () async {
+        // 1. Try to get real token from secure storage (Google or Demo login)
+        final savedToken = await _secureStorage.getAccessToken();
+        if (savedToken != null && savedToken.isNotEmpty) {
+          return savedToken;
+        }
+        
+        /* 
+        // 2. Fallback to hardcoded demo token if nothing is saved
+        // STASHED: Uncomment for stakeholder demos if needed
         return "test-token-day2";
+        */
+        return null;
       },
-      refreshToken: () async {},
+      refreshToken: () async {
+        // Use the repository to refresh the token
+        await _authRepository.refreshToken();
+      },
     );
 
     // Initialize repositories
     _authRepository = AuthRepository(
       apiClient: _apiClient,
-      secureStorage: SecureStorageHelper(),
+      secureStorage: _secureStorage,
     );
 
     _chatRepository = ChatRepository(
@@ -160,7 +181,7 @@ class _AppState extends State<App> {
                 return supportedLocales.first;
               },
               onGenerateRoute: AppRouter.generateRoute,
-              initialRoute: AppRouter.chat,
+              initialRoute: AppRouter.splash,
               builder: (context, child) {
                 // Wrap app with environment banner if not production
                 if (!widget.config.isProduction) {

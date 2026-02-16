@@ -47,6 +47,7 @@ class ChatCubit extends Cubit<ChatState> {
   Future<void> initialize() async {
     try {
       emit(state.copyWith(status: ChatStatus.loading));
+      // Any initialization logic here
       emit(state.copyWith(status: ChatStatus.success));
     } catch (e) {
       emit(state.copyWith(
@@ -60,56 +61,55 @@ class ChatCubit extends Cubit<ChatState> {
 
   Future<void> startRecording() async {
     try {
-      if (await _audioRecordingService.hasPermission()) {
-        emit(state.copyWith(isRecording: true, amplitude: -160.0));
-        await _audioRecordingService.startRecording();
-        
-        _amplitudeSubscription = _audioRecordingService.onAmplitudeChanged().listen((amp) {
-          emit(state.copyWith(amplitude: amp.current));
-        });
-      } else {
+      final hasPermission = await _audioRecordingService.hasPermission();
+      if (!hasPermission) {
         emit(state.copyWith(error: 'Microphone permission denied'));
+        return;
       }
+
+      await _audioRecordingService.startRecording();
+      
+      _amplitudeSubscription?.cancel();
+      _amplitudeSubscription = _audioRecordingService.onAmplitudeChanged().listen((amp) {
+        emit(state.copyWith(amplitude: amp.current.toDouble()));
+      });
+
+      emit(state.copyWith(isRecording: true));
     } catch (e) {
-      emit(state.copyWith(isRecording: false, error: 'Failed to start recording: $e'));
+      emit(state.copyWith(error: 'Failed to start recording: $e'));
     }
   }
 
   Future<void> stopRecording() async {
     try {
-      await _amplitudeSubscription?.cancel();
-      _amplitudeSubscription = null;
-      emit(state.copyWith(isRecording: false, isTyping: true));
       final path = await _audioRecordingService.stopRecording();
+      _amplitudeSubscription?.cancel();
+      emit(state.copyWith(isRecording: false, amplitude: 0.0));
       
       if (path != null) {
-        emit(state.copyWith(recordingPath: path));
-        await _sendAudioMessage(path);
-      } else {
-        emit(state.copyWith(isTyping: false, error: 'Recording failed'));
+        await sendAudioMessage(path);
       }
     } catch (e) {
-      emit(state.copyWith(isTyping: false, error: 'Failed to stop recording: $e'));
+      emit(state.copyWith(isRecording: false, amplitude: 0.0, error: 'Failed to stop recording: $e'));
     }
   }
 
   Future<void> cancelRecording() async {
     try {
-      await _amplitudeSubscription?.cancel();
-      _amplitudeSubscription = null;
-      await _audioRecordingService.cancelRecording();
-      emit(state.copyWith(isRecording: false));
+      await _audioRecordingService.stopRecording();
+      _amplitudeSubscription?.cancel();
+      emit(state.copyWith(isRecording: false, amplitude: 0.0));
     } catch (e) {
-      emit(state.copyWith(isRecording: false));
+      emit(state.copyWith(isRecording: false, amplitude: 0.0));
     }
   }
 
-  Future<void> _sendAudioMessage(String path) async {
+  Future<void> sendAudioMessage(String audioPath) async {
     try {
-      _startLoadingRotation();
+      emit(state.copyWith(isTyping: true));
 
       final responseData = await _chatRepository.sendVoiceMessage(
-        audioPath: path,
+        audioPath: audioPath,
         sessionId: state.sessionId ?? DateTime.now().millisecondsSinceEpoch.toString(),
         userRole: _userRole,
         interests: _interests,
@@ -140,7 +140,6 @@ class ChatCubit extends Cubit<ChatState> {
 
   void _handleChatResponse(Map<String, dynamic> responseData) {
     _loadingTimer?.cancel();
-    emit(state.resetLoadingMessage());
     final status = responseData['status'] as String? ?? 'error';
 
     if (status == 'out_of_scope') {
@@ -233,25 +232,11 @@ class ChatCubit extends Cubit<ChatState> {
 
   void _startLoadingRotation() {
     _loadingTimer?.cancel();
-    final messages = [
-      'Processing your request...',
-      'Analyzing context...',
-      'Consulting medical guidelines...',
-      'Ensuring safety protocols...',
-      'Finalizing your answer...',
-    ];
-    int index = 0;
-    
-    emit(state.copyWith(loadingMessage: messages[0]));
-    
-    _loadingTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
-      index = (index + 1) % messages.length;
-      emit(state.copyWith(loadingMessage: messages[index]));
-    });
+    // Loading visual feedback handled in UI layer with isTyping state
   }
 
-  // Main send message method - use this
-  Future<void> sendMessage(String content) async {
+  // Main send message method
+  Future<void> sendMessage(String content, {String? imageUrl}) async {
     if (content.trim().isEmpty) return;
 
     final userMessage = ChatMessage(
@@ -261,29 +246,32 @@ class ChatCubit extends Cubit<ChatState> {
       timestamp: DateTime.now(),
     );
 
-    final attachments = state.pendingAttachments;
-    
+    final loadingMessages = [
+      'Thinking...',
+      'Searching medical sources...',
+      'Verifying with experts...',
+      'Looking up citations...',
+    ];
+    int currentMsgIdx = 0;
+    _loadingTimer?.cancel();
+    _loadingTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
+      if (currentMsgIdx < loadingMessages.length) {
+        emit(state.updateLoadingMessage(loadingMessages[currentMsgIdx]));
+        currentMsgIdx++;
+      }
+    });
+
     emit(state.copyWith(
       messages: [...state.messages, userMessage],
       status: ChatStatus.loading,
       isTyping: true,
-      pendingAttachments: const [], // Clear immediately for UI feedback
+      loadingMessage: loadingMessages[0],
     ));
 
-    _startLoadingRotation();
-
     try {
-      // NOTE: Current repository might need update to support multiple/mixed attachments.
-      // For now, if there is an image, we use sendMessageWithImage flow internally or similar.
-      // If we have just text, we proceed as normal.
-      
-      final String? imageUrl = attachments.isNotEmpty && attachments.any((a) => a.type == AttachmentType.image)
-          ? attachments.firstWhere((a) => a.type == AttachmentType.image).path
-          : null;
-
       final request = repo.ChatQueryRequest(
         query: content.trim(),
-        imageUrl: imageUrl, // Passing first image if exists
+        imageUrl: imageUrl, // Optionally pass image from UI layer
         conversationId: state.sessionId ?? DateTime.now().millisecondsSinceEpoch.toString(),
         userRole: _userRole,
         interests: _interests,

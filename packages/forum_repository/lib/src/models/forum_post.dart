@@ -24,6 +24,7 @@ class ForumPost extends Equatable {
     this.syncStatus = SyncStatus.synced,
     this.sources = const [],
     this.tags = const [],
+    this.originalAnswerId,
   });
 
   final String id; // Server ID
@@ -41,6 +42,7 @@ class ForumPost extends Equatable {
   final SyncStatus syncStatus;
   final List<ForumPostSource> sources;
   final List<String> tags;
+  final String? originalAnswerId;
 
   // Helpers
   bool get isPendingSync => syncStatus == SyncStatus.pending;
@@ -72,16 +74,17 @@ class ForumPost extends Equatable {
       tags: data.tags != null
           ? List<String>.from(jsonDecode(data.tags!) as List)
           : const [],
+      originalAnswerId: data.originalAnswerId,
     );
   }
 
   /// Create from backend JSON
   factory ForumPost.fromJson(Map<String, dynamic> json) {
     return ForumPost(
-      id: json['id'] as String,
-      localId: json['id'] as String, // Use server ID as local ID when from server
-      authorId: json['author_id'] as String,
-      authorName: json['author_name'] as String,
+      id: json['id'].toString(),
+      localId: json['id'].toString(), // Use server ID as local ID when from server
+      authorId: (json['user_id'] ?? json['author_id']).toString(),
+      authorName: (json['author_name'] ?? 'Unknown').toString(),
       title: json['title'] as String,
       content: json['content'] as String,
       createdAt: DateTime.parse(json['created_at'] as String),
@@ -97,6 +100,7 @@ class ForumPost extends Equatable {
           .map((e) => ForumPostSource.fromJson(e as Map<String, dynamic>))
           .toList(),
       tags: (json['tags'] as List? ?? []).map((e) => e as String).toList(),
+      originalAnswerId: json['original_answer_id'] as String?,
     );
   }
 
@@ -115,6 +119,7 @@ class ForumPost extends Equatable {
     bool? isLiked,
     SyncStatus? syncStatus,
     List<String>? tags,
+    String? originalAnswerId,
   }) {
     return ForumPost(
       id: id ?? this.id,
@@ -132,6 +137,7 @@ class ForumPost extends Equatable {
       syncStatus: syncStatus ?? this.syncStatus,
       sources: sources ?? this.sources,
       tags: tags ?? this.tags,
+      originalAnswerId: originalAnswerId ?? this.originalAnswerId,
     );
   }
 

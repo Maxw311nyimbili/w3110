@@ -219,7 +219,7 @@ class _RefinedChatInputState extends State<RefinedChatInput> with TickerProvider
           color: AppColors.backgroundPrimary,
           border: Border(
             top: BorderSide(
-              color: AppColors.borderLight.withOpacity(0.8),
+              color: AppColors.borderLight.withOpacity(0.6),
               width: 1,
             ),
           ),
@@ -234,9 +234,9 @@ class _RefinedChatInputState extends State<RefinedChatInput> with TickerProvider
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.03),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
+                color: AppColors.accentPrimary.withOpacity(0.08),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
               ),
             ],
           ),

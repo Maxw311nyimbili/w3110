@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cap_project/core/theme/app_colors.dart';
 import 'package:cap_project/core/theme/app_text_styles.dart';
-import 'package:cap_project/core/widgets/brand_orb.dart';
+import 'package:cap_project/core/widgets/brand_logo.dart';
 
 class ThinkingIndicator extends StatefulWidget {
   final String message;
@@ -46,7 +46,7 @@ class _ThinkingIndicatorState extends State<ThinkingIndicator> with SingleTicker
         opacity: _pulseAnimation,
         child: Row(
           children: [
-            const BrandOrb(size: 32, isThinking: true),
+            const BrandLogo(size: 32),
             const SizedBox(width: 12),
             Expanded(
               child: Column(

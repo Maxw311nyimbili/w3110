@@ -10,6 +10,7 @@ class User extends Equatable {
     this.displayName,
     this.photoUrl,
     this.role,
+    this.onboardingCompleted = false,
   });
 
   final String id;
@@ -17,6 +18,7 @@ class User extends Equatable {
   final String? displayName;
   final String? photoUrl;
   final String? role;
+  final bool onboardingCompleted;
 
   /// Create user from JSON
   factory User.fromJson(Map<String, dynamic> json) {
@@ -26,6 +28,7 @@ class User extends Equatable {
       displayName: json['display_name'] as String?,
       photoUrl: json['photo_url'] as String?,
       role: json['role'] as String?,
+      onboardingCompleted: json['onboarding_completed'] as bool? ?? false,
     );
   }
 
@@ -37,9 +40,10 @@ class User extends Equatable {
       'display_name': displayName,
       'photo_url': photoUrl,
       'role': role,
+      'onboarding_completed': onboardingCompleted,
     };
   }
 
   @override
-  List<Object?> get props => [id, email, displayName, photoUrl, role];
+  List<Object?> get props => [id, email, displayName, photoUrl, role, onboardingCompleted];
 }

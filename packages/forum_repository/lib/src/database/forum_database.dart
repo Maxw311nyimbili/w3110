@@ -9,16 +9,36 @@ import 'package:path/path.dart' as p;
 import 'tables/forum_posts_table.dart';
 import 'tables/forum_comments_table.dart';
 import 'tables/sync_queue_table.dart';
+import 'tables/forum_answer_lines_table.dart';
+import 'tables/forum_line_comments_table.dart';
 
 part 'forum_database.g.dart';
 
 /// Forum database - offline-first local storage with Drift
-@DriftDatabase(tables: [ForumPosts, ForumComments, SyncQueue])
+@DriftDatabase(tables: [ForumPosts, ForumComments, SyncQueue, ForumAnswerLines, ForumLineComments])
 class ForumDatabase extends _$ForumDatabase {
   ForumDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 3;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+    onCreate: (m) async {
+      await m.createAll();
+    },
+    onUpgrade: (m, from, to) async {
+      if (from < 3) {
+        // Safe approach for dev: drop and recreate to fix constraints
+        await m.drop(forumPosts);
+        await m.drop(forumComments);
+        await m.drop(syncQueue);
+        await m.drop(forumAnswerLines);
+        await m.drop(forumLineComments);
+        await m.createAll();
+      }
+    },
+  );
 
   // ============================================================
   // POSTS QUERIES
@@ -78,6 +98,19 @@ class ForumDatabase extends _$ForumDatabase {
     ));
   }
 
+  /// Update post like status locally
+  Future<int> updatePostLike({
+    required String postId,
+    required bool isLiked,
+    required int likeCount,
+  }) async {
+    return (update(forumPosts)..where((post) => post.serverId.equals(postId) | post.localId.equals(postId)))
+        .write(ForumPostsCompanion(
+      isLiked: Value(isLiked),
+      likeCount: Value(likeCount),
+    ));
+  }
+
   // ============================================================
   // COMMENTS QUERIES
   // ============================================================
@@ -95,9 +128,27 @@ class ForumDatabase extends _$ForumDatabase {
         .get();
   }
 
+  /// Get a single comment by local ID
+  Future<ForumCommentData?> getCommentByLocalId(String localId) async {
+    return (select(forumComments)..where((c) => c.localId.equals(localId)))
+        .getSingleOrNull();
+  }
+
+  /// Get a single comment by server ID
+  Future<ForumCommentData?> getCommentByServerId(String serverId) async {
+    return (select(forumComments)..where((c) => c.serverId.equals(serverId)))
+        .getSingleOrNull();
+  }
+
   /// Insert a new comment
   Future<int> insertComment(ForumCommentsCompanion comment) async {
     return into(forumComments).insert(comment);
+  }
+
+  /// Delete a comment
+  Future<int> deleteComment(String localId) async {
+    return (delete(forumComments)..where((c) => c.localId.equals(localId)))
+        .go();
   }
 
   /// Update comment sync status
@@ -204,6 +255,77 @@ class ForumDatabase extends _$ForumDatabase {
       batch.insertAll(forumComments, comments,
           mode: InsertMode.insertOrReplace);
     });
+  }
+
+  /// Clear all cached forum data
+  Future<void> clearCache() async {
+    await transaction(() async {
+      await delete(syncQueue).go();
+      await delete(forumComments).go();
+      await delete(forumPosts).go();
+      await delete(forumAnswerLines).go();
+      await delete(forumLineComments).go();
+    });
+  }
+
+  // ============================================================
+  // LINE-LEVEL QUERIES
+  // ============================================================
+
+  Future<void> batchInsertLines(List<ForumAnswerLinesCompanion> lines) async {
+    await batch((batch) {
+      batch.insertAll(forumAnswerLines, lines, mode: InsertMode.insertOrReplace);
+    });
+  }
+
+  Future<void> batchInsertLineComments(List<ForumLineCommentsCompanion> comments) async {
+    await batch((batch) {
+      batch.insertAll(forumLineComments, comments, mode: InsertMode.insertOrReplace);
+    });
+  }
+
+  Future<List<ForumAnswerLineData>> getLinesForPost(int postId) async {
+    return (select(forumAnswerLines)
+      ..where((l) => l.postId.equals(postId))
+      ..orderBy([(l) => OrderingTerm(expression: l.lineNumber)]))
+        .get();
+  }
+
+  Future<List<ForumAnswerLineData>> getLinesForAnswer(String answerId) async {
+    return (select(forumAnswerLines)
+      ..where((l) => l.answerId.equals(answerId))
+      ..orderBy([(l) => OrderingTerm(expression: l.lineNumber)]))
+        .get();
+  }
+
+  Future<List<ForumLineCommentData>> getCommentsForLine(String lineId) async {
+    return (select(forumLineComments)
+      ..where((c) => c.lineId.equals(lineId))
+      ..orderBy([(c) => OrderingTerm(expression: c.createdAt)]))
+        .get();
+  }
+
+  Future<ForumLineCommentData?> getLineCommentByLocalId(String localId) async {
+    return (select(forumLineComments)..where((c) => c.localId.equals(localId)))
+        .getSingleOrNull();
+  }
+
+  Future<int> updateLineCommentSyncStatus({
+    required String localId,
+    required String syncStatus,
+    String? serverId,
+  }) async {
+    return (update(forumLineComments)
+      ..where((c) => c.localId.equals(localId)))
+        .write(ForumLineCommentsCompanion(
+      syncStatus: Value(syncStatus),
+      serverId: serverId != null ? Value(serverId) : const Value.absent(),
+    ));
+  }
+
+  /// Insert a single line comment
+  Future<int> insertLineComment(ForumLineCommentsCompanion comment) async {
+    return into(forumLineComments).insert(comment);
   }
 }
 

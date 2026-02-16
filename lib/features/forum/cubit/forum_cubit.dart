@@ -3,6 +3,7 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:forum_repository/forum_repository.dart'; // Unprefixed for ForumPost/ForumComment availability
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import 'forum_state.dart';
 
@@ -26,11 +27,11 @@ class ForumCubit extends Cubit<ForumState> {
       // Load posts from local database
       var posts = await _forumRepository.getLocalPosts();
       
-      // Auto-seed if empty (Demo Mode)
-      if (posts.isEmpty) {
-        await _forumRepository.seedDemoData();
-        posts = await _forumRepository.getLocalPosts();
-      }
+      // Demo data seeding disabled - start with clean slate
+      // if (posts.isEmpty) {
+      //   await _forumRepository.seedDemoData();
+      //   posts = await _forumRepository.getLocalPosts();
+      // }
 
       // Check if there are pending sync items
       final hasPendingSync = await _forumRepository.hasPendingSyncItems();
@@ -50,6 +51,25 @@ class ForumCubit extends Cubit<ForumState> {
       emit(state.copyWith(
         status: ForumStatus.error,
         error: 'Failed to load forum: ${e.toString()}',
+      ));
+    }
+  }
+
+  /// Reset forum - clear all local cache and re-initialize
+  /// Used to clear corrupted data from demo accounts
+  Future<void> resetAndReload() async {
+    try {
+      emit(state.copyWith(status: ForumStatus.loading));
+      
+      // Clear all local database tables
+      await _forumRepository.clearCache();
+      
+      // Re-initialize (which will trigger fresh seeding if empty)
+      await initialize();
+    } catch (e) {
+      emit(state.copyWith(
+        status: ForumStatus.error,
+        error: 'Failed to reset forum: ${e.toString()}',
       ));
     }
   }
@@ -79,9 +99,15 @@ class ForumCubit extends Cubit<ForumState> {
   /// Select a post and load its comments
   Future<void> selectPost(ForumPost post) async {
     try {
+      // Find the most up-to-date version of this post from current state
+      final currentPost = state.posts.firstWhere(
+        (p) => p.id == post.id,
+        orElse: () => post,
+      );
+
       emit(state.copyWith(
         view: ForumView.detail,
-        selectedPost: post,
+        selectedPost: currentPost,
         status: ForumStatus.loading,
       ));
 
@@ -94,10 +120,31 @@ class ForumCubit extends Cubit<ForumState> {
       emit(state.copyWith(
         status: ForumStatus.success,
         comments: comments,
-        // Also parse content into lines for discussion view
-        answerLines: _parsePostContentToLines(post),
         currentAnswerId: postId,
       ));
+
+      // Load sophisticated lines from repo
+      await loadAnswerLines(postId);
+      
+      // Load general discussion comments for this post
+      final generalComments = await _forumRepository.getCommentsForLine(
+        'general', 
+        postId: postId,
+      );
+
+      emit(state.copyWith(
+        status: ForumStatus.success,
+        comments: comments, // Keep old comments too if needed
+        lineComments: generalComments, // This is what the drawer uses
+        currentAnswerId: postId,
+      ));
+
+      // Fallback: If repo has no lines, parse content (legacy/simple posts)
+      if (state.answerLines.isEmpty) {
+        emit(state.copyWith(
+          answerLines: _parsePostContentToLines(post),
+        ));
+      }
 
       // Background sync comments
       _syncComments(postId);
@@ -121,6 +168,12 @@ class ForumCubit extends Cubit<ForumState> {
     ));
   }
 
+  /// Prepare post content (LLM Title + Formatting)
+  Future<Map<String, String>> preparePost(String query, String content) async {
+    final result = await _forumRepository.preparePost(query, content);
+    return result;
+  }
+
   /// Create a new post (saved locally immediately, synced in background)
   Future<void> createPost({
     required String title,
@@ -128,7 +181,9 @@ class ForumCubit extends Cubit<ForumState> {
     required String authorId,
     required String authorName,
     List<ForumPostSource> sources = const [],
+    String? originalAnswerId,
   }) async {
+    print('DEBUG: ForumCubit.createPost - title: $title');
     try {
       final localId = _uuid.v4();
       final now = DateTime.now();
@@ -144,9 +199,11 @@ class ForumCubit extends Cubit<ForumState> {
         createdAt: now,
         syncStatus: SyncStatus.pending,
         sources: sources,
+        originalAnswerId: originalAnswerId,
       );
 
       // Save to local database
+      print('DEBUG: ForumCubit.createPost - saving local post');
       await _forumRepository.createLocalPost(
         localId: localId,
         title: title,
@@ -154,9 +211,11 @@ class ForumCubit extends Cubit<ForumState> {
         authorId: authorId,
         authorName: authorName,
         sources: sources,
+        originalAnswerId: originalAnswerId,
       );
 
       // Add to sync queue
+      print('DEBUG: ForumCubit.createPost - adding to sync queue');
       await _forumRepository.addToSyncQueue(
         entityType: 'post',
         entityId: localId,
@@ -170,11 +229,31 @@ class ForumCubit extends Cubit<ForumState> {
       ));
 
       // Trigger background sync
+      print('DEBUG: ForumCubit.createPost - triggering sync');
       syncWithBackend();
     } catch (e) {
+      print('DEBUG: ForumCubit.createPost - ERROR: $e');
       emit(state.copyWith(
         status: ForumStatus.error,
         error: 'Failed to create post: ${e.toString()}',
+      ));
+    }
+  }
+
+  /// Delete a post (local and from server if synced)
+  Future<void> deletePost(String localId) async {
+    try {
+      // Remove from local database
+      await _forumRepository.deletePost(localId);
+
+      // Update UI immediately
+      emit(state.copyWith(
+        posts: state.posts.where((p) => p.localId != localId).toList(),
+      ));
+    } catch (e) {
+      emit(state.copyWith(
+        status: ForumStatus.error,
+        error: 'Failed to delete post: ${e.toString()}',
       ));
     }
   }
@@ -298,25 +377,47 @@ class ForumCubit extends Cubit<ForumState> {
   /// Toggle like on post (optimistic update)
   Future<void> togglePostLike(String postId) async {
     try {
-      // Find the post and update it locally first
+      // 1. Update main posts list
       final postIndex = state.posts.indexWhere((p) => p.id == postId);
-      if (postIndex == -1) return;
+      List<ForumPost>? updatedPosts;
+      ForumPost? targetPost;
 
-      final post = state.posts[postIndex];
-      final updatedPost = post.copyWith(
-        isLiked: !post.isLiked,
-        likeCount: post.isLiked ? post.likeCount - 1 : post.likeCount + 1,
-      );
+      if (postIndex != -1) {
+        final post = state.posts[postIndex];
+        targetPost = post.copyWith(
+          isLiked: !post.isLiked,
+          likeCount: post.isLiked ? post.likeCount - 1 : post.likeCount + 1,
+        );
+        updatedPosts = List<ForumPost>.from(state.posts)..[postIndex] = targetPost;
+      }
 
-      final updatedPosts = List<ForumPost>.from(state.posts)..[postIndex] = updatedPost;
-      
+      // 2. Update search results list if applicable
+      final searchIndex = state.searchResults.indexWhere((p) => p.id == postId);
+      List<ForumPost>? updatedSearchResults;
+      if (searchIndex != -1) {
+        targetPost ??= state.searchResults[searchIndex].copyWith(
+          isLiked: !state.searchResults[searchIndex].isLiked,
+          likeCount: state.searchResults[searchIndex].isLiked 
+              ? state.searchResults[searchIndex].likeCount - 1 
+              : state.searchResults[searchIndex].likeCount + 1,
+        );
+        updatedSearchResults = List<ForumPost>.from(state.searchResults)..[searchIndex] = targetPost;
+      }
+
+      if (targetPost == null) return;
+
       emit(state.copyWith(
-        posts: updatedPosts,
-        selectedPost: state.selectedPost?.id == postId ? updatedPost : state.selectedPost,
+        posts: updatedPosts ?? state.posts,
+        searchResults: updatedSearchResults ?? state.searchResults,
+        selectedPost: state.selectedPost?.id == postId ? targetPost : state.selectedPost,
       ));
 
-      // Call API
-      await _forumRepository.togglePostLike(postId);
+      // 3. Call API and persist locally
+      await _forumRepository.togglePostLike(
+        postId,
+        isLiked: targetPost.isLiked,
+        likeCount: targetPost.likeCount,
+      );
     } catch (e) {
       // Revert on failure (simple implementation: reload posts)
       loadPosts();
@@ -473,17 +574,24 @@ class ForumCubit extends Cubit<ForumState> {
   Future<void> postLineComment({
     required String text,
     required String commentType,
+    String? lineId,
+    String? postId,
   }) async {
-    final lineId = state.selectedLineId;
-    if (lineId == null) return;
+    final effectiveLineId = lineId ?? state.selectedLineId;
+    if (effectiveLineId == null) return;
+    
+    // Handle "general" comments by redirection to addComment if needed,
+    // or keep using postLineComment if backend supports it.
+    // For now, let's assume we want to support typed comments everywhere.
     
     try {
       // Optimistic update could happen here, but for simplicity we await response
       
       final newComment = await _forumRepository.postLineComment(
-        lineId: lineId,
+        lineId: effectiveLineId,
         text: text,
         commentType: commentType,
+        postId: postId,
       );
       
       // Update local state by appending new comment (if matches filter or filter is all)
@@ -494,7 +602,7 @@ class ForumCubit extends Cubit<ForumState> {
       
       // Also update line comment count locally
       final updatedLines = state.answerLines.map((line) {
-        if (line.lineId == lineId) {
+        if (line.lineId == effectiveLineId) {
           return line.copyWith(commentCount: line.commentCount + 1);
         }
         return line;

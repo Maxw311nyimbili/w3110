@@ -94,3 +94,4 @@ flutter:
   assets:
     # Your other assets...
     - assets/animations/
+    - assets/images/

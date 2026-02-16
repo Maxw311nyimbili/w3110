@@ -18,6 +18,8 @@ class ForumComment extends Equatable {
     this.likeCount = 0,
     this.isLiked = false,
     this.syncStatus = SyncStatus.synced,
+    this.authorRole = 'user',
+    this.authorProfession,
   });
 
   final String id; // Server ID
@@ -31,6 +33,10 @@ class ForumComment extends Equatable {
   final int likeCount;
   final bool isLiked;
   final SyncStatus syncStatus;
+  final String authorRole; // 'user', 'doctor', 'healthcare_professional'
+  final String? authorProfession;
+
+  String get text => content;
 
   bool get isPendingSync => syncStatus == SyncStatus.pending;
 
@@ -48,17 +54,19 @@ class ForumComment extends Equatable {
       likeCount: data.likeCount,
       isLiked: data.isLiked,
       syncStatus: _parseSyncStatus(data.syncStatus),
+      authorRole: data.authorRole ?? 'user',
+      authorProfession: data.authorProfession,
     );
   }
 
   /// Create from backend JSON
   factory ForumComment.fromJson(Map<String, dynamic> json) {
     return ForumComment(
-      id: json['id'] as String,
-      localId: json['id'] as String, // Use server ID as local ID when from server
-      postId: json['post_id'] as String,
-      authorId: json['author_id'] as String,
-      authorName: json['author_name'] as String,
+      id: json['id'].toString(),
+      localId: json['id'].toString(), // Use server ID as local ID when from server
+      postId: json['post_id'].toString(),
+      authorId: (json['user_id'] ?? json['author_id']).toString(),
+      authorName: (json['author_name'] ?? 'Unknown').toString(),
       content: json['content'] as String,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: json['updated_at'] != null
@@ -67,6 +75,8 @@ class ForumComment extends Equatable {
       likeCount: json['like_count'] as int? ?? 0,
       isLiked: json['is_liked'] as bool? ?? false,
       syncStatus: SyncStatus.synced, // From server = already synced
+      authorRole: json['author_role'] as String? ?? 'user',
+      authorProfession: json['author_profession'] as String?,
     );
   }
 
@@ -82,6 +92,8 @@ class ForumComment extends Equatable {
     int? likeCount,
     bool? isLiked,
     SyncStatus? syncStatus,
+    String? authorRole,
+    String? authorProfession,
   }) {
     return ForumComment(
       id: id ?? this.id,
@@ -95,6 +107,8 @@ class ForumComment extends Equatable {
       likeCount: likeCount ?? this.likeCount,
       isLiked: isLiked ?? this.isLiked,
       syncStatus: syncStatus ?? this.syncStatus,
+      authorRole: authorRole ?? this.authorRole,
+      authorProfession: authorProfession ?? this.authorProfession,
     );
   }
 
@@ -120,5 +134,7 @@ class ForumComment extends Equatable {
     likeCount,
     isLiked,
     syncStatus,
+    authorRole,
+    authorProfession,
   ];
 }

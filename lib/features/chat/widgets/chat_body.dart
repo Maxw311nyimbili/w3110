@@ -40,6 +40,10 @@ class _ChatBodyState extends State<ChatBody> with SingleTickerProviderStateMixin
       vsync: this,
       duration: const Duration(seconds: 4),
     )..repeat(reverse: true);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ChatCubit>().initialize();
+    });
   }
 
   @override
@@ -91,14 +95,18 @@ class _ChatBodyState extends State<ChatBody> with SingleTickerProviderStateMixin
                 borderRadius: BorderRadius.circular(8),
               ),
               duration: const Duration(seconds: 3),
+              action: SnackBarAction(
+                label: 'Dismiss',
+                onPressed: () => context.read<ChatCubit>().clearError(),
+                textColor: Colors.white,
+              ),
             ),
           );
-          context.read<ChatCubit>().clearError();
         }
         
         if (state.hasMessages) {
           final lastMessage = state.messages.last;
-          if (lastMessage.isUser) {
+          if (lastMessage.isUser || state.isTyping) {
             _scrollToLatestMessage();
           } else {
             if (_scrollController.hasClients && _scrollController.offset > 100) {

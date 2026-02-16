@@ -74,21 +74,38 @@ class ForumBody extends StatelessWidget {
 
   Widget _buildSearchBar(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
       child: TextField(
         onChanged: (value) => context.read<ForumCubit>().searchPosts(value),
         style: AppTextStyles.bodyLarge,
         decoration: InputDecoration(
           hintText: 'Search discussions...',
           hintStyle: AppTextStyles.bodyLarge.copyWith(color: AppColors.textTertiary),
-          prefixIcon: const Icon(Icons.search_rounded, color: AppColors.textSecondary),
+          prefixIcon: Icon(Icons.search_rounded, color: AppColors.textSecondary, size: 20),
           filled: true,
           fillColor: AppColors.backgroundSurface,
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(30),
-            borderSide: BorderSide.none,
+            borderRadius: BorderRadius.circular(28),
+            borderSide: const BorderSide(
+              color: AppColors.borderLight,
+              width: 1,
+            ),
           ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(28),
+            borderSide: const BorderSide(
+              color: AppColors.borderLight,
+              width: 1,
+            ),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(28),
+            borderSide: const BorderSide(
+              color: AppColors.accentPrimary,
+              width: 1.5,
+            ),
+          ),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
         ),
       ),
     );

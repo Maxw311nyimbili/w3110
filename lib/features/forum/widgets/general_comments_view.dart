@@ -84,27 +84,29 @@ class GeneralCommentsView extends StatelessWidget {
 
                       if (comments.isEmpty) {
                         return Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.chat_bubble_outline_rounded, 
-                                size: 48, 
-                                color: AppColors.borderMedium,
-                              ),
-                              const SizedBox(height: 12),
-                              Text(
-                                'No discussions yet',
-                                style: AppTextStyles.bodyMedium.copyWith(
-                                  color: AppColors.textTertiary,
+                          child: SingleChildScrollView(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.chat_bubble_outline_rounded, 
+                                  size: 32, // Reduced from 48
+                                  color: AppColors.borderMedium,
                                 ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'Tap below to start one',
-                                style: AppTextStyles.caption.copyWith(color: AppColors.textTertiary),
-                              ),
-                            ],
+                                const SizedBox(height: 8), // Reduced from 12
+                                Text(
+                                  'No discussions yet',
+                                  style: AppTextStyles.bodyMedium.copyWith(
+                                    color: AppColors.textTertiary,
+                                  ),
+                                ),
+                                const SizedBox(height: 4), // Reduced from 8
+                                Text(
+                                  'Tap below to start one',
+                                  style: AppTextStyles.caption.copyWith(color: AppColors.textTertiary),
+                                ),
+                              ],
+                            ),
                           ),
                         );
                       }
@@ -143,7 +145,10 @@ class GeneralCommentsView extends StatelessWidget {
 
                 // ========== REPLY INPUT ==========
                 const Divider(height: 1, color: AppColors.borderLight),
-                ReplyInputFieldForModal(lineId: 'general'), 
+                ReplyInputFieldForModal(
+                  lineId: 'general', // Backend now handles this by mapping internally
+                  postId: post.id,
+                ), 
               ],
             ),
           ),

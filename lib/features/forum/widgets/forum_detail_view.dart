@@ -2,10 +2,13 @@
 
 import 'package:cap_project/core/theme/app_colors.dart';
 import 'package:cap_project/core/theme/app_text_styles.dart';
+import 'package:cap_project/features/auth/cubit/auth_cubit.dart';
+import 'package:cap_project/features/auth/cubit/auth_state.dart';
 import 'package:cap_project/features/forum/cubit/forum_cubit.dart';
 import 'package:cap_project/features/forum/cubit/forum_state.dart';
 import 'package:cap_project/features/forum/widgets/general_comments_view.dart';
 import 'package:cap_project/features/forum/widgets/line_comments_filtered_view.dart';
+import 'package:cap_project/features/forum/widgets/thread_summary_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:forum_repository/forum_repository.dart';
@@ -112,8 +115,15 @@ class ForumDetailView extends StatelessWidget {
                   )).toList(),
                 ),
               ],
-              const SizedBox(height: 32),
-
+              const SizedBox(height: 24),
+              
+              // Thread Summary Header - Shows consensus, expert count, and depth
+              ThreadSummaryHeader(
+                post: post,
+                comments: state.displayComments,
+              ),
+              const SizedBox(height: 24),
+              
               // Content with Line-Level Discussion
               _buildInteractiveContent(context, state),
               
@@ -214,7 +224,19 @@ class ForumDetailView extends StatelessWidget {
                         post.isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
                         post.likeCount.toString(),
                         isActive: post.isLiked,
-                        onTap: () => context.read<ForumCubit>().togglePostLike(post.id),
+                        onTap: () {
+                          final authStatus = context.read<AuthCubit>().state.status;
+                          if (authStatus != AuthStatus.authenticated) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Please log in to like posts'),
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
+                            return;
+                          }
+                          context.read<ForumCubit>().togglePostLike(post.id);
+                        },
                       ),
                       const SizedBox(width: 24),
                       _buildAction(
@@ -256,81 +278,132 @@ class ForumDetailView extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: state.answerLines.map((line) {
         final isSelected = state.selectedLineId == line.lineId;
+        final hasExpertActivity = line.commentCount > 0;
         
         return GestureDetector(
           onTap: () => context.read<ForumCubit>().toggleLineSelection(line.lineId),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 150),
-            margin: const EdgeInsets.only(bottom: 2),
-            padding: EdgeInsets.fromLTRB(isSelected ? 14 : 0, 4, 8, 4),
-            decoration: BoxDecoration(
-              // Minimalist highlight: left border + very faint bg
-              color: isSelected ? AppColors.accentPrimary.withOpacity(0.03) : Colors.transparent,
-              border: isSelected 
-                  ? const Border(left: BorderSide(color: AppColors.accentPrimary, width: 3))
-                  : null,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                RichText(
-                  text: TextSpan(
-                    style: AppTextStyles.bodyLarge.copyWith(
-                      height: 1.8,
-                      fontSize: 17,
-                      color: isSelected ? AppColors.textPrimary : AppColors.textSecondary,
-                    ),
-                    children: [
-                      TextSpan(text: line.text),
-                    ],
+          child: AnimatedOpacity(
+            duration: const Duration(milliseconds: 300),
+            opacity: state.selectedLineId != null && !isSelected ? 0.4 : 1.0,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.easeOutQuart,
+              margin: const EdgeInsets.only(bottom: 4),
+              padding: EdgeInsets.fromLTRB(isSelected ? 16 : 0, 8, 12, 8),
+              decoration: BoxDecoration(
+                color: isSelected 
+                    ? AppColors.backgroundSurface
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(16),
+                border: Border(
+                  left: BorderSide(
+                    color: isSelected 
+                        ? AppColors.accentPrimary 
+                        : (hasExpertActivity ? AppColors.success.withOpacity(0.4) : Colors.transparent),
+                    width: isSelected ? 4 : 2,
                   ),
                 ),
-                // Minimalist inline drawer for comments
-                if (isSelected) ...[
-                  const SizedBox(height: 6),
-                  InkWell(
-                    onTap: () => _showLineCommentsModal(context, line),
-                    borderRadius: BorderRadius.circular(4),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: AppColors.backgroundElevated,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.chat_bubble_outline_rounded, 
-                            size: 14, 
-                            color: line.commentCount > 0 ? AppColors.accentPrimary : AppColors.textTertiary
+                boxShadow: const [],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: RichText(
+                          text: TextSpan(
+                            style: AppTextStyles.bodyLarge.copyWith(
+                              height: 1.8,
+                              fontSize: 17,
+                              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
+                              letterSpacing: isSelected ? -0.2 : 0,
+                              color: isSelected ? AppColors.textPrimary : AppColors.textSecondary,
+                            ),
+                            children: [
+                              TextSpan(text: line.text),
+                            ],
                           ),
-                          if (line.commentCount > 0) ...[
-                            const SizedBox(width: 4),
-                            Text(
-                              line.commentCount.toString(),
-                              style: AppTextStyles.labelSmall.copyWith(
-                                color: AppColors.accentPrimary,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ] else ...[
-                             const SizedBox(width: 4),
-                             Text(
-                              '+',
-                              style: AppTextStyles.labelSmall.copyWith(
-                                color: AppColors.textTertiary,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ],
+                        ),
                       ),
-                    ),
+                      if (hasExpertActivity && !isSelected)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8, top: 4),
+                          child: Icon(
+                            Icons.verified_user_rounded,
+                            size: 16,
+                            color: AppColors.success.withOpacity(0.8),
+                          ),
+                        ),
+                    ],
                   ),
-                  const SizedBox(height: 8),
+                  if (isSelected) ...[
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        InkWell(
+                          onTap: () => _showLineCommentsModal(context, line),
+                          borderRadius: BorderRadius.circular(12),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: AppColors.accentPrimary.withOpacity(0.08),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: AppColors.accentPrimary.withOpacity(0.1),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.chat_bubble_outline_rounded, 
+                                  size: 14, 
+                                  color: AppColors.accentPrimary,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  line.commentCount > 0 ? '${line.commentCount} expert insights' : 'Discuss line',
+                                  style: AppTextStyles.labelSmall.copyWith(
+                                    color: AppColors.accentPrimary,
+                                    fontWeight: FontWeight.w900,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        if (hasExpertActivity) ...[
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: AppColors.success.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.verified, size: 12, color: AppColors.success),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'Expert Consensus',
+                                  style: AppTextStyles.caption.copyWith(
+                                    color: AppColors.success,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 10,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
         );

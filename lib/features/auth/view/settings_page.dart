@@ -118,7 +118,16 @@ class SettingsPage extends StatelessWidget {
                         icon: Icons.logout_rounded,
                         textColor: AppColors.error,
                         isDestructive: true,
+                        showDivider: true,
                         onTap: () => _handleLogout(context, l10n),
+                      ),
+                      _buildSettingTile(
+                        title: 'Reset App Data',
+                        subtitle: 'Wipes all local state (Dev Only)',
+                        icon: Icons.delete_forever_rounded,
+                        textColor: AppColors.error,
+                        isDestructive: true,
+                        onTap: () => _handleDeepReset(context),
                       ),
                     ]),
                     const SizedBox(height: 32),
@@ -160,7 +169,7 @@ class SettingsPage extends StatelessWidget {
         title: Text(l10n.signOut, style: AppTextStyles.headlineSmall),
         content: Text(
           'Are you sure you want to sign out?',
-          style: AppTextStyles.bodyMedium, // Removed const
+          style: AppTextStyles.bodyMedium,
         ),
         actions: [
           TextButton(
@@ -184,7 +193,53 @@ class SettingsPage extends StatelessWidget {
     if (confirm == true && context.mounted) {
       await context.read<AuthCubit>().signOut();
       if (context.mounted) {
+        // We don't necessarily clear ALL local data on a simple sign out,
+        // but we should at least reset the onboarding cubit's state
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          AppRouter.landing,
+          (route) => false,
+        );
+      }
+    }
+  }
+
+  Future<void> _handleDeepReset(BuildContext context) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.backgroundSurface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text('Reset All Data?', style: AppTextStyles.headlineSmall),
+        content: Text(
+          'This will permanently delete ALL local data, including your login session and onboarding progress. The app will restart from scratch.',
+          style: AppTextStyles.bodyMedium,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(
+              'Cancel',
+              style: AppTextStyles.labelLarge.copyWith(color: AppColors.textSecondary),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(
+              'Reset Everything',
+              style: AppTextStyles.labelLarge.copyWith(color: AppColors.error),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true && context.mounted) {
+      // 1. Clear Auth (Tokens)
+      await context.read<AuthCubit>().signOut();
+      if (context.mounted) {
+        // 2. Clear Landing (Onboarding/Prefs)
         await context.read<LandingCubit>().resetOnboarding();
+        // 3. Go to root
         Navigator.of(context).pushNamedAndRemoveUntil(
           AppRouter.landing,
           (route) => false,

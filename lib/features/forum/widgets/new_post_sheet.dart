@@ -15,12 +15,14 @@ class NewPostSheet extends StatefulWidget {
     this.initialTitle,
     this.initialContent,
     this.sources = const [],
+    this.originalAnswerId,
     super.key,
   });
 
   final String? initialTitle;
   final String? initialContent;
   final List<ForumPostSource> sources;
+  final String? originalAnswerId;
 
   @override
   State<NewPostSheet> createState() => _NewPostSheetState();
@@ -61,6 +63,7 @@ class _NewPostSheetState extends State<NewPostSheet> {
         authorId: authorId,
         authorName: authorName,
         sources: widget.sources,
+        originalAnswerId: widget.originalAnswerId,
       );
 
       Navigator.pop(context);
