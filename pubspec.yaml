@@ -10,7 +10,7 @@ environment:
 dependencies:
   # State Management
   bloc: ^9.0.1
-  equatable: ^2.0.5
+  equatable: ^2.0.8
   flutter_bloc: ^9.1.1
 
   # Firebase
