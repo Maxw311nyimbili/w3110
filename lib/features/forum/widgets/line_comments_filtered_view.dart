@@ -95,6 +95,10 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
                       }
                       
                       final comments = state.lineComments;
+                      print('DEBUG: LineCommentsFilteredView - Rendering ${comments.length} comments for ${widget.lineId}');
+                      for (var c in comments) {
+                        print('DEBUG:   - Comment ${c.id} by ${c.authorName} (${c.authorRole})');
+                      }
                       final lineText = state.getLineText(widget.lineId);
 
                       return ListView(

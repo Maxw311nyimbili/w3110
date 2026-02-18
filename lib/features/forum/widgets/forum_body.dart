@@ -25,6 +25,7 @@ class ForumBody extends StatelessWidget {
             return Column(
               children: [
                 _buildSearchBar(context),
+                _buildFilterToggle(context, state),
                 Expanded(
                   child: _buildMainContent(context, state),
                 ),
@@ -33,6 +34,74 @@ class ForumBody extends StatelessWidget {
           },
         );
       }
+
+  Widget _buildFilterToggle(BuildContext context, ForumState state) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: AppColors.backgroundSurface.withOpacity(0.6),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: _buildAppleStyleButton(
+              context,
+              label: 'All Posts',
+              isSelected: state.postFilter == PostFilter.all,
+              onTap: () => context.read<ForumCubit>().setPostFilter(PostFilter.all),
+            ),
+          ),
+          Expanded(
+            child: _buildAppleStyleButton(
+              context,
+              label: 'My Posts',
+              isSelected: state.postFilter == PostFilter.mine,
+              onTap: () => context.read<ForumCubit>().setPostFilter(PostFilter.mine),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAppleStyleButton(
+    BuildContext context, {
+    required String label,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeInOut,
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.white : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.08),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
+        ),
+        child: Text(
+          label,
+          textAlign: TextAlign.center,
+          style: AppTextStyles.labelLarge.copyWith(
+            color: isSelected ? AppColors.textPrimary : AppColors.textSecondary,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+          ),
+        ),
+      ),
+    );
+  }
 
   Widget _buildMainContent(BuildContext context, ForumState state) {
     if (state.isLoading && !state.isSearching) {
@@ -47,28 +116,41 @@ class ForumBody extends StatelessWidget {
       return _buildErrorState(context, state);
     }
 
-    if (state.displayPosts.isEmpty) {
-      return _buildEmptyState(context, state);
-    }
+    // Get filtered posts based on current filter
+    final cubit = context.read<ForumCubit>();
+    
+    return FutureBuilder<String>(
+      future: cubit.getCurrentUserId(),
+      builder: (context, snapshot) {
+        final userId = snapshot.data ?? '';
+        final displayPosts = state.isSearching 
+            ? state.searchResults 
+            : cubit.getFilteredPosts(userId);
 
-    return RefreshIndicator(
-      color: AppColors.accentPrimary,
-      onRefresh: () async {
-        await context.read<ForumCubit>().syncWithBackend();
-      },
-      child: ListView.builder(
-        padding: const EdgeInsets.only(top: 8, bottom: 24),
-        itemCount: state.displayPosts.length,
-        itemBuilder: (context, index) {
-          final post = state.displayPosts[index];
-          return PostCard(
-            post: post,
-            onTap: () {
-              context.read<ForumCubit>().selectPost(post);
+        if (displayPosts.isEmpty) {
+          return _buildEmptyState(context, state);
+        }
+
+        return RefreshIndicator(
+          color: AppColors.accentPrimary,
+          onRefresh: () async {
+            await context.read<ForumCubit>().loadPosts();
+          },
+          child: ListView.builder(
+            padding: const EdgeInsets.only(top: 8, bottom: 24),
+            itemCount: displayPosts.length,
+            itemBuilder: (context, index) {
+              final post = displayPosts[index];
+              return PostCard(
+                post: post,
+                onTap: () {
+                  context.read<ForumCubit>().selectPost(post);
+                },
+              );
             },
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 
