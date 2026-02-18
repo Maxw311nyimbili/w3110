@@ -124,7 +124,7 @@ class GeneralCommentsView extends StatelessWidget {
                             authorId: comment.authorId,
                             authorName: comment.authorName,
                             authorRole: CommentRole.community, 
-                            commentType: CommentType.experience, // Defaulting for general comments
+                            commentType: CommentType.general, // Correct type for post-level discussions
                             text: comment.content,
                             createdAt: comment.createdAt,
                             syncStatus: comment.syncStatus,
@@ -146,7 +146,7 @@ class GeneralCommentsView extends StatelessWidget {
                 // ========== REPLY INPUT ==========
                 const Divider(height: 1, color: AppColors.borderLight),
                 ReplyInputFieldForModal(
-                  lineId: 'general', // Backend now handles this by mapping internally
+                  isGeneral: true,
                   postId: post.id,
                 ), 
               ],

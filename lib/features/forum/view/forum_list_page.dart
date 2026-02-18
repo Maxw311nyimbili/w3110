@@ -1,4 +1,5 @@
 import 'package:cap_project/core/theme/app_colors.dart';
+import 'package:auth_repository/auth_repository.dart';
 import 'package:cap_project/core/theme/app_text_styles.dart';
 import 'package:cap_project/features/forum/cubit/forum_cubit.dart';
 import 'package:cap_project/features/forum/cubit/forum_state.dart';
@@ -19,6 +20,7 @@ class ForumListPage extends StatelessWidget {
     return BlocProvider(
       create: (context) => ForumCubit(
         forumRepository: context.read<ForumRepository>(),
+        authRepository: context.read<AuthRepository>(),
       )..initialize(),
       child: const ForumListView(),
     );

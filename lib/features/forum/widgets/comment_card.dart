@@ -19,16 +19,21 @@ class CommentCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final roleIconInfo = _getRoleIconInfo(comment.authorRole);
     final typeLabel = comment.commentType != CommentType.general ? comment.typeLabel : null;
-    final isExpert = comment.authorRole == CommentRole.clinician;
+    final isExpert = comment.authorRole == CommentRole.clinician || comment.authorRole == CommentRole.supportPartner;
+    final isClinician = comment.authorRole == CommentRole.clinician;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: Container(
         decoration: BoxDecoration(
-          color: isExpert ? AppColors.success.withOpacity(0.04) : AppColors.backgroundSurface,
+          color: isExpert 
+              ? (isClinician ? AppColors.success.withOpacity(0.04) : AppColors.accentPrimary.withOpacity(0.04))
+              : AppColors.backgroundSurface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isExpert ? AppColors.success.withOpacity(0.15) : AppColors.borderLight,
+            color: isExpert 
+                ? (isClinician ? AppColors.success.withOpacity(0.15) : AppColors.accentPrimary.withOpacity(0.15))
+                : AppColors.borderLight,
             width: isExpert ? 1.5 : 1,
           ),
         ),
@@ -52,7 +57,9 @@ class CommentCard extends StatelessWidget {
                   child: Icon(
                     roleIconInfo, 
                     size: 18, 
-                    color: isExpert ? AppColors.success : AppColors.textSecondary,
+                    color: isExpert 
+                        ? (isClinician ? AppColors.success : AppColors.accentPrimary)
+                        : AppColors.textSecondary,
                   ),
                 ),
                 if (isExpert)
@@ -87,7 +94,9 @@ class CommentCard extends StatelessWidget {
                         comment.authorName,
                         style: AppTextStyles.labelMedium.copyWith(
                           fontWeight: FontWeight.w700,
-                          color: isExpert ? AppColors.success : AppColors.textPrimary,
+                          color: isExpert 
+                              ? (isClinician ? AppColors.success : AppColors.accentPrimary)
+                              : AppColors.textPrimary,
                         ),
                       ),
                       if (isExpert) ...[
@@ -99,9 +108,9 @@ class CommentCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
-                            'Expert',
+                            isClinician ? 'Expert' : 'Support',
                             style: AppTextStyles.caption.copyWith(
-                              color: AppColors.success,
+                              color: isClinician ? AppColors.success : AppColors.accentPrimary,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -121,7 +130,9 @@ class CommentCard extends StatelessWidget {
                     Text(
                       comment.authorProfession!,
                       style: AppTextStyles.caption.copyWith(
-                        color: isExpert ? AppColors.success : AppColors.textSecondary,
+                        color: isExpert 
+                            ? (isClinician ? AppColors.success : AppColors.accentPrimary)
+                            : AppColors.textSecondary,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -177,6 +188,7 @@ class CommentCard extends StatelessWidget {
       case CommentRole.clinician: return Icons.local_hospital_outlined;
       case CommentRole.mother: return Icons.face_4_outlined;
       case CommentRole.community: return Icons.person_outline;
+      case CommentRole.supportPartner: return Icons.handshake_outlined;
       default: return Icons.chat_bubble_outline_rounded;
     }
   }

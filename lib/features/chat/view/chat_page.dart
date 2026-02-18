@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:auth_repository/auth_repository.dart';
 import 'package:chat_repository/chat_repository.dart';
 import 'package:cap_project/app/view/app_router.dart';
 import 'package:cap_project/core/locale/cubit/locale_cubit.dart';
@@ -120,6 +121,7 @@ class _ChatPageState extends State<ChatPage> {
         BlocProvider(
           create: (context) => ForumCubit(
             forumRepository: context.read<ForumRepository>(),
+            authRepository: context.read<AuthRepository>(),
           ),
         ),
       ],

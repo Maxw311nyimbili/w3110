@@ -197,6 +197,19 @@ class ForumDatabase extends _$ForumDatabase {
         .get();
   }
 
+  /// Get failed sync items (for retry)
+  Future<List<SyncQueueData>> getFailedSyncItems() async {
+    return (select(syncQueue)
+      ..where((item) => item.status.equals('failed'))
+      ..orderBy([
+            (item) => OrderingTerm(
+          expression: item.createdAt,
+          mode: OrderingMode.asc,
+        ),
+      ]))
+        .get();
+  }
+
   /// Update sync queue item status
   Future<int> updateSyncQueueStatus({
     required int id,
@@ -326,6 +339,16 @@ class ForumDatabase extends _$ForumDatabase {
   /// Insert a single line comment
   Future<int> insertLineComment(ForumLineCommentsCompanion comment) async {
     return into(forumLineComments).insert(comment);
+  }
+
+  /// Increment the comment count for a line
+  Future<void> incrementLineCommentCount(String lineId) async {
+    final line = await (select(forumAnswerLines)..where((l) => l.lineId.equals(lineId))).getSingleOrNull();
+    if (line != null) {
+      await (update(forumAnswerLines)..where((l) => l.lineId.equals(lineId))).write(
+        ForumAnswerLinesCompanion(commentCount: Value(line.commentCount + 1)),
+      );
+    }
   }
 }
 

@@ -4,16 +4,19 @@ import 'package:cap_project/core/theme/app_colors.dart';
 import 'package:cap_project/core/theme/app_text_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:cap_project/features/auth/cubit/cubit.dart';
 import 'package:cap_project/features/forum/cubit/forum_cubit.dart';
 
 class ReplyInputFieldForModal extends StatefulWidget {
-  final String lineId;
+  final String? lineId;
   final String? postId;
+  final bool isGeneral;
 
   const ReplyInputFieldForModal({
     super.key, 
-    required this.lineId,
+    this.lineId,
     this.postId,
+    this.isGeneral = false,
   });
 
   @override
@@ -44,12 +47,24 @@ class _ReplyInputFieldForModalState extends State<ReplyInputFieldForModal> {
 
     setState(() => _isPosting = true);
     try {
-      await context.read<ForumCubit>().postLineComment(
-        text: _textController.text,
-        commentType: _typeController.value,
-        lineId: widget.lineId,
-        postId: widget.postId,
-      );
+      if (widget.isGeneral) {
+        final authState = context.read<AuthCubit>().state;
+        final forumState = context.read<ForumCubit>().state;
+        final post = forumState.selectedPost!;
+        
+        await context.read<ForumCubit>().addComment(
+          postId: post.id.isEmpty ? post.localId : post.id,
+          content: _textController.text,
+          authorId: authState.user?.id ?? 'guest_${DateTime.now().millisecondsSinceEpoch}',
+          authorName: authState.user?.displayName ?? 'Guest',
+        );
+      } else {
+        await context.read<ForumCubit>().postLineComment(
+          text: _textController.text,
+          commentType: _typeController.value,
+          lineId: widget.lineId,
+        );
+      }
       _textController.clear();
       if (mounted) FocusScope.of(context).unfocus();
     } catch (e) {
@@ -67,51 +82,53 @@ class _ReplyInputFieldForModalState extends State<ReplyInputFieldForModal> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Type Selection (Horizontal Pills)
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: ValueListenableBuilder<String>(
-              valueListenable: _typeController,
-              builder: (context, selectedType, child) {
-                return Row(
-                  children: [
-                    _TypeChoiceChip(
-                      label: 'Experience',
-                      icon: Icons.face_4_outlined,
-                      value: 'experience',
-                      groupValue: selectedType,
-                      onSelected: (val) => _typeController.value = val,
-                    ),
-                    const SizedBox(width: 8),
-                    _TypeChoiceChip(
-                      label: 'Clinical',
-                      icon: Icons.local_hospital_outlined,
-                      value: 'clinical',
-                      groupValue: selectedType,
-                      onSelected: (val) => _typeController.value = val,
-                    ),
-                    const SizedBox(width: 8),
-                    _TypeChoiceChip(
-                      label: 'Evidence',
-                      icon: Icons.library_books_outlined,
-                      value: 'evidence',
-                      groupValue: selectedType,
-                      onSelected: (val) => _typeController.value = val,
-                    ),
-                    const SizedBox(width: 8),
-                    _TypeChoiceChip(
-                      label: 'Concern',
-                      icon: Icons.help_outline_rounded,
-                      value: 'concern',
-                      groupValue: selectedType,
-                      onSelected: (val) => _typeController.value = val,
-                    ),
-                  ],
-                );
-              },
+          // Type Selection (Horizontal Pills) - Hide for general comments
+          if (!widget.isGeneral) ...[
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: ValueListenableBuilder<String>(
+                valueListenable: _typeController,
+                builder: (context, selectedType, child) {
+                  return Row(
+                    children: [
+                      _TypeChoiceChip(
+                        label: 'Experience',
+                        icon: Icons.face_4_outlined,
+                        value: 'experience',
+                        groupValue: selectedType,
+                        onSelected: (val) => _typeController.value = val,
+                      ),
+                      const SizedBox(width: 8),
+                      _TypeChoiceChip(
+                        label: 'Clinical',
+                        icon: Icons.local_hospital_outlined,
+                        value: 'clinical',
+                        groupValue: selectedType,
+                        onSelected: (val) => _typeController.value = val,
+                      ),
+                      const SizedBox(width: 8),
+                      _TypeChoiceChip(
+                        label: 'Evidence',
+                        icon: Icons.library_books_outlined,
+                        value: 'evidence',
+                        groupValue: selectedType,
+                        onSelected: (val) => _typeController.value = val,
+                      ),
+                      const SizedBox(width: 8),
+                      _TypeChoiceChip(
+                        label: 'Concern',
+                        icon: Icons.help_outline_rounded,
+                        value: 'concern',
+                        groupValue: selectedType,
+                        onSelected: (val) => _typeController.value = val,
+                      ),
+                    ],
+                  );
+                },
+              ),
             ),
-          ),
-          const SizedBox(height: 12),
+            const SizedBox(height: 12),
+          ],
 
           // Input Row
           Row(
@@ -129,7 +146,7 @@ class _ReplyInputFieldForModalState extends State<ReplyInputFieldForModal> {
                     maxLines: 4,
                     style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary),
                     decoration: InputDecoration(
-                      hintText: 'Share your perspective...',
+                      hintText: widget.isGeneral ? 'Add to the discussion...' : 'Share your perspective...',
                       hintStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.textTertiary),
                       border: InputBorder.none,
                       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),

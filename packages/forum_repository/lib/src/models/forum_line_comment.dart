@@ -7,6 +7,7 @@ enum CommentRole {
   clinician,
   mother,
   community,
+  supportPartner,
   unknown,
 }
 
@@ -60,6 +61,7 @@ class ForumLineComment extends Equatable {
       case CommentRole.clinician: return 'Clinician';
       case CommentRole.mother: return 'Mother';
       case CommentRole.community: return 'Community';
+      case CommentRole.supportPartner: return 'Support Partner';
       default: return '';
     }
   }
@@ -77,7 +79,7 @@ class ForumLineComment extends Equatable {
   factory ForumLineComment.fromJson(Map<String, dynamic> json) {
     return ForumLineComment(
       id: json['comment_id'] as String,
-      lineId: json['line_id'] as String,
+      lineId: (json['line_id'] ?? '').toString(),
       authorId: json['author_id'] as String,
       authorName: json['author_name'] as String,
       authorRole: _parseRole(json['author_role'] as String?),
@@ -94,12 +96,12 @@ class ForumLineComment extends Equatable {
   }
 
   static CommentRole _parseRole(String? role) {
-    switch (role?.toLowerCase()) {
-      case 'clinician': return CommentRole.clinician;
-      case 'mother': return CommentRole.mother;
-      case 'community': return CommentRole.community;
-      default: return CommentRole.community;
-    }
+    final r = role?.toLowerCase() ?? '';
+    if (r == 'clinician') return CommentRole.clinician;
+    if (r == 'mother') return CommentRole.mother;
+    if (r == 'support_partner' || r == 'supportpartner') return CommentRole.supportPartner;
+    if (r == 'community') return CommentRole.community;
+    return CommentRole.community;
   }
   
   static CommentType _parseType(String? type) {

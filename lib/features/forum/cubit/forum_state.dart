@@ -15,6 +15,11 @@ enum ForumView {
   detail,
 }
 
+enum PostFilter {
+  all,    // Show all community posts
+  mine,   // Show only user's posts
+}
+
 /// Immutable forum state - manages posts, comments, and sync
 class ForumState extends Equatable {
   const ForumState({
@@ -31,6 +36,8 @@ class ForumState extends Equatable {
     this.selectedLineId,
     this.lineComments = const [],
     this.activeFilter = 'all',
+    
+    this.postFilter = PostFilter.all,
     
     this.error,
     this.isSyncing = false,
@@ -54,6 +61,9 @@ class ForumState extends Equatable {
   final String? selectedLineId; // Currently tappable line
   final List<ForumLineComment> lineComments; // Comments for the selected line
   final String activeFilter; // 'all', 'clinician', etc.
+  
+  // Post filtering
+  final PostFilter postFilter;
   
   final String? error;
   final bool isSyncing;
@@ -89,6 +99,8 @@ class ForumState extends Equatable {
     List<ForumLineComment>? lineComments,
     String? activeFilter,
     
+    PostFilter? postFilter,
+    
     String? error,
     bool? isSyncing,
     bool? hasPendingSync,
@@ -108,6 +120,8 @@ class ForumState extends Equatable {
       selectedLineId: selectedLineId ?? this.selectedLineId, 
       lineComments: lineComments ?? this.lineComments,
       activeFilter: activeFilter ?? this.activeFilter,
+      
+      postFilter: postFilter ?? this.postFilter,
       
       error: error,
       isSyncing: isSyncing ?? this.isSyncing,
@@ -136,6 +150,7 @@ class ForumState extends Equatable {
       selectedLineId: clearLineId ? null : (selectedLineId ?? this.selectedLineId),
       lineComments: lineComments,
       activeFilter: activeFilter,
+      postFilter: postFilter,
       error: error,
       isSyncing: isSyncing,
       hasPendingSync: hasPendingSync,
@@ -195,6 +210,7 @@ class ForumState extends Equatable {
     selectedLineId,
     lineComments,
     activeFilter,
+    postFilter,
     error,
     isSyncing,
     hasPendingSync,

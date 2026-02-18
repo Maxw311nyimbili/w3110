@@ -20,10 +20,26 @@ class SyncManager {
   /// Process sync queue - upload pending changes to backend
   /// Uses exponential backoff for failed items
   Future<void> processSyncQueue() async {
+    // Get pending items AND failed items that are ready for retry
     final pendingItems = await _database.getPendingSyncItems();
-    print('DEBUG: SyncManager.processSyncQueue - found ${pendingItems.length} pending items');
+    final failedItems = await _database.getFailedSyncItems();
+    
+    // Filter failed items where nextRetryAt is in the past or null
+    final now = DateTime.now();
+    final retryableFailedItems = failedItems.where((item) => 
+      item.nextRetryAt == null || item.nextRetryAt!.isBefore(now)
+    ).toList();
 
-    for (final item in pendingItems) {
+    final allItems = [...pendingItems, ...retryableFailedItems];
+    
+    if (allItems.isEmpty) {
+      print('DEBUG: SyncManager.processSyncQueue - nothing to sync');
+      return;
+    }
+
+    print('DEBUG: SyncManager.processSyncQueue - found ${allItems.length} total items to process');
+
+    for (final item in allItems) {
       try {
         print('DEBUG: SyncManager.processSyncQueue - processing item: ${item.entityType} ${item.action} for ${item.entityId}');
         // Mark as syncing
@@ -81,7 +97,7 @@ class SyncManager {
       // Response: { "id": "server-uuid", ... }
         final postModel = ForumPost.fromDatabase(post);
         final response = await _apiClient.post(
-          '/forum/posts',
+          '/api/v1/forum/posts',
           data: {
             'title': postModel.title,
             'content': postModel.content,
@@ -103,7 +119,7 @@ class SyncManager {
       case 'update':
       // Backend endpoint: PUT /forum/posts/{id}
         await _apiClient.put(
-          '/forum/posts/${post.serverId}',
+          '/api/v1/forum/posts/${post.serverId}',
           data: {
             'title': post.title,
             'content': post.content,
@@ -118,7 +134,7 @@ class SyncManager {
 
       case 'delete':
       // Backend endpoint: DELETE /forum/posts/{id}
-        await _apiClient.delete('/forum/posts/${post.serverId}');
+        await _apiClient.delete('/api/v1/forum/posts/${post.serverId}');
         await _database.deletePost(post.localId);
         break;
 
@@ -141,13 +157,16 @@ class SyncManager {
       // Response: { "id": "server-uuid", ... }
 
       // Get parent post to find server ID
-        final post = await _database.getPostByLocalId(comment.postId);
+        // The postId in the comment might be a localId or a serverId
+        final post = await _database.getPostByLocalId(comment.postId) ?? 
+                    await _database.getPostByServerId(comment.postId);
+                    
         if (post == null || post.serverId.isEmpty) {
-          throw SyncException('Parent post not synced yet');
+          throw SyncException('Parent post not synced yet or not found: ${comment.postId}');
         }
 
         final response = await _apiClient.post(
-          '/forum/posts/${post.serverId}/comments',
+          '/api/v1/forum/posts/${post.serverId}/comments',
           data: {
             'content': comment.content,
             'author_id': comment.authorId,
@@ -166,7 +185,7 @@ class SyncManager {
       case 'update':
       // Backend endpoint: PUT /forum/comments/{id}
         await _apiClient.put(
-          '/forum/comments/${comment.serverId}',
+          '/api/v1/forum/comments/${comment.serverId}',
           data: {
             'content': comment.content,
           },
@@ -180,7 +199,7 @@ class SyncManager {
 
       case 'delete':
       // Backend endpoint: DELETE /forum/comments/{id}
-        await _apiClient.delete('/forum/comments/${comment.serverId}');
+        await _apiClient.delete('/api/v1/forum/comments/${comment.serverId}');
         // TODO: Implement delete in database
         break;
 
@@ -226,7 +245,7 @@ class SyncManager {
           : <String, dynamic>{};
 
       final response = await _apiClient.get(
-        '/forum/posts',
+        '/api/v1/forum/posts',
         queryParameters: queryParams,
       );
 
@@ -246,7 +265,7 @@ class SyncManager {
   /// Response: { "comments": [...] }
   Future<List<ForumComment>> fetchCommentsFromServer(String postId) async {
     try {
-      final response = await _apiClient.get('/forum/posts/$postId/comments');
+      final response = await _apiClient.get('/api/v1/forum/posts/$postId/comments');
 
       final List<dynamic> commentsJson =
       response.data['comments'] as List<dynamic>;

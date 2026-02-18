@@ -1,7 +1,10 @@
 // lib/features/forum/cubit/forum_cubit.dart
 
 import 'dart:async';
+import 'dart:convert';
+import 'package:auth_repository/auth_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:forum_repository/forum_repository.dart'; // Unprefixed for ForumPost/ForumComment availability
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
@@ -11,34 +14,31 @@ import 'forum_state.dart';
 class ForumCubit extends Cubit<ForumState> {
   ForumCubit({
     required ForumRepository forumRepository,
+    required AuthRepository authRepository,
   })  : _forumRepository = forumRepository,
+        _authRepository = authRepository,
         _uuid = const Uuid(),
         super(const ForumState());
 
   final ForumRepository _forumRepository;
+  final AuthRepository _authRepository;
   final Uuid _uuid;
   Timer? _syncTimer;
 
-  /// Initialize forum - load cached posts and start sync
+  /// Initialize forum - load posts from server
   Future<void> initialize() async {
     try {
       emit(state.copyWith(status: ForumStatus.loading));
 
-      // Load posts from local database
-      var posts = await _forumRepository.getLocalPosts();
+      // Fetch all posts from server (community feed)
+      final allPosts = await _forumRepository.fetchAllPostsFromServer();
       
-      // Demo data seeding disabled - start with clean slate
-      // if (posts.isEmpty) {
-      //   await _forumRepository.seedDemoData();
-      //   posts = await _forumRepository.getLocalPosts();
-      // }
-
       // Check if there are pending sync items
       final hasPendingSync = await _forumRepository.hasPendingSyncItems();
 
       emit(state.copyWith(
         status: ForumStatus.success,
-        posts: posts, // No need to map if types are same now!
+        posts: allPosts,
         hasPendingSync: hasPendingSync,
       ));
 
@@ -74,25 +74,71 @@ class ForumCubit extends Cubit<ForumState> {
     }
   }
 
-  /// Load posts (from local DB, then sync with backend)
+
+  /// Load posts (fetch all from server for community feed)
   Future<void> loadPosts() async {
     try {
       emit(state.copyWith(status: ForumStatus.loading));
 
-      final posts = await _forumRepository.getLocalPosts();
+      // Fetch all posts from server (community feed)
+      final allPosts = await _forumRepository.fetchAllPostsFromServer();
 
       emit(state.copyWith(
         status: ForumStatus.success,
-        posts: posts,
+        posts: allPosts,
       ));
-
-      // Background sync to get latest from server
-      syncWithBackend();
     } catch (e) {
       emit(state.copyWith(
         status: ForumStatus.error,
         error: 'Failed to load posts: ${e.toString()}',
       ));
+    }
+  }
+
+  /// Toggle post filter between all posts and user's posts
+  void setPostFilter(PostFilter filter) {
+    emit(state.copyWith(postFilter: filter));
+  }
+
+  /// Get filtered posts based on current filter
+  List<ForumPost> getFilteredPosts(String currentUserId) {
+    print('🔍 Filter: ${state.postFilter}, User ID: $currentUserId');
+    if (state.postFilter == PostFilter.mine) {
+      final myPosts = state.posts.where((post) => post.authorId == currentUserId).toList();
+      print('✅ My Posts: ${myPosts.length} out of ${state.posts.length} total');
+      return myPosts;
+    }
+    print('✅ All Posts: ${state.posts.length}');
+    return state.posts; // Show all posts
+  }
+
+  /// Get current user ID from auth repository
+  Future<String> getCurrentUserId() async {
+    final user = await _authRepository.getCurrentUser();
+    return user?.id ?? '';
+  }
+
+  String? _cachedUserId;
+
+  /// Cache user ID for filtering
+  Future<void> _cacheUserId() async {
+    try {
+      const secureStorage = FlutterSecureStorage();
+      final userDataJson = await secureStorage.read(key: 'medlink_user_data');
+      
+      print('📦 Read from secure storage: ${userDataJson?.substring(0, 50)}...'); // First 50 chars
+      
+      if (userDataJson != null && userDataJson.isNotEmpty) {
+        final userData = jsonDecode(userDataJson) as Map<String, dynamic>;
+        _cachedUserId = userData['id'] as String?;
+        print('✅ Cached user ID: $_cachedUserId');
+      } else {
+        print('❌ No user data in secure storage');
+      }
+    } catch (e, stack) {
+      print('❌ Error caching user ID: $e');
+      print('Stack: ${stack.toString().substring(0, 200)}');
+      _cachedUserId = null;
     }
   }
 
@@ -123,28 +169,37 @@ class ForumCubit extends Cubit<ForumState> {
         currentAnswerId: postId,
       ));
 
-      // Load sophisticated lines from repo
-      await loadAnswerLines(postId);
-      
-      // Load general discussion comments for this post
-      final generalComments = await _forumRepository.getCommentsForLine(
-        'general', 
-        postId: postId,
-      );
+      // Load authoritative lines from repository (server or cache)
+      List<ForumAnswerLine> lines = [];
+      try {
+        final serverPostId = int.tryParse(post.id);
+        if (serverPostId != null) {
+          lines = await _forumRepository.getLinesForPost(serverPostId);
+        } else {
+          lines = await _forumRepository.getLinesForAnswer(post.id.isNotEmpty ? post.id : post.localId);
+        }
+      } catch (e) {
+        print('DEBUG: Error matching lines: $e');
+        // Fallback to local parsing
+        lines = _parsePostContentToLines(post);
+      }
 
+      if (lines.isEmpty) {
+        lines = _parsePostContentToLines(post);
+      }
+
+      print('DEBUG: Loaded ${lines.length} lines from backend');
+      for (final line in lines) {
+        print('DEBUG: Line ${line.lineId} has commentCount: ${line.commentCount}');
+      }
+      
       emit(state.copyWith(
         status: ForumStatus.success,
-        comments: comments, // Keep old comments too if needed
-        lineComments: generalComments, // This is what the drawer uses
+        comments: comments,
         currentAnswerId: postId,
+        answerLines: lines,
+        lineComments: const [], // Clear line comments when selecting new post
       ));
-
-      // Fallback: If repo has no lines, parse content (legacy/simple posts)
-      if (state.answerLines.isEmpty) {
-        emit(state.copyWith(
-          answerLines: _parsePostContentToLines(post),
-        ));
-      }
 
       // Background sync comments
       _syncComments(postId);
@@ -575,32 +630,20 @@ class ForumCubit extends Cubit<ForumState> {
     required String text,
     required String commentType,
     String? lineId,
-    String? postId,
   }) async {
     final effectiveLineId = lineId ?? state.selectedLineId;
     if (effectiveLineId == null) return;
     
-    // Handle "general" comments by redirection to addComment if needed,
-    // or keep using postLineComment if backend supports it.
-    // For now, let's assume we want to support typed comments everywhere.
-    
     try {
-      // Optimistic update could happen here, but for simplicity we await response
-      
       final newComment = await _forumRepository.postLineComment(
         lineId: effectiveLineId,
         text: text,
         commentType: commentType,
-        postId: postId,
       );
       
-      // Update local state by appending new comment (if matches filter or filter is all)
-      // Actually, simplest is to just append it if it matches, assuming server sync handles it.
-      // For now, let's just append it to UI list for instant feedback.
+      final updatedLineComments = List<ForumLineComment>.from(state.lineComments)..add(newComment);
       
-      final updatedComments = [...state.lineComments, newComment];
-      
-      // Also update line comment count locally
+      // Also update line comment count locally in the answerLines list
       final updatedLines = state.answerLines.map((line) {
         if (line.lineId == effectiveLineId) {
           return line.copyWith(commentCount: line.commentCount + 1);
@@ -609,17 +652,14 @@ class ForumCubit extends Cubit<ForumState> {
       }).toList();
       
       emit(state.copyWith(
-        lineComments: updatedComments,
+        lineComments: updatedLineComments,
         answerLines: updatedLines,
       ));
-      
     } catch (e) {
-      emit(state.copyWith(
-        status: ForumStatus.error,
-        error: 'Failed to post comment: ${e.toString()}',
-      ));
+      emit(state.copyWith(error: 'Failed to post comment: ${e.toString()}'));
     }
   }
+  // End of comments section
 
   /// Clear error state
   void clearError() {
@@ -631,7 +671,7 @@ class ForumCubit extends Cubit<ForumState> {
     final content = post.content;
     final postId = post.id.isEmpty ? post.localId : post.id;
     
-    // Simple sentence splitter (can be improved with regex)
+    // Relaxed split: lookbehind for .!? + space
     final sentences = content
         .split(RegExp(r'(?<=[.!?])\s+'))
         .where((s) => s.trim().isNotEmpty)
@@ -643,10 +683,10 @@ class ForumCubit extends Cubit<ForumState> {
       return ForumAnswerLine(
         lineId: '${postId}_L$index',
         answerId: postId,
-        lineNumber: index + 1,
+        lineNumber: index, // 0-indexed as per backend change
         text: text,
         discussionTitle: text.length > 30 ? '${text.substring(0, 30)}...' : text,
-        commentCount: 0, // In a real app, fetch these counts
+        commentCount: 0,
       );
     }).toList();
   }

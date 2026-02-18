@@ -131,10 +131,21 @@ class ForumRepository {
     await _conflictResolver.mergeServerPosts(serverPosts);
   }
 
+  /// Fetch all posts from server (for community feed)
+  Future<List<ForumPost>> fetchAllPostsFromServer() async {
+    try {
+      final response = await _apiClient.get('/api/v1/forum/posts');
+      final List<dynamic> postsJson = response.data['posts'] as List<dynamic>;
+      return postsJson.map((json) => ForumPost.fromJson(json as Map<String, dynamic>)).toList();
+    } catch (e) {
+      throw ForumException('Failed to fetch posts: ${e.toString()}');
+    }
+  }
+
   /// Search for posts
   Future<List<ForumPost>> searchPosts(String query) async {
     try {
-      final response = await _apiClient.get('/forum/search', queryParameters: {'q': query});
+      final response = await _apiClient.get('/api/v1/forum/search', queryParameters: {'q': query});
       final List<dynamic> postsJson = response.data['posts'] as List<dynamic>;
       return postsJson.map((json) => ForumPost.fromJson(json as Map<String, dynamic>)).toList();
     } catch (e) {
@@ -146,7 +157,7 @@ class ForumRepository {
   Future<Map<String, String>> preparePost(String query, String content) async {
     try {
       final response = await _apiClient.post(
-        '/forum/prepare',
+        '/api/v1/forum/prepare',
         data: {'query': query, 'content': content},
       );
       return {
@@ -175,7 +186,7 @@ class ForumRepository {
       }
       
       // 2. Hit API
-      final response = await _apiClient.post('/forum/posts/$postId/like');
+      final response = await _apiClient.post('/api/v1/forum/posts/$postId/like');
       
       if (response.statusCode == 200) {
         final serverLiked = response.data['liked'] as bool;
@@ -196,7 +207,7 @@ class ForumRepository {
   /// Toggle like on comment
   Future<void> toggleCommentLike(String commentId) async {
     try {
-      await _apiClient.post('/forum/comments/$commentId/like');
+      await _apiClient.post('/api/v1/forum/comments/$commentId/like');
     } catch (e) {
       throw ForumException('Failed to like comment: ${e.toString()}');
     }
@@ -205,7 +216,7 @@ class ForumRepository {
   /// Flag/Report a post
   Future<void> flagPost(String postId) async {
     try {
-      await _apiClient.post('/forum/posts/$postId/flag');
+      await _apiClient.post('/api/v1/forum/posts/$postId/flag');
     } catch (e) {
       throw ForumException('Failed to flag post: ${e.toString()}');
     }
@@ -228,28 +239,61 @@ class ForumRepository {
   // Use real backend now
   final bool _useMock = false; 
 
+  /// Get or create lines for a general forum post
+  Future<List<ForumAnswerLine>> getLinesForPost(int postId) async {
+    // 1. Try server first for counts
+    try {
+      print('DEBUG: Fetching lines for post $postId from server...');
+      final response = await _apiClient.get('/api/v1/forum/posts/$postId/lines');
+      final list = response.data['lines'] as List;
+      
+      print('DEBUG: Server returned ${list.length} lines');
+      for (var lineJson in list) {
+        print('DEBUG: Server line ${lineJson['line_id']}: commentCount = ${lineJson['comment_count']}');
+      }
+      
+      final lines = list.map((e) => ForumAnswerLine.fromJson(e as Map<String, dynamic>)).toList();
+      
+      print('DEBUG: Parsed ${lines.length} ForumAnswerLine objects');
+      for (var line in lines) {
+        print('DEBUG: Parsed line ${line.lineId}: commentCount = ${line.commentCount}');
+      }
+
+      // 2. Update local cache
+      await _database.batchInsertLines(lines.map((l) => ForumAnswerLinesCompanion.insert(
+        lineId: l.lineId,
+        postId: Value(postId),
+        lineNumber: l.lineNumber,
+        textContent: l.text,
+        discussionTitle: Value(l.discussionTitle),
+        commentCount: Value(l.commentCount),
+      )).toList());
+      
+      print('DEBUG: Updated local cache with ${lines.length} lines');
+
+      return lines;
+    } catch (e) {
+      print('DEBUG: getLinesForPost - server failed, falling back to local: $e');
+      // 3. Fallback to local cache
+      final localLines = await _database.getLinesForPost(postId);
+      if (localLines.isNotEmpty) {
+        return localLines.map((l) => ForumAnswerLine(
+          lineId: l.lineId,
+          answerId: l.answerId ?? '',
+          lineNumber: l.lineNumber,
+          text: l.textContent,
+          discussionTitle: l.discussionTitle ?? '',
+          commentCount: l.commentCount,
+        )).toList();
+      }
+      rethrow;
+    }
+  }
+
   /// Publish (or get) lines for a specific answer
   /// Checks local cache first, then server
   Future<List<ForumAnswerLine>> getLinesForAnswer(String answerId) async {
-    // 1. Check local cache
-    final localLines = await _database.getLinesForAnswer(answerId);
-    if (localLines.isNotEmpty) {
-      print('DEBUG: getLinesForAnswer - using local cache for $answerId');
-      return localLines.map((l) => ForumAnswerLine(
-        lineId: l.lineId,
-        answerId: l.answerId ?? '',
-        lineNumber: l.lineNumber,
-        text: l.textContent,
-        discussionTitle: l.discussionTitle ?? '',
-        commentCount: l.commentCount,
-      )).toList();
-    }
-
-    if (_useMock || answerId.startsWith('demo_')) {
-      await Future.delayed(const Duration(milliseconds: 800));
-      return _generateMockLines(answerId);
-    }
-    
+    // 1. Try server first
     try {
       final response = await _apiClient.post(
         '/api/v1/forum/answers/publish',
@@ -258,7 +302,7 @@ class ForumRepository {
       final list = response.data['lines'] as List;
       final lines = list.map((e) => ForumAnswerLine.fromJson(e as Map<String, dynamic>)).toList();
 
-      // 2. Cache locally
+      // 2. Update local cache
       await _database.batchInsertLines(lines.map((l) => ForumAnswerLinesCompanion.insert(
         lineId: l.lineId,
         answerId: Value(l.answerId),
@@ -270,6 +314,19 @@ class ForumRepository {
 
       return lines;
     } catch (e) {
+      print('DEBUG: getLinesForAnswer - server failed, falling back to local: $e');
+      // 3. Fallback to local cache
+      final localLines = await _database.getLinesForAnswer(answerId);
+      if (localLines.isNotEmpty) {
+        return localLines.map((l) => ForumAnswerLine(
+          lineId: l.lineId,
+          answerId: l.answerId ?? '',
+          lineNumber: l.lineNumber,
+          text: l.textContent,
+          discussionTitle: l.discussionTitle ?? '',
+          commentCount: l.commentCount,
+        )).toList();
+      }
       rethrow;
     }
   }
@@ -279,42 +336,19 @@ class ForumRepository {
   Future<List<ForumLineComment>> getCommentsForLine(
     String lineId, {
     String filter = 'all',
-    String? postId,
   }) async {
-    // 1. Check local cache
-    final localComments = await _database.getCommentsForLine(lineId);
-    if (localComments.isNotEmpty) {
-      print('DEBUG: getCommentsForLine - using local cache for $lineId');
-      return localComments.map((c) => ForumLineComment(
-        id: c.localId,
-        lineId: c.lineId,
-        authorId: c.authorId,
-        authorName: c.authorName,
-        authorRole: _parseAuthorRole(c.authorRole),
-        commentType: _parseCommentType(c.commentType),
-        text: c.content,
-        createdAt: c.createdAt,
-        syncStatus: _parseSyncStatus(c.syncStatus),
-      )).toList();
-    }
-
-    if (_useMock || lineId.startsWith('demo_')) {
-      await Future.delayed(const Duration(milliseconds: 600));
-      return _generateMockComments(lineId, filter);
-    }
-
+    // 1. Try server first
     try {
       final response = await _apiClient.get(
         '/api/v1/forum/lines/$lineId/comments',
         queryParameters: {
           'filter': filter,
-          if (postId != null) 'post_id': postId,
         },
       );
       final list = response.data['comments'] as List;
       final comments = list.map((e) => ForumLineComment.fromJson(e as Map<String, dynamic>)).toList();
 
-      // 2. Cache locally
+      // 2. Update local cache (batch insert)
       await _database.batchInsertLineComments(comments.map((c) => ForumLineCommentsCompanion.insert(
         localId: c.id,
         serverId: Value(c.id),
@@ -330,6 +364,22 @@ class ForumRepository {
 
       return comments;
     } catch (e) {
+      print('DEBUG: getCommentsForLine - server failed, falling back to local: $e');
+      // 3. Fallback to local cache
+      final localComments = await _database.getCommentsForLine(lineId);
+      if (localComments.isNotEmpty) {
+        return localComments.map((c) => ForumLineComment(
+          id: c.localId,
+          lineId: c.lineId,
+          authorId: c.authorId,
+          authorName: c.authorName,
+          authorRole: _parseAuthorRole(c.authorRole),
+          commentType: _parseCommentType(c.commentType),
+          text: c.content,
+          createdAt: c.createdAt,
+          syncStatus: _parseSyncStatus(c.syncStatus),
+        )).toList();
+      }
       rethrow;
     }
   }
@@ -339,7 +389,6 @@ class ForumRepository {
     required String lineId,
     required String text,
     required String commentType,
-    String? postId,
   }) async {
     if (_useMock) {
       await Future.delayed(const Duration(seconds: 1));
@@ -362,7 +411,6 @@ class ForumRepository {
         data: {
           'text': text,
           'comment_type': commentType,
-          if (postId != null) 'post_id': postId,
         },
       );
       final comment = ForumLineComment.fromJson(response.data as Map<String, dynamic>);
@@ -380,6 +428,9 @@ class ForumRepository {
         createdAt: comment.createdAt,
         syncStatus: const Value('synced'),
       ));
+      
+      // Update the comment count in the local database
+      await _database.incrementLineCommentCount(comment.lineId);
 
       return comment;
     } catch (e) {
@@ -391,12 +442,47 @@ class ForumRepository {
     }
   }
 
-  CommentRole _parseAuthorRole(String role) {
-    switch (role.toLowerCase()) {
-      case 'clinician': return CommentRole.clinician;
-      case 'mother': return CommentRole.mother;
-      default: return CommentRole.community;
+  /// Post a general comment to a forum post
+  Future<ForumComment> addPostComment({
+    required String postId,
+    required String content,
+    String? clientId,
+  }) async {
+    try {
+      final response = await _apiClient.post(
+        '/api/v1/forum/posts/$postId/comments',
+        data: {
+          'content': content,
+          if (clientId != null) 'client_id': clientId,
+        },
+      );
+      
+      final comment = ForumComment.fromJson(response.data as Map<String, dynamic>);
+      
+      // Save locally
+      await _database.insertComment(ForumCommentsCompanion.insert(
+        localId: comment.localId,
+        serverId: Value(comment.id),
+        postId: postId,
+        authorId: comment.authorId,
+        authorName: comment.authorName,
+        content: comment.content,
+        createdAt: comment.createdAt,
+        syncStatus: const Value('synced'),
+      ));
+      
+      return comment;
+    } catch (e) {
+      throw ForumException('Failed to post comment: ${e.toString()}');
     }
+  }
+
+  CommentRole _parseAuthorRole(String role) {
+    final r = role.toLowerCase();
+    if (r == 'clinician') return CommentRole.clinician;
+    if (r == 'mother') return CommentRole.mother;
+    if (r == 'support_partner' || r == 'supportpartner') return CommentRole.supportPartner;
+    return CommentRole.community;
   }
 
   SyncStatus _parseSyncStatus(String status) {

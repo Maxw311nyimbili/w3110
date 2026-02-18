@@ -38,7 +38,7 @@ class ForumAnswerLine extends Equatable {
   factory ForumAnswerLine.fromJson(Map<String, dynamic> json) {
     return ForumAnswerLine(
       lineId: json['line_id'] as String,
-      answerId: json['answer_id'] as String,
+      answerId: (json['answer_id'] ?? json['post_id'] ?? '').toString(),
       lineNumber: json['line_number'] as int,
       text: json['text'] as String,
       discussionTitle: json['discussion_title'] as String,
