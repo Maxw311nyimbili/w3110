@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:cap_project/features/chat/widgets/chat_input.dart';
 import 'package:cap_project/features/chat/widgets/message_bubble.dart';
 import 'package:cap_project/features/chat/widgets/thinking_indicator.dart';
@@ -5,10 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../cubit/cubit.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_shadows.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../app/view/app_router.dart';
 import '../../auth/cubit/cubit.dart';
 import '../../landing/widgets/welcome_drawer.dart';
+import '../../../core/widgets/entry_animation.dart';
 
 class ChatBody extends StatefulWidget {
   final bool isAudioMode;
@@ -171,9 +174,7 @@ class _ChatBodyState extends State<ChatBody> with SingleTickerProviderStateMixin
             BlocBuilder<ChatCubit, ChatState>(
               builder: (context, state) {
                 if (state.isTyping) {
-                  return state.loadingMessage != null
-                    ? ThinkingIndicator(message: state.loadingMessage!)
-                    : _buildTypingIndicator();
+                  return _buildTypingIndicator();
                 }
                 return const SizedBox.shrink();
               },
@@ -202,72 +203,86 @@ class _ChatBodyState extends State<ChatBody> with SingleTickerProviderStateMixin
       greeting = 'Good Evening,';
     }
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              minHeight: constraints.maxHeight,
-            ),
-            child: IntrinsicHeight(
-              child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const Spacer(), 
-                      Column(
+    return BlocBuilder<ChatCubit, ChatState>(
+      builder: (context, state) {
+        final displayGreeting = state.dynamicGreeting ?? greeting;
+
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight,
+                ),
+                child: IntrinsicHeight(
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 24,
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Text(
-                            greeting,
-                            textAlign: TextAlign.center,
-                            style: AppTextStyles.displayLarge.copyWith(
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: -1.5,
-                              color: AppColors.textPrimary,
-                              height: 1.1,
-                              fontSize: 40,
-                            ),
-                            key: ValueKey(greeting),
+                          const Spacer(),
+                          Column(
+                            children: [
+                              EntryAnimation(
+                                child: Text(
+                                  displayGreeting,
+                                  textAlign: TextAlign.center,
+                                  style: AppTextStyles.displayLarge.copyWith(
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: -1.5,
+                                    color: AppColors.textPrimary,
+                                    height: 1.1,
+                                    fontSize: 40,
+                                  ),
+                                  key: ValueKey(displayGreeting),
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              EntryAnimation(
+                                delay: const Duration(milliseconds: 200),
+                                child: Text(
+                                  'Your personal health guide.',
+                                  textAlign: TextAlign.center,
+                                  style: AppTextStyles.bodyLarge.copyWith(
+                                    color: AppColors.textSecondary,
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 12),
-                          Text(
-                            'Your personal health guide.',
-                            textAlign: TextAlign.center,
-                            style: AppTextStyles.bodyLarge.copyWith(
-                              color: AppColors.textSecondary,
-                              fontWeight: FontWeight.w500,
-                              fontSize: 16,
-                            ),
+                          const SizedBox(height: 56),
+                          AnimatedBuilder(
+                            animation: _breathingController,
+                            builder: (context, child) {
+                              return Transform.scale(
+                                scale: 0.98 + (0.02 * _breathingController.value),
+                                child: Opacity(
+                                  opacity: 0.5 + (0.5 * _breathingController.value),
+                                  child: child,
+                                ),
+                              );
+                            },
+                            child: _buildDailyFact(context),
                           ),
+                          const Spacer(),
                         ],
                       ),
-                      const SizedBox(height: 56),
-                      AnimatedBuilder(
-                        animation: _breathingController,
-                        builder: (context, child) {
-                          return Transform.scale(
-                            scale: 0.98 + (0.02 * _breathingController.value),
-                            child: Opacity(
-                              opacity: 0.5 + (0.5 * _breathingController.value),
-                              child: child,
-                            ),
-                          );
-                        },
-                        child: _buildDailyFact(context),
-                      ),
-                      const Spacer(), 
-                    ],
+                    ),
                   ),
                 ),
               ),
-            ),
-          ),
+            );
+          },
         );
-      }
+      },
     );
   }
 
@@ -307,7 +322,7 @@ class _ChatBodyState extends State<ChatBody> with SingleTickerProviderStateMixin
                   child: Icon(
                     Icons.format_quote_rounded,
                     size: 140,
-                    color: AppColors.accentPrimary.withOpacity(0.06),
+                    color: AppColors.brandDarkTeal.withOpacity(0.06),
                   ),
                 ),
               ),
@@ -318,7 +333,7 @@ class _ChatBodyState extends State<ChatBody> with SingleTickerProviderStateMixin
                     Text(
                       'DAILY INSIGHT',
                       style: AppTextStyles.labelSmall.copyWith(
-                        color: AppColors.accentPrimary,
+                        color: AppColors.brandDarkTeal,
                         fontWeight: FontWeight.w800,
                         letterSpacing: 2.0,
                         fontSize: 10,
@@ -328,13 +343,12 @@ class _ChatBodyState extends State<ChatBody> with SingleTickerProviderStateMixin
                     Text(
                       dailyFact,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
-                         fontFamily: 'Georgia', 
-                         fontSize: 22,
-                         height: 1.4,
-                         color: AppColors.textPrimary,
-                         fontWeight: FontWeight.w500,
-                         fontStyle: FontStyle.italic,
+                      style: AppTextStyles.bodyLarge.copyWith(
+                        fontSize: 20,
+                        height: 1.5,
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.w500,
+                        fontStyle: FontStyle.italic,
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -342,7 +356,7 @@ class _ChatBodyState extends State<ChatBody> with SingleTickerProviderStateMixin
                       width: 40,
                       height: 2,
                       decoration: BoxDecoration(
-                        color: AppColors.accentPrimary.withOpacity(0.3),
+                        color: AppColors.brandDarkTeal.withOpacity(0.25),
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -379,56 +393,9 @@ class _ChatBodyState extends State<ChatBody> with SingleTickerProviderStateMixin
   }
 
   Widget _buildTypingIndicator() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 12,
-        vertical: 8,
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 12,
-              vertical: 8,
-            ),
-            decoration: BoxDecoration(
-              color: AppColors.backgroundSurface,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _buildTypingDot(delay: 0),
-                const SizedBox(width: 4),
-                _buildTypingDot(delay: 100),
-                const SizedBox(width: 4),
-                _buildTypingDot(delay: 200),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTypingDot({required int delay}) {
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0.0, end: 1.0),
-      duration: const Duration(milliseconds: 500),
-      builder: (context, value, child) {
-        final paused = value < 0.33 || (value > 0.66 && value < 1.0);
-        return Opacity(
-          opacity: paused ? 0.4 : 1.0,
-          child: Container(
-            width: 6,
-            height: 6,
-            decoration: const BoxDecoration(
-              color: AppColors.textPrimary,
-              shape: BoxShape.circle,
-            ),
-          ),
-        );
-      },
+    return const Padding(
+      padding: EdgeInsets.fromLTRB(4, 4, 4, 4),
+      child: ThinkingIndicator(),
     );
   }
 
@@ -443,15 +410,9 @@ class _ChatBodyState extends State<ChatBody> with SingleTickerProviderStateMixin
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
-              color: AppColors.accentPrimary.withOpacity(0.95),
+              color: AppColors.brandDarkTeal.withOpacity(0.95),
               borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+              boxShadow: AppShadows.card,
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -475,46 +436,57 @@ class _ChatBodyState extends State<ChatBody> with SingleTickerProviderStateMixin
 
   Widget _buildFloatingSignInChip(BuildContext context) {
     return Center(
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () => WelcomeDrawer.show(context),
-          borderRadius: BorderRadius.circular(20),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: AppColors.backgroundSurface.withValues(alpha: 0.92),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: AppColors.accentPrimary.withValues(alpha: 0.2)),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.06),
-                  blurRadius: 12,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.auto_awesome_rounded, size: 14, color: AppColors.accentPrimary),
-                const SizedBox(width: 6),
-                Text(
-                  'Sign In',
-                  style: AppTextStyles.labelSmall.copyWith(
-                    color: AppColors.accentPrimary,
-                    fontWeight: FontWeight.bold,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: BackdropFilter(
+          filter: ColorFilter.mode(
+            Colors.transparent,
+            BlendMode.dst,
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () => WelcomeDrawer.show(context),
+              borderRadius: BorderRadius.circular(24),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.18),
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(
+                    color: AppColors.brandDarkTeal.withOpacity(0.22),
+                    width: 1,
                   ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.brandDarkTeal.withOpacity(0.06),
+                      blurRadius: 16,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 4),
-                Text(
-                  'to save history',
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: AppColors.textSecondary,
-                    fontSize: 11,
-                  ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Sign in',
+                      style: AppTextStyles.labelSmall.copyWith(
+                        color: AppColors.brandDarkTeal,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.2,
+                      ),
+                    ),
+                    const SizedBox(width: 5),
+                    Text(
+                      'to save history',
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: AppColors.textSecondary,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         ),

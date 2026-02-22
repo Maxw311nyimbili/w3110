@@ -12,6 +12,7 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/widgets/entry_animation.dart';
 
 class RefinedMessageBubble extends StatelessWidget {
   const RefinedMessageBubble({required this.message, super.key});
@@ -28,39 +29,41 @@ class RefinedMessageBubble extends StatelessWidget {
   }
 
   Widget _buildUserMessage(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(48, 8, 16, 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-            decoration: BoxDecoration(
-              color: AppColors.accentPrimary, // Warm Rust
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(24),
-                topRight: Radius.circular(4),
-                bottomLeft: Radius.circular(24),
-                bottomRight: Radius.circular(24),
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.accentPrimary.withOpacity(0.15),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
+    return EntryAnimation(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(48, 8, 16, 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+              decoration: BoxDecoration(
+                color: AppColors.brandDarkTeal,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(24),
+                  topRight: Radius.circular(4),
+                  bottomLeft: Radius.circular(24),
+                  bottomRight: Radius.circular(24),
                 ),
-              ],
-            ),
-            child: Text(
-              message.content,
-              style: AppTextStyles.bodyLarge.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.w500,
-                height: 1.5,
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.brandDarkTeal.withOpacity(0.18),
+                    blurRadius: 10,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: Text(
+                message.content,
+                style: AppTextStyles.bodyLarge.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w500,
+                  height: 1.5,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -103,110 +106,168 @@ class RefinedMessageBubble extends StatelessWidget {
 
     final hasSources = displaySources.isNotEmpty;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header Row with Icon and Toggle
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: AppColors.accentPrimary.withOpacity(0.12),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.auto_awesome,
-                  size: 16,
-                  color: AppColors.accentPrimary,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'Thanzi AI',
-                style: AppTextStyles.labelMedium.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.accentPrimary,
-                ),
-              ),
-              const Spacer(),
-              if (message.isDualMode)
-                _buildModeToggle(context, isDetailed),
-            ],
-          ),
-          
-          const SizedBox(height: 12),
-
-          // Sources Section
-          if (hasSources) ...[
-            _buildSourceList(displaySources),
-            const SizedBox(height: 16),
-          ],
-
-          // Medicine Result Card (If present)
-          if (message.medicineResult != null)
-            MedicineResultCard(result: message.medicineResult!),
-
-          // Content Area (Clean, no container)
-          Padding(
-            padding: const EdgeInsets.only(left: 0),
-            child: AnimatedSize(
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeInOut,
-              alignment: Alignment.topLeft,
-              child: BlocBuilder<ForumCubit, ForumState>(
-                builder: (context, forumState) {
-                  final isForumOpen = forumState.currentAnswerId == message.id;
-                  
-                  if (isForumOpen) {
-                    return AnswerReaderWithComments(answerId: message.id);
-                  }
-                  
-                  return MarkdownBody(
-                    data: content,
-                    selectable: true,
-                    onTapLink: (text, href, title) {
-                      if (href != null) _launchURL(href);
-                    },
-                    styleSheet: MarkdownStyleSheet(
-                      p: AppTextStyles.bodyLarge.copyWith(
-                        color: AppColors.textPrimary,
-                        height: 1.6,
-                        fontSize: 16,
-                      ),
-                      strong: AppTextStyles.bodyLarge.copyWith(
-                        color: AppColors.textPrimary,
-                        fontWeight: FontWeight.w700,
-                      ),
-                      h1: AppTextStyles.headlineMedium,
-                      h2: AppTextStyles.headlineSmall,
-                      code: TextStyle(
-                        backgroundColor: AppColors.backgroundSurface,
-                        fontFamily: 'monospace',
-                        fontSize: 14,
-                      ),
-                      codeblockDecoration: BoxDecoration(
-                        color: AppColors.backgroundSurface,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: AppColors.borderLight),
-                      ),
-                    ),
-                  );
-                },
+    return EntryAnimation(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header Row: logo only + optional mode toggle
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    'assets/images/logo.png',
+                    height: 32, // Larger logo
+                    fit: BoxFit.contain,
+                  ),
+                  const Spacer(),
+                  if (message.isDualMode)
+                    _buildModeToggle(context, isDetailed),
+                ],
               ),
             ),
-          ),
 
-          const SizedBox(height: 16),
-          _buildFooter(context, displaySources),
-          
-          // Separator line for visual break
-          const SizedBox(height: 24),
-          const Divider(height: 1, color: AppColors.gray200),
-        ],
+            const SizedBox(height: 10),
+
+            // Sources Section (above the card)
+            if (hasSources) ...[
+              _buildSourceList(displaySources),
+              const SizedBox(height: 12),
+            ],
+
+            // Medicine Result Card
+            if (message.medicineResult != null)
+              MedicineResultCard(result: message.medicineResult!),
+
+            // Content area — No background card as per user request
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Minimal left teal accent bar (optional, can be removed if strictly no background means no bar)
+                  Container(
+                    width: 2,
+                    height: 40, // Just a small accent
+                    decoration: BoxDecoration(
+                      color: AppColors.brandDarkTeal.withOpacity(0.4),
+                      borderRadius: BorderRadius.circular(1),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  // Main content
+                  Expanded(
+                    child: AnimatedSize(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                      alignment: Alignment.topLeft,
+                      child: BlocBuilder<ForumCubit, ForumState>(
+                        builder: (context, forumState) {
+                          final isForumOpen = forumState.currentAnswerId == message.id;
+
+                          if (isForumOpen) {
+                            return AnswerReaderWithComments(answerId: message.id);
+                          }
+
+                          return MarkdownBody(
+                            data: content,
+                            selectable: true,
+                            onTapLink: (text, href, title) {
+                              if (href != null) _launchURL(href);
+                            },
+                            styleSheet: MarkdownStyleSheet(
+                              p: AppTextStyles.bodyMedium.copyWith(
+                                color: AppColors.textPrimary,
+                                height: 1.65,
+                                fontSize: 15.5,
+                              ),
+                              strong: AppTextStyles.bodyMedium.copyWith(
+                                color: AppColors.textPrimary,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 15.5,
+                              ),
+                              em: AppTextStyles.bodyMedium.copyWith(
+                                color: AppColors.textSecondary,
+                                fontStyle: FontStyle.italic,
+                                fontSize: 15.5,
+                              ),
+                              h1: AppTextStyles.headlineSmall.copyWith(
+                                color: AppColors.textPrimary,
+                                fontWeight: FontWeight.w700,
+                              ),
+                              h2: AppTextStyles.labelLarge.copyWith(
+                                color: AppColors.brandDarkTeal,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 14,
+                                letterSpacing: 0.4,
+                              ),
+                              h3: AppTextStyles.labelMedium.copyWith(
+                                color: AppColors.textPrimary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              listBullet: AppTextStyles.bodyMedium.copyWith(
+                                color: AppColors.brandDarkTeal,
+                                fontSize: 15.5,
+                              ),
+                              blockquoteDecoration: BoxDecoration(
+                                border: Border(
+                                  left: BorderSide(
+                                    color: AppColors.accentLight,
+                                    width: 3,
+                                  ),
+                                ),
+                                color: AppColors.backgroundElevated,
+                              ),
+                              code: TextStyle(
+                                backgroundColor: AppColors.backgroundElevated,
+                                fontFamily: 'monospace',
+                                fontSize: 13,
+                                color: AppColors.brandDarkTeal,
+                              ),
+                              codeblockDecoration: BoxDecoration(
+                                color: AppColors.backgroundElevated,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: AppColors.borderLight),
+                              ),
+                              tableHead: AppTextStyles.labelSmall.copyWith(
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.textPrimary,
+                              ),
+                              tableBorder: TableBorder.all(
+                                color: AppColors.borderLight,
+                                width: 1,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 14),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: _buildFooter(context, displaySources),
+            ),
+
+            // Teal-tinted separator
+            const SizedBox(height: 16),
+            Container(
+              height: 1,
+              decoration: BoxDecoration(
+                color: AppColors.brandDarkTeal.withOpacity(0.07),
+                borderRadius: BorderRadius.circular(1),
+              ),
+            ),
+            const SizedBox(height: 4),
+          ],
+        ),
       ),
     );
   }
@@ -328,7 +389,7 @@ class RefinedMessageBubble extends StatelessWidget {
                              height: 16,
                              alignment: Alignment.center,
                              decoration: BoxDecoration(
-                               color: AppColors.gray100,
+                               color: AppColors.accentLight,
                                shape: BoxShape.circle,
                              ),
                              child: Text(
@@ -336,7 +397,7 @@ class RefinedMessageBubble extends StatelessWidget {
                                style: const TextStyle(
                                  fontSize: 10,
                                  fontWeight: FontWeight.bold,
-                                 color: AppColors.textSecondary,
+                                 color: AppColors.brandDarkTeal,
                                ),
                              ),
                            ),
@@ -392,7 +453,7 @@ class RefinedMessageBubble extends StatelessWidget {
       height: 32, // Slightly taller
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
-        color: AppColors.gray100,
+        color: AppColors.backgroundElevated,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
@@ -415,11 +476,11 @@ class RefinedMessageBubble extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14),
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: active ? Colors.white : Colors.transparent,
+          color: active ? AppColors.brandDarkTeal : Colors.transparent,
           borderRadius: BorderRadius.circular(16),
           boxShadow: active ? [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
+              color: AppColors.brandDarkTeal.withOpacity(0.18),
               blurRadius: 4,
               offset: const Offset(0, 1),
             )
@@ -428,7 +489,7 @@ class RefinedMessageBubble extends StatelessWidget {
         child: Text(
           label,
           style: AppTextStyles.caption.copyWith(
-            color: active ? AppColors.textPrimary : AppColors.textTertiary,
+            color: active ? Colors.white : AppColors.textTertiary,
             fontWeight: active ? FontWeight.w600 : FontWeight.w500,
           ),
         ),

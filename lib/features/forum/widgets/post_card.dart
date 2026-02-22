@@ -10,10 +10,12 @@ class PostCard extends StatelessWidget {
     super.key,
     required this.post,
     this.onTap,
+    this.currentUserId,
   });
 
   final ForumPost post;
   final VoidCallback? onTap;
+  final String? currentUserId;
 
   String _formatTime(DateTime time) {
     final difference = DateTime.now().difference(time);
@@ -77,7 +79,8 @@ class PostCard extends StatelessWidget {
                   ),
                 ),
                 const Spacer(),
-                _buildDeleteAction(context),
+                if (currentUserId == post.authorId)
+                  _buildActions(context),
               ],
             ),
             const SizedBox(height: 16),
@@ -161,38 +164,108 @@ class PostCard extends StatelessWidget {
     );
   }
 
-  Widget _buildDeleteAction(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () {
-          showDialog(
-            context: context,
-            builder: (dialogContext) => AlertDialog(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-              title: const Text('Delete Post'),
-              content: const Text('Are you sure you want to delete this post?'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(dialogContext),
-                  child: const Text('Cancel'),
-                ),
-                TextButton(
-                  onPressed: () {
-                    context.read<ForumCubit>().deletePost(post.localId);
-                    Navigator.pop(dialogContext);
-                  },
-                  child: const Text('Delete', style: TextStyle(color: Colors.red)),
-                ),
-              ],
-            ),
-          );
-        },
-        borderRadius: BorderRadius.circular(20),
-        child: const Padding(
-          padding: EdgeInsets.all(4),
-          child: Icon(Icons.more_vert_rounded, size: 18, color: AppColors.textTertiary),
+  Widget _buildActions(BuildContext context) {
+    return PopupMenuButton<String>(
+      icon: const Icon(Icons.more_vert_rounded, size: 18, color: AppColors.textTertiary),
+      onSelected: (value) {
+        if (value == 'edit') {
+          _showEditDialog(context);
+        } else if (value == 'delete') {
+          _showDeleteDialog(context);
+        }
+      },
+      itemBuilder: (context) => [
+        const PopupMenuItem(
+          value: 'edit',
+          child: Row(
+            children: [
+              Icon(Icons.edit_outlined, size: 18),
+              SizedBox(width: 8),
+              Text('Edit'),
+            ],
+          ),
         ),
+        const PopupMenuItem(
+          value: 'delete',
+          child: Row(
+            children: [
+              Icon(Icons.delete_outline_rounded, size: 18, color: Colors.red),
+              SizedBox(width: 8),
+              Text('Delete', style: TextStyle(color: Colors.red)),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _showEditDialog(BuildContext context) {
+    final titleController = TextEditingController(text: post.title);
+    final contentController = TextEditingController(text: post.content);
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text('Edit Post'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: titleController,
+              decoration: const InputDecoration(labelText: 'Title'),
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: contentController,
+              decoration: const InputDecoration(labelText: 'Content'),
+              minLines: 3,
+              maxLines: 5,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              context.read<ForumCubit>().updatePost(
+                localId: post.localId,
+                title: titleController.text,
+                content: contentController.text,
+              );
+              Navigator.pop(dialogContext);
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text('Delete Post'),
+        content: const Text('Are you sure you want to delete this post?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              context.read<ForumCubit>().deletePost(post.localId);
+              Navigator.pop(dialogContext);
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
       ),
     );
   }

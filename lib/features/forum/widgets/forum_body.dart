@@ -138,11 +138,31 @@ class ForumBody extends StatelessWidget {
           },
           child: ListView.builder(
             padding: const EdgeInsets.only(top: 8, bottom: 24),
-            itemCount: displayPosts.length,
+            itemCount: displayPosts.length + (state.isSearching ? 1 : 0),
             itemBuilder: (context, index) {
-              final post = displayPosts[index];
+              if (state.isSearching && index == 0) {
+                return Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.auto_awesome_rounded, size: 18, color: AppColors.accentPrimary),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Recommended for You',
+                        style: AppTextStyles.labelLarge.copyWith(
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.accentPrimary,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              final post = displayPosts[state.isSearching ? index - 1 : index];
               return PostCard(
                 post: post,
+                currentUserId: userId,
                 onTap: () {
                   context.read<ForumCubit>().selectPost(post);
                 },
@@ -161,7 +181,7 @@ class ForumBody extends StatelessWidget {
         onChanged: (value) => context.read<ForumCubit>().searchPosts(value),
         style: AppTextStyles.bodyLarge,
         decoration: InputDecoration(
-          hintText: 'Search discussions...',
+          hintText: 'Search or ask for recommendations...',
           hintStyle: AppTextStyles.bodyLarge.copyWith(color: AppColors.textTertiary),
           prefixIcon: Icon(Icons.search_rounded, color: AppColors.textSecondary, size: 20),
           filled: true,

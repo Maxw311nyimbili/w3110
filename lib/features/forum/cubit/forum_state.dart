@@ -41,8 +41,10 @@ class ForumState extends Equatable {
     
     this.error,
     this.isSyncing = false,
+    this.isSearching = false,
     this.hasPendingSync = false,
     this.lastSyncTime,
+    this.replyingToComment,
   });
 
   final ForumStatus status;
@@ -67,6 +69,8 @@ class ForumState extends Equatable {
   
   final String? error;
   final bool isSyncing;
+  final bool isSearching;
+  final ForumLineComment? replyingToComment;
   final bool hasPendingSync; // Has unsynced local changes
   final DateTime? lastSyncTime;
 
@@ -74,7 +78,7 @@ class ForumState extends Equatable {
   bool get isLoading => status == ForumStatus.loading;
   bool get hasPosts => posts.isNotEmpty;
   bool get hasComments => comments.isNotEmpty;
-  bool get isSearching => searchQuery.isNotEmpty;
+  
   List<ForumPost> get displayPosts => isSearching ? searchResults : posts;
   
   // Return either general comments or line comments based on view context
@@ -103,8 +107,10 @@ class ForumState extends Equatable {
     
     String? error,
     bool? isSyncing,
+    bool? isSearching,
     bool? hasPendingSync,
     DateTime? lastSyncTime,
+    ForumLineComment? replyingToComment,
   }) {
     return ForumState(
       status: status ?? this.status,
@@ -125,8 +131,10 @@ class ForumState extends Equatable {
       
       error: error,
       isSyncing: isSyncing ?? this.isSyncing,
+      isSearching: isSearching ?? this.isSearching,
       hasPendingSync: hasPendingSync ?? this.hasPendingSync,
       lastSyncTime: lastSyncTime ?? this.lastSyncTime,
+      replyingToComment: replyingToComment ?? this.replyingToComment,
     );
   }
   
@@ -136,6 +144,7 @@ class ForumState extends Equatable {
     String? currentAnswerId,
     bool clearLineId = false,
     bool clearAnswerId = false,
+    bool clearReplyingTo = false,
   }) {
      return ForumState(
       status: status,
@@ -153,8 +162,10 @@ class ForumState extends Equatable {
       postFilter: postFilter,
       error: error,
       isSyncing: isSyncing,
+      isSearching: isSearching,
       hasPendingSync: hasPendingSync,
       lastSyncTime: lastSyncTime,
+      replyingToComment: clearReplyingTo ? null : (replyingToComment ?? this.replyingToComment),
     );
   }
 
@@ -207,12 +218,14 @@ class ForumState extends Equatable {
     selectedPost,
     comments,
     answerLines,
+    currentAnswerId,
     selectedLineId,
     lineComments,
     activeFilter,
     postFilter,
     error,
     isSyncing,
+    isSearching,
     hasPendingSync,
     lastSyncTime,
   ];

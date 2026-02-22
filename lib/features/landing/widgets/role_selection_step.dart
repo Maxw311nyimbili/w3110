@@ -120,7 +120,7 @@ class RoleSelectionStep extends StatelessWidget {
               padding: const EdgeInsets.all(20),
               borderRadius: 24,
               borderOpacity: isSelected ? 0.6 : 0.2,
-              glassOpacity: isSelected ? 0.08 : 0.03,
+              tintOpacity: isSelected ? 0.88 : 0.72,
               child: Row(
                 children: [
                   Expanded(

@@ -115,9 +115,62 @@ class ForumRepository {
     print('DEBUG: ForumRepository.addToSyncQueue - SUCCESS');
   }
 
-  /// Delete a post from local database
+  /// Delete a post (sync-aware)
   Future<void> deletePost(String localId) async {
-    await _database.deletePost(localId);
+    final post = await _database.getPostByLocalId(localId);
+    if (post == null) return;
+
+    if (post.serverId.isNotEmpty) {
+      // Synced: Soft delete locally and queue server delete
+      await _database.softDeletePost(localId);
+      await addToSyncQueue(
+        entityType: 'post',
+        entityId: localId,
+        action: 'delete',
+      );
+    } else {
+      // Pending: Hard delete is fine
+      await _database.deletePost(localId);
+      // TODO: Also remove from sync queue if it was a 'create' action
+    }
+  }
+
+  /// Delete a comment (sync-aware)
+  Future<void> deleteComment(String localId) async {
+    final comment = await _database.getCommentByLocalId(localId);
+    if (comment == null) return;
+
+    if (comment.serverId.isNotEmpty) {
+      // Synced: Soft delete locally and queue server delete
+      await _database.softDeleteComment(localId);
+      await addToSyncQueue(
+        entityType: 'comment',
+        entityId: localId,
+        action: 'delete',
+      );
+    } else {
+      // Pending: Hard delete
+      await _database.deleteComment(localId);
+    }
+  }
+
+  /// Delete a line comment (sync-aware)
+  Future<void> deleteLineComment(String localId) async {
+    final comment = await _database.getLineCommentByLocalId(localId);
+    if (comment == null) return;
+
+    if (comment.serverId.isNotEmpty) {
+      // Synced: Soft delete
+      await _database.softDeleteLineComment(localId);
+      await addToSyncQueue(
+        entityType: 'line_comment',
+        entityId: localId,
+        action: 'delete',
+      );
+    } else {
+      // Pending: Hard delete
+      await _database.deleteLineComment(localId);
+    }
   }
 
   /// Process sync queue (upload pending changes)
@@ -150,6 +203,48 @@ class ForumRepository {
       return postsJson.map((json) => ForumPost.fromJson(json as Map<String, dynamic>)).toList();
     } catch (e) {
       throw ForumException('Failed to search posts: ${e.toString()}');
+    }
+  }
+
+  /// Search for posts by similarity (Vector Search)
+  Future<List<ForumPost>> searchSimilarPosts(String text, {int limit = 5}) async {
+    try {
+      final response = await _apiClient.post(
+        '/api/v1/forum/recommendations/posts',
+        data: {'text': text, 'limit': limit},
+      );
+      final List<dynamic> postsJson = response.data as List<dynamic>;
+      return postsJson.map((json) => ForumPost.fromJson(json as Map<String, dynamic>)).toList();
+    } catch (e) {
+      print('DEBUG: searchSimilarPosts failed: $e');
+      return []; // Return empty list on failure rather than throwing for UI resilience
+    }
+  }
+
+  /// Update an existing post
+  Future<void> updatePost({
+    required String localId,
+    required String title,
+    required String content,
+  }) async {
+    try {
+      final post = await _database.getPostByLocalId(localId);
+      if (post == null) return;
+
+      if (post.serverId.isNotEmpty) {
+        await _apiClient.put(
+          '/api/v1/forum/posts/${post.serverId}',
+          data: {'title': title, 'content': content},
+        );
+      }
+
+      await _database.updatePostContent(
+        localId: localId,
+        title: title,
+        content: content,
+      );
+    } catch (e) {
+      throw ForumException('Failed to update post: ${e.toString()}');
     }
   }
 
@@ -368,17 +463,7 @@ class ForumRepository {
       // 3. Fallback to local cache
       final localComments = await _database.getCommentsForLine(lineId);
       if (localComments.isNotEmpty) {
-        return localComments.map((c) => ForumLineComment(
-          id: c.localId,
-          lineId: c.lineId,
-          authorId: c.authorId,
-          authorName: c.authorName,
-          authorRole: _parseAuthorRole(c.authorRole),
-          commentType: _parseCommentType(c.commentType),
-          text: c.content,
-          createdAt: c.createdAt,
-          syncStatus: _parseSyncStatus(c.syncStatus),
-        )).toList();
+        return localComments.map((c) => ForumLineComment.fromDatabase(c)).toList();
       }
       rethrow;
     }
@@ -389,11 +474,14 @@ class ForumRepository {
     required String lineId,
     required String text,
     required String commentType,
+    String? parentCommentId,
   }) async {
     if (_useMock) {
       await Future.delayed(const Duration(seconds: 1));
+      final mockId = 'mock_comment_${DateTime.now().millisecondsSinceEpoch}';
       return ForumLineComment(
-        id: 'mock_comment_${DateTime.now().millisecondsSinceEpoch}',
+        id: mockId,
+        localId: mockId,
         lineId: lineId,
         authorId: 'current_user',
         authorName: 'You',
@@ -401,6 +489,7 @@ class ForumRepository {
         commentType: _parseCommentType(commentType),
         text: text,
         createdAt: DateTime.now(),
+        parentCommentId: parentCommentId,
         syncStatus: SyncStatus.synced,
       );
     }
@@ -411,6 +500,7 @@ class ForumRepository {
         data: {
           'text': text,
           'comment_type': commentType,
+          if (parentCommentId != null) 'parent_comment_id': parentCommentId,
         },
       );
       final comment = ForumLineComment.fromJson(response.data as Map<String, dynamic>);
@@ -425,6 +515,7 @@ class ForumRepository {
         authorRole: comment.authorRole.name,
         commentType: comment.commentType.name,
         content: comment.text,
+        parentCommentId: Value(comment.parentCommentId),
         createdAt: comment.createdAt,
         syncStatus: const Value('synced'),
       ));
@@ -442,11 +533,39 @@ class ForumRepository {
     }
   }
 
+  /// Update a line comment
+  Future<void> updateLineComment({
+    required String localId,
+    required String serverId,
+    required String text,
+    String? commentType,
+  }) async {
+    try {
+      if (serverId.isNotEmpty) {
+        await _apiClient.put(
+          '/api/v1/forum/lines/comments/$serverId',
+          data: {
+            'text': text,
+            if (commentType != null) 'comment_type': commentType,
+          },
+        );
+      }
+
+      await _database.updateLineCommentContent(
+        localId: localId,
+        content: text,
+      );
+    } catch (e) {
+      throw ForumException('Failed to update line comment: ${e.toString()}');
+    }
+  }
+
   /// Post a general comment to a forum post
   Future<ForumComment> addPostComment({
     required String postId,
     required String content,
     String? clientId,
+    String? parentCommentId,
   }) async {
     try {
       final response = await _apiClient.post(
@@ -454,6 +573,7 @@ class ForumRepository {
         data: {
           'content': content,
           if (clientId != null) 'client_id': clientId,
+          if (parentCommentId != null) 'parent_comment_id': parentCommentId,
         },
       );
       
@@ -467,6 +587,7 @@ class ForumRepository {
         authorId: comment.authorId,
         authorName: comment.authorName,
         content: comment.content,
+        parentCommentId: Value(comment.parentCommentId),
         createdAt: comment.createdAt,
         syncStatus: const Value('synced'),
       ));
@@ -474,6 +595,29 @@ class ForumRepository {
       return comment;
     } catch (e) {
       throw ForumException('Failed to post comment: ${e.toString()}');
+    }
+  }
+
+  /// Update an existing comment
+  Future<void> updateComment({
+    required String localId,
+    required String serverId,
+    required String content,
+  }) async {
+    try {
+      if (serverId.isNotEmpty) {
+        await _apiClient.put(
+          '/api/v1/forum/comments/$serverId',
+          data: {'content': content},
+        );
+      }
+
+      await _database.updateCommentContent(
+        localId: localId,
+        content: content,
+      );
+    } catch (e) {
+      throw ForumException('Failed to update comment: ${e.toString()}');
     }
   }
 
@@ -537,6 +681,7 @@ class ForumRepository {
     final allComments = [
       ForumLineComment(
         id: 'c1',
+        localId: 'c1',
         lineId: lineId,
         authorId: 'u1',
         authorName: 'Dr. Amina Mensah',
@@ -548,6 +693,7 @@ class ForumRepository {
       ),
       ForumLineComment(
         id: 'c2',
+        localId: 'c2',
         lineId: lineId,
         authorId: 'u2',
         authorName: 'Sarah K.',
@@ -559,6 +705,7 @@ class ForumRepository {
       ),
       ForumLineComment(
         id: 'c3',
+        localId: 'c3',
         lineId: lineId,
         authorId: 'u3',
         authorName: 'Health Council',
@@ -569,6 +716,7 @@ class ForumRepository {
       ),
       ForumLineComment(
         id: 'c4',
+        localId: 'c4',
         lineId: lineId,
         authorId: 'u4',
         authorName: 'Kwame',

@@ -63,6 +63,7 @@ class _ReplyInputFieldForModalState extends State<ReplyInputFieldForModal> {
           text: _textController.text,
           commentType: _typeController.value,
           lineId: widget.lineId,
+          parentCommentId: context.read<ForumCubit>().state.replyingToComment?.id,
         );
       }
       _textController.clear();
@@ -82,6 +83,42 @@ class _ReplyInputFieldForModalState extends State<ReplyInputFieldForModal> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
+          // Replying To Banner
+          BlocBuilder<ForumCubit, ForumState>(
+            builder: (context, state) {
+              if (state.replyingToComment == null) return const SizedBox.shrink();
+              
+              return Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: AppColors.backgroundElevated,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.borderLight),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.reply_rounded, size: 16, color: AppColors.textTertiary),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Replying to ${state.replyingToComment!.authorName}',
+                        style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close_rounded, size: 16, color: AppColors.textTertiary),
+                      onPressed: () => context.read<ForumCubit>().clearReplyingTo(),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
           // Type Selection (Horizontal Pills) - Hide for general comments
           if (!widget.isGeneral) ...[
             SingleChildScrollView(

@@ -20,7 +20,7 @@ class ForumDatabase extends _$ForumDatabase {
   ForumDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -28,7 +28,7 @@ class ForumDatabase extends _$ForumDatabase {
       await m.createAll();
     },
     onUpgrade: (m, from, to) async {
-      if (from < 3) {
+      if (from < 4) {
         // Safe approach for dev: drop and recreate to fix constraints
         await m.drop(forumPosts);
         await m.drop(forumComments);
@@ -47,6 +47,7 @@ class ForumDatabase extends _$ForumDatabase {
   /// Get all posts ordered by creation date (newest first)
   Future<List<ForumPostData>> getAllPosts() async {
     return (select(forumPosts)
+      ..where((post) => post.isDeleted.equals(false))
       ..orderBy([
             (post) => OrderingTerm(
           expression: post.createdAt,
@@ -78,7 +79,13 @@ class ForumDatabase extends _$ForumDatabase {
     return update(forumPosts).replace(post);
   }
 
-  /// Delete a post
+  /// Soft delete a post
+  Future<int> softDeletePost(String localId) async {
+    return (update(forumPosts)..where((post) => post.localId.equals(localId)))
+        .write(const ForumPostsCompanion(isDeleted: Value(true)));
+  }
+
+  /// Hard delete a post (use for unsynced items)
   Future<int> deletePost(String localId) async {
     return (delete(forumPosts)..where((post) => post.localId.equals(localId)))
         .go();
@@ -95,6 +102,20 @@ class ForumDatabase extends _$ForumDatabase {
       syncStatus: Value(syncStatus),
       serverId: serverId != null ? Value(serverId) : const Value.absent(),
       lastSyncAttempt: Value(DateTime.now()),
+    ));
+  }
+
+  /// Update post content locally
+  Future<int> updatePostContent({
+    required String localId,
+    required String title,
+    required String content,
+  }) async {
+    return (update(forumPosts)..where((post) => post.localId.equals(localId)))
+        .write(ForumPostsCompanion(
+      title: Value(title),
+      content: Value(content),
+      updatedAt: Value(DateTime.now()),
     ));
   }
 
@@ -118,7 +139,7 @@ class ForumDatabase extends _$ForumDatabase {
   /// Get all comments for a post
   Future<List<ForumCommentData>> getCommentsForPost(String postId) async {
     return (select(forumComments)
-      ..where((comment) => comment.postId.equals(postId))
+      ..where((comment) => comment.postId.equals(postId) & comment.isDeleted.equals(false))
       ..orderBy([
             (comment) => OrderingTerm(
           expression: comment.createdAt,
@@ -145,7 +166,13 @@ class ForumDatabase extends _$ForumDatabase {
     return into(forumComments).insert(comment);
   }
 
-  /// Delete a comment
+  /// Soft delete a comment
+  Future<int> softDeleteComment(String localId) async {
+    return (update(forumComments)..where((c) => c.localId.equals(localId)))
+        .write(const ForumCommentsCompanion(isDeleted: Value(true)));
+  }
+
+  /// Hard delete a comment
   Future<int> deleteComment(String localId) async {
     return (delete(forumComments)..where((c) => c.localId.equals(localId)))
         .go();
@@ -163,6 +190,18 @@ class ForumDatabase extends _$ForumDatabase {
       syncStatus: Value(syncStatus),
       serverId: serverId != null ? Value(serverId) : const Value.absent(),
       lastSyncAttempt: Value(DateTime.now()),
+    ));
+  }
+
+  /// Update comment content locally
+  Future<int> updateCommentContent({
+    required String localId,
+    required String content,
+  }) async {
+    return (update(forumComments)..where((c) => c.localId.equals(localId)))
+        .write(ForumCommentsCompanion(
+      content: Value(content),
+      updatedAt: Value(DateTime.now()),
     ));
   }
 
@@ -313,7 +352,7 @@ class ForumDatabase extends _$ForumDatabase {
 
   Future<List<ForumLineCommentData>> getCommentsForLine(String lineId) async {
     return (select(forumLineComments)
-      ..where((c) => c.lineId.equals(lineId))
+      ..where((c) => c.lineId.equals(lineId) & c.isDeleted.equals(false))
       ..orderBy([(c) => OrderingTerm(expression: c.createdAt)]))
         .get();
   }
@@ -341,6 +380,18 @@ class ForumDatabase extends _$ForumDatabase {
     return into(forumLineComments).insert(comment);
   }
 
+  /// Soft delete a line comment
+  Future<int> softDeleteLineComment(String localId) async {
+    return (update(forumLineComments)..where((c) => c.localId.equals(localId)))
+        .write(const ForumLineCommentsCompanion(isDeleted: Value(true)));
+  }
+
+  /// Hard delete a line comment
+  Future<int> deleteLineComment(String localId) async {
+    return (delete(forumLineComments)..where((c) => c.localId.equals(localId)))
+        .go();
+  }
+
   /// Increment the comment count for a line
   Future<void> incrementLineCommentCount(String lineId) async {
     final line = await (select(forumAnswerLines)..where((l) => l.lineId.equals(lineId))).getSingleOrNull();
@@ -349,6 +400,17 @@ class ForumDatabase extends _$ForumDatabase {
         ForumAnswerLinesCompanion(commentCount: Value(line.commentCount + 1)),
       );
     }
+  }
+
+  /// Update line comment content locally
+  Future<int> updateLineCommentContent({
+    required String localId,
+    required String content,
+  }) async {
+    return (update(forumLineComments)..where((c) => c.localId.equals(localId)))
+        .write(ForumLineCommentsCompanion(
+      content: Value(content),
+    ));
   }
 }
 

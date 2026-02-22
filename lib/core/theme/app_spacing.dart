@@ -21,4 +21,12 @@ class AppSpacing {
 
   // Reduced padding for dense layouts
   static const double dense = 6;
+
+  // ─── Border Radius Scale ───────────────────────────────────────────────────
+  static const double radiusXs = 6;
+  static const double radiusSm = 8;
+  static const double radiusMd = 12;
+  static const double radiusLg = 16;
+  static const double radiusXl = 24;
+  static const double radiusFull = 999; // pill / circular
 }

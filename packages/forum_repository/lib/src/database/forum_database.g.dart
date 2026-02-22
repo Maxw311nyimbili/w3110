@@ -214,6 +214,33 @@ class $ForumPostsTable extends ForumPosts
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _isDeletedMeta = const VerificationMeta(
+    'isDeleted',
+  );
+  @override
+  late final GeneratedColumn<bool> isDeleted = GeneratedColumn<bool>(
+    'is_deleted',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_deleted" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _versionMeta = const VerificationMeta(
+    'version',
+  );
+  @override
+  late final GeneratedColumn<int> version = GeneratedColumn<int>(
+    'version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     localId,
@@ -234,6 +261,8 @@ class $ForumPostsTable extends ForumPosts
     originalAnswerId,
     lastSyncAttempt,
     syncRetryCount,
+    isDeleted,
+    version,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -379,6 +408,18 @@ class $ForumPostsTable extends ForumPosts
         ),
       );
     }
+    if (data.containsKey('is_deleted')) {
+      context.handle(
+        _isDeletedMeta,
+        isDeleted.isAcceptableOrUnknown(data['is_deleted']!, _isDeletedMeta),
+      );
+    }
+    if (data.containsKey('version')) {
+      context.handle(
+        _versionMeta,
+        version.isAcceptableOrUnknown(data['version']!, _versionMeta),
+      );
+    }
     return context;
   }
 
@@ -460,6 +501,14 @@ class $ForumPostsTable extends ForumPosts
         DriftSqlType.int,
         data['${effectivePrefix}sync_retry_count'],
       )!,
+      isDeleted: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_deleted'],
+      )!,
+      version: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}version'],
+      )!,
     );
   }
 
@@ -488,6 +537,8 @@ class ForumPostData extends DataClass implements Insertable<ForumPostData> {
   final String? originalAnswerId;
   final DateTime? lastSyncAttempt;
   final int syncRetryCount;
+  final bool isDeleted;
+  final int version;
   const ForumPostData({
     required this.localId,
     required this.serverId,
@@ -507,6 +558,8 @@ class ForumPostData extends DataClass implements Insertable<ForumPostData> {
     this.originalAnswerId,
     this.lastSyncAttempt,
     required this.syncRetryCount,
+    required this.isDeleted,
+    required this.version,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -541,6 +594,8 @@ class ForumPostData extends DataClass implements Insertable<ForumPostData> {
       map['last_sync_attempt'] = Variable<DateTime>(lastSyncAttempt);
     }
     map['sync_retry_count'] = Variable<int>(syncRetryCount);
+    map['is_deleted'] = Variable<bool>(isDeleted);
+    map['version'] = Variable<int>(version);
     return map;
   }
 
@@ -574,6 +629,8 @@ class ForumPostData extends DataClass implements Insertable<ForumPostData> {
           ? const Value.absent()
           : Value(lastSyncAttempt),
       syncRetryCount: Value(syncRetryCount),
+      isDeleted: Value(isDeleted),
+      version: Value(version),
     );
   }
 
@@ -601,6 +658,8 @@ class ForumPostData extends DataClass implements Insertable<ForumPostData> {
       originalAnswerId: serializer.fromJson<String?>(json['originalAnswerId']),
       lastSyncAttempt: serializer.fromJson<DateTime?>(json['lastSyncAttempt']),
       syncRetryCount: serializer.fromJson<int>(json['syncRetryCount']),
+      isDeleted: serializer.fromJson<bool>(json['isDeleted']),
+      version: serializer.fromJson<int>(json['version']),
     );
   }
   @override
@@ -625,6 +684,8 @@ class ForumPostData extends DataClass implements Insertable<ForumPostData> {
       'originalAnswerId': serializer.toJson<String?>(originalAnswerId),
       'lastSyncAttempt': serializer.toJson<DateTime?>(lastSyncAttempt),
       'syncRetryCount': serializer.toJson<int>(syncRetryCount),
+      'isDeleted': serializer.toJson<bool>(isDeleted),
+      'version': serializer.toJson<int>(version),
     };
   }
 
@@ -647,6 +708,8 @@ class ForumPostData extends DataClass implements Insertable<ForumPostData> {
     Value<String?> originalAnswerId = const Value.absent(),
     Value<DateTime?> lastSyncAttempt = const Value.absent(),
     int? syncRetryCount,
+    bool? isDeleted,
+    int? version,
   }) => ForumPostData(
     localId: localId ?? this.localId,
     serverId: serverId ?? this.serverId,
@@ -670,6 +733,8 @@ class ForumPostData extends DataClass implements Insertable<ForumPostData> {
         ? lastSyncAttempt.value
         : this.lastSyncAttempt,
     syncRetryCount: syncRetryCount ?? this.syncRetryCount,
+    isDeleted: isDeleted ?? this.isDeleted,
+    version: version ?? this.version,
   );
   ForumPostData copyWithCompanion(ForumPostsCompanion data) {
     return ForumPostData(
@@ -703,6 +768,8 @@ class ForumPostData extends DataClass implements Insertable<ForumPostData> {
       syncRetryCount: data.syncRetryCount.present
           ? data.syncRetryCount.value
           : this.syncRetryCount,
+      isDeleted: data.isDeleted.present ? data.isDeleted.value : this.isDeleted,
+      version: data.version.present ? data.version.value : this.version,
     );
   }
 
@@ -726,7 +793,9 @@ class ForumPostData extends DataClass implements Insertable<ForumPostData> {
           ..write('tags: $tags, ')
           ..write('originalAnswerId: $originalAnswerId, ')
           ..write('lastSyncAttempt: $lastSyncAttempt, ')
-          ..write('syncRetryCount: $syncRetryCount')
+          ..write('syncRetryCount: $syncRetryCount, ')
+          ..write('isDeleted: $isDeleted, ')
+          ..write('version: $version')
           ..write(')'))
         .toString();
   }
@@ -751,6 +820,8 @@ class ForumPostData extends DataClass implements Insertable<ForumPostData> {
     originalAnswerId,
     lastSyncAttempt,
     syncRetryCount,
+    isDeleted,
+    version,
   );
   @override
   bool operator ==(Object other) =>
@@ -773,7 +844,9 @@ class ForumPostData extends DataClass implements Insertable<ForumPostData> {
           other.tags == this.tags &&
           other.originalAnswerId == this.originalAnswerId &&
           other.lastSyncAttempt == this.lastSyncAttempt &&
-          other.syncRetryCount == this.syncRetryCount);
+          other.syncRetryCount == this.syncRetryCount &&
+          other.isDeleted == this.isDeleted &&
+          other.version == this.version);
 }
 
 class ForumPostsCompanion extends UpdateCompanion<ForumPostData> {
@@ -795,6 +868,8 @@ class ForumPostsCompanion extends UpdateCompanion<ForumPostData> {
   final Value<String?> originalAnswerId;
   final Value<DateTime?> lastSyncAttempt;
   final Value<int> syncRetryCount;
+  final Value<bool> isDeleted;
+  final Value<int> version;
   final Value<int> rowid;
   const ForumPostsCompanion({
     this.localId = const Value.absent(),
@@ -815,6 +890,8 @@ class ForumPostsCompanion extends UpdateCompanion<ForumPostData> {
     this.originalAnswerId = const Value.absent(),
     this.lastSyncAttempt = const Value.absent(),
     this.syncRetryCount = const Value.absent(),
+    this.isDeleted = const Value.absent(),
+    this.version = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ForumPostsCompanion.insert({
@@ -836,6 +913,8 @@ class ForumPostsCompanion extends UpdateCompanion<ForumPostData> {
     this.originalAnswerId = const Value.absent(),
     this.lastSyncAttempt = const Value.absent(),
     this.syncRetryCount = const Value.absent(),
+    this.isDeleted = const Value.absent(),
+    this.version = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : localId = Value(localId),
        authorId = Value(authorId),
@@ -862,6 +941,8 @@ class ForumPostsCompanion extends UpdateCompanion<ForumPostData> {
     Expression<String>? originalAnswerId,
     Expression<DateTime>? lastSyncAttempt,
     Expression<int>? syncRetryCount,
+    Expression<bool>? isDeleted,
+    Expression<int>? version,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -883,6 +964,8 @@ class ForumPostsCompanion extends UpdateCompanion<ForumPostData> {
       if (originalAnswerId != null) 'original_answer_id': originalAnswerId,
       if (lastSyncAttempt != null) 'last_sync_attempt': lastSyncAttempt,
       if (syncRetryCount != null) 'sync_retry_count': syncRetryCount,
+      if (isDeleted != null) 'is_deleted': isDeleted,
+      if (version != null) 'version': version,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -906,6 +989,8 @@ class ForumPostsCompanion extends UpdateCompanion<ForumPostData> {
     Value<String?>? originalAnswerId,
     Value<DateTime?>? lastSyncAttempt,
     Value<int>? syncRetryCount,
+    Value<bool>? isDeleted,
+    Value<int>? version,
     Value<int>? rowid,
   }) {
     return ForumPostsCompanion(
@@ -927,6 +1012,8 @@ class ForumPostsCompanion extends UpdateCompanion<ForumPostData> {
       originalAnswerId: originalAnswerId ?? this.originalAnswerId,
       lastSyncAttempt: lastSyncAttempt ?? this.lastSyncAttempt,
       syncRetryCount: syncRetryCount ?? this.syncRetryCount,
+      isDeleted: isDeleted ?? this.isDeleted,
+      version: version ?? this.version,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -988,6 +1075,12 @@ class ForumPostsCompanion extends UpdateCompanion<ForumPostData> {
     if (syncRetryCount.present) {
       map['sync_retry_count'] = Variable<int>(syncRetryCount.value);
     }
+    if (isDeleted.present) {
+      map['is_deleted'] = Variable<bool>(isDeleted.value);
+    }
+    if (version.present) {
+      map['version'] = Variable<int>(version.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1015,6 +1108,8 @@ class ForumPostsCompanion extends UpdateCompanion<ForumPostData> {
           ..write('originalAnswerId: $originalAnswerId, ')
           ..write('lastSyncAttempt: $lastSyncAttempt, ')
           ..write('syncRetryCount: $syncRetryCount, ')
+          ..write('isDeleted: $isDeleted, ')
+          ..write('version: $version, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1114,6 +1209,44 @@ class $ForumCommentsTable extends ForumComments
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _parentCommentIdMeta = const VerificationMeta(
+    'parentCommentId',
+  );
+  @override
+  late final GeneratedColumn<String> parentCommentId = GeneratedColumn<String>(
+    'parent_comment_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _isDeletedMeta = const VerificationMeta(
+    'isDeleted',
+  );
+  @override
+  late final GeneratedColumn<bool> isDeleted = GeneratedColumn<bool>(
+    'is_deleted',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_deleted" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _versionMeta = const VerificationMeta(
+    'version',
+  );
+  @override
+  late final GeneratedColumn<int> version = GeneratedColumn<int>(
+    'version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
   static const VerificationMeta _likeCountMeta = const VerificationMeta(
     'likeCount',
   );
@@ -1209,6 +1342,9 @@ class $ForumCommentsTable extends ForumComments
     authorRole,
     authorProfession,
     content,
+    parentCommentId,
+    isDeleted,
+    version,
     likeCount,
     isLiked,
     createdAt,
@@ -1289,6 +1425,27 @@ class $ForumCommentsTable extends ForumComments
       );
     } else if (isInserting) {
       context.missing(_contentMeta);
+    }
+    if (data.containsKey('parent_comment_id')) {
+      context.handle(
+        _parentCommentIdMeta,
+        parentCommentId.isAcceptableOrUnknown(
+          data['parent_comment_id']!,
+          _parentCommentIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('is_deleted')) {
+      context.handle(
+        _isDeletedMeta,
+        isDeleted.isAcceptableOrUnknown(data['is_deleted']!, _isDeletedMeta),
+      );
+    }
+    if (data.containsKey('version')) {
+      context.handle(
+        _versionMeta,
+        version.isAcceptableOrUnknown(data['version']!, _versionMeta),
+      );
     }
     if (data.containsKey('like_count')) {
       context.handle(
@@ -1381,6 +1538,18 @@ class $ForumCommentsTable extends ForumComments
         DriftSqlType.string,
         data['${effectivePrefix}content'],
       )!,
+      parentCommentId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}parent_comment_id'],
+      ),
+      isDeleted: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_deleted'],
+      )!,
+      version: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}version'],
+      )!,
       likeCount: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}like_count'],
@@ -1428,6 +1597,9 @@ class ForumCommentData extends DataClass
   final String? authorRole;
   final String? authorProfession;
   final String content;
+  final String? parentCommentId;
+  final bool isDeleted;
+  final int version;
   final int likeCount;
   final bool isLiked;
   final DateTime createdAt;
@@ -1444,6 +1616,9 @@ class ForumCommentData extends DataClass
     this.authorRole,
     this.authorProfession,
     required this.content,
+    this.parentCommentId,
+    required this.isDeleted,
+    required this.version,
     required this.likeCount,
     required this.isLiked,
     required this.createdAt,
@@ -1467,6 +1642,11 @@ class ForumCommentData extends DataClass
       map['author_profession'] = Variable<String>(authorProfession);
     }
     map['content'] = Variable<String>(content);
+    if (!nullToAbsent || parentCommentId != null) {
+      map['parent_comment_id'] = Variable<String>(parentCommentId);
+    }
+    map['is_deleted'] = Variable<bool>(isDeleted);
+    map['version'] = Variable<int>(version);
     map['like_count'] = Variable<int>(likeCount);
     map['is_liked'] = Variable<bool>(isLiked);
     map['created_at'] = Variable<DateTime>(createdAt);
@@ -1495,6 +1675,11 @@ class ForumCommentData extends DataClass
           ? const Value.absent()
           : Value(authorProfession),
       content: Value(content),
+      parentCommentId: parentCommentId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(parentCommentId),
+      isDeleted: Value(isDeleted),
+      version: Value(version),
       likeCount: Value(likeCount),
       isLiked: Value(isLiked),
       createdAt: Value(createdAt),
@@ -1523,6 +1708,9 @@ class ForumCommentData extends DataClass
       authorRole: serializer.fromJson<String?>(json['authorRole']),
       authorProfession: serializer.fromJson<String?>(json['authorProfession']),
       content: serializer.fromJson<String>(json['content']),
+      parentCommentId: serializer.fromJson<String?>(json['parentCommentId']),
+      isDeleted: serializer.fromJson<bool>(json['isDeleted']),
+      version: serializer.fromJson<int>(json['version']),
       likeCount: serializer.fromJson<int>(json['likeCount']),
       isLiked: serializer.fromJson<bool>(json['isLiked']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
@@ -1544,6 +1732,9 @@ class ForumCommentData extends DataClass
       'authorRole': serializer.toJson<String?>(authorRole),
       'authorProfession': serializer.toJson<String?>(authorProfession),
       'content': serializer.toJson<String>(content),
+      'parentCommentId': serializer.toJson<String?>(parentCommentId),
+      'isDeleted': serializer.toJson<bool>(isDeleted),
+      'version': serializer.toJson<int>(version),
       'likeCount': serializer.toJson<int>(likeCount),
       'isLiked': serializer.toJson<bool>(isLiked),
       'createdAt': serializer.toJson<DateTime>(createdAt),
@@ -1563,6 +1754,9 @@ class ForumCommentData extends DataClass
     Value<String?> authorRole = const Value.absent(),
     Value<String?> authorProfession = const Value.absent(),
     String? content,
+    Value<String?> parentCommentId = const Value.absent(),
+    bool? isDeleted,
+    int? version,
     int? likeCount,
     bool? isLiked,
     DateTime? createdAt,
@@ -1581,6 +1775,11 @@ class ForumCommentData extends DataClass
         ? authorProfession.value
         : this.authorProfession,
     content: content ?? this.content,
+    parentCommentId: parentCommentId.present
+        ? parentCommentId.value
+        : this.parentCommentId,
+    isDeleted: isDeleted ?? this.isDeleted,
+    version: version ?? this.version,
     likeCount: likeCount ?? this.likeCount,
     isLiked: isLiked ?? this.isLiked,
     createdAt: createdAt ?? this.createdAt,
@@ -1607,6 +1806,11 @@ class ForumCommentData extends DataClass
           ? data.authorProfession.value
           : this.authorProfession,
       content: data.content.present ? data.content.value : this.content,
+      parentCommentId: data.parentCommentId.present
+          ? data.parentCommentId.value
+          : this.parentCommentId,
+      isDeleted: data.isDeleted.present ? data.isDeleted.value : this.isDeleted,
+      version: data.version.present ? data.version.value : this.version,
       likeCount: data.likeCount.present ? data.likeCount.value : this.likeCount,
       isLiked: data.isLiked.present ? data.isLiked.value : this.isLiked,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
@@ -1634,6 +1838,9 @@ class ForumCommentData extends DataClass
           ..write('authorRole: $authorRole, ')
           ..write('authorProfession: $authorProfession, ')
           ..write('content: $content, ')
+          ..write('parentCommentId: $parentCommentId, ')
+          ..write('isDeleted: $isDeleted, ')
+          ..write('version: $version, ')
           ..write('likeCount: $likeCount, ')
           ..write('isLiked: $isLiked, ')
           ..write('createdAt: $createdAt, ')
@@ -1655,6 +1862,9 @@ class ForumCommentData extends DataClass
     authorRole,
     authorProfession,
     content,
+    parentCommentId,
+    isDeleted,
+    version,
     likeCount,
     isLiked,
     createdAt,
@@ -1675,6 +1885,9 @@ class ForumCommentData extends DataClass
           other.authorRole == this.authorRole &&
           other.authorProfession == this.authorProfession &&
           other.content == this.content &&
+          other.parentCommentId == this.parentCommentId &&
+          other.isDeleted == this.isDeleted &&
+          other.version == this.version &&
           other.likeCount == this.likeCount &&
           other.isLiked == this.isLiked &&
           other.createdAt == this.createdAt &&
@@ -1693,6 +1906,9 @@ class ForumCommentsCompanion extends UpdateCompanion<ForumCommentData> {
   final Value<String?> authorRole;
   final Value<String?> authorProfession;
   final Value<String> content;
+  final Value<String?> parentCommentId;
+  final Value<bool> isDeleted;
+  final Value<int> version;
   final Value<int> likeCount;
   final Value<bool> isLiked;
   final Value<DateTime> createdAt;
@@ -1710,6 +1926,9 @@ class ForumCommentsCompanion extends UpdateCompanion<ForumCommentData> {
     this.authorRole = const Value.absent(),
     this.authorProfession = const Value.absent(),
     this.content = const Value.absent(),
+    this.parentCommentId = const Value.absent(),
+    this.isDeleted = const Value.absent(),
+    this.version = const Value.absent(),
     this.likeCount = const Value.absent(),
     this.isLiked = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -1728,6 +1947,9 @@ class ForumCommentsCompanion extends UpdateCompanion<ForumCommentData> {
     this.authorRole = const Value.absent(),
     this.authorProfession = const Value.absent(),
     required String content,
+    this.parentCommentId = const Value.absent(),
+    this.isDeleted = const Value.absent(),
+    this.version = const Value.absent(),
     this.likeCount = const Value.absent(),
     this.isLiked = const Value.absent(),
     required DateTime createdAt,
@@ -1751,6 +1973,9 @@ class ForumCommentsCompanion extends UpdateCompanion<ForumCommentData> {
     Expression<String>? authorRole,
     Expression<String>? authorProfession,
     Expression<String>? content,
+    Expression<String>? parentCommentId,
+    Expression<bool>? isDeleted,
+    Expression<int>? version,
     Expression<int>? likeCount,
     Expression<bool>? isLiked,
     Expression<DateTime>? createdAt,
@@ -1769,6 +1994,9 @@ class ForumCommentsCompanion extends UpdateCompanion<ForumCommentData> {
       if (authorRole != null) 'author_role': authorRole,
       if (authorProfession != null) 'author_profession': authorProfession,
       if (content != null) 'content': content,
+      if (parentCommentId != null) 'parent_comment_id': parentCommentId,
+      if (isDeleted != null) 'is_deleted': isDeleted,
+      if (version != null) 'version': version,
       if (likeCount != null) 'like_count': likeCount,
       if (isLiked != null) 'is_liked': isLiked,
       if (createdAt != null) 'created_at': createdAt,
@@ -1789,6 +2017,9 @@ class ForumCommentsCompanion extends UpdateCompanion<ForumCommentData> {
     Value<String?>? authorRole,
     Value<String?>? authorProfession,
     Value<String>? content,
+    Value<String?>? parentCommentId,
+    Value<bool>? isDeleted,
+    Value<int>? version,
     Value<int>? likeCount,
     Value<bool>? isLiked,
     Value<DateTime>? createdAt,
@@ -1807,6 +2038,9 @@ class ForumCommentsCompanion extends UpdateCompanion<ForumCommentData> {
       authorRole: authorRole ?? this.authorRole,
       authorProfession: authorProfession ?? this.authorProfession,
       content: content ?? this.content,
+      parentCommentId: parentCommentId ?? this.parentCommentId,
+      isDeleted: isDeleted ?? this.isDeleted,
+      version: version ?? this.version,
       likeCount: likeCount ?? this.likeCount,
       isLiked: isLiked ?? this.isLiked,
       createdAt: createdAt ?? this.createdAt,
@@ -1844,6 +2078,15 @@ class ForumCommentsCompanion extends UpdateCompanion<ForumCommentData> {
     }
     if (content.present) {
       map['content'] = Variable<String>(content.value);
+    }
+    if (parentCommentId.present) {
+      map['parent_comment_id'] = Variable<String>(parentCommentId.value);
+    }
+    if (isDeleted.present) {
+      map['is_deleted'] = Variable<bool>(isDeleted.value);
+    }
+    if (version.present) {
+      map['version'] = Variable<int>(version.value);
     }
     if (likeCount.present) {
       map['like_count'] = Variable<int>(likeCount.value);
@@ -1883,6 +2126,9 @@ class ForumCommentsCompanion extends UpdateCompanion<ForumCommentData> {
           ..write('authorRole: $authorRole, ')
           ..write('authorProfession: $authorProfession, ')
           ..write('content: $content, ')
+          ..write('parentCommentId: $parentCommentId, ')
+          ..write('isDeleted: $isDeleted, ')
+          ..write('version: $version, ')
           ..write('likeCount: $likeCount, ')
           ..write('isLiked: $isLiked, ')
           ..write('createdAt: $createdAt, ')
@@ -3082,6 +3328,44 @@ class $ForumLineCommentsTable extends ForumLineComments
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _parentCommentIdMeta = const VerificationMeta(
+    'parentCommentId',
+  );
+  @override
+  late final GeneratedColumn<String> parentCommentId = GeneratedColumn<String>(
+    'parent_comment_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _isDeletedMeta = const VerificationMeta(
+    'isDeleted',
+  );
+  @override
+  late final GeneratedColumn<bool> isDeleted = GeneratedColumn<bool>(
+    'is_deleted',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_deleted" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _versionMeta = const VerificationMeta(
+    'version',
+  );
+  @override
+  late final GeneratedColumn<int> version = GeneratedColumn<int>(
+    'version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -3115,6 +3399,9 @@ class $ForumLineCommentsTable extends ForumLineComments
     authorRole,
     commentType,
     content,
+    parentCommentId,
+    isDeleted,
+    version,
     createdAt,
     syncStatus,
   ];
@@ -3195,6 +3482,27 @@ class $ForumLineCommentsTable extends ForumLineComments
     } else if (isInserting) {
       context.missing(_contentMeta);
     }
+    if (data.containsKey('parent_comment_id')) {
+      context.handle(
+        _parentCommentIdMeta,
+        parentCommentId.isAcceptableOrUnknown(
+          data['parent_comment_id']!,
+          _parentCommentIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('is_deleted')) {
+      context.handle(
+        _isDeletedMeta,
+        isDeleted.isAcceptableOrUnknown(data['is_deleted']!, _isDeletedMeta),
+      );
+    }
+    if (data.containsKey('version')) {
+      context.handle(
+        _versionMeta,
+        version.isAcceptableOrUnknown(data['version']!, _versionMeta),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -3250,6 +3558,18 @@ class $ForumLineCommentsTable extends ForumLineComments
         DriftSqlType.string,
         data['${effectivePrefix}content'],
       )!,
+      parentCommentId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}parent_comment_id'],
+      ),
+      isDeleted: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_deleted'],
+      )!,
+      version: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}version'],
+      )!,
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -3277,6 +3597,9 @@ class ForumLineCommentData extends DataClass
   final String authorRole;
   final String commentType;
   final String content;
+  final String? parentCommentId;
+  final bool isDeleted;
+  final int version;
   final DateTime createdAt;
   final String syncStatus;
   const ForumLineCommentData({
@@ -3288,6 +3611,9 @@ class ForumLineCommentData extends DataClass
     required this.authorRole,
     required this.commentType,
     required this.content,
+    this.parentCommentId,
+    required this.isDeleted,
+    required this.version,
     required this.createdAt,
     required this.syncStatus,
   });
@@ -3302,6 +3628,11 @@ class ForumLineCommentData extends DataClass
     map['author_role'] = Variable<String>(authorRole);
     map['comment_type'] = Variable<String>(commentType);
     map['content'] = Variable<String>(content);
+    if (!nullToAbsent || parentCommentId != null) {
+      map['parent_comment_id'] = Variable<String>(parentCommentId);
+    }
+    map['is_deleted'] = Variable<bool>(isDeleted);
+    map['version'] = Variable<int>(version);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['sync_status'] = Variable<String>(syncStatus);
     return map;
@@ -3317,6 +3648,11 @@ class ForumLineCommentData extends DataClass
       authorRole: Value(authorRole),
       commentType: Value(commentType),
       content: Value(content),
+      parentCommentId: parentCommentId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(parentCommentId),
+      isDeleted: Value(isDeleted),
+      version: Value(version),
       createdAt: Value(createdAt),
       syncStatus: Value(syncStatus),
     );
@@ -3336,6 +3672,9 @@ class ForumLineCommentData extends DataClass
       authorRole: serializer.fromJson<String>(json['authorRole']),
       commentType: serializer.fromJson<String>(json['commentType']),
       content: serializer.fromJson<String>(json['content']),
+      parentCommentId: serializer.fromJson<String?>(json['parentCommentId']),
+      isDeleted: serializer.fromJson<bool>(json['isDeleted']),
+      version: serializer.fromJson<int>(json['version']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       syncStatus: serializer.fromJson<String>(json['syncStatus']),
     );
@@ -3352,6 +3691,9 @@ class ForumLineCommentData extends DataClass
       'authorRole': serializer.toJson<String>(authorRole),
       'commentType': serializer.toJson<String>(commentType),
       'content': serializer.toJson<String>(content),
+      'parentCommentId': serializer.toJson<String?>(parentCommentId),
+      'isDeleted': serializer.toJson<bool>(isDeleted),
+      'version': serializer.toJson<int>(version),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'syncStatus': serializer.toJson<String>(syncStatus),
     };
@@ -3366,6 +3708,9 @@ class ForumLineCommentData extends DataClass
     String? authorRole,
     String? commentType,
     String? content,
+    Value<String?> parentCommentId = const Value.absent(),
+    bool? isDeleted,
+    int? version,
     DateTime? createdAt,
     String? syncStatus,
   }) => ForumLineCommentData(
@@ -3377,6 +3722,11 @@ class ForumLineCommentData extends DataClass
     authorRole: authorRole ?? this.authorRole,
     commentType: commentType ?? this.commentType,
     content: content ?? this.content,
+    parentCommentId: parentCommentId.present
+        ? parentCommentId.value
+        : this.parentCommentId,
+    isDeleted: isDeleted ?? this.isDeleted,
+    version: version ?? this.version,
     createdAt: createdAt ?? this.createdAt,
     syncStatus: syncStatus ?? this.syncStatus,
   );
@@ -3396,6 +3746,11 @@ class ForumLineCommentData extends DataClass
           ? data.commentType.value
           : this.commentType,
       content: data.content.present ? data.content.value : this.content,
+      parentCommentId: data.parentCommentId.present
+          ? data.parentCommentId.value
+          : this.parentCommentId,
+      isDeleted: data.isDeleted.present ? data.isDeleted.value : this.isDeleted,
+      version: data.version.present ? data.version.value : this.version,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       syncStatus: data.syncStatus.present
           ? data.syncStatus.value
@@ -3414,6 +3769,9 @@ class ForumLineCommentData extends DataClass
           ..write('authorRole: $authorRole, ')
           ..write('commentType: $commentType, ')
           ..write('content: $content, ')
+          ..write('parentCommentId: $parentCommentId, ')
+          ..write('isDeleted: $isDeleted, ')
+          ..write('version: $version, ')
           ..write('createdAt: $createdAt, ')
           ..write('syncStatus: $syncStatus')
           ..write(')'))
@@ -3430,6 +3788,9 @@ class ForumLineCommentData extends DataClass
     authorRole,
     commentType,
     content,
+    parentCommentId,
+    isDeleted,
+    version,
     createdAt,
     syncStatus,
   );
@@ -3445,6 +3806,9 @@ class ForumLineCommentData extends DataClass
           other.authorRole == this.authorRole &&
           other.commentType == this.commentType &&
           other.content == this.content &&
+          other.parentCommentId == this.parentCommentId &&
+          other.isDeleted == this.isDeleted &&
+          other.version == this.version &&
           other.createdAt == this.createdAt &&
           other.syncStatus == this.syncStatus);
 }
@@ -3458,6 +3822,9 @@ class ForumLineCommentsCompanion extends UpdateCompanion<ForumLineCommentData> {
   final Value<String> authorRole;
   final Value<String> commentType;
   final Value<String> content;
+  final Value<String?> parentCommentId;
+  final Value<bool> isDeleted;
+  final Value<int> version;
   final Value<DateTime> createdAt;
   final Value<String> syncStatus;
   final Value<int> rowid;
@@ -3470,6 +3837,9 @@ class ForumLineCommentsCompanion extends UpdateCompanion<ForumLineCommentData> {
     this.authorRole = const Value.absent(),
     this.commentType = const Value.absent(),
     this.content = const Value.absent(),
+    this.parentCommentId = const Value.absent(),
+    this.isDeleted = const Value.absent(),
+    this.version = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.syncStatus = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -3483,6 +3853,9 @@ class ForumLineCommentsCompanion extends UpdateCompanion<ForumLineCommentData> {
     required String authorRole,
     required String commentType,
     required String content,
+    this.parentCommentId = const Value.absent(),
+    this.isDeleted = const Value.absent(),
+    this.version = const Value.absent(),
     required DateTime createdAt,
     this.syncStatus = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -3503,6 +3876,9 @@ class ForumLineCommentsCompanion extends UpdateCompanion<ForumLineCommentData> {
     Expression<String>? authorRole,
     Expression<String>? commentType,
     Expression<String>? content,
+    Expression<String>? parentCommentId,
+    Expression<bool>? isDeleted,
+    Expression<int>? version,
     Expression<DateTime>? createdAt,
     Expression<String>? syncStatus,
     Expression<int>? rowid,
@@ -3516,6 +3892,9 @@ class ForumLineCommentsCompanion extends UpdateCompanion<ForumLineCommentData> {
       if (authorRole != null) 'author_role': authorRole,
       if (commentType != null) 'comment_type': commentType,
       if (content != null) 'content': content,
+      if (parentCommentId != null) 'parent_comment_id': parentCommentId,
+      if (isDeleted != null) 'is_deleted': isDeleted,
+      if (version != null) 'version': version,
       if (createdAt != null) 'created_at': createdAt,
       if (syncStatus != null) 'sync_status': syncStatus,
       if (rowid != null) 'rowid': rowid,
@@ -3531,6 +3910,9 @@ class ForumLineCommentsCompanion extends UpdateCompanion<ForumLineCommentData> {
     Value<String>? authorRole,
     Value<String>? commentType,
     Value<String>? content,
+    Value<String?>? parentCommentId,
+    Value<bool>? isDeleted,
+    Value<int>? version,
     Value<DateTime>? createdAt,
     Value<String>? syncStatus,
     Value<int>? rowid,
@@ -3544,6 +3926,9 @@ class ForumLineCommentsCompanion extends UpdateCompanion<ForumLineCommentData> {
       authorRole: authorRole ?? this.authorRole,
       commentType: commentType ?? this.commentType,
       content: content ?? this.content,
+      parentCommentId: parentCommentId ?? this.parentCommentId,
+      isDeleted: isDeleted ?? this.isDeleted,
+      version: version ?? this.version,
       createdAt: createdAt ?? this.createdAt,
       syncStatus: syncStatus ?? this.syncStatus,
       rowid: rowid ?? this.rowid,
@@ -3577,6 +3962,15 @@ class ForumLineCommentsCompanion extends UpdateCompanion<ForumLineCommentData> {
     if (content.present) {
       map['content'] = Variable<String>(content.value);
     }
+    if (parentCommentId.present) {
+      map['parent_comment_id'] = Variable<String>(parentCommentId.value);
+    }
+    if (isDeleted.present) {
+      map['is_deleted'] = Variable<bool>(isDeleted.value);
+    }
+    if (version.present) {
+      map['version'] = Variable<int>(version.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -3600,6 +3994,9 @@ class ForumLineCommentsCompanion extends UpdateCompanion<ForumLineCommentData> {
           ..write('authorRole: $authorRole, ')
           ..write('commentType: $commentType, ')
           ..write('content: $content, ')
+          ..write('parentCommentId: $parentCommentId, ')
+          ..write('isDeleted: $isDeleted, ')
+          ..write('version: $version, ')
           ..write('createdAt: $createdAt, ')
           ..write('syncStatus: $syncStatus, ')
           ..write('rowid: $rowid')
@@ -3652,6 +4049,8 @@ typedef $$ForumPostsTableCreateCompanionBuilder =
       Value<String?> originalAnswerId,
       Value<DateTime?> lastSyncAttempt,
       Value<int> syncRetryCount,
+      Value<bool> isDeleted,
+      Value<int> version,
       Value<int> rowid,
     });
 typedef $$ForumPostsTableUpdateCompanionBuilder =
@@ -3674,6 +4073,8 @@ typedef $$ForumPostsTableUpdateCompanionBuilder =
       Value<String?> originalAnswerId,
       Value<DateTime?> lastSyncAttempt,
       Value<int> syncRetryCount,
+      Value<bool> isDeleted,
+      Value<int> version,
       Value<int> rowid,
     });
 
@@ -3773,6 +4174,16 @@ class $$ForumPostsTableFilterComposer
 
   ColumnFilters<int> get syncRetryCount => $composableBuilder(
     column: $table.syncRetryCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isDeleted => $composableBuilder(
+    column: $table.isDeleted,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get version => $composableBuilder(
+    column: $table.version,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -3875,6 +4286,16 @@ class $$ForumPostsTableOrderingComposer
     column: $table.syncRetryCount,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get isDeleted => $composableBuilder(
+    column: $table.isDeleted,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$ForumPostsTableAnnotationComposer
@@ -3951,6 +4372,12 @@ class $$ForumPostsTableAnnotationComposer
     column: $table.syncRetryCount,
     builder: (column) => column,
   );
+
+  GeneratedColumn<bool> get isDeleted =>
+      $composableBuilder(column: $table.isDeleted, builder: (column) => column);
+
+  GeneratedColumn<int> get version =>
+      $composableBuilder(column: $table.version, builder: (column) => column);
 }
 
 class $$ForumPostsTableTableManager
@@ -4002,6 +4429,8 @@ class $$ForumPostsTableTableManager
                 Value<String?> originalAnswerId = const Value.absent(),
                 Value<DateTime?> lastSyncAttempt = const Value.absent(),
                 Value<int> syncRetryCount = const Value.absent(),
+                Value<bool> isDeleted = const Value.absent(),
+                Value<int> version = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ForumPostsCompanion(
                 localId: localId,
@@ -4022,6 +4451,8 @@ class $$ForumPostsTableTableManager
                 originalAnswerId: originalAnswerId,
                 lastSyncAttempt: lastSyncAttempt,
                 syncRetryCount: syncRetryCount,
+                isDeleted: isDeleted,
+                version: version,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -4044,6 +4475,8 @@ class $$ForumPostsTableTableManager
                 Value<String?> originalAnswerId = const Value.absent(),
                 Value<DateTime?> lastSyncAttempt = const Value.absent(),
                 Value<int> syncRetryCount = const Value.absent(),
+                Value<bool> isDeleted = const Value.absent(),
+                Value<int> version = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ForumPostsCompanion.insert(
                 localId: localId,
@@ -4064,6 +4497,8 @@ class $$ForumPostsTableTableManager
                 originalAnswerId: originalAnswerId,
                 lastSyncAttempt: lastSyncAttempt,
                 syncRetryCount: syncRetryCount,
+                isDeleted: isDeleted,
+                version: version,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -4101,6 +4536,9 @@ typedef $$ForumCommentsTableCreateCompanionBuilder =
       Value<String?> authorRole,
       Value<String?> authorProfession,
       required String content,
+      Value<String?> parentCommentId,
+      Value<bool> isDeleted,
+      Value<int> version,
       Value<int> likeCount,
       Value<bool> isLiked,
       required DateTime createdAt,
@@ -4120,6 +4558,9 @@ typedef $$ForumCommentsTableUpdateCompanionBuilder =
       Value<String?> authorRole,
       Value<String?> authorProfession,
       Value<String> content,
+      Value<String?> parentCommentId,
+      Value<bool> isDeleted,
+      Value<int> version,
       Value<int> likeCount,
       Value<bool> isLiked,
       Value<DateTime> createdAt,
@@ -4176,6 +4617,21 @@ class $$ForumCommentsTableFilterComposer
 
   ColumnFilters<String> get content => $composableBuilder(
     column: $table.content,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get parentCommentId => $composableBuilder(
+    column: $table.parentCommentId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isDeleted => $composableBuilder(
+    column: $table.isDeleted,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get version => $composableBuilder(
+    column: $table.version,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4264,6 +4720,21 @@ class $$ForumCommentsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get parentCommentId => $composableBuilder(
+    column: $table.parentCommentId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isDeleted => $composableBuilder(
+    column: $table.isDeleted,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get likeCount => $composableBuilder(
     column: $table.likeCount,
     builder: (column) => ColumnOrderings(column),
@@ -4339,6 +4810,17 @@ class $$ForumCommentsTableAnnotationComposer
   GeneratedColumn<String> get content =>
       $composableBuilder(column: $table.content, builder: (column) => column);
 
+  GeneratedColumn<String> get parentCommentId => $composableBuilder(
+    column: $table.parentCommentId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isDeleted =>
+      $composableBuilder(column: $table.isDeleted, builder: (column) => column);
+
+  GeneratedColumn<int> get version =>
+      $composableBuilder(column: $table.version, builder: (column) => column);
+
   GeneratedColumn<int> get likeCount =>
       $composableBuilder(column: $table.likeCount, builder: (column) => column);
 
@@ -4412,6 +4894,9 @@ class $$ForumCommentsTableTableManager
                 Value<String?> authorRole = const Value.absent(),
                 Value<String?> authorProfession = const Value.absent(),
                 Value<String> content = const Value.absent(),
+                Value<String?> parentCommentId = const Value.absent(),
+                Value<bool> isDeleted = const Value.absent(),
+                Value<int> version = const Value.absent(),
                 Value<int> likeCount = const Value.absent(),
                 Value<bool> isLiked = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
@@ -4429,6 +4914,9 @@ class $$ForumCommentsTableTableManager
                 authorRole: authorRole,
                 authorProfession: authorProfession,
                 content: content,
+                parentCommentId: parentCommentId,
+                isDeleted: isDeleted,
+                version: version,
                 likeCount: likeCount,
                 isLiked: isLiked,
                 createdAt: createdAt,
@@ -4448,6 +4936,9 @@ class $$ForumCommentsTableTableManager
                 Value<String?> authorRole = const Value.absent(),
                 Value<String?> authorProfession = const Value.absent(),
                 required String content,
+                Value<String?> parentCommentId = const Value.absent(),
+                Value<bool> isDeleted = const Value.absent(),
+                Value<int> version = const Value.absent(),
                 Value<int> likeCount = const Value.absent(),
                 Value<bool> isLiked = const Value.absent(),
                 required DateTime createdAt,
@@ -4465,6 +4956,9 @@ class $$ForumCommentsTableTableManager
                 authorRole: authorRole,
                 authorProfession: authorProfession,
                 content: content,
+                parentCommentId: parentCommentId,
+                isDeleted: isDeleted,
+                version: version,
                 likeCount: likeCount,
                 isLiked: isLiked,
                 createdAt: createdAt,
@@ -5062,6 +5556,9 @@ typedef $$ForumLineCommentsTableCreateCompanionBuilder =
       required String authorRole,
       required String commentType,
       required String content,
+      Value<String?> parentCommentId,
+      Value<bool> isDeleted,
+      Value<int> version,
       required DateTime createdAt,
       Value<String> syncStatus,
       Value<int> rowid,
@@ -5076,6 +5573,9 @@ typedef $$ForumLineCommentsTableUpdateCompanionBuilder =
       Value<String> authorRole,
       Value<String> commentType,
       Value<String> content,
+      Value<String?> parentCommentId,
+      Value<bool> isDeleted,
+      Value<int> version,
       Value<DateTime> createdAt,
       Value<String> syncStatus,
       Value<int> rowid,
@@ -5127,6 +5627,21 @@ class $$ForumLineCommentsTableFilterComposer
 
   ColumnFilters<String> get content => $composableBuilder(
     column: $table.content,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get parentCommentId => $composableBuilder(
+    column: $table.parentCommentId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isDeleted => $composableBuilder(
+    column: $table.isDeleted,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get version => $composableBuilder(
+    column: $table.version,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5190,6 +5705,21 @@ class $$ForumLineCommentsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get parentCommentId => $composableBuilder(
+    column: $table.parentCommentId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isDeleted => $composableBuilder(
+    column: $table.isDeleted,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -5239,6 +5769,17 @@ class $$ForumLineCommentsTableAnnotationComposer
 
   GeneratedColumn<String> get content =>
       $composableBuilder(column: $table.content, builder: (column) => column);
+
+  GeneratedColumn<String> get parentCommentId => $composableBuilder(
+    column: $table.parentCommentId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isDeleted =>
+      $composableBuilder(column: $table.isDeleted, builder: (column) => column);
+
+  GeneratedColumn<int> get version =>
+      $composableBuilder(column: $table.version, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -5297,6 +5838,9 @@ class $$ForumLineCommentsTableTableManager
                 Value<String> authorRole = const Value.absent(),
                 Value<String> commentType = const Value.absent(),
                 Value<String> content = const Value.absent(),
+                Value<String?> parentCommentId = const Value.absent(),
+                Value<bool> isDeleted = const Value.absent(),
+                Value<int> version = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<String> syncStatus = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -5309,6 +5853,9 @@ class $$ForumLineCommentsTableTableManager
                 authorRole: authorRole,
                 commentType: commentType,
                 content: content,
+                parentCommentId: parentCommentId,
+                isDeleted: isDeleted,
+                version: version,
                 createdAt: createdAt,
                 syncStatus: syncStatus,
                 rowid: rowid,
@@ -5323,6 +5870,9 @@ class $$ForumLineCommentsTableTableManager
                 required String authorRole,
                 required String commentType,
                 required String content,
+                Value<String?> parentCommentId = const Value.absent(),
+                Value<bool> isDeleted = const Value.absent(),
+                Value<int> version = const Value.absent(),
                 required DateTime createdAt,
                 Value<String> syncStatus = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -5335,6 +5885,9 @@ class $$ForumLineCommentsTableTableManager
                 authorRole: authorRole,
                 commentType: commentType,
                 content: content,
+                parentCommentId: parentCommentId,
+                isDeleted: isDeleted,
+                version: version,
                 createdAt: createdAt,
                 syncStatus: syncStatus,
                 rowid: rowid,

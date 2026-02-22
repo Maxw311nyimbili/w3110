@@ -14,6 +14,9 @@ class ForumLineComments extends Table {
   TextColumn get authorRole => text()(); // 'clinician', 'mother', 'community'
   TextColumn get commentType => text()(); // 'clinical', 'evidence', 'experience', 'concern'
   TextColumn get content => text()();
+  TextColumn get parentCommentId => text().nullable()();
+  BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
+  IntColumn get version => integer().withDefault(const Constant(1))();
   
   DateTimeColumn get createdAt => dateTime()();
   
