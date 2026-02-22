@@ -61,6 +61,7 @@ class _ReplyInputFieldForModalState extends State<ReplyInputFieldForModal> {
           content: _textController.text,
           authorId: authState.user?.id ?? 'guest_${DateTime.now().millisecondsSinceEpoch}',
           authorName: authState.user?.displayName ?? 'Guest',
+          parentCommentId: forumState.replyingToComment?.localId,
         );
       } else {
         await context.read<ForumCubit>().postLineComment(
@@ -82,154 +83,155 @@ class _ReplyInputFieldForModalState extends State<ReplyInputFieldForModal> {
   @override
   Widget build(BuildContext context) {
     return BlocListener<ForumCubit, ForumState>(
-      listenWhen: (previous, current) => 
+      listenWhen: (previous, current) =>
           previous.replyingToComment == null && current.replyingToComment != null,
       listener: (context, state) {
         _focusNode.requestFocus();
       },
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Replying To Banner
-          BlocBuilder<ForumCubit, ForumState>(
-            builder: (context, state) {
-              if (state.replyingToComment == null) return const SizedBox.shrink();
-              
-              return Container(
-                margin: const EdgeInsets.only(bottom: 12),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                  color: AppColors.backgroundElevated,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.borderLight),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.reply_rounded, size: 16, color: AppColors.textTertiary),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'Replying to ${state.replyingToComment!.authorName}',
-                        style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.close_rounded, size: 16, color: AppColors.textTertiary),
-                      onPressed: () => context.read<ForumCubit>().clearReplyingTo(),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-          // Type Selection (Horizontal Pills) - Hide for general comments
-          if (!widget.isGeneral) ...[
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: ValueListenableBuilder<String>(
-                valueListenable: _typeController,
-                builder: (context, selectedType, child) {
-                  return Row(
-                    children: [
-                      _TypeChoiceChip(
-                        label: 'Experience',
-                        icon: Icons.face_4_outlined,
-                        value: 'experience',
-                        groupValue: selectedType,
-                        onSelected: (val) => _typeController.value = val,
-                      ),
-                      const SizedBox(width: 8),
-                      _TypeChoiceChip(
-                        label: 'Clinical',
-                        icon: Icons.local_hospital_outlined,
-                        value: 'clinical',
-                        groupValue: selectedType,
-                        onSelected: (val) => _typeController.value = val,
-                      ),
-                      const SizedBox(width: 8),
-                      _TypeChoiceChip(
-                        label: 'Evidence',
-                        icon: Icons.library_books_outlined,
-                        value: 'evidence',
-                        groupValue: selectedType,
-                        onSelected: (val) => _typeController.value = val,
-                      ),
-                      const SizedBox(width: 8),
-                      _TypeChoiceChip(
-                        label: 'Concern',
-                        icon: Icons.help_outline_rounded,
-                        value: 'concern',
-                        groupValue: selectedType,
-                        onSelected: (val) => _typeController.value = val,
-                      ),
-                    ],
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 12),
-          ],
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Replying To Banner
+            BlocBuilder<ForumCubit, ForumState>(
+              builder: (context, state) {
+                if (state.replyingToComment == null) return const SizedBox.shrink();
 
-          // Input Row
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Expanded(
-                child: Container(
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
                     color: AppColors.backgroundElevated,
-                    borderRadius: BorderRadius.circular(24),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.borderLight),
                   ),
-                  child: TextField(
-                    controller: _textController,
-                    focusNode: _focusNode,
-                    minLines: 1,
-                    maxLines: 4,
-                    style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary),
-                    decoration: InputDecoration(
-                      hintText: widget.isGeneral ? 'Add to the discussion...' : 'Share your perspective...',
-                      hintStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.textTertiary),
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.reply_rounded, size: 16, color: AppColors.textTertiary),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Replying to ${state.replyingToComment!.authorName}',
+                          style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close_rounded, size: 16, color: AppColors.textTertiary),
+                        onPressed: () => context.read<ForumCubit>().clearReplyingTo(),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+            // Type Selection (Horizontal Pills) - Hide for general comments
+            if (!widget.isGeneral) ...[
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: ValueListenableBuilder<String>(
+                  valueListenable: _typeController,
+                  builder: (context, selectedType, child) {
+                    return Row(
+                      children: [
+                        _TypeChoiceChip(
+                          label: 'Experience',
+                          icon: Icons.face_4_outlined,
+                          value: 'experience',
+                          groupValue: selectedType,
+                          onSelected: (val) => _typeController.value = val,
+                        ),
+                        const SizedBox(width: 8),
+                        _TypeChoiceChip(
+                          label: 'Clinical',
+                          icon: Icons.local_hospital_outlined,
+                          value: 'clinical',
+                          groupValue: selectedType,
+                          onSelected: (val) => _typeController.value = val,
+                        ),
+                        const SizedBox(width: 8),
+                        _TypeChoiceChip(
+                          label: 'Evidence',
+                          icon: Icons.library_books_outlined,
+                          value: 'evidence',
+                          groupValue: selectedType,
+                          onSelected: (val) => _typeController.value = val,
+                        ),
+                        const SizedBox(width: 8),
+                        _TypeChoiceChip(
+                          label: 'Concern',
+                          icon: Icons.help_outline_rounded,
+                          value: 'concern',
+                          groupValue: selectedType,
+                          onSelected: (val) => _typeController.value = val,
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
+
+            // Input Row
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.backgroundElevated,
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    child: TextField(
+                      controller: _textController,
+                      focusNode: _focusNode,
+                      minLines: 1,
+                      maxLines: 4,
+                      style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary),
+                      decoration: InputDecoration(
+                        hintText: widget.isGeneral ? 'Add to the discussion...' : 'Share your perspective...',
+                        hintStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.textTertiary),
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              
-              // Post Button
-              _isPosting 
-                ? const SizedBox(
-                    width: 40, 
-                    height: 40, 
-                    child: Padding(
-                      padding: EdgeInsets.all(10),
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
-                  )
-                : Container(
-                    height: 40,
-                    width: 40,
-                    decoration: BoxDecoration(
-                      color: AppColors.accentPrimary,
-                      shape: BoxShape.circle,
-                    ),
-                    child: IconButton(
-                      icon: const Icon(Icons.arrow_upward_rounded, size: 20, color: Colors.white),
-                      onPressed: _handlePost,
-                      padding: EdgeInsets.zero,
-                    ),
-                  ),
-            ],
-          ),
-        ],
+                const SizedBox(width: 8),
+
+                // Post Button
+                _isPosting
+                    ? const SizedBox(
+                        width: 40,
+                        height: 40,
+                        child: Padding(
+                          padding: EdgeInsets.all(10),
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      )
+                    : Container(
+                        height: 40,
+                        width: 40,
+                        decoration: BoxDecoration(
+                          color: AppColors.accentPrimary,
+                          shape: BoxShape.circle,
+                        ),
+                        child: IconButton(
+                          icon: const Icon(Icons.arrow_upward_rounded, size: 20, color: Colors.white),
+                          onPressed: _handlePost,
+                          padding: EdgeInsets.zero,
+                        ),
+                      ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

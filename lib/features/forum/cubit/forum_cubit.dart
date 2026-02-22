@@ -147,7 +147,7 @@ class ForumCubit extends Cubit<ForumState> {
     try {
       // Find the most up-to-date version of this post from current state
       final currentPost = state.posts.firstWhere(
-        (p) => p.id == post.id,
+        (p) => p.localId == post.localId || (p.id.isNotEmpty && p.id == post.id),
         orElse: () => post,
       );
 
@@ -169,15 +169,15 @@ class ForumCubit extends Cubit<ForumState> {
         currentAnswerId: postId,
       ));
 
+      // Trigger background sync to "heal" any ID drifts or fetch new comments
+      unawaited(_forumRepository.fetchCommentsFromServer(postId));
+
       // Load authoritative lines from repository (server or cache)
       List<ForumAnswerLine> lines = [];
       try {
-        final serverPostId = int.tryParse(post.id);
-        if (serverPostId != null) {
-          lines = await _forumRepository.getLinesForPost(serverPostId);
-        } else {
-          lines = await _forumRepository.getLinesForAnswer(post.id.isNotEmpty ? post.id : post.localId);
-        }
+        // Use either server ID or local UUID - backend now resolves both
+        final idToUse = post.id.isNotEmpty ? post.id : post.localId;
+        lines = await _forumRepository.getLinesForPost(idToUse);
       } catch (e) {
         print('DEBUG: Error matching lines: $e');
         // Fallback to local parsing
@@ -210,6 +210,7 @@ class ForumCubit extends Cubit<ForumState> {
       ));
     }
   }
+
 
   /// Go back to forum list
   void backToList() {
@@ -359,10 +360,21 @@ class ForumCubit extends Cubit<ForumState> {
     required String content,
     required String authorId,
     required String authorName,
+    String? parentCommentId,
   }) async {
     try {
       final localId = _uuid.v4();
-      final now = DateTime.now();
+      final effectiveParentId = parentCommentId ?? (state.replyingToComment?.isLineComment == false ? state.replyingToComment?.localId : null);
+      
+      // 1. Create locally for instant feedback
+      await _forumRepository.createLocalComment(
+        localId: localId,
+        postId: postId,
+        content: content,
+        authorId: authorId,
+        authorName: authorName,
+        parentCommentId: effectiveParentId,
+      );
 
       final newComment = ForumComment(
         id: '',
@@ -371,27 +383,12 @@ class ForumCubit extends Cubit<ForumState> {
         authorId: authorId,
         authorName: authorName,
         content: content,
-    String? parentCommentId,
-  }) async {
-    try {
-      final effectiveParentId = parentCommentId ?? (state.replyingToComment?.isLineComment == false ? state.replyingToComment?.id : null);
-      
-      final comment = await _forumRepository.addComment(
-        postId: postId,
-        content: content,
-        authorId: authorId,
-        authorName: authorName,
+        createdAt: DateTime.now(),
         parentCommentId: effectiveParentId,
+        syncStatus: SyncStatus.pending,
       );
 
-      // Add to sync queue
-      await _forumRepository.addToSyncQueue(
-        entityType: 'comment',
-        entityId: localId,
-        action: 'create',
-      );
-
-      // Update UI
+      // 2. Update UI
       emit(state.copyWith(
         comments: [...state.comments, newComment],
         hasPendingSync: true,
@@ -407,6 +404,13 @@ class ForumCubit extends Cubit<ForumState> {
           replyingToComment: null, // Clear replying indicator
         ));
       }
+
+      // 3. Add to sync queue
+      await _forumRepository.addToSyncQueue(
+        entityType: 'comment',
+        entityId: localId,
+        action: 'create',
+      );
 
       // Trigger sync
       syncWithBackend();
@@ -545,7 +549,7 @@ class ForumCubit extends Cubit<ForumState> {
   Future<void> togglePostLike(String postId) async {
     try {
       // 1. Update main posts list
-      final postIndex = state.posts.indexWhere((p) => p.id == postId);
+      final postIndex = state.posts.indexWhere((p) => p.localId == postId || p.id == postId);
       List<ForumPost>? updatedPosts;
       ForumPost? targetPost;
 
@@ -576,12 +580,12 @@ class ForumCubit extends Cubit<ForumState> {
       emit(state.copyWith(
         posts: updatedPosts ?? state.posts,
         searchResults: updatedSearchResults ?? state.searchResults,
-        selectedPost: state.selectedPost?.id == postId ? targetPost : state.selectedPost,
+        selectedPost: state.selectedPost?.localId == postId ? targetPost : state.selectedPost,
       ));
 
       // 3. Call API and persist locally
       await _forumRepository.togglePostLike(
-        postId,
+        postId, // Note: Repository should accept both, and Backend now resolves.
         isLiked: targetPost.isLiked,
         likeCount: targetPost.likeCount,
       );
@@ -593,26 +597,39 @@ class ForumCubit extends Cubit<ForumState> {
   }
 
   /// Toggle like on comment (optimistic update)
-  Future<void> toggleCommentLike(String commentId) async {
+  Future<void> toggleCommentLike(String commentId, {required bool isLineComment}) async {
     try {
-      final commentIndex = state.comments.indexWhere((c) => c.id == commentId);
-      if (commentIndex == -1) return;
+      if (isLineComment) {
+        final commentIndex = state.lineComments.indexWhere((c) => c.localId == commentId || c.id == commentId);
+        if (commentIndex == -1) return;
 
-      final comment = state.comments[commentIndex];
-      final updatedComment = comment.copyWith(
-        isLiked: !comment.isLiked,
-        likeCount: comment.isLiked ? comment.likeCount - 1 : comment.likeCount + 1,
-      );
+        final comment = state.lineComments[commentIndex];
+        final updatedComment = comment.copyWith(
+          isLiked: !comment.isLiked,
+          likeCount: comment.isLiked ? comment.likeCount - 1 : comment.likeCount + 1,
+        );
 
-      final updatedComments = List<ForumComment>.from(state.comments)..[commentIndex] = updatedComment;
-      
-      emit(state.copyWith(comments: updatedComments));
+        final updatedLineComments = List<ForumLineComment>.from(state.lineComments)..[commentIndex] = updatedComment;
+        emit(state.copyWith(lineComments: updatedLineComments));
+      } else {
+        final commentIndex = state.comments.indexWhere((c) => c.localId == commentId || c.id == commentId);
+        if (commentIndex == -1) return;
+
+        final comment = state.comments[commentIndex];
+        final updatedComment = comment.copyWith(
+          isLiked: !comment.isLiked,
+          likeCount: comment.isLiked ? comment.likeCount - 1 : comment.likeCount + 1,
+        );
+
+        final updatedComments = List<ForumComment>.from(state.comments)..[commentIndex] = updatedComment;
+        emit(state.copyWith(comments: updatedComments));
+      }
 
       // Call API
-      await _forumRepository.toggleCommentLike(commentId);
+      await _forumRepository.toggleCommentLike(commentId, isLineComment: isLineComment);
     } catch (e) {
       // Revert (reload comments for current post)
-      if (state.selectedPost != null) {
+      if (state.selectedPost != null && !isLineComment) { // Only reload post comments if it's a regular comment
         selectPost(state.selectedPost!);
       }
       emit(state.copyWith(error: 'Failed to update comment like: ${e.toString()}'));
@@ -745,7 +762,7 @@ class ForumCubit extends Cubit<ForumState> {
     String? parentCommentId,
   }) async {
     final effectiveLineId = lineId ?? state.selectedLineId;
-    final effectiveParentId = parentCommentId ?? (state.replyingToComment?.isLineComment == true ? state.replyingToComment?.id : null);
+    final effectiveParentId = parentCommentId ?? (state.replyingToComment?.isLineComment == true ? state.replyingToComment?.localId : null);
     if (effectiveLineId == null) return;
     
     try {

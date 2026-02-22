@@ -6,207 +6,244 @@ import 'package:flutter/material.dart';
 import 'package:forum_repository/forum_repository.dart';
 
 class CommentCard extends StatelessWidget {
-  final ForumLineComment comment;
+  final String authorName;
+  final String text;
+  final DateTime createdAt;
+  final int likeCount;
+  final bool isLiked;
+  final String? authorRoleLabel;
+  final String? profession;
+  final bool isExpert;
+  final bool isClinician;
+  final IconData roleIcon;
+  final String? typeLabel;
   final VoidCallback onReply;
-
-  const CommentCard({
-    super.key,
-    required this.comment,
-    required this.onReply,
-    this.currentUserId,
-    this.onEdit,
-    this.onDelete,
-  });
-
+  final VoidCallback onLike;
+  final int depth;
   final String? currentUserId;
+  final String authorId;
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
 
+  const CommentCard({
+    super.key,
+    required this.authorName,
+    required this.text,
+    required this.createdAt,
+    required this.onReply,
+    required this.onLike,
+    required this.authorId,
+    this.likeCount = 0,
+    this.isLiked = false,
+    this.authorRoleLabel,
+    this.profession,
+    this.isExpert = false,
+    this.isClinician = false,
+    this.roleIcon = Icons.person_outline,
+    this.typeLabel,
+    this.currentUserId,
+    this.onEdit,
+    this.onDelete,
+    this.depth = 0,
+  });
+
   @override
   Widget build(BuildContext context) {
-    final roleIconInfo = _getRoleIconInfo(comment.authorRole);
-    final typeLabel = comment.commentType != CommentType.general ? comment.typeLabel : null;
-    final isExpert = comment.authorRole == CommentRole.clinician || comment.authorRole == CommentRole.supportPartner;
-    final isClinician = comment.authorRole == CommentRole.clinician;
-
-    final isReply = comment.parentCommentId != null;
-
-    return Padding(
-      padding: EdgeInsets.only(
-        top: 8,
-        bottom: 8,
-        left: isReply ? 16.0 : 0.0,
-      ),
-      child: Container(
-        decoration: BoxDecoration(
-          color: isExpert 
-              ? (isClinician ? AppColors.success.withOpacity(0.04) : AppColors.accentPrimary.withOpacity(0.04))
-              : AppColors.backgroundSurface,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isExpert 
-                ? (isClinician ? AppColors.success.withOpacity(0.15) : AppColors.accentPrimary.withOpacity(0.15))
-                : AppColors.borderLight,
-            width: isExpert ? 1.5 : 1,
-          ),
-        ),
-        padding: const EdgeInsets.all(12),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Avatar with expert highlight
-            Stack(
-              children: [
-                Container(
-                  width: isReply ? 28 : 36,
-                  height: isReply ? 28 : 36,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: isExpert 
-                        ? AppColors.success.withOpacity(0.15)
-                        : AppColors.backgroundElevated,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    roleIconInfo, 
-                    size: isReply ? 14 : 18, 
-                    color: isExpert 
-                        ? (isClinician ? AppColors.success : AppColors.accentPrimary)
-                        : AppColors.textSecondary,
-                  ),
+    final effectiveIsExpert = isExpert;
+    final effectiveIsClinician = isClinician;
+    
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Thread Line area
+          if (depth > 0)
+            Row(
+              children: List.generate(depth, (index) => Container(
+                width: 24, // Consistent indentation
+                alignment: Alignment.centerLeft,
+                child: VerticalDivider(
+                  color: AppColors.borderLight,
+                  thickness: 1.5,
+                  width: 1,
                 ),
-                if (isExpert)
-                  Positioned(
-                    right: 0,
-                    bottom: 0,
-                    child: Container(
-                      padding: const EdgeInsets.all(2),
-                      decoration: const BoxDecoration(
-                        color: AppColors.success,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.check,
-                        size: isReply ? 8 : 10,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-              ],
+              )),
             ),
-            const SizedBox(width: 12),
-            
-            Expanded(
-              child: Column(
+          
+          // Main Content
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+              child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Header with expert badge
-                  Row(
-                    children: [
-                      Text(
-                        comment.authorName,
-                        style: AppTextStyles.labelMedium.copyWith(
-                          fontWeight: FontWeight.w700,
-                          fontSize: isReply ? 12 : 14,
-                          color: isExpert 
-                              ? (isClinician ? AppColors.success : AppColors.accentPrimary)
-                              : AppColors.textPrimary,
-                        ),
-                      ),
-                      if (isExpert) ...[
-                        const SizedBox(width: 6),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: AppColors.success.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            isClinician ? 'Expert' : 'Support',
-                            style: AppTextStyles.caption.copyWith(
-                              fontSize: isReply ? 9 : 10,
-                              color: isClinician ? AppColors.success : AppColors.accentPrimary,
-                              fontWeight: FontWeight.w600,
-                            ),
+                  // Avatar
+                  _buildAvatar(isExpert: effectiveIsExpert, isClinician: effectiveIsClinician, size: depth > 0 ? 28 : 34),
+                  const SizedBox(width: 10),
+                  
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Header
+                        _buildHeader(context, isExpert: effectiveIsExpert, isClinician: effectiveIsClinician),
+                        const SizedBox(height: 2),
+                        
+                        // Body
+                        Text(
+                          text,
+                          style: AppTextStyles.bodyMedium.copyWith(
+                            fontSize: depth > 0 ? 13 : 14,
+                            height: 1.4,
+                            color: AppColors.textPrimary,
                           ),
                         ),
+                        
+                        // Actions
+                        const SizedBox(height: 4),
+                        _buildFooterActions(),
                       ],
-                      const Spacer(),
-                      Text(
-                        _formatTime(comment.createdAt),
-                        style: AppTextStyles.caption.copyWith(
-                          fontSize: isReply ? 9 : 10,
-                          color: AppColors.textTertiary
-                        ),
-                      ),
-                      if (currentUserId == comment.authorId) ...[
-                        const SizedBox(width: 4),
-                        _buildCommentActions(context),
-                      ],
-                    ],
-                  ),
-
-                  // Profession (if available)
-                  if (comment.authorProfession != null) ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      comment.authorProfession!,
-                      style: AppTextStyles.caption.copyWith(
-                        fontSize: isReply ? 9 : 10,
-                        color: isExpert 
-                            ? (isClinician ? AppColors.success : AppColors.accentPrimary)
-                            : AppColors.textSecondary,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                  
-                  // Optional Type Badge
-                  if (typeLabel != null && comment.lineId != 'general') ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      typeLabel.toUpperCase(),
-                      style: AppTextStyles.caption.copyWith(
-                        color: AppColors.accentPrimary.withOpacity(0.6),
-                        fontSize: isReply ? 8 : 9,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ],
-                  const SizedBox(height: 4),
-
-                  // Content
-                  Text(
-                    comment.text,
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      fontSize: isReply ? 13 : 14,
-                      height: 1.4, 
-                      color: AppColors.textPrimary,
                     ),
                   ),
-                  
-                  // Footer (Reply) - Only show if not already a reply (limiting to 1 level for now like IG)
-                  if (!isReply) ...[
-                    const SizedBox(height: 8),
-                    GestureDetector(
-                      onTap: onReply,
-                      child: Text(
-                        'Reply',
-                        style: AppTextStyles.labelSmall.copyWith(
-                          color: AppColors.textTertiary,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 11,
-                        ),
-                      ),
-                    ),
-                  ],
                 ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
+    );
+  }
+
+  Widget _buildAvatar({required bool isExpert, required bool isClinician, required double size}) {
+    return Stack(
+      children: [
+        Container(
+          width: size,
+          height: size,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: isExpert 
+                ? AppColors.success.withOpacity(0.1)
+                : AppColors.backgroundElevated,
+            shape: BoxShape.circle,
+            border: isExpert ? Border.all(color: isClinician ? AppColors.success : AppColors.accentPrimary, width: 1) : null,
+          ),
+          child: Icon(
+            roleIcon, 
+            size: size * 0.5, 
+            color: isExpert 
+                ? (isClinician ? AppColors.success : AppColors.accentPrimary)
+                : AppColors.textSecondary,
+          ),
+        ),
+        if (isExpert)
+          Positioned(
+            right: 0,
+            bottom: 0,
+            child: Container(
+              padding: const EdgeInsets.all(1.5),
+              decoration: const BoxDecoration(
+                color: AppColors.success,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.check,
+                size: 8,
+                color: Colors.white,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildHeader(BuildContext context, {required bool isExpert, required bool isClinician}) {
+    return Row(
+      children: [
+        Text(
+          authorName,
+          style: AppTextStyles.labelMedium.copyWith(
+            fontWeight: FontWeight.w700,
+            fontSize: depth > 0 ? 12 : 13,
+            color: isExpert 
+                ? (isClinician ? AppColors.success : AppColors.accentPrimary)
+                : AppColors.textPrimary,
+          ),
+        ),
+        if (isExpert) ...[
+          const SizedBox(width: 4),
+          Text(
+            '•',
+            style: TextStyle(color: AppColors.textTertiary, fontSize: 10),
+          ),
+          const SizedBox(width: 4),
+          Text(
+            authorRoleLabel ?? 'Expert',
+            style: AppTextStyles.caption.copyWith(
+              fontSize: depth > 0 ? 9 : 10,
+              color: isClinician ? AppColors.success : AppColors.accentPrimary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+        const Spacer(),
+        Text(
+          _formatTime(createdAt),
+          style: AppTextStyles.caption.copyWith(
+            fontSize: 9,
+            color: AppColors.textTertiary
+          ),
+        ),
+        if (currentUserId == authorId) ...[
+          const SizedBox(width: 4),
+          _buildCommentActions(context),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildFooterActions() {
+    return Row(
+      children: [
+        GestureDetector(
+          onTap: onLike,
+          behavior: HitTestBehavior.opaque,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                isLiked ? Icons.favorite_rounded : Icons.favorite_outline_rounded,
+                size: 13,
+                color: isLiked ? Colors.red : AppColors.textTertiary,
+              ),
+              if (likeCount > 0) ...[
+                const SizedBox(width: 4),
+                Text(
+                  likeCount.toString(),
+                  style: AppTextStyles.caption.copyWith(
+                    color: isLiked ? Colors.red : AppColors.textTertiary,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 10,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+        const SizedBox(width: 16),
+        GestureDetector(
+          onTap: onReply,
+          behavior: HitTestBehavior.opaque,
+          child: Text(
+            'Reply',
+            style: AppTextStyles.labelSmall.copyWith(
+              color: AppColors.textTertiary,
+              fontWeight: FontWeight.w700,
+              fontSize: 10,
+            ),
+          ),
+        ),
+      ],
     );
   }
 

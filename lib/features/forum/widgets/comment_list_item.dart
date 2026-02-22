@@ -82,7 +82,7 @@ class CommentListItem extends StatelessWidget {
                 const SizedBox(height: 8),
                 // Like action for comment
                 GestureDetector(
-                  onTap: () => context.read<ForumCubit>().toggleCommentLike(comment.id),
+                  onTap: () => context.read<ForumCubit>().toggleCommentLike(comment.id, isLineComment: false),
                   child: Row(
                     children: [
                       Icon(

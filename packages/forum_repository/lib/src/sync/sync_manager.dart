@@ -141,20 +141,14 @@ class SyncManager {
 
     switch (item.action) {
       case 'create':
-        // Get parent post to find server ID
-        final post = await _database.getPostByLocalId(comment.postId) ?? 
-                    await _database.getPostByServerId(comment.postId);
-                    
-        if (post == null || post.serverId.isEmpty) {
-          throw SyncException('Parent post not synced yet: ${comment.postId}');
-        }
-
+        // No need to wait for parent post to sync anymore! The backend can resolve via client_id.
         final response = await _apiClient.post(
-          '/api/v1/forum/posts/${post.serverId}/comments',
+          '/api/v1/forum/posts/${comment.postId}/comments',
           data: {
             'content': comment.content,
             'author_id': comment.authorId,
-            'parent_comment_id': comment.parentCommentId,
+            'parent_comment_id': comment.parentCommentId, // This can now be a UUID
+            'client_id': comment.localId,
           },
         );
 

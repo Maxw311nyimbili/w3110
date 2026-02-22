@@ -88,7 +88,7 @@ class ForumPost extends Equatable {
   factory ForumPost.fromJson(Map<String, dynamic> json) {
     return ForumPost(
       id: json['id'].toString(),
-      localId: json['id'].toString(), 
+      localId: (json['client_id'] ?? json['id']).toString(), // Prioritize client_id (UUID)
       authorId: (json['user_id'] ?? json['author_id']).toString(),
       authorName: (json['author_name'] ?? 'Unknown').toString(),
       title: json['title'] as String? ?? 'Untitled',

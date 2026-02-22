@@ -167,33 +167,7 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
                               ),
                             )
                           else
-                            ...comments.expand((comment) => [
-                              Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                                child: FutureBuilder<String>(
-                                  future: context.read<ForumCubit>().getCurrentUserId(),
-                                  builder: (context, snapshot) {
-                                    final userId = snapshot.data ?? '';
-                                    return CommentCard(
-                                      comment: comment,
-                                      currentUserId: userId,
-                                      onReply: () {
-                                        context.read<ForumCubit>().setReplyingTo(
-                                          ForumReplyTarget(
-                                            id: comment.id,
-                                            authorName: comment.authorName,
-                                            isLineComment: true,
-                                          ),
-                                        );
-                                      },
-                                      onEdit: () => _showEditCommentDialog(context, comment),
-                                      onDelete: () => _showDeleteCommentDialog(context, comment.localId),
-                                    );
-                                  },
-                                ),
-                              ),
-                              const Divider(height: 1, indent: 20, endIndent: 20, color: AppColors.borderLight),
-                            ]),
+                            ..._buildThreadedComments(context, comments),
                         ],
                       );
                     },
@@ -209,6 +183,88 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
         ),
       ),
     );
+  }
+
+  List<Widget> _buildThreadedComments(BuildContext context, List<ForumLineComment> allComments) {
+    // 1. Group comments by parentId
+    final Map<String?, List<ForumLineComment>> grouped = {};
+    for (final comment in allComments) {
+      final pid = comment.parentCommentId;
+      grouped.containsKey(pid) ? grouped[pid]!.add(comment) : grouped[pid] = [comment];
+    }
+
+    // 2. Recursive builder
+    List<Widget> buildTree(String? parentId, int depth) {
+      final children = grouped[parentId] ?? [];
+      // Sort children by date
+      children.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+      
+      final List<Widget> items = [];
+      for (final comment in children) {
+        items.add(
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: FutureBuilder<String>(
+              future: context.read<ForumCubit>().getCurrentUserId(),
+              builder: (context, snapshot) {
+                final userId = snapshot.data ?? '';
+                return CommentCard(
+                  authorName: comment.authorName,
+                  text: comment.text,
+                  createdAt: comment.createdAt,
+                  likeCount: comment.likeCount,
+                  isLiked: comment.isLiked,
+                  authorId: comment.authorId,
+                  currentUserId: userId,
+                  depth: depth,
+                  isExpert: comment.authorRole == CommentRole.clinician || comment.authorRole == CommentRole.supportPartner,
+                  isClinician: comment.authorRole == CommentRole.clinician,
+                  profession: comment.authorProfession,
+                  typeLabel: comment.typeLabel,
+                  roleIcon: _getRoleIcon(comment.authorRole),
+                  onLike: () {
+                    context.read<ForumCubit>().toggleCommentLike(comment.id, isLineComment: true);
+                  },
+                  onReply: () {
+                    context.read<ForumCubit>().setReplyingTo(
+                      ForumReplyTarget(
+                        id: comment.id,
+                        localId: comment.localId,
+                        authorName: comment.authorName,
+                        isLineComment: true,
+                      ),
+                    );
+                  },
+                  onEdit: () => _showEditCommentDialog(context, comment),
+                  onDelete: () => _showDeleteCommentDialog(context, comment.localId),
+                );
+              },
+            ),
+          ),
+        );
+        
+        // Add divider (optional, but looks cleaner if not deeply nested)
+        if (depth == 0) {
+          items.add(const Divider(height: 1, indent: 20, endIndent: 20, color: AppColors.borderLight));
+        }
+
+        // Add children recursively
+        items.addAll(buildTree(comment.id, depth + 1));
+      }
+      return items;
+    }
+
+    return buildTree(null, 0);
+  }
+
+  IconData _getRoleIcon(CommentRole role) {
+    switch (role) {
+      case CommentRole.clinician: return Icons.local_hospital_outlined;
+      case CommentRole.mother: return Icons.face_4_outlined;
+      case CommentRole.community: return Icons.person_outline;
+      case CommentRole.supportPartner: return Icons.handshake_outlined;
+      default: return Icons.chat_bubble_outline_rounded;
+    }
   }
 
   void _showEditCommentDialog(BuildContext context, ForumLineComment comment) {
