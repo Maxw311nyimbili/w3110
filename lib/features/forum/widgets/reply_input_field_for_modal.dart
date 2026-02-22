@@ -5,7 +5,8 @@ import 'package:cap_project/core/theme/app_text_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cap_project/features/auth/cubit/cubit.dart';
-import 'package:cap_project/features/forum/cubit/forum_cubit.dart';
+import '../cubit/cubit.dart';
+import 'package:forum_repository/forum_repository.dart';
 
 class ReplyInputFieldForModal extends StatefulWidget {
   final String? lineId;

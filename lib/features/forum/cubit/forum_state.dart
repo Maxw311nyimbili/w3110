@@ -228,6 +228,7 @@ class ForumState extends Equatable {
     isSearching,
     hasPendingSync,
     lastSyncTime,
+    replyingToComment,
   ];
 }
 
