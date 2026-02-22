@@ -3,3 +3,7 @@ export 'comment_list_item.dart';
 export 'forum_body.dart';
 export 'new_post_sheet.dart';
 export 'post_card.dart';
+export 'comment_card.dart';
+export 'general_comments_view.dart';
+export 'line_comments_filtered_view.dart';
+export 'reply_input_field_for_modal.dart';

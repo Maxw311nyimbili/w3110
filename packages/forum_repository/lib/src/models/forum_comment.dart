@@ -72,7 +72,7 @@ class ForumComment extends Equatable {
   factory ForumComment.fromJson(Map<String, dynamic> json) {
     return ForumComment(
       id: json['id'].toString(),
-      localId: json['id'].toString(), 
+      localId: (json['client_id'] ?? json['id']).toString(), // Prioritize client_id (UUID)
       postId: json['post_id'].toString(),
       authorId: (json['user_id'] ?? json['author_id']).toString(),
       authorName: (json['author_name'] ?? 'Unknown').toString(),

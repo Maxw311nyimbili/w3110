@@ -23,17 +23,19 @@ enum PostFilter {
 /// Helper model for tracking what we are replying to
 class ForumReplyTarget extends Equatable {
   final String id;
+  final String localId;
   final String authorName;
   final bool isLineComment;
 
   const ForumReplyTarget({
     required this.id,
+    required this.localId,
     required this.authorName,
     required this.isLineComment,
   });
 
   @override
-  List<Object?> get props => [id, authorName, isLineComment];
+  List<Object?> get props => [id, localId, authorName, isLineComment];
 }
 
 /// Immutable forum state - manages posts, comments, and sync

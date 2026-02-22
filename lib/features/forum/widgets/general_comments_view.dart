@@ -111,51 +111,9 @@ class GeneralCommentsView extends StatelessWidget {
                         );
                       }
 
-                      return ListView.separated(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                        itemCount: comments.length,
-                        separatorBuilder: (context, index) => const Divider(height: 1, color: AppColors.borderLight),
-                        itemBuilder: (context, index) {
-                          final comment = comments[index];
-                          // Adapt ForumComment to ForumLineComment for the card
-                          final lineComment = ForumLineComment(
-                            id: comment.id,
-                            localId: comment.localId,
-                            lineId: 'general',
-                            authorId: comment.authorId,
-                            authorName: comment.authorName,
-                            authorRole: CommentRole.community, 
-                            commentType: CommentType.general, // Correct type for post-level discussions
-                            text: comment.content,
-                            createdAt: comment.createdAt,
-                            syncStatus: comment.syncStatus,
-                          );
-
-                          return FutureBuilder<String>(
-                            future: context.read<ForumCubit>().getCurrentUserId(),
-                            builder: (context, snapshot) {
-                              final userId = snapshot.data ?? '';
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 8),
-                                child: CommentCard(
-                                  comment: lineComment,
-                                  currentUserId: userId,
-                                  onReply: () {
-                                    context.read<ForumCubit>().setReplyingTo(
-                                      ForumReplyTarget(
-                                        id: comment.id,
-                                        authorName: comment.authorName,
-                                        isLineComment: false,
-                                      ),
-                                    );
-                                  },
-                                  onEdit: () => _showEditCommentDialog(context, comment),
-                                  onDelete: () => _showDeleteCommentDialog(context, comment.localId),
-                                ),
-                              );
-                            },
-                          );
-                        },
+                      return ListView(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        children: _buildThreadedComments(context, comments),
                       );
                     },
                   ),
@@ -173,6 +131,92 @@ class GeneralCommentsView extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  List<Widget> _buildThreadedComments(BuildContext context, List<ForumComment> allComments) {
+    // 1. Group by parentLocalId (backend returns parent_comment_id as string, which maps to localId)
+    // We need to ensure we map properly.
+    final Map<String?, List<ForumComment>> grouped = {};
+    for (final comment in allComments) {
+      // Backend's parent_comment_id now matches our localId (UUID or legacy ID string)
+      final pid = comment.parentCommentId;
+      grouped.containsKey(pid) ? grouped[pid]!.add(comment) : grouped[pid] = [comment];
+    }
+
+    // 2. Recursive builder
+    List<Widget> buildTree(String? parentId, int depth) {
+      final children = grouped[parentId] ?? [];
+      children.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+
+      final List<Widget> items = [];
+      for (final comment in children) {
+        items.add(
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: FutureBuilder<String>(
+              future: context.read<ForumCubit>().getCurrentUserId(),
+              builder: (context, snapshot) {
+                final userId = snapshot.data ?? '';
+                final isClinician = comment.authorRole.toLowerCase().contains('clinician');
+                final isExpert = isClinician || comment.authorRole.toLowerCase().contains('healthcare') || comment.authorRole.toLowerCase().contains('support');
+
+                return CommentCard(
+                  authorName: comment.authorName,
+                  text: comment.content,
+                  createdAt: comment.createdAt,
+                  likeCount: comment.likeCount,
+                  isLiked: comment.isLiked,
+                  authorId: comment.authorId,
+                  currentUserId: userId,
+                  depth: depth,
+                  isExpert: isExpert,
+                  isClinician: isClinician,
+                  profession: comment.authorProfession,
+                  authorRoleLabel: comment.authorRole,
+                  roleIcon: _getRoleIcon(comment.authorRole),
+                  onLike: () {
+                    // Use id (preferring non-empty) for the like action, backend resolves both
+                    final idToUse = comment.id.isNotEmpty ? comment.id : comment.localId;
+                    context.read<ForumCubit>().toggleCommentLike(idToUse, isLineComment: false);
+                  },
+                  onReply: () {
+                    context.read<ForumCubit>().setReplyingTo(
+                      ForumReplyTarget(
+                        id: comment.id,
+                        localId: comment.localId,
+                        authorName: comment.authorName,
+                        isLineComment: false,
+                      ),
+                    );
+                  },
+                  onEdit: () => _showEditCommentDialog(context, comment),
+                  onDelete: () => _showDeleteCommentDialog(context, comment.localId),
+                );
+              },
+            ),
+          ),
+        );
+
+        if (depth == 0) {
+          items.add(const Divider(height: 1, indent: 20, endIndent: 20, color: AppColors.borderLight));
+        }
+
+        // Recursive call using the current comment's localId as the parentId for children
+        items.addAll(buildTree(comment.localId, depth + 1));
+      }
+      return items;
+    }
+
+    // Root level comments have parentId == null (or possibly empty/0 strings from legacy)
+    return buildTree(null, 0);
+  }
+
+  IconData _getRoleIcon(String role) {
+    final r = role.toLowerCase();
+    if (r.contains('clinician')) return Icons.local_hospital_outlined;
+    if (r.contains('mother')) return Icons.face_4_outlined;
+    if (r.contains('support')) return Icons.handshake_outlined;
+    return Icons.person_outline;
   }
 
   void _showEditCommentDialog(BuildContext context, ForumComment comment) {

@@ -78,6 +78,7 @@ class ForumRepository {
     required String content,
     required String authorId,
     required String authorName,
+    String? parentCommentId,
     String? authorRole,
     String? authorProfession,
   }) async {
@@ -90,6 +91,7 @@ class ForumRepository {
       authorRole: Value(authorRole),
       authorProfession: Value(authorProfession),
       content: content,
+      parentCommentId: Value(parentCommentId),
       createdAt: DateTime.now(),
       syncStatus: const Value('pending'),
     ));
@@ -221,6 +223,17 @@ class ForumRepository {
     }
   }
 
+  /// Fetch comments for a post from server and merge (ID healing)
+  Future<void> fetchCommentsFromServer(String postId) async {
+    try {
+      final serverComments = await _syncManager.fetchCommentsFromServer(postId);
+      await _conflictResolver.mergeServerComments(serverComments);
+    } catch (e) {
+      print('DEBUG: fetchCommentsFromServer failed: $e');
+      // We don't throw here to avoid breaking the UI for offline users
+    }
+  }
+
   /// Update an existing post
   Future<void> updatePost({
     required String localId,
@@ -300,9 +313,12 @@ class ForumRepository {
   }
 
   /// Toggle like on comment
-  Future<void> toggleCommentLike(String commentId) async {
+  Future<void> toggleCommentLike(String commentId, {required bool isLineComment}) async {
     try {
-      await _apiClient.post('/api/v1/forum/comments/$commentId/like');
+      final path = isLineComment 
+          ? '/api/v1/forum/lines/comments/$commentId/like'
+          : '/api/v1/forum/comments/$commentId/like';
+      await _apiClient.post(path);
     } catch (e) {
       throw ForumException('Failed to like comment: ${e.toString()}');
     }
@@ -335,7 +351,7 @@ class ForumRepository {
   final bool _useMock = false; 
 
   /// Get or create lines for a general forum post
-  Future<List<ForumAnswerLine>> getLinesForPost(int postId) async {
+  Future<List<ForumAnswerLine>> getLinesForPost(String postId) async {
     // 1. Try server first for counts
     try {
       print('DEBUG: Fetching lines for post $postId from server...');
@@ -355,14 +371,17 @@ class ForumRepository {
       }
 
       // 2. Update local cache
-      await _database.batchInsertLines(lines.map((l) => ForumAnswerLinesCompanion.insert(
-        lineId: l.lineId,
-        postId: Value(postId),
-        lineNumber: l.lineNumber,
-        textContent: l.text,
-        discussionTitle: Value(l.discussionTitle),
-        commentCount: Value(l.commentCount),
-      )).toList());
+      final serverPostId = int.tryParse(postId);
+      if (serverPostId != null) {
+        await _database.batchInsertLines(lines.map((l) => ForumAnswerLinesCompanion.insert(
+          lineId: l.lineId,
+          postId: Value(serverPostId),
+          lineNumber: l.lineNumber,
+          textContent: l.text,
+          discussionTitle: Value(l.discussionTitle),
+          commentCount: Value(l.commentCount),
+        )).toList());
+      }
       
       print('DEBUG: Updated local cache with ${lines.length} lines');
 
@@ -370,7 +389,10 @@ class ForumRepository {
     } catch (e) {
       print('DEBUG: getLinesForPost - server failed, falling back to local: $e');
       // 3. Fallback to local cache
-      final localLines = await _database.getLinesForPost(postId);
+      final intId = int.tryParse(postId);
+      if (intId == null) rethrow; // Can't fallback if it's not an int ID
+
+      final localLines = await _database.getLinesForPost(intId);
       if (localLines.isNotEmpty) {
         return localLines.map((l) => ForumAnswerLine(
           lineId: l.lineId,

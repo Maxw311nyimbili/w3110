@@ -205,6 +205,18 @@ class ForumDatabase extends _$ForumDatabase {
     ));
   }
 
+  /// Update parent ID for all children (used during ID healing)
+  Future<int> updateChildParentIds({
+    required String oldParentLocalId,
+    required String newParentLocalId,
+  }) async {
+    return (update(forumComments)
+      ..where((c) => c.parentCommentId.equals(oldParentLocalId)))
+        .write(ForumCommentsCompanion(
+      parentCommentId: Value(newParentLocalId),
+    ));
+  }
+
   // ============================================================
   // SYNC QUEUE QUERIES
   // ============================================================
