@@ -85,8 +85,7 @@ class _FeatureChoicePageState extends State<FeatureChoicePage>
           SafeArea(
             bottom: false,
             child: Padding(
-              padding: EdgeInsets.fromLTRB(
-                  24, 32, 24, 24 + bottomPadding),
+              padding: EdgeInsets.fromLTRB(24, 32, 24, 24 + bottomPadding),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -99,11 +98,14 @@ class _FeatureChoicePageState extends State<FeatureChoicePage>
                       children: [
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 4),
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
                             color: _kBrand.withOpacity(0.08),
-                            borderRadius:
-                                BorderRadius.circular(AppSpacing.radiusFull),
+                            borderRadius: BorderRadius.circular(
+                              AppSpacing.radiusFull,
+                            ),
                           ),
                           child: Text(
                             'SELECT INTENT',
@@ -143,13 +145,14 @@ class _FeatureChoicePageState extends State<FeatureChoicePage>
                             delay: 0.15 + i * 0.12,
                             child: Padding(
                               padding: EdgeInsets.only(
-                                  bottom: i < _features.length - 1 ? 12 : 0),
+                                bottom: i < _features.length - 1 ? 12 : 0,
+                              ),
                               child: _FeatureCard(
                                 def: def,
-                                isSelected:
-                                    _selectedFeature == def.feature,
+                                isSelected: _selectedFeature == def.feature,
                                 onTap: () => setState(
-                                    () => _selectedFeature = def.feature),
+                                  () => _selectedFeature = def.feature,
+                                ),
                               ),
                             ),
                           ),
@@ -255,14 +258,14 @@ class _FeatureCard extends StatelessWidget {
                     color: _kBrand.withOpacity(0.12),
                     blurRadius: 20,
                     offset: const Offset(0, 6),
-                  )
+                  ),
                 ]
               : [
                   BoxShadow(
                     color: AppColors.shadowWarm,
                     blurRadius: 10,
                     offset: const Offset(0, 3),
-                  )
+                  ),
                 ],
         ),
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
@@ -274,9 +277,7 @@ class _FeatureCard extends StatelessWidget {
               width: 52,
               height: 52,
               decoration: BoxDecoration(
-                color: isSelected
-                    ? _kBrand
-                    : _kBrand.withOpacity(0.08),
+                color: isSelected ? _kBrand : _kBrand.withOpacity(0.08),
                 borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
               ),
               child: Icon(
@@ -301,21 +302,22 @@ class _FeatureCard extends StatelessWidget {
                           def.title,
                           style: AppTextStyles.headlineSmall.copyWith(
                             fontWeight: FontWeight.w700,
-                            color: isSelected
-                                ? _kBrand
-                                : AppColors.textPrimary,
+                            color: isSelected ? _kBrand : AppColors.textPrimary,
                           ),
                         ),
                       ),
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 7, vertical: 3),
+                          horizontal: 7,
+                          vertical: 3,
+                        ),
                         decoration: BoxDecoration(
                           color: isSelected
                               ? _kBrand.withOpacity(0.1)
                               : AppColors.backgroundElevated,
                           borderRadius: BorderRadius.circular(
-                              AppSpacing.radiusFull),
+                            AppSpacing.radiusFull,
+                          ),
                         ),
                         child: Text(
                           def.tag,
@@ -357,8 +359,11 @@ class _FeatureCard extends StatelessWidget {
                 ),
               ),
               child: isSelected
-                  ? const Icon(Icons.check_rounded,
-                      size: 14, color: Colors.white)
+                  ? const Icon(
+                      Icons.check_rounded,
+                      size: 14,
+                      color: Colors.white,
+                    )
                   : null,
             ),
           ],
@@ -392,15 +397,16 @@ class _FadeSlideIn extends StatelessWidget {
         curve: Interval(start, end, curve: Curves.easeOut),
       ),
     );
-    final slide = Tween<Offset>(
-      begin: const Offset(0, 0.12),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(
-        parent: controller,
-        curve: Interval(start, end, curve: Curves.easeOutCubic),
-      ),
-    );
+    final slide =
+        Tween<Offset>(
+          begin: const Offset(0, 0.12),
+          end: Offset.zero,
+        ).animate(
+          CurvedAnimation(
+            parent: controller,
+            curve: Interval(start, end, curve: Curves.easeOutCubic),
+          ),
+        );
 
     return FadeTransition(
       opacity: opacity,

@@ -15,9 +15,12 @@ class ChatResponse extends Equatable {
   factory ChatResponse.fromJson(Map<String, dynamic> json) {
     return ChatResponse(
       answer: json['answer'] as String,
-      sentences: (json['sentences'] as List<dynamic>?)
-          ?.map((e) => SentenceConfidence.fromJson(e as Map<String, dynamic>))
-          .toList() ??
+      sentences:
+          (json['sentences'] as List<dynamic>?)
+              ?.map(
+                (e) => SentenceConfidence.fromJson(e as Map<String, dynamic>),
+              )
+              .toList() ??
           [],
     );
   }

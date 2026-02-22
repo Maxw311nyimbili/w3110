@@ -59,10 +59,12 @@ class TextScaleLimiter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textScale = MediaQuery.of(context).textScaleFactor;
-    
+
     return MediaQuery(
       data: MediaQuery.of(context).copyWith(
-        textScaleFactor: textScale > maxScaleFactor ? maxScaleFactor : textScale,
+        textScaleFactor: textScale > maxScaleFactor
+            ? maxScaleFactor
+            : textScale,
       ),
       child: child,
     );
@@ -90,7 +92,7 @@ class AndroidOptimizedShadow extends StatelessWidget {
   Widget build(BuildContext context) {
     // On Android, use subtler shadows to avoid rendering issues
     final isAndroid = Theme.of(context).platform == TargetPlatform.android;
-    
+
     return Container(
       decoration: BoxDecoration(
         boxShadow: [

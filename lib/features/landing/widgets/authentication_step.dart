@@ -14,10 +14,12 @@ class AuthenticationStep extends StatelessWidget {
     return BlocListener<LandingCubit, LandingState>(
       listener: (context, state) {
         if (state.authError != null) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(state.authError!),
-            backgroundColor: AppColors.error,
-          ));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.authError!),
+              backgroundColor: AppColors.error,
+            ),
+          );
           context.read<LandingCubit>().clearError();
         }
       },
@@ -31,9 +33,12 @@ class AuthenticationStep extends StatelessWidget {
               automaticallyImplyLeading: false,
               actions: [
                 IconButton(
-                  icon: const Icon(Icons.close_rounded, color: AppColors.textSecondary),
-                  onPressed: state.isAuthenticating 
-                      ? null 
+                  icon: const Icon(
+                    Icons.close_rounded,
+                    color: AppColors.textSecondary,
+                  ),
+                  onPressed: state.isAuthenticating
+                      ? null
                       : () => context.read<LandingCubit>().continueAsGuest(),
                 ),
                 const SizedBox(width: 8),
@@ -46,7 +51,7 @@ class AuthenticationStep extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const Spacer(),
-                    
+
                     // Brand Identity Character (Orb) & Welcome
                     _buildStaggeredEntrance(
                       delay: 100,
@@ -85,7 +90,7 @@ class AuthenticationStep extends StatelessWidget {
                     ),
 
                     const SizedBox(height: 48),
-                    
+
                     // Main Sign-In Action
                     _buildStaggeredEntrance(
                       delay: 500,
@@ -93,7 +98,9 @@ class AuthenticationStep extends StatelessWidget {
                         height: 60,
                         width: double.infinity,
                         decoration: BoxDecoration(
-                          border: Border.all(color: AppColors.borderLight.withOpacity(0.5)),
+                          border: Border.all(
+                            color: AppColors.borderLight.withOpacity(0.5),
+                          ),
                           borderRadius: BorderRadius.circular(30),
                           color: AppColors.backgroundSurface,
                           boxShadow: [
@@ -109,22 +116,26 @@ class AuthenticationStep extends StatelessWidget {
                           child: GoogleSignInButton(
                             onPressed: state.isAuthenticating
                                 ? null
-                                : () => context.read<LandingCubit>().authenticateWithGoogle(),
+                                : () => context
+                                      .read<LandingCubit>()
+                                      .authenticateWithGoogle(),
                             isLoading: state.isAuthenticating,
                           ),
                         ),
                       ),
                     ),
-                    
+
                     const SizedBox(height: 20),
 
                     // Guest / Dismiss Action
                     _buildStaggeredEntrance(
                       delay: 600,
                       child: TextButton(
-                        onPressed: state.isAuthenticating 
-                            ? null 
-                            : () => context.read<LandingCubit>().continueAsGuest(),
+                        onPressed: state.isAuthenticating
+                            ? null
+                            : () => context
+                                  .read<LandingCubit>()
+                                  .continueAsGuest(),
                         child: Text(
                           'Continue as Guest',
                           style: AppTextStyles.labelLarge.copyWith(
@@ -134,17 +145,19 @@ class AuthenticationStep extends StatelessWidget {
                         ),
                       ),
                     ),
-                    
+
                     const Spacer(),
-                    
+
                     if (state.isDemoAvailable)
                       _buildStaggeredEntrance(
                         delay: 700,
                         child: Center(
                           child: TextButton(
-                            onPressed: state.isAuthenticating 
-                                ? null 
-                                : () => context.read<LandingCubit>().authenticateAsDemo(), 
+                            onPressed: state.isAuthenticating
+                                ? null
+                                : () => context
+                                      .read<LandingCubit>()
+                                      .authenticateAsDemo(),
                             child: Text(
                               'Demo Login (Developer Bypass)',
                               style: AppTextStyles.labelSmall.copyWith(

@@ -8,22 +8,22 @@ import 'line_comments_filtered_view.dart';
 
 class AnswerReaderWithComments extends StatefulWidget {
   final String answerId;
-  
+
   // If we want to force parse it from text, we might need a helper,
   // but ideally Cubit loads the lines separately.
   // For now, let's assume Cubit loads lines based on answerId.
-  
+
   const AnswerReaderWithComments({
     super.key,
     required this.answerId,
   });
 
   @override
-  State<AnswerReaderWithComments> createState() => _AnswerReaderWithCommentsState();
+  State<AnswerReaderWithComments> createState() =>
+      _AnswerReaderWithCommentsState();
 }
 
 class _AnswerReaderWithCommentsState extends State<AnswerReaderWithComments> {
-  
   @override
   void initState() {
     super.initState();
@@ -38,9 +38,9 @@ class _AnswerReaderWithCommentsState extends State<AnswerReaderWithComments> {
         if (state.isLoading && state.answerLines.isEmpty) {
           return const Center(child: CircularProgressIndicator());
         }
-        
+
         if (state.answerLines.isEmpty) {
-          return const SizedBox.shrink(); 
+          return const SizedBox.shrink();
         }
 
         return ListView.builder(
@@ -50,18 +50,20 @@ class _AnswerReaderWithCommentsState extends State<AnswerReaderWithComments> {
           itemBuilder: (context, index) {
             final line = state.answerLines[index];
             final isSelected = state.selectedLineId == line.lineId;
-            
+
             return GestureDetector(
               onTap: () {
-                 if (isSelected) {
-                   context.read<ForumCubit>().toggleLineSelection(line.lineId);
-                 } else {
-                   context.read<ForumCubit>().toggleLineSelection(line.lineId);
-                 }
+                if (isSelected) {
+                  context.read<ForumCubit>().toggleLineSelection(line.lineId);
+                } else {
+                  context.read<ForumCubit>().toggleLineSelection(line.lineId);
+                }
               },
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
-                color: isSelected ? Colors.blue.withOpacity(0.08) : Colors.transparent,
+                color: isSelected
+                    ? Colors.blue.withOpacity(0.08)
+                    : Colors.transparent,
                 padding: EdgeInsets.symmetric(
                   vertical: isSelected ? 12 : 4,
                   horizontal: isSelected ? 8 : 0,
@@ -88,23 +90,33 @@ class _AnswerReaderWithCommentsState extends State<AnswerReaderWithComments> {
                           TextSpan(
                             text: line.text,
                             style: TextStyle(
-                              color: isSelected ? Colors.black87 : Colors.black54,
+                              color: isSelected
+                                  ? Colors.black87
+                                  : Colors.black54,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    
+
                     // Interaction Point
                     if (isSelected)
                       Padding(
                         padding: const EdgeInsets.only(top: 8),
                         child: GestureDetector(
-                          onTap: () => _showLineCommentsModal(context, line.lineId, line.lineNumber),
+                          onTap: () => _showLineCommentsModal(
+                            context,
+                            line.lineId,
+                            line.lineNumber,
+                          ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.chat_bubble_outline, size: 16, color: Colors.blue),
+                              const Icon(
+                                Icons.chat_bubble_outline,
+                                size: 16,
+                                color: Colors.blue,
+                              ),
                               const SizedBox(width: 4),
                               Text(
                                 '${line.commentCount} ${line.commentCount == 1 ? 'comment' : 'comments'}',
@@ -115,7 +127,11 @@ class _AnswerReaderWithCommentsState extends State<AnswerReaderWithComments> {
                                 ),
                               ),
                               const SizedBox(width: 8),
-                              const Icon(Icons.chevron_right, size: 16, color: Colors.blue),
+                              const Icon(
+                                Icons.chevron_right,
+                                size: 16,
+                                color: Colors.blue,
+                              ),
                             ],
                           ),
                         ),
@@ -130,7 +146,11 @@ class _AnswerReaderWithCommentsState extends State<AnswerReaderWithComments> {
     );
   }
 
-  void _showLineCommentsModal(BuildContext context, String lineId, int lineNumber) {
+  void _showLineCommentsModal(
+    BuildContext context,
+    String lineId,
+    int lineNumber,
+  ) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,

@@ -48,22 +48,25 @@ class ForumListView extends StatelessWidget {
               },
             ),
             title: Text(
-              state.view == ForumView.detail 
-                  ? 'Discussion' 
-                  : AppLocalizations.of(context).community
+              state.view == ForumView.detail
+                  ? 'Discussion'
+                  : AppLocalizations.of(context).community,
             ),
             centerTitle: true,
-             actions: [
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.refresh_rounded, size: 20),
+                onPressed: () => context.read<ForumCubit>().resetAndReload(),
+                tooltip: 'Reset Forum Data',
+              ),
+              if (state.hasPendingSync)
                 IconButton(
-                  icon: const Icon(Icons.refresh_rounded, size: 20),
-                  onPressed: () => context.read<ForumCubit>().resetAndReload(),
-                  tooltip: 'Reset Forum Data',
+                  icon: const Icon(
+                    Icons.cloud_upload_outlined,
+                    color: AppColors.warning,
+                  ),
+                  onPressed: () => context.read<ForumCubit>().syncWithBackend(),
                 ),
-               if (state.hasPendingSync)
-                 IconButton(
-                    icon: const Icon(Icons.cloud_upload_outlined, color: AppColors.warning),
-                    onPressed: () => context.read<ForumCubit>().syncWithBackend(),
-                 ),
             ],
           ),
           body: const SafeArea(

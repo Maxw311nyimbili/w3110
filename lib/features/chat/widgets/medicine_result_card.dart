@@ -73,7 +73,10 @@ class MedicineResultCard extends StatelessWidget {
                           ),
                           if (result.barcode != null) ...[
                             const SizedBox(width: 8),
-                            _buildBadge(result.barcode!, AppColors.accentSecondary),
+                            _buildBadge(
+                              result.barcode!,
+                              AppColors.accentSecondary,
+                            ),
                           ],
                         ],
                       ),
@@ -95,7 +98,10 @@ class MedicineResultCard extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     result.dosageInfo!,
-                    style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary, height: 1.5),
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: AppColors.textPrimary,
+                      height: 1.5,
+                    ),
                   ),
                   const SizedBox(height: 16),
                 ],
@@ -106,74 +112,94 @@ class MedicineResultCard extends StatelessWidget {
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
-                    children: result.activeIngredients.map((i) => Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: AppColors.gray100,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        i,
-                        style: AppTextStyles.caption.copyWith(
-                          color: AppColors.textSecondary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    )).toList(),
+                    children: result.activeIngredients
+                        .map(
+                          (i) => Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.gray100,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              i,
+                              style: AppTextStyles.caption.copyWith(
+                                color: AppColors.textSecondary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        )
+                        .toList(),
                   ),
                   const SizedBox(height: 16),
                 ],
 
                 if (result.warnings.isNotEmpty) ...[
-                   Container(
-                     padding: const EdgeInsets.all(16),
-                     decoration: BoxDecoration(
-                       color: AppColors.error.withOpacity(0.05),
-                       borderRadius: BorderRadius.circular(16),
-                       border: Border.all(color: AppColors.error.withOpacity(0.1)),
-                     ),
-                     child: Column(
-                       crossAxisAlignment: CrossAxisAlignment.start,
-                       children: [
-                         Row(
-                           children: [
-                             Icon(Icons.warning_amber_rounded, color: AppColors.error, size: 18),
-                             const SizedBox(width: 8),
-                             Text(
-                               'Critical Warnings',
-                               style: AppTextStyles.labelMedium.copyWith(
-                                 color: AppColors.error,
-                                 fontWeight: FontWeight.bold,
-                               ),
-                             ),
-                           ],
-                         ),
-                         const SizedBox(height: 12),
-                         ...result.warnings.map((w) => Padding(
-                           padding: const EdgeInsets.only(bottom: 4),
-                           child: Row(
-                             crossAxisAlignment: CrossAxisAlignment.start,
-                             children: [
-                               const Padding(
-                                 padding: EdgeInsets.only(top: 6),
-                                 child: CircleAvatar(radius: 2, backgroundColor: AppColors.error),
-                               ),
-                               const SizedBox(width: 8),
-                               Expanded(
-                                 child: Text(
-                                   w,
-                                   style: AppTextStyles.caption.copyWith(
-                                     color: AppColors.textPrimary,
-                                     height: 1.4,
-                                   ),
-                                 ),
-                               ),
-                             ],
-                           ),
-                         )).toList(),
-                       ],
-                     ),
-                   ),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppColors.error.withOpacity(0.05),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: AppColors.error.withOpacity(0.1),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.warning_amber_rounded,
+                              color: AppColors.error,
+                              size: 18,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Critical Warnings',
+                              style: AppTextStyles.labelMedium.copyWith(
+                                color: AppColors.error,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        ...result.warnings
+                            .map(
+                              (w) => Padding(
+                                padding: const EdgeInsets.only(bottom: 4),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Padding(
+                                      padding: EdgeInsets.only(top: 6),
+                                      child: CircleAvatar(
+                                        radius: 2,
+                                        backgroundColor: AppColors.error,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        w,
+                                        style: AppTextStyles.caption.copyWith(
+                                          color: AppColors.textPrimary,
+                                          height: 1.4,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            )
+                            .toList(),
+                      ],
+                    ),
+                  ),
                 ],
               ],
             ),

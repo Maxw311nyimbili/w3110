@@ -20,11 +20,11 @@ class LineCommentsFilteredView extends StatefulWidget {
   });
 
   @override
-  State<LineCommentsFilteredView> createState() => _LineCommentsFilteredViewState();
+  State<LineCommentsFilteredView> createState() =>
+      _LineCommentsFilteredViewState();
 }
 
 class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
-  
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -57,7 +57,10 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
 
                 // ========== HEADER ==========
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 8,
+                  ),
                   child: Row(
                     children: [
                       Expanded(
@@ -79,13 +82,16 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.close_rounded, color: AppColors.textSecondary),
+                        icon: const Icon(
+                          Icons.close_rounded,
+                          color: AppColors.textSecondary,
+                        ),
                         onPressed: () => Navigator.pop(context),
                       ),
                     ],
                   ),
                 ),
-                
+
                 // ========== SCROLLABLE CONTENT ==========
                 Expanded(
                   child: BlocBuilder<ForumCubit, ForumState>(
@@ -93,11 +99,15 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
                       if (state.isLoading && state.lineComments.isEmpty) {
                         return const Center(child: CircularProgressIndicator());
                       }
-                      
+
                       final comments = state.lineComments;
-                      print('DEBUG: LineCommentsFilteredView - Rendering ${comments.length} comments for ${widget.lineId}');
+                      print(
+                        'DEBUG: LineCommentsFilteredView - Rendering ${comments.length} comments for ${widget.lineId}',
+                      );
                       for (var c in comments) {
-                        print('DEBUG:   - Comment ${c.id} by ${c.authorName} (${c.authorRole})');
+                        print(
+                          'DEBUG:   - Comment ${c.id} by ${c.authorName} (${c.authorRole})',
+                        );
                       }
                       final lineText = state.getLineText(widget.lineId);
 
@@ -106,7 +116,10 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
                         children: [
                           // 1. Quoted Line (Scrolls away)
                           Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                            margin: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 8,
+                            ),
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
                               color: AppColors.backgroundElevated,
@@ -118,7 +131,11 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
                               children: [
                                 Row(
                                   children: [
-                                    Icon(Icons.format_quote_rounded, size: 20, color: AppColors.accentPrimary),
+                                    Icon(
+                                      Icons.format_quote_rounded,
+                                      size: 20,
+                                      color: AppColors.accentPrimary,
+                                    ),
                                     const SizedBox(width: 8),
                                     Text(
                                       'Line ${widget.lineNumber}',
@@ -141,7 +158,10 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
                             ),
                           ),
 
-                          const Divider(height: 1, color: AppColors.borderLight),
+                          const Divider(
+                            height: 1,
+                            color: AppColors.borderLight,
+                          ),
 
                           // 3. Comments List
                           if (comments.isEmpty)
@@ -151,16 +171,24 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Icon(Icons.chat_bubble_outline_rounded, size: 48, color: AppColors.borderMedium),
+                                    Icon(
+                                      Icons.chat_bubble_outline_rounded,
+                                      size: 48,
+                                      color: AppColors.borderMedium,
+                                    ),
                                     const SizedBox(height: 12),
                                     Text(
                                       'No discussions yet',
-                                      style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textTertiary),
+                                      style: AppTextStyles.bodyMedium.copyWith(
+                                        color: AppColors.textTertiary,
+                                      ),
                                     ),
                                     const SizedBox(height: 8),
                                     Text(
                                       'Tap below to start one',
-                                      style: AppTextStyles.caption.copyWith(color: AppColors.textTertiary),
+                                      style: AppTextStyles.caption.copyWith(
+                                        color: AppColors.textTertiary,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -185,12 +213,17 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
     );
   }
 
-  List<Widget> _buildThreadedComments(BuildContext context, List<ForumLineComment> allComments) {
+  List<Widget> _buildThreadedComments(
+    BuildContext context,
+    List<ForumLineComment> allComments,
+  ) {
     // 1. Group comments by parentId
     final Map<String?, List<ForumLineComment>> grouped = {};
     for (final comment in allComments) {
       final pid = comment.parentCommentId;
-      grouped.containsKey(pid) ? grouped[pid]!.add(comment) : grouped[pid] = [comment];
+      grouped.containsKey(pid)
+          ? grouped[pid]!.add(comment)
+          : grouped[pid] = [comment];
     }
 
     // 2. Recursive builder
@@ -198,7 +231,7 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
       final children = grouped[parentId] ?? [];
       // Sort children by date
       children.sort((a, b) => a.createdAt.compareTo(b.createdAt));
-      
+
       final List<Widget> items = [];
       for (final comment in children) {
         items.add(
@@ -217,13 +250,18 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
                   authorId: comment.authorId,
                   currentUserId: userId,
                   depth: depth,
-                  isExpert: comment.authorRole == CommentRole.clinician || comment.authorRole == CommentRole.supportPartner,
+                  isExpert:
+                      comment.authorRole == CommentRole.clinician ||
+                      comment.authorRole == CommentRole.supportPartner,
                   isClinician: comment.authorRole == CommentRole.clinician,
                   profession: comment.authorProfession,
                   typeLabel: comment.typeLabel,
                   roleIcon: _getRoleIcon(comment.authorRole),
                   onLike: () {
-                    context.read<ForumCubit>().toggleCommentLike(comment.id, isLineComment: true);
+                    context.read<ForumCubit>().toggleCommentLike(
+                      comment.id,
+                      isLineComment: true,
+                    );
                   },
                   onReply: () {
                     context.read<ForumCubit>().setReplyingTo(
@@ -236,16 +274,24 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
                     );
                   },
                   onEdit: () => _showEditCommentDialog(context, comment),
-                  onDelete: () => _showDeleteCommentDialog(context, comment.localId),
+                  onDelete: () =>
+                      _showDeleteCommentDialog(context, comment.localId),
                 );
               },
             ),
           ),
         );
-        
+
         // Add divider (optional, but looks cleaner if not deeply nested)
         if (depth == 0) {
-          items.add(const Divider(height: 1, indent: 20, endIndent: 20, color: AppColors.borderLight));
+          items.add(
+            const Divider(
+              height: 1,
+              indent: 20,
+              endIndent: 20,
+              color: AppColors.borderLight,
+            ),
+          );
         }
 
         // Add children recursively
@@ -259,11 +305,16 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
 
   IconData _getRoleIcon(CommentRole role) {
     switch (role) {
-      case CommentRole.clinician: return Icons.local_hospital_outlined;
-      case CommentRole.mother: return Icons.face_4_outlined;
-      case CommentRole.community: return Icons.person_outline;
-      case CommentRole.supportPartner: return Icons.handshake_outlined;
-      default: return Icons.chat_bubble_outline_rounded;
+      case CommentRole.clinician:
+        return Icons.local_hospital_outlined;
+      case CommentRole.mother:
+        return Icons.face_4_outlined;
+      case CommentRole.community:
+        return Icons.person_outline;
+      case CommentRole.supportPartner:
+        return Icons.handshake_outlined;
+      default:
+        return Icons.chat_bubble_outline_rounded;
     }
   }
 
@@ -357,9 +408,9 @@ class _FilterTab extends StatelessWidget {
           children: [
             if (icon != null) ...[
               Icon(
-                icon, 
-                size: 16, 
-                color: isActive ? Colors.white : AppColors.textSecondary
+                icon,
+                size: 16,
+                color: isActive ? Colors.white : AppColors.textSecondary,
               ),
               const SizedBox(width: 8),
             ],

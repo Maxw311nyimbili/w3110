@@ -64,7 +64,10 @@ class MedScannerView extends StatelessWidget {
                   child: EntryAnimation(
                     delay: const Duration(milliseconds: 200),
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 16,
+                      ),
                       child: Row(
                         children: [
                           // Floating Back Button
@@ -75,7 +78,9 @@ class MedScannerView extends StatelessWidget {
                               decoration: BoxDecoration(
                                 color: Colors.black.withOpacity(0.4),
                                 borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: Colors.white.withOpacity(0.1)),
+                                border: Border.all(
+                                  color: Colors.white.withOpacity(0.1),
+                                ),
                               ),
                               child: const Icon(
                                 Icons.arrow_back_ios_new_rounded,
@@ -84,12 +89,12 @@ class MedScannerView extends StatelessWidget {
                               ),
                             ),
                           ),
-                          
+
                           const Spacer(),
-                          
+
                           // Title (Optional, maybe skip for lighter feel or center it?)
                           // Let's keep it clean for now, or maybe a small pill.
-                          
+
                           // Info Button
                           GestureDetector(
                             onTap: () => _showInfoDialog(context),
@@ -98,7 +103,9 @@ class MedScannerView extends StatelessWidget {
                               decoration: BoxDecoration(
                                 color: Colors.black.withOpacity(0.4),
                                 borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: Colors.white.withOpacity(0.1)),
+                                border: Border.all(
+                                  color: Colors.white.withOpacity(0.1),
+                                ),
                               ),
                               child: const Icon(
                                 Icons.info_outline_rounded,
@@ -147,11 +154,15 @@ class MedScannerView extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-            
+
             // Header
             Row(
               children: [
-                const Icon(Icons.center_focus_strong_rounded, color: AppColors.accentPrimary, size: 28),
+                const Icon(
+                  Icons.center_focus_strong_rounded,
+                  color: AppColors.accentPrimary,
+                  size: 28,
+                ),
                 const SizedBox(width: 12),
                 Text(
                   AppLocalizations.of(context).scannerGuide,
@@ -208,11 +219,11 @@ class MedScannerView extends StatelessWidget {
   }
 
   Widget _buildInfoStep(
-      BuildContext context,
-      String number,
-      String title,
-      String description,
-      ) {
+    BuildContext context,
+    String number,
+    String title,
+    String description,
+  ) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: Row(

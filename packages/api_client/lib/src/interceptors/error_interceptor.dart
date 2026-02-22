@@ -22,7 +22,7 @@ class ErrorInterceptor extends Interceptor {
         break;
 
       case DioExceptionType.badResponse:
-      // Parse error from response
+        // Parse error from response
         final statusCode = err.response?.statusCode;
         final data = err.response?.data;
 

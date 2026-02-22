@@ -30,7 +30,8 @@ class OnboardingStatus extends Equatable {
       userRole: json['user_role'] as String?,
       userName: json['user_name'] as String?,
       accountNickname: json['account_nickname'] as String?,
-      interests: (json['interests'] as List<dynamic>?)?.cast<String>() ?? const [],
+      interests:
+          (json['interests'] as List<dynamic>?)?.cast<String>() ?? const [],
       consentGiven: json['consent_given'] as bool? ?? false,
       consentVersion: json['consent_version'] as String?,
       completedAt: json['completed_at'] != null

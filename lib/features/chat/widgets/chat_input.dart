@@ -1,7 +1,8 @@
 import 'dart:io';
 import 'package:cap_project/app/view/app_router.dart';
 import 'package:cap_project/core/widgets/glass_card.dart';
-import 'package:cap_project/features/medscanner/cubit/medscanner_state.dart' as scanner;
+import 'package:cap_project/features/medscanner/cubit/medscanner_state.dart'
+    as scanner;
 import 'package:cap_project/features/chat/widgets/audio_waveform.dart';
 import 'package:cap_project/l10n/l10n.dart';
 import 'package:flutter/material.dart';
@@ -25,11 +26,12 @@ class RefinedChatInput extends StatefulWidget {
   State<RefinedChatInput> createState() => _RefinedChatInputState();
 }
 
-class _RefinedChatInputState extends State<RefinedChatInput> with TickerProviderStateMixin {
+class _RefinedChatInputState extends State<RefinedChatInput>
+    with TickerProviderStateMixin {
   final _controller = TextEditingController();
   final _focusNode = FocusNode();
   bool _hasText = false;
-  
+
   late AnimationController _pulseController;
 
   @override
@@ -75,7 +77,8 @@ class _RefinedChatInputState extends State<RefinedChatInput> with TickerProvider
 
   void _showPlusMenu() {
     _focusNode.unfocus(); // Ensure keyboard is dismissed when menu opens
-    final chatCubit = context.read<ChatCubit>(); // Capture cubit from valid context
+    final chatCubit = context
+        .read<ChatCubit>(); // Capture cubit from valid context
 
     showModalBottomSheet(
       context: context,
@@ -107,10 +110,13 @@ class _RefinedChatInputState extends State<RefinedChatInput> with TickerProvider
                     onTap: () async {
                       Navigator.pop(modalContext);
                       _focusNode.unfocus(); // Ensure focus doesn't return
-                      
+
                       // Then navigate to scanner
-                      final result = await AppRouter.navigateTo(context, AppRouter.scanner);
-                      
+                      final result = await AppRouter.navigateTo(
+                        context,
+                        AppRouter.scanner,
+                      );
+
                       // Handle result if we are still mounted
                       if (context.mounted && result is scanner.ScanResult) {
                         chatCubit.addMedicineResult(result);
@@ -200,7 +206,8 @@ class _RefinedChatInputState extends State<RefinedChatInput> with TickerProvider
   @override
   Widget build(BuildContext context) {
     return BlocListener<ChatCubit, ChatState>(
-      listenWhen: (previous, current) => previous.error != current.error && current.error != null,
+      listenWhen: (previous, current) =>
+          previous.error != current.error && current.error != null,
       listener: (context, state) {
         if (state.error != null) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -229,7 +236,7 @@ class _RefinedChatInputState extends State<RefinedChatInput> with TickerProvider
             color: AppColors.backgroundSurface,
             borderRadius: BorderRadius.circular(28),
             border: Border.all(
-              color: AppColors.borderLight, 
+              color: AppColors.borderLight,
               width: 1.0,
             ),
             boxShadow: [
@@ -253,40 +260,52 @@ class _RefinedChatInputState extends State<RefinedChatInput> with TickerProvider
         _buildAttachmentPreview(),
         Padding(
           padding: const EdgeInsets.fromLTRB(20, 4, 12, 0),
-            child: TextField(
-              controller: _controller,
-              focusNode: _focusNode,
-              maxLines: 6, // predictable growth limit
-              minLines: 1,
-              keyboardType: TextInputType.multiline,
-              textInputAction: TextInputAction.newline,
-              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary),
-              decoration: InputDecoration(
-                hintText: AppLocalizations.of(context).askAnything,
-                hintStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.textTertiary),
-                filled: false, // Override global theme
-                fillColor: Colors.transparent,
-                border: InputBorder.none,
-                enabledBorder: InputBorder.none,
-                focusedBorder: InputBorder.none,
-                errorBorder: InputBorder.none,
-                disabledBorder: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(vertical: 12),
-              ),
+          child: TextField(
+            controller: _controller,
+            focusNode: _focusNode,
+            maxLines: 6, // predictable growth limit
+            minLines: 1,
+            keyboardType: TextInputType.multiline,
+            textInputAction: TextInputAction.newline,
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: AppColors.textPrimary,
             ),
+            decoration: InputDecoration(
+              hintText: AppLocalizations.of(context).askAnything,
+              hintStyle: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.textTertiary,
+              ),
+              filled: false, // Override global theme
+              fillColor: Colors.transparent,
+              border: InputBorder.none,
+              enabledBorder: InputBorder.none,
+              focusedBorder: InputBorder.none,
+              errorBorder: InputBorder.none,
+              disabledBorder: InputBorder.none,
+              contentPadding: const EdgeInsets.symmetric(vertical: 12),
+            ),
+          ),
         ),
         Padding(
           padding: const EdgeInsets.only(left: 12, right: 12, bottom: 12),
           child: Row(
             children: [
               IconButton(
-                icon: const Icon(Icons.add_rounded, color: AppColors.textSecondary, size: 28),
+                icon: const Icon(
+                  Icons.add_rounded,
+                  color: AppColors.textSecondary,
+                  size: 28,
+                ),
                 onPressed: _showPlusMenu,
               ),
               const Spacer(),
               if (!_hasText)
                 IconButton(
-                  icon: const Icon(Icons.mic_none_rounded, color: AppColors.textSecondary, size: 26),
+                  icon: const Icon(
+                    Icons.mic_none_rounded,
+                    color: AppColors.textSecondary,
+                    size: 26,
+                  ),
                   onPressed: widget.onToggleAudio,
                 ),
               const SizedBox(width: 8),
@@ -301,15 +320,19 @@ class _RefinedChatInputState extends State<RefinedChatInput> with TickerProvider
                       child: Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: canSend ? AppColors.brandDarkTeal : AppColors.borderLight,
+                          color: canSend
+                              ? AppColors.brandDarkTeal
+                              : AppColors.borderLight,
                           shape: BoxShape.circle,
-                          boxShadow: canSend ? [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            )
-                          ] : null,
+                          boxShadow: canSend
+                              ? [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ]
+                              : null,
                         ),
                         child: const Icon(
                           Icons.arrow_upward_rounded,
@@ -336,7 +359,10 @@ class _RefinedChatInputState extends State<RefinedChatInput> with TickerProvider
           child: Row(
             children: [
               IconButton(
-                icon: const Icon(Icons.close_rounded, color: AppColors.textTertiary),
+                icon: const Icon(
+                  Icons.close_rounded,
+                  color: AppColors.textTertiary,
+                ),
                 onPressed: () {
                   context.read<ChatCubit>().cancelRecording();
                   widget.onToggleAudio();
@@ -344,13 +370,13 @@ class _RefinedChatInputState extends State<RefinedChatInput> with TickerProvider
               ),
               Expanded(
                 child: SizedBox(
-                   height: 60,
-                   child: Center(
-                     child: AudioWaveform(
-                       isRecording: state.isRecording,
-                       amplitude: state.amplitude,
-                     ),
-                   ),
+                  height: 60,
+                  child: Center(
+                    child: AudioWaveform(
+                      isRecording: state.isRecording,
+                      amplitude: state.amplitude,
+                    ),
+                  ),
                 ),
               ),
               GestureDetector(
@@ -361,54 +387,62 @@ class _RefinedChatInputState extends State<RefinedChatInput> with TickerProvider
                     context.read<ChatCubit>().startRecording();
                   }
                 },
-                child: state.isRecording 
-                  ? Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      Container(
-                        width: 44,
-                        height: 44,
-                        decoration: BoxDecoration(
-                          color: AppColors.error.withOpacity(0.2),
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      const Icon(
-                        Icons.stop_rounded,
-                        color: AppColors.error,
-                        size: 28,
-                      ),
-                    ],
-                  )
-                  : FadeTransition(
-                      opacity: _pulseController,
-                      child: Stack(
+                child: state.isRecording
+                    ? Stack(
                         alignment: Alignment.center,
                         children: [
-                          ScaleTransition(
-                            scale: Tween(begin: 1.0, end: 1.2).animate(
-                              CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
-                            ),
-                            child: Container(
-                              width: 44,
-                              height: 44,
-                              decoration: BoxDecoration(
-                                color: AppColors.accentPrimary.withOpacity(0.1),
-                                shape: BoxShape.circle,
-                              ),
+                          Container(
+                            width: 44,
+                            height: 44,
+                            decoration: BoxDecoration(
+                              color: AppColors.error.withOpacity(0.2),
+                              shape: BoxShape.circle,
                             ),
                           ),
                           const Icon(
-                            Icons.mic_rounded,
-                            color: AppColors.accentPrimary,
+                            Icons.stop_rounded,
+                            color: AppColors.error,
                             size: 28,
                           ),
                         ],
+                      )
+                    : FadeTransition(
+                        opacity: _pulseController,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            ScaleTransition(
+                              scale: Tween(begin: 1.0, end: 1.2).animate(
+                                CurvedAnimation(
+                                  parent: _pulseController,
+                                  curve: Curves.easeInOut,
+                                ),
+                              ),
+                              child: Container(
+                                width: 44,
+                                height: 44,
+                                decoration: BoxDecoration(
+                                  color: AppColors.accentPrimary.withOpacity(
+                                    0.1,
+                                  ),
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                            ),
+                            const Icon(
+                              Icons.mic_rounded,
+                              color: AppColors.accentPrimary,
+                              size: 28,
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
               ),
               IconButton(
-                icon: const Icon(Icons.keyboard_outlined, color: AppColors.textSecondary),
+                icon: const Icon(
+                  Icons.keyboard_outlined,
+                  color: AppColors.textSecondary,
+                ),
                 onPressed: widget.onToggleAudio,
               ),
             ],
@@ -448,16 +482,24 @@ class _RefinedChatInputState extends State<RefinedChatInput> with TickerProvider
                                 child: Image.file(
                                   File(attachment.path),
                                   fit: BoxFit.cover,
-                                  errorBuilder: (_, __, ___) => const Icon(Icons.broken_image_outlined, size: 20),
+                                  errorBuilder: (_, __, ___) => const Icon(
+                                    Icons.broken_image_outlined,
+                                    size: 20,
+                                  ),
                                 ),
                               )
                             : Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  const Icon(Icons.description_rounded, color: Colors.blue),
+                                  const Icon(
+                                    Icons.description_rounded,
+                                    color: Colors.blue,
+                                  ),
                                   const SizedBox(height: 4),
                                   Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 4,
+                                    ),
                                     child: Text(
                                       attachment.name,
                                       maxLines: 1,
@@ -472,14 +514,20 @@ class _RefinedChatInputState extends State<RefinedChatInput> with TickerProvider
                         top: -6,
                         right: -6,
                         child: GestureDetector(
-                          onTap: () => context.read<ChatCubit>().removeAttachment(attachment.path),
+                          onTap: () => context
+                              .read<ChatCubit>()
+                              .removeAttachment(attachment.path),
                           child: Container(
                             padding: const EdgeInsets.all(2),
                             decoration: const BoxDecoration(
                               color: Colors.red,
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(Icons.close, color: Colors.white, size: 14),
+                            child: const Icon(
+                              Icons.close,
+                              color: Colors.white,
+                              size: 14,
+                            ),
                           ),
                         ),
                       ),

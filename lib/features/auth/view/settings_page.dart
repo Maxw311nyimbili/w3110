@@ -63,104 +63,110 @@ class SettingsPage extends StatelessWidget {
                   ),
                 ),
               ),
-  
+
               // Content
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: Column(
                     children: [
-                    // --- Preferences Section ---
-                    _buildSectionHeader(l10n.preferences),
-                    _buildGroup([
-                      BlocBuilder<LocaleCubit, LocaleState>(
-                        builder: (context, state) {
-                          return _buildSettingTile(
-                            title: l10n.language,
-                            subtitle: LocaleState.getLanguageName(state.locale),
-                            icon: Icons.language_rounded,
-                            showDivider: true,
-                            onTap: () =>
-                                LanguageSelectorBottomSheet.show(context),
-                          );
-                        },
-                      ),
-                      _buildSettingTile(
-                        title: l10n.darkMode,
-                        subtitle: l10n.systemDefault,
-                        icon: Icons.dark_mode_outlined,
-                        onTap: () {}, // TODO: Implement ThemeCubit
-                      ),
-                    ]),
-                    const SizedBox(height: 32),
-
-                    // --- Profile Section ---
-                    _buildSectionHeader(l10n.profile),
-                    _buildGroup([
-                      _buildSettingTile(
-                        title: l10n.accountInfo,
-                        icon: Icons.person_outline_rounded,
-                        showDivider: true,
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const ProfilePage()),
+                      // --- Preferences Section ---
+                      _buildSectionHeader(l10n.preferences),
+                      _buildGroup([
+                        BlocBuilder<LocaleCubit, LocaleState>(
+                          builder: (context, state) {
+                            return _buildSettingTile(
+                              title: l10n.language,
+                              subtitle: LocaleState.getLanguageName(
+                                state.locale,
+                              ),
+                              icon: Icons.language_rounded,
+                              showDivider: true,
+                              onTap: () =>
+                                  LanguageSelectorBottomSheet.show(context),
+                            );
+                          },
                         ),
-                      ),
-                      _buildSettingTile(
-                        title: 'Push Notifications',
-                        icon: Icons.notifications_outlined,
-                        showDivider: true,
-                        onTap: () {},
-                      ),
-                      _buildSettingTile(
-                        title: l10n.signOut,
-                        icon: Icons.logout_rounded,
-                        textColor: AppColors.error,
-                        isDestructive: true,
-                        showDivider: true,
-                        onTap: () => _handleLogout(context, l10n),
-                      ),
-                      _buildSettingTile(
-                        title: 'Reset App Data',
-                        subtitle: 'Wipes all local state (Dev Only)',
-                        icon: Icons.delete_forever_rounded,
-                        textColor: AppColors.error,
-                        isDestructive: true,
-                        onTap: () => _handleDeepReset(context),
-                      ),
-                    ]),
-                    const SizedBox(height: 32),
+                        _buildSettingTile(
+                          title: l10n.darkMode,
+                          subtitle: l10n.systemDefault,
+                          icon: Icons.dark_mode_outlined,
+                          onTap: () {}, // TODO: Implement ThemeCubit
+                        ),
+                      ]),
+                      const SizedBox(height: 32),
 
-                    // --- About Section ---
-                    _buildSectionHeader(l10n.about),
-                    _buildGroup([
-                      _buildSettingTile(
-                        title: l10n.privacyPolicy,
-                        icon: Icons.privacy_tip_outlined,
-                        showDivider: true,
-                        onTap: () {},
-                      ),
-                      _buildSettingTile(
-                        title: l10n.version,
-                        subtitle: l10n.versionNumber,
-                        icon: Icons.info_outline_rounded,
-                        onTap: null, // Just display
-                      ),
-                    ]),
-                    const SizedBox(height: 48),
-                  ],
+                      // --- Profile Section ---
+                      _buildSectionHeader(l10n.profile),
+                      _buildGroup([
+                        _buildSettingTile(
+                          title: l10n.accountInfo,
+                          icon: Icons.person_outline_rounded,
+                          showDivider: true,
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const ProfilePage(),
+                            ),
+                          ),
+                        ),
+                        _buildSettingTile(
+                          title: 'Push Notifications',
+                          icon: Icons.notifications_outlined,
+                          showDivider: true,
+                          onTap: () {},
+                        ),
+                        _buildSettingTile(
+                          title: l10n.signOut,
+                          icon: Icons.logout_rounded,
+                          textColor: AppColors.error,
+                          isDestructive: true,
+                          showDivider: true,
+                          onTap: () => _handleLogout(context, l10n),
+                        ),
+                        _buildSettingTile(
+                          title: 'Reset App Data',
+                          subtitle: 'Wipes all local state (Dev Only)',
+                          icon: Icons.delete_forever_rounded,
+                          textColor: AppColors.error,
+                          isDestructive: true,
+                          onTap: () => _handleDeepReset(context),
+                        ),
+                      ]),
+                      const SizedBox(height: 32),
+
+                      // --- About Section ---
+                      _buildSectionHeader(l10n.about),
+                      _buildGroup([
+                        _buildSettingTile(
+                          title: l10n.privacyPolicy,
+                          icon: Icons.privacy_tip_outlined,
+                          showDivider: true,
+                          onTap: () {},
+                        ),
+                        _buildSettingTile(
+                          title: l10n.version,
+                          subtitle: l10n.versionNumber,
+                          icon: Icons.info_outline_rounded,
+                          onTap: null, // Just display
+                        ),
+                      ]),
+                      const SizedBox(height: 48),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
       ),
     );
   }
 
-  Future<void> _handleLogout(BuildContext context, AppLocalizations l10n) async {
+  Future<void> _handleLogout(
+    BuildContext context,
+    AppLocalizations l10n,
+  ) async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -176,7 +182,9 @@ class SettingsPage extends StatelessWidget {
             onPressed: () => Navigator.pop(context, false),
             child: Text(
               l10n.cancel,
-              style: AppTextStyles.labelLarge.copyWith(color: AppColors.textSecondary),
+              style: AppTextStyles.labelLarge.copyWith(
+                color: AppColors.textSecondary,
+              ),
             ),
           ),
           TextButton(
@@ -219,7 +227,9 @@ class SettingsPage extends StatelessWidget {
             onPressed: () => Navigator.pop(context, false),
             child: Text(
               'Cancel',
-              style: AppTextStyles.labelLarge.copyWith(color: AppColors.textSecondary),
+              style: AppTextStyles.labelLarge.copyWith(
+                color: AppColors.textSecondary,
+              ),
             ),
           ),
           TextButton(
@@ -299,8 +309,10 @@ class SettingsPage extends StatelessWidget {
     bool isDestructive = false,
   }) {
     // Determine visuals based on state
-    final color = isDestructive ? AppColors.error : (textColor ?? AppColors.accentPrimary);
-    
+    final color = isDestructive
+        ? AppColors.error
+        : (textColor ?? AppColors.accentPrimary);
+
     return Column(
       children: [
         Material(
@@ -326,7 +338,7 @@ class SettingsPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 16),
-                  
+
                   // Text content
                   Expanded(
                     child: Column(
@@ -335,7 +347,9 @@ class SettingsPage extends StatelessWidget {
                         Text(
                           title,
                           style: AppTextStyles.bodyLarge.copyWith(
-                            color: isDestructive ? AppColors.error : AppColors.textPrimary,
+                            color: isDestructive
+                                ? AppColors.error
+                                : AppColors.textPrimary,
                             fontWeight: FontWeight.w600,
                             fontSize: 16,
                           ),
@@ -352,7 +366,7 @@ class SettingsPage extends StatelessWidget {
                       ],
                     ),
                   ),
-                  
+
                   // Chevron (only if tappable)
                   if (onTap != null)
                     Icon(

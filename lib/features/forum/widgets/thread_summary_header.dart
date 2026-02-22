@@ -18,23 +18,35 @@ class ThreadSummaryHeader extends StatelessWidget {
   });
 
   /// Count expert responses
-  int get expertCount => comments.where((c) => c.authorRole == 'clinician' || c.authorRole == 'doctor' || c.authorRole == 'healthcare_professional').length;
+  int get expertCount => comments
+      .where(
+        (c) =>
+            c.authorRole == 'clinician' ||
+            c.authorRole == 'doctor' ||
+            c.authorRole == 'healthcare_professional',
+      )
+      .length;
 
   /// Calculate consensus from comment sentiment
   String _getConsensus() {
     final experts = comments
-        .where((c) => c.authorRole == 'clinician' || c.authorRole == 'doctor' || c.authorRole == 'healthcare_professional')
+        .where(
+          (c) =>
+              c.authorRole == 'clinician' ||
+              c.authorRole == 'doctor' ||
+              c.authorRole == 'healthcare_professional',
+        )
         .toList();
-        
+
     if (comments.isEmpty) return 'Awaiting community insights';
     if (experts.isEmpty) return 'Active community discussion in progress';
-    
+
     if (experts.length >= 3) {
       return 'Broad expert consensus established';
     } else if (experts.length >= 1) {
       return 'Expert clinical perspectives available';
     }
-    
+
     return 'Consensus forming among members';
   }
 
@@ -57,7 +69,10 @@ class ThreadSummaryHeader extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.accentPrimary,
                   borderRadius: BorderRadius.circular(12),
@@ -73,7 +88,10 @@ class ThreadSummaryHeader extends StatelessWidget {
               const SizedBox(width: 8),
               if (expertCount > 0)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.success.withOpacity(0.15),
                     borderRadius: BorderRadius.circular(12),
@@ -85,7 +103,11 @@ class ThreadSummaryHeader extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.verified, size: 12, color: AppColors.success),
+                      const Icon(
+                        Icons.verified,
+                        size: 12,
+                        color: AppColors.success,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         '$expertCount expert',
@@ -242,7 +264,7 @@ class ThreadDepthIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final progress = totalComments > 0 ? currentPosition / totalComments : 0.0;
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(

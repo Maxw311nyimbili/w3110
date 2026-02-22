@@ -43,10 +43,12 @@ class AppRouter {
         final args = settings.arguments as Map<String, dynamic>?;
         final initialStep = args?['initialStep'] as OnboardingStep?;
         final forceAuth = args?['forceAuth'] == true;
-        
+
         return CupertinoPageRoute(
           builder: (_) => LandingPage(
-            initialStepOverride: initialStep ?? (forceAuth ? OnboardingStep.authentication : null),
+            initialStepOverride:
+                initialStep ??
+                (forceAuth ? OnboardingStep.authentication : null),
           ),
           settings: settings,
         );
@@ -85,7 +87,10 @@ class AppRouter {
             const end = Offset.zero;
             const curve = Curves.easeOutCubic;
 
-            var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+            var tween = Tween(
+              begin: begin,
+              end: end,
+            ).chain(CurveTween(curve: curve));
             var offsetAnimation = animation.drive(tween);
 
             return SlideTransition(
@@ -109,10 +114,10 @@ class AppRouter {
 
   /// Navigate to route
   static Future<T?> navigateTo<T>(
-      BuildContext context,
-      String routeName, {
-        Object? arguments,
-      }) {
+    BuildContext context,
+    String routeName, {
+    Object? arguments,
+  }) {
     return Navigator.pushNamed<T>(
       context,
       routeName,
@@ -122,10 +127,10 @@ class AppRouter {
 
   /// Replace current route
   static Future<T?> replaceTo<T>(
-      BuildContext context,
-      String routeName, {
-        Object? arguments,
-      }) {
+    BuildContext context,
+    String routeName, {
+    Object? arguments,
+  }) {
     return Navigator.pushReplacementNamed<T, dynamic>(
       context,
       routeName,

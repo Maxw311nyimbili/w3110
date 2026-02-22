@@ -61,7 +61,7 @@ class _ProfileSetupStepState extends State<ProfileSetupStep> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 16),
-                  
+
                   // Staggered Title
                   _buildStaggeredEntrance(
                     delay: 100,
@@ -91,7 +91,7 @@ class _ProfileSetupStepState extends State<ProfileSetupStep> {
                   ),
 
                   const SizedBox(height: 48),
-                  
+
                   // Staggered Inputs
                   _buildStaggeredEntrance(
                     delay: 300,
@@ -107,9 +107,9 @@ class _ProfileSetupStepState extends State<ProfileSetupStep> {
                       ],
                     ),
                   ),
-                  
+
                   const SizedBox(height: 32),
-                  
+
                   _buildStaggeredEntrance(
                     delay: 400,
                     child: Column(
@@ -118,7 +118,9 @@ class _ProfileSetupStepState extends State<ProfileSetupStep> {
                         _buildLabel('ACCOUNT NICKNAME'),
                         TextField(
                           controller: _nicknameController,
-                          decoration: _buildInputDecoration('e.g., Clinical Account, Personal'),
+                          decoration: _buildInputDecoration(
+                            'e.g., Clinical Account, Personal',
+                          ),
                           style: AppTextStyles.bodyLarge,
                         ),
                         const SizedBox(height: 8),
@@ -132,7 +134,7 @@ class _ProfileSetupStepState extends State<ProfileSetupStep> {
                       ],
                     ),
                   ),
-                  
+
                   const Spacer(),
 
                   _buildStaggeredEntrance(
@@ -140,8 +142,8 @@ class _ProfileSetupStepState extends State<ProfileSetupStep> {
                     child: Padding(
                       padding: const EdgeInsets.only(bottom: 24),
                       child: PremiumButton(
-                        onPressed: state.canProceed 
-                            ? () => context.read<LandingCubit>().nextStep() 
+                        onPressed: state.canProceed
+                            ? () => context.read<LandingCubit>().nextStep()
                             : null,
                         text: 'Continue',
                       ),

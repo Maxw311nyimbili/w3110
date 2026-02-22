@@ -51,7 +51,7 @@ class CommentCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final effectiveIsExpert = isExpert;
     final effectiveIsClinician = isClinician;
-    
+
     return IntrinsicHeight(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -59,17 +59,20 @@ class CommentCard extends StatelessWidget {
           // Thread Line area
           if (depth > 0)
             Row(
-              children: List.generate(depth, (index) => Container(
-                width: 24, // Consistent indentation
-                alignment: Alignment.centerLeft,
-                child: VerticalDivider(
-                  color: AppColors.borderLight,
-                  thickness: 1.5,
-                  width: 1,
+              children: List.generate(
+                depth,
+                (index) => Container(
+                  width: 24, // Consistent indentation
+                  alignment: Alignment.centerLeft,
+                  child: VerticalDivider(
+                    color: AppColors.borderLight,
+                    thickness: 1.5,
+                    width: 1,
+                  ),
                 ),
-              )),
+              ),
             ),
-          
+
           // Main Content
           Expanded(
             child: Container(
@@ -78,17 +81,25 @@ class CommentCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Avatar
-                  _buildAvatar(isExpert: effectiveIsExpert, isClinician: effectiveIsClinician, size: depth > 0 ? 28 : 34),
+                  _buildAvatar(
+                    isExpert: effectiveIsExpert,
+                    isClinician: effectiveIsClinician,
+                    size: depth > 0 ? 28 : 34,
+                  ),
                   const SizedBox(width: 10),
-                  
+
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Header
-                        _buildHeader(context, isExpert: effectiveIsExpert, isClinician: effectiveIsClinician),
+                        _buildHeader(
+                          context,
+                          isExpert: effectiveIsExpert,
+                          isClinician: effectiveIsClinician,
+                        ),
                         const SizedBox(height: 2),
-                        
+
                         // Body
                         Text(
                           text,
@@ -98,7 +109,7 @@ class CommentCard extends StatelessWidget {
                             color: AppColors.textPrimary,
                           ),
                         ),
-                        
+
                         // Actions
                         const SizedBox(height: 4),
                         _buildFooterActions(),
@@ -114,7 +125,11 @@ class CommentCard extends StatelessWidget {
     );
   }
 
-  Widget _buildAvatar({required bool isExpert, required bool isClinician, required double size}) {
+  Widget _buildAvatar({
+    required bool isExpert,
+    required bool isClinician,
+    required double size,
+  }) {
     return Stack(
       children: [
         Container(
@@ -122,16 +137,23 @@ class CommentCard extends StatelessWidget {
           height: size,
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: isExpert 
+            color: isExpert
                 ? AppColors.success.withOpacity(0.1)
                 : AppColors.backgroundElevated,
             shape: BoxShape.circle,
-            border: isExpert ? Border.all(color: isClinician ? AppColors.success : AppColors.accentPrimary, width: 1) : null,
+            border: isExpert
+                ? Border.all(
+                    color: isClinician
+                        ? AppColors.success
+                        : AppColors.accentPrimary,
+                    width: 1,
+                  )
+                : null,
           ),
           child: Icon(
-            roleIcon, 
-            size: size * 0.5, 
-            color: isExpert 
+            roleIcon,
+            size: size * 0.5,
+            color: isExpert
                 ? (isClinician ? AppColors.success : AppColors.accentPrimary)
                 : AppColors.textSecondary,
           ),
@@ -157,7 +179,11 @@ class CommentCard extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(BuildContext context, {required bool isExpert, required bool isClinician}) {
+  Widget _buildHeader(
+    BuildContext context, {
+    required bool isExpert,
+    required bool isClinician,
+  }) {
     return Row(
       children: [
         Text(
@@ -165,7 +191,7 @@ class CommentCard extends StatelessWidget {
           style: AppTextStyles.labelMedium.copyWith(
             fontWeight: FontWeight.w700,
             fontSize: depth > 0 ? 12 : 13,
-            color: isExpert 
+            color: isExpert
                 ? (isClinician ? AppColors.success : AppColors.accentPrimary)
                 : AppColors.textPrimary,
           ),
@@ -191,7 +217,7 @@ class CommentCard extends StatelessWidget {
           _formatTime(createdAt),
           style: AppTextStyles.caption.copyWith(
             fontSize: 9,
-            color: AppColors.textTertiary
+            color: AppColors.textTertiary,
           ),
         ),
         if (currentUserId == authorId) ...[
@@ -212,7 +238,9 @@ class CommentCard extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
-                isLiked ? Icons.favorite_rounded : Icons.favorite_outline_rounded,
+                isLiked
+                    ? Icons.favorite_rounded
+                    : Icons.favorite_outline_rounded,
                 size: 13,
                 color: isLiked ? Colors.red : AppColors.textTertiary,
               ),
@@ -250,12 +278,16 @@ class CommentCard extends StatelessWidget {
   Widget _buildCommentActions(BuildContext context) {
     return PopupMenuButton<String>(
       padding: EdgeInsets.zero,
-      icon: const Icon(Icons.more_horiz_rounded, size: 14, color: AppColors.textTertiary),
+      icon: const Icon(
+        Icons.more_horiz_rounded,
+        size: 14,
+        color: AppColors.textTertiary,
+      ),
       onSelected: (value) {
         if (value == 'edit') {
-           onEdit?.call();
+          onEdit?.call();
         } else if (value == 'delete') {
-           onDelete?.call();
+          onDelete?.call();
         }
       },
       itemBuilder: (context) => [
@@ -287,14 +319,19 @@ class CommentCard extends StatelessWidget {
 
   IconData _getRoleIconInfo(CommentRole role) {
     switch (role) {
-      case CommentRole.clinician: return Icons.local_hospital_outlined;
-      case CommentRole.mother: return Icons.face_4_outlined;
-      case CommentRole.community: return Icons.person_outline;
-      case CommentRole.supportPartner: return Icons.handshake_outlined;
-      default: return Icons.chat_bubble_outline_rounded;
+      case CommentRole.clinician:
+        return Icons.local_hospital_outlined;
+      case CommentRole.mother:
+        return Icons.face_4_outlined;
+      case CommentRole.community:
+        return Icons.person_outline;
+      case CommentRole.supportPartner:
+        return Icons.handshake_outlined;
+      default:
+        return Icons.chat_bubble_outline_rounded;
     }
   }
-  
+
   String _formatTime(DateTime time) {
     final diff = DateTime.now().difference(time);
     if (diff.inDays > 0) return '${diff.inDays}d';

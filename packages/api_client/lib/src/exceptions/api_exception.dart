@@ -23,33 +23,33 @@ class ApiException implements Exception {
 /// Exception thrown when network request times out
 class NetworkTimeoutException extends ApiException {
   NetworkTimeoutException()
-      : super(
-    error: const ApiError(
-      message: 'Request timed out - please check your connection',
-      code: 'TIMEOUT',
-    ),
-  );
+    : super(
+        error: const ApiError(
+          message: 'Request timed out - please check your connection',
+          code: 'TIMEOUT',
+        ),
+      );
 }
 
 /// Exception thrown when device is offline
 class NoInternetException extends ApiException {
   NoInternetException()
-      : super(
-    error: const ApiError(
-      message: 'No internet connection - please check your network',
-      code: 'NO_INTERNET',
-    ),
-  );
+    : super(
+        error: const ApiError(
+          message: 'No internet connection - please check your network',
+          code: 'NO_INTERNET',
+        ),
+      );
 }
 
 /// Exception thrown when authentication fails
 class AuthenticationException extends ApiException {
   AuthenticationException({String? message})
-      : super(
-    error: ApiError(
-      message: message ?? 'Authentication failed - please sign in again',
-      code: 'AUTH_FAILED',
-      statusCode: 401,
-    ),
-  );
+    : super(
+        error: ApiError(
+          message: message ?? 'Authentication failed - please sign in again',
+          code: 'AUTH_FAILED',
+          statusCode: 401,
+        ),
+      );
 }

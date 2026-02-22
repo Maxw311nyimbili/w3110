@@ -30,7 +30,9 @@ class CommentListItem extends StatelessWidget {
             ),
             child: Center(
               child: Text(
-                comment.authorName.isNotEmpty ? comment.authorName[0].toUpperCase() : '?',
+                comment.authorName.isNotEmpty
+                    ? comment.authorName[0].toUpperCase()
+                    : '?',
                 style: const TextStyle(
                   color: AppColors.accentPrimary,
                   fontSize: 14,
@@ -82,20 +84,31 @@ class CommentListItem extends StatelessWidget {
                 const SizedBox(height: 8),
                 // Like action for comment
                 GestureDetector(
-                  onTap: () => context.read<ForumCubit>().toggleCommentLike(comment.id, isLineComment: false),
+                  onTap: () => context.read<ForumCubit>().toggleCommentLike(
+                    comment.id,
+                    isLineComment: false,
+                  ),
                   child: Row(
                     children: [
                       Icon(
-                        comment.isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                        comment.isLiked
+                            ? Icons.favorite_rounded
+                            : Icons.favorite_border_rounded,
                         size: 16,
-                        color: comment.isLiked ? Colors.pink : AppColors.textTertiary,
+                        color: comment.isLiked
+                            ? Colors.pink
+                            : AppColors.textTertiary,
                       ),
                       const SizedBox(width: 4),
                       Text(
                         comment.likeCount.toString(),
                         style: AppTextStyles.labelSmall.copyWith(
-                          color: comment.isLiked ? Colors.pink : AppColors.textTertiary,
-                          fontWeight: comment.isLiked ? FontWeight.bold : FontWeight.normal,
+                          color: comment.isLiked
+                              ? Colors.pink
+                              : AppColors.textTertiary,
+                          fontWeight: comment.isLiked
+                              ? FontWeight.bold
+                              : FontWeight.normal,
                         ),
                       ),
                     ],

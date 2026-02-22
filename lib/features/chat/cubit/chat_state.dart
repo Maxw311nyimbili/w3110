@@ -2,7 +2,8 @@
 // Business logic state ONLY - UI state stays in StatefulWidget
 
 import 'package:equatable/equatable.dart';
-import 'package:cap_project/features/medscanner/cubit/medscanner_state.dart' as scanner;
+import 'package:cap_project/features/medscanner/cubit/medscanner_state.dart'
+    as scanner;
 import 'package:chat_repository/chat_repository.dart' hide ChatMessage;
 
 enum ChatStatus {

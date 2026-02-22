@@ -72,12 +72,15 @@ class ForumComment extends Equatable {
   factory ForumComment.fromJson(Map<String, dynamic> json) {
     return ForumComment(
       id: json['id'].toString(),
-      localId: (json['client_id'] ?? json['id']).toString(), // Prioritize client_id (UUID)
+      localId: (json['client_id'] ?? json['id'])
+          .toString(), // Prioritize client_id (UUID)
       postId: json['post_id'].toString(),
       authorId: (json['user_id'] ?? json['author_id']).toString(),
       authorName: (json['author_name'] ?? 'Unknown').toString(),
       content: json['content'] as String? ?? '',
-      createdAt: json['created_at'] != null ? DateTime.parse(json['created_at'] as String) : DateTime.now(),
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'] as String)
+          : DateTime.now(),
       updatedAt: json['updated_at'] != null
           ? DateTime.parse(json['updated_at'] as String)
           : null,
@@ -132,17 +135,34 @@ class ForumComment extends Equatable {
 
   static SyncStatus _parseSyncStatus(String status) {
     switch (status) {
-      case 'pending': return SyncStatus.pending;
-      case 'syncing': return SyncStatus.syncing;
-      case 'error': return SyncStatus.error;
-      default: return SyncStatus.synced;
+      case 'pending':
+        return SyncStatus.pending;
+      case 'syncing':
+        return SyncStatus.syncing;
+      case 'error':
+        return SyncStatus.error;
+      default:
+        return SyncStatus.synced;
     }
   }
 
   @override
   List<Object?> get props => [
-    id, localId, postId, authorId, authorName, content, createdAt, updatedAt,
-    likeCount, isLiked, syncStatus, authorRole, authorProfession, parentCommentId,
-    isDeleted, version,
+    id,
+    localId,
+    postId,
+    authorId,
+    authorName,
+    content,
+    createdAt,
+    updatedAt,
+    likeCount,
+    isLiked,
+    syncStatus,
+    authorRole,
+    authorProfession,
+    parentCommentId,
+    isDeleted,
+    version,
   ];
 }

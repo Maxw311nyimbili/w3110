@@ -70,10 +70,10 @@ class ForumPost extends Equatable {
       viewCount: data.viewCount ?? 0,
       isLiked: data.isLiked,
       syncStatus: _parseSyncStatus(data.syncStatus),
-      sources: data.sources != null 
+      sources: data.sources != null
           ? (jsonDecode(data.sources!) as List)
-              .map((e) => ForumPostSource.fromJson(e as Map<String, dynamic>))
-              .toList()
+                .map((e) => ForumPostSource.fromJson(e as Map<String, dynamic>))
+                .toList()
           : const [],
       tags: data.tags != null
           ? List<String>.from(jsonDecode(data.tags!) as List)
@@ -88,12 +88,15 @@ class ForumPost extends Equatable {
   factory ForumPost.fromJson(Map<String, dynamic> json) {
     return ForumPost(
       id: json['id'].toString(),
-      localId: (json['client_id'] ?? json['id']).toString(), // Prioritize client_id (UUID)
+      localId: (json['client_id'] ?? json['id'])
+          .toString(), // Prioritize client_id (UUID)
       authorId: (json['user_id'] ?? json['author_id']).toString(),
       authorName: (json['author_name'] ?? 'Unknown').toString(),
       title: json['title'] as String? ?? 'Untitled',
       content: json['content'] as String? ?? '',
-      createdAt: json['created_at'] != null ? DateTime.parse(json['created_at'] as String) : DateTime.now(),
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'] as String)
+          : DateTime.now(),
       updatedAt: json['updated_at'] != null
           ? DateTime.parse(json['updated_at'] as String)
           : null,
@@ -156,17 +159,36 @@ class ForumPost extends Equatable {
 
   static SyncStatus _parseSyncStatus(String status) {
     switch (status) {
-      case 'pending': return SyncStatus.pending;
-      case 'syncing': return SyncStatus.syncing;
-      case 'error': return SyncStatus.error;
-      default: return SyncStatus.synced;
+      case 'pending':
+        return SyncStatus.pending;
+      case 'syncing':
+        return SyncStatus.syncing;
+      case 'error':
+        return SyncStatus.error;
+      default:
+        return SyncStatus.synced;
     }
   }
 
   @override
   List<Object?> get props => [
-    id, localId, authorId, authorName, title, content, createdAt, updatedAt,
-    commentCount, likeCount, viewCount, isLiked, syncStatus, sources, tags,
-    originalAnswerId, isDeleted, version,
+    id,
+    localId,
+    authorId,
+    authorName,
+    title,
+    content,
+    createdAt,
+    updatedAt,
+    commentCount,
+    likeCount,
+    viewCount,
+    isLiked,
+    syncStatus,
+    sources,
+    tags,
+    originalAnswerId,
+    isDeleted,
+    version,
   ];
 }

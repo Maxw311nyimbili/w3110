@@ -16,7 +16,7 @@ class LocaleCubit extends Cubit<LocaleState> {
     try {
       final prefs = await SharedPreferences.getInstance();
       final localeCode = prefs.getString(_localeKey);
-      
+
       if (localeCode != null) {
         final locale = Locale(localeCode);
         if (_isSupported(locale)) {

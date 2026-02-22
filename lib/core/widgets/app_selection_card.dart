@@ -34,7 +34,7 @@ class AppSelectionCard extends StatelessWidget {
           ),
           boxShadow: [
             BoxShadow(
-              color: isSelected 
+              color: isSelected
                   ? AppColors.accentPrimary.withOpacity(0.05)
                   : AppColors.shadow.withOpacity(0.05),
               blurRadius: 10,
@@ -50,7 +50,9 @@ class AppSelectionCard extends StatelessWidget {
                 Icon(
                   icon,
                   size: 24,
-                  color: isSelected ? AppColors.accentPrimary : AppColors.textTertiary,
+                  color: isSelected
+                      ? AppColors.accentPrimary
+                      : AppColors.textTertiary,
                 ),
                 const Spacer(),
                 if (isSelected)

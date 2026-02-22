@@ -18,7 +18,9 @@ class LoggingInterceptor extends Interceptor {
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     if (enabled) {
       final buffer = StringBuffer();
-      buffer.writeln('╔══════════════════════════════════════════════════════════');
+      buffer.writeln(
+        '╔══════════════════════════════════════════════════════════',
+      );
       buffer.writeln('║ 📤 REQUEST');
       buffer.writeln('║ ${options.method} ${options.uri}');
       if (options.headers.isNotEmpty) {
@@ -35,7 +37,9 @@ class LoggingInterceptor extends Interceptor {
       if (options.data != null) {
         buffer.writeln('║ Body: ${options.data}');
       }
-      buffer.writeln('╚══════════════════════════════════════════════════════════');
+      buffer.writeln(
+        '╚══════════════════════════════════════════════════════════',
+      );
       _log(buffer.toString());
     }
     handler.next(options);
@@ -45,12 +49,18 @@ class LoggingInterceptor extends Interceptor {
   void onResponse(Response response, ResponseInterceptorHandler handler) {
     if (enabled) {
       final buffer = StringBuffer();
-      buffer.writeln('╔══════════════════════════════════════════════════════════');
+      buffer.writeln(
+        '╔══════════════════════════════════════════════════════════',
+      );
       buffer.writeln('║ 📥 RESPONSE');
-      buffer.writeln('║ ${response.requestOptions.method} ${response.requestOptions.uri}');
+      buffer.writeln(
+        '║ ${response.requestOptions.method} ${response.requestOptions.uri}',
+      );
       buffer.writeln('║ Status: ${response.statusCode}');
       buffer.writeln('║ Data: ${response.data}');
-      buffer.writeln('╚══════════════════════════════════════════════════════════');
+      buffer.writeln(
+        '╚══════════════════════════════════════════════════════════',
+      );
       _log(buffer.toString());
     }
     handler.next(response);
@@ -60,15 +70,21 @@ class LoggingInterceptor extends Interceptor {
   void onError(DioException err, ErrorInterceptorHandler handler) {
     if (enabled) {
       final buffer = StringBuffer();
-      buffer.writeln('╔══════════════════════════════════════════════════════════');
+      buffer.writeln(
+        '╔══════════════════════════════════════════════════════════',
+      );
       buffer.writeln('║ ❌ ERROR');
-      buffer.writeln('║ ${err.requestOptions.method} ${err.requestOptions.uri}');
+      buffer.writeln(
+        '║ ${err.requestOptions.method} ${err.requestOptions.uri}',
+      );
       buffer.writeln('║ Status: ${err.response?.statusCode}');
       buffer.writeln('║ Message: ${err.message}');
       if (err.response?.data != null) {
         buffer.writeln('║ Error Data: ${err.response?.data}');
       }
-      buffer.writeln('╚══════════════════════════════════════════════════════════');
+      buffer.writeln(
+        '╚══════════════════════════════════════════════════════════',
+      );
       _log(buffer.toString());
     }
     handler.next(err);

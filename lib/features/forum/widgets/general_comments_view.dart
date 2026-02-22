@@ -47,7 +47,10 @@ class GeneralCommentsView extends StatelessWidget {
 
                 // ========== HEADER ==========
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 8,
+                  ),
                   child: Row(
                     children: [
                       Expanded(
@@ -65,13 +68,16 @@ class GeneralCommentsView extends StatelessWidget {
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.close_rounded, color: AppColors.textSecondary),
+                        icon: const Icon(
+                          Icons.close_rounded,
+                          color: AppColors.textSecondary,
+                        ),
                         onPressed: () => Navigator.pop(context),
                       ),
                     ],
                   ),
                 ),
-                
+
                 // ========== COMMENTS LIST ==========
                 Expanded(
                   child: BlocBuilder<ForumCubit, ForumState>(
@@ -79,7 +85,7 @@ class GeneralCommentsView extends StatelessWidget {
                       if (state.isLoading && state.comments.isEmpty) {
                         return const Center(child: CircularProgressIndicator());
                       }
-                      
+
                       final comments = state.comments;
 
                       if (comments.isEmpty) {
@@ -89,7 +95,7 @@ class GeneralCommentsView extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Icon(
-                                  Icons.chat_bubble_outline_rounded, 
+                                  Icons.chat_bubble_outline_rounded,
                                   size: 32, // Reduced from 48
                                   color: AppColors.borderMedium,
                                 ),
@@ -103,7 +109,9 @@ class GeneralCommentsView extends StatelessWidget {
                                 const SizedBox(height: 4), // Reduced from 8
                                 Text(
                                   'Tap below to start one',
-                                  style: AppTextStyles.caption.copyWith(color: AppColors.textTertiary),
+                                  style: AppTextStyles.caption.copyWith(
+                                    color: AppColors.textTertiary,
+                                  ),
                                 ),
                               ],
                             ),
@@ -124,7 +132,7 @@ class GeneralCommentsView extends StatelessWidget {
                 ReplyInputFieldForModal(
                   isGeneral: true,
                   postId: post.id,
-                ), 
+                ),
               ],
             ),
           ),
@@ -133,14 +141,19 @@ class GeneralCommentsView extends StatelessWidget {
     );
   }
 
-  List<Widget> _buildThreadedComments(BuildContext context, List<ForumComment> allComments) {
+  List<Widget> _buildThreadedComments(
+    BuildContext context,
+    List<ForumComment> allComments,
+  ) {
     // 1. Group by parentLocalId (backend returns parent_comment_id as string, which maps to localId)
     // We need to ensure we map properly.
     final Map<String?, List<ForumComment>> grouped = {};
     for (final comment in allComments) {
       // Backend's parent_comment_id now matches our localId (UUID or legacy ID string)
       final pid = comment.parentCommentId;
-      grouped.containsKey(pid) ? grouped[pid]!.add(comment) : grouped[pid] = [comment];
+      grouped.containsKey(pid)
+          ? grouped[pid]!.add(comment)
+          : grouped[pid] = [comment];
     }
 
     // 2. Recursive builder
@@ -157,8 +170,13 @@ class GeneralCommentsView extends StatelessWidget {
               future: context.read<ForumCubit>().getCurrentUserId(),
               builder: (context, snapshot) {
                 final userId = snapshot.data ?? '';
-                final isClinician = comment.authorRole.toLowerCase().contains('clinician');
-                final isExpert = isClinician || comment.authorRole.toLowerCase().contains('healthcare') || comment.authorRole.toLowerCase().contains('support');
+                final isClinician = comment.authorRole.toLowerCase().contains(
+                  'clinician',
+                );
+                final isExpert =
+                    isClinician ||
+                    comment.authorRole.toLowerCase().contains('healthcare') ||
+                    comment.authorRole.toLowerCase().contains('support');
 
                 return CommentCard(
                   authorName: comment.authorName,
@@ -176,8 +194,13 @@ class GeneralCommentsView extends StatelessWidget {
                   roleIcon: _getRoleIcon(comment.authorRole),
                   onLike: () {
                     // Use id (preferring non-empty) for the like action, backend resolves both
-                    final idToUse = comment.id.isNotEmpty ? comment.id : comment.localId;
-                    context.read<ForumCubit>().toggleCommentLike(idToUse, isLineComment: false);
+                    final idToUse = comment.id.isNotEmpty
+                        ? comment.id
+                        : comment.localId;
+                    context.read<ForumCubit>().toggleCommentLike(
+                      idToUse,
+                      isLineComment: false,
+                    );
                   },
                   onReply: () {
                     context.read<ForumCubit>().setReplyingTo(
@@ -190,7 +213,8 @@ class GeneralCommentsView extends StatelessWidget {
                     );
                   },
                   onEdit: () => _showEditCommentDialog(context, comment),
-                  onDelete: () => _showDeleteCommentDialog(context, comment.localId),
+                  onDelete: () =>
+                      _showDeleteCommentDialog(context, comment.localId),
                 );
               },
             ),
@@ -198,7 +222,14 @@ class GeneralCommentsView extends StatelessWidget {
         );
 
         if (depth == 0) {
-          items.add(const Divider(height: 1, indent: 20, endIndent: 20, color: AppColors.borderLight));
+          items.add(
+            const Divider(
+              height: 1,
+              indent: 20,
+              endIndent: 20,
+              color: AppColors.borderLight,
+            ),
+          );
         }
 
         // Recursive call using the current comment's localId as the parentId for children

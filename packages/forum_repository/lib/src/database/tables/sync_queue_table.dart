@@ -17,7 +17,9 @@ class SyncQueue extends Table {
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get lastAttempt => dateTime().nullable()();
   IntColumn get retryCount => integer().withDefault(const Constant(0))();
-  TextColumn get status => text().withDefault(const Constant('pending'))(); // 'pending', 'syncing', 'failed'
+  TextColumn get status => text().withDefault(
+    const Constant('pending'),
+  )(); // 'pending', 'syncing', 'failed'
 
   // Exponential backoff
   DateTimeColumn get nextRetryAt => dateTime().nullable()();

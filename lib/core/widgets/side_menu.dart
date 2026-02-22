@@ -42,15 +42,16 @@ class SideMenu extends StatelessWidget {
                       route: AppRouter.chat,
                       isPrimary: true,
                     ),
-                     _buildNavItem(
+                    _buildNavItem(
                       context,
                       label: 'History',
-                      icon: null, // Text only for secondary items if possible, or very subtle icon
+                      icon:
+                          null, // Text only for secondary items if possible, or very subtle icon
                       onTap: () => _showComingSoon(context, 'History'),
                     ),
                     const SizedBox(height: 24),
                     _buildNavSection('DISCOVER'),
-                     _buildNavItem(
+                    _buildNavItem(
                       context,
                       label: 'Med Scanner',
                       icon: null,
@@ -123,22 +124,29 @@ class SideMenu extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: onTap ?? () {
-          if (Scaffold.of(context).hasDrawer && Scaffold.of(context).isDrawerOpen) {
-             Navigator.pop(context);
-          }
-          if (route != null && !isSelected) {
-            AppRouter.replaceTo(context, route);
-          }
-        },
+        onTap:
+            onTap ??
+            () {
+              if (Scaffold.of(context).hasDrawer &&
+                  Scaffold.of(context).isDrawerOpen) {
+                Navigator.pop(context);
+              }
+              if (route != null && !isSelected) {
+                AppRouter.replaceTo(context, route);
+              }
+            },
         borderRadius: BorderRadius.circular(12),
         child: Container(
           width: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
           decoration: BoxDecoration(
-            color: isSelected ? AppColors.backgroundElevated : Colors.transparent,
+            color: isSelected
+                ? AppColors.backgroundElevated
+                : Colors.transparent,
             borderRadius: BorderRadius.circular(12),
-            border: isSelected ? Border.all(color: AppColors.borderLight, width: 1.0) : null,
+            border: isSelected
+                ? Border.all(color: AppColors.borderLight, width: 1.0)
+                : null,
           ),
           child: Row(
             children: [
@@ -146,18 +154,29 @@ class SideMenu extends StatelessWidget {
                 Icon(
                   icon,
                   size: 20,
-                  color: isPrimary ? AppColors.accentPrimary : (isSelected ? AppColors.textPrimary : AppColors.textSecondary),
+                  color: isPrimary
+                      ? AppColors.accentPrimary
+                      : (isSelected
+                            ? AppColors.textPrimary
+                            : AppColors.textSecondary),
                 ),
                 const SizedBox(width: 12),
               ],
               Text(
                 label,
-                style: isPrimary 
-                  ? AppTextStyles.labelLarge.copyWith(color: AppColors.accentPrimary, fontWeight: FontWeight.w700)
-                  : AppTextStyles.bodyMedium.copyWith(
-                      color: isSelected ? AppColors.textPrimary : AppColors.textSecondary,
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                    ),
+                style: isPrimary
+                    ? AppTextStyles.labelLarge.copyWith(
+                        color: AppColors.accentPrimary,
+                        fontWeight: FontWeight.w700,
+                      )
+                    : AppTextStyles.bodyMedium.copyWith(
+                        color: isSelected
+                            ? AppColors.textPrimary
+                            : AppColors.textSecondary,
+                        fontWeight: isSelected
+                            ? FontWeight.w600
+                            : FontWeight.w500,
+                      ),
               ),
             ],
           ),
@@ -168,7 +187,7 @@ class SideMenu extends StatelessWidget {
 
   Widget _buildFooter(BuildContext context) {
     final user = context.watch<AuthCubit>().state.user;
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -181,7 +200,9 @@ class SideMenu extends StatelessWidget {
             backgroundColor: AppColors.gray200,
             child: Text(
               (user?.displayName ?? 'U')[0].toUpperCase(),
-              style: AppTextStyles.labelMedium.copyWith(color: AppColors.textSecondary),
+              style: AppTextStyles.labelMedium.copyWith(
+                color: AppColors.textSecondary,
+              ),
             ),
           ),
           const SizedBox(width: 12),
@@ -197,7 +218,9 @@ class SideMenu extends StatelessWidget {
                 ),
                 Text(
                   'Free Plan', // Placeholder for "Plan" status common in Perplexity/NotebookLM
-                  style: AppTextStyles.caption.copyWith(color: AppColors.textTertiary),
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.textTertiary,
+                  ),
                 ),
               ],
             ),
@@ -205,11 +228,11 @@ class SideMenu extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.settings_outlined, size: 18),
             onPressed: () {
-               // Show settings or logout options
-               _showSignOutDialog(context);
+              // Show settings or logout options
+              _showSignOutDialog(context);
             },
             color: AppColors.textSecondary,
-          )
+          ),
         ],
       ),
     );
@@ -227,12 +250,12 @@ class SideMenu extends StatelessWidget {
             child: const Text('Cancel'),
           ),
           TextButton(
-             onPressed: () {
-               Navigator.pop(context);
-               context.read<AuthCubit>().signOut();
-               AppRouter.replaceTo(context, AppRouter.auth);
-             },
-             child: const Text('Sign Out', style: TextStyle(color: Colors.red)),
+            onPressed: () {
+              Navigator.pop(context);
+              context.read<AuthCubit>().signOut();
+              AppRouter.replaceTo(context, AppRouter.auth);
+            },
+            child: const Text('Sign Out', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -241,7 +264,10 @@ class SideMenu extends StatelessWidget {
 
   void _showComingSoon(BuildContext context, String feature) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$feature coming soon'), backgroundColor: AppColors.textPrimary),
+      SnackBar(
+        content: Text('$feature coming soon'),
+        backgroundColor: AppColors.textPrimary,
+      ),
     );
   }
 }

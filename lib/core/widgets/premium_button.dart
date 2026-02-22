@@ -22,7 +22,8 @@ class PremiumButton extends StatefulWidget {
   State<PremiumButton> createState() => _PremiumButtonState();
 }
 
-class _PremiumButtonState extends State<PremiumButton> with SingleTickerProviderStateMixin {
+class _PremiumButtonState extends State<PremiumButton>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
 
@@ -67,19 +68,23 @@ class _PremiumButtonState extends State<PremiumButton> with SingleTickerProvider
           height: 58,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(28),
-            color: isEnabled 
-                ? (widget.isSecondary ? AppColors.backgroundSurface : AppColors.accentPrimary)
+            color: isEnabled
+                ? (widget.isSecondary
+                      ? AppColors.backgroundSurface
+                      : AppColors.accentPrimary)
                 : AppColors.borderLight,
-            border: widget.isSecondary 
+            border: widget.isSecondary
                 ? Border.all(color: AppColors.borderLight, width: 1.5)
                 : null,
-            boxShadow: isEnabled ? [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.04),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ] : null,
+            boxShadow: isEnabled
+                ? [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ]
+                : null,
           ),
           child: Center(
             child: widget.isLoading
@@ -97,7 +102,9 @@ class _PremiumButtonState extends State<PremiumButton> with SingleTickerProvider
                       if (widget.icon != null) ...[
                         Icon(
                           widget.icon,
-                          color: widget.isSecondary ? AppColors.accentPrimary : Colors.white,
+                          color: widget.isSecondary
+                              ? AppColors.accentPrimary
+                              : Colors.white,
                           size: 20,
                         ),
                         const SizedBox(width: 8),
@@ -105,7 +112,9 @@ class _PremiumButtonState extends State<PremiumButton> with SingleTickerProvider
                       Text(
                         widget.text,
                         style: AppTextStyles.labelLarge.copyWith(
-                          color: widget.isSecondary ? AppColors.accentPrimary : Colors.white,
+                          color: widget.isSecondary
+                              ? AppColors.accentPrimary
+                              : Colors.white,
                           fontWeight: FontWeight.w700,
                           letterSpacing: 0.5,
                         ),

@@ -52,7 +52,10 @@ class AuthBody extends StatelessWidget {
         }
       },
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.xl),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.xl,
+        ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -81,10 +84,7 @@ class AuthBody extends StatelessWidget {
             Text(
               'Your personal medical assistant',
               style: AppTextStyles.bodyLarge.copyWith(
-                color: Theme.of(context)
-                    .colorScheme
-                    .onSurface
-                    .withOpacity(0.7),
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
               ),
               textAlign: TextAlign.center,
             ),
@@ -95,10 +95,7 @@ class AuthBody extends StatelessWidget {
             Text(
               'Sign in with your Google account to get started with personalized medical Q&A, community forums, and more.',
               style: AppTextStyles.bodyMedium.copyWith(
-                color: Theme.of(context)
-                    .colorScheme
-                    .onSurface
-                    .withOpacity(0.6),
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
               ),
               textAlign: TextAlign.center,
             ),
@@ -117,9 +114,9 @@ class AuthBody extends StatelessWidget {
                       onPressed: state.isLoading
                           ? null
                           : () {
-                        // Trigger Google Sign-In flow
-                        context.read<AuthCubit>().signInWithGoogle();
-                      },
+                              // Trigger Google Sign-In flow
+                              context.read<AuthCubit>().signInWithGoogle();
+                            },
                       isLoading: state.isLoading,
                     ),
 
@@ -169,10 +166,9 @@ class AuthBody extends StatelessWidget {
                   return Column(
                     children: [
                       Divider(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .outlineVariant
-                            .withOpacity(0.5),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.outlineVariant.withOpacity(0.5),
                       ),
                       const SizedBox(height: AppSpacing.md),
                       Text(
@@ -188,18 +184,21 @@ class AuthBody extends StatelessWidget {
                             onPressed: state.isLoading
                                 ? null
                                 : () {
-                              // Skip auth and go directly to chat (dev only)
-                              AppRouter.replaceTo(context, AppRouter.chat);
-                            },
+                                    // Skip auth and go directly to chat (dev only)
+                                    AppRouter.replaceTo(
+                                      context,
+                                      AppRouter.chat,
+                                    );
+                                  },
                             icon: const Icon(Icons.bug_report),
                             label: const Text('Skip Auth (Dev Only)'),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Theme.of(context)
-                                  .colorScheme
-                                  .errorContainer,
-                              foregroundColor: Theme.of(context)
-                                  .colorScheme
-                                  .onErrorContainer,
+                              backgroundColor: Theme.of(
+                                context,
+                              ).colorScheme.errorContainer,
+                              foregroundColor: Theme.of(
+                                context,
+                              ).colorScheme.onErrorContainer,
                             ),
                           );
                         },
@@ -222,14 +221,10 @@ class AuthBody extends StatelessWidget {
             const SizedBox(height: AppSpacing.xxl),
 
             // ============ Legal Disclaimer ============
-
             Text(
               'By continuing, you agree to our Terms of Service and Privacy Policy',
               style: AppTextStyles.labelSmall.copyWith(
-                color: Theme.of(context)
-                    .colorScheme
-                    .onSurface
-                    .withOpacity(0.5),
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
               ),
               textAlign: TextAlign.center,
             ),
@@ -240,10 +235,7 @@ class AuthBody extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(AppSpacing.md),
               decoration: BoxDecoration(
-                color: Theme.of(context)
-                    .colorScheme
-                    .primary
-                    .withOpacity(0.1),
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(

@@ -30,7 +30,8 @@ class User extends Equatable {
       displayName: json['display_name'] as String?,
       photoUrl: json['photo_url'] as String?,
       role: json['role'] as String?,
-      interests: (json['interests'] as List<dynamic>?)
+      interests:
+          (json['interests'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
           const [],
@@ -52,6 +53,13 @@ class User extends Equatable {
   }
 
   @override
-  List<Object?> get props =>
-      [id, email, displayName, photoUrl, role, interests, onboardingCompleted];
+  List<Object?> get props => [
+    id,
+    email,
+    displayName,
+    photoUrl,
+    role,
+    interests,
+    onboardingCompleted,
+  ];
 }

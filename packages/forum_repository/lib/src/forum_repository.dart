@@ -19,10 +19,10 @@ class ForumRepository {
   ForumRepository({
     required ApiClient apiClient,
     required ForumDatabase database,
-  })  : _apiClient = apiClient,
-        _database = database,
-        _syncManager = SyncManager(apiClient: apiClient, database: database),
-        _conflictResolver = ConflictResolver(database: database);
+  }) : _apiClient = apiClient,
+       _database = database,
+       _syncManager = SyncManager(apiClient: apiClient, database: database),
+       _conflictResolver = ConflictResolver(database: database);
 
   final ApiClient _apiClient;
   final ForumDatabase _database;
@@ -56,18 +56,24 @@ class ForumRepository {
     String? originalAnswerId,
   }) async {
     print('DEBUG: ForumRepository.createLocalPost - localId: $localId');
-    await _database.insertPost(ForumPostsCompanion.insert(
-      localId: localId,
-      authorId: authorId,
-      authorName: authorName,
-      title: title,
-      content: content,
-      createdAt: DateTime.now(),
-      syncStatus: const Value('pending'),
-      sources: Value(sources.isNotEmpty ? jsonEncode(sources.map((e) => e.toJson()).toList()) : null),
-      tags: Value(tags.isNotEmpty ? jsonEncode(tags) : null),
-      originalAnswerId: Value(originalAnswerId),
-    ));
+    await _database.insertPost(
+      ForumPostsCompanion.insert(
+        localId: localId,
+        authorId: authorId,
+        authorName: authorName,
+        title: title,
+        content: content,
+        createdAt: DateTime.now(),
+        syncStatus: const Value('pending'),
+        sources: Value(
+          sources.isNotEmpty
+              ? jsonEncode(sources.map((e) => e.toJson()).toList())
+              : null,
+        ),
+        tags: Value(tags.isNotEmpty ? jsonEncode(tags) : null),
+        originalAnswerId: Value(originalAnswerId),
+      ),
+    );
     print('DEBUG: ForumRepository.createLocalPost - SUCCESS');
   }
 
@@ -83,18 +89,20 @@ class ForumRepository {
     String? authorProfession,
   }) async {
     print('DEBUG: ForumRepository.createLocalComment - localId: $localId');
-    await _database.insertComment(ForumCommentsCompanion.insert(
-      localId: localId,
-      postId: postId,
-      authorId: authorId,
-      authorName: authorName,
-      authorRole: Value(authorRole),
-      authorProfession: Value(authorProfession),
-      content: content,
-      parentCommentId: Value(parentCommentId),
-      createdAt: DateTime.now(),
-      syncStatus: const Value('pending'),
-    ));
+    await _database.insertComment(
+      ForumCommentsCompanion.insert(
+        localId: localId,
+        postId: postId,
+        authorId: authorId,
+        authorName: authorName,
+        authorRole: Value(authorRole),
+        authorProfession: Value(authorProfession),
+        content: content,
+        parentCommentId: Value(parentCommentId),
+        createdAt: DateTime.now(),
+        syncStatus: const Value('pending'),
+      ),
+    );
     print('DEBUG: ForumRepository.createLocalComment - SUCCESS');
   }
 
@@ -108,7 +116,9 @@ class ForumRepository {
     required String entityId,
     required String action,
   }) async {
-    print('DEBUG: ForumRepository.addToSyncQueue - $entityType $action for $entityId');
+    print(
+      'DEBUG: ForumRepository.addToSyncQueue - $entityType $action for $entityId',
+    );
     await _database.addToSyncQueue(
       entityType: entityType,
       entityId: entityId,
@@ -191,7 +201,9 @@ class ForumRepository {
     try {
       final response = await _apiClient.get('/api/v1/forum/posts');
       final List<dynamic> postsJson = response.data['posts'] as List<dynamic>;
-      return postsJson.map((json) => ForumPost.fromJson(json as Map<String, dynamic>)).toList();
+      return postsJson
+          .map((json) => ForumPost.fromJson(json as Map<String, dynamic>))
+          .toList();
     } catch (e) {
       throw ForumException('Failed to fetch posts: ${e.toString()}');
     }
@@ -200,23 +212,33 @@ class ForumRepository {
   /// Search for posts
   Future<List<ForumPost>> searchPosts(String query) async {
     try {
-      final response = await _apiClient.get('/api/v1/forum/search', queryParameters: {'q': query});
+      final response = await _apiClient.get(
+        '/api/v1/forum/search',
+        queryParameters: {'q': query},
+      );
       final List<dynamic> postsJson = response.data['posts'] as List<dynamic>;
-      return postsJson.map((json) => ForumPost.fromJson(json as Map<String, dynamic>)).toList();
+      return postsJson
+          .map((json) => ForumPost.fromJson(json as Map<String, dynamic>))
+          .toList();
     } catch (e) {
       throw ForumException('Failed to search posts: ${e.toString()}');
     }
   }
 
   /// Search for posts by similarity (Vector Search)
-  Future<List<ForumPost>> searchSimilarPosts(String text, {int limit = 5}) async {
+  Future<List<ForumPost>> searchSimilarPosts(
+    String text, {
+    int limit = 5,
+  }) async {
     try {
       final response = await _apiClient.post(
         '/api/v1/forum/recommendations/posts',
         data: {'text': text, 'limit': limit},
       );
       final List<dynamic> postsJson = response.data as List<dynamic>;
-      return postsJson.map((json) => ForumPost.fromJson(json as Map<String, dynamic>)).toList();
+      return postsJson
+          .map((json) => ForumPost.fromJson(json as Map<String, dynamic>))
+          .toList();
     } catch (e) {
       print('DEBUG: searchSimilarPosts failed: $e');
       return []; // Return empty list on failure rather than throwing for UI resilience
@@ -275,14 +297,19 @@ class ForumRepository {
     } catch (e) {
       // Fallback to simple title
       return {
-        'title': 'Discussion on: ${query.length > 40 ? '${query.substring(0, 40)}...' : query}',
+        'title':
+            'Discussion on: ${query.length > 40 ? '${query.substring(0, 40)}...' : query}',
         'content': content,
       };
     }
   }
 
   /// Toggle like on post
-  Future<void> togglePostLike(String postId, {bool? isLiked, int? likeCount}) async {
+  Future<void> togglePostLike(
+    String postId, {
+    bool? isLiked,
+    int? likeCount,
+  }) async {
     try {
       // 1. Update local database immediately for resilience
       if (isLiked != null && likeCount != null) {
@@ -292,14 +319,16 @@ class ForumRepository {
           likeCount: likeCount,
         );
       }
-      
+
       // 2. Hit API
-      final response = await _apiClient.post('/api/v1/forum/posts/$postId/like');
-      
+      final response = await _apiClient.post(
+        '/api/v1/forum/posts/$postId/like',
+      );
+
       if (response.statusCode == 200) {
         final serverLiked = response.data['liked'] as bool;
         final serverCount = response.data['like_count'] as int;
-        
+
         // 3. Sync with actual server state
         await _database.updatePostLike(
           postId: postId,
@@ -313,9 +342,12 @@ class ForumRepository {
   }
 
   /// Toggle like on comment
-  Future<void> toggleCommentLike(String commentId, {required bool isLineComment}) async {
+  Future<void> toggleCommentLike(
+    String commentId, {
+    required bool isLineComment,
+  }) async {
     try {
-      final path = isLineComment 
+      final path = isLineComment
           ? '/api/v1/forum/lines/comments/$commentId/like'
           : '/api/v1/forum/comments/$commentId/like';
       await _apiClient.post(path);
@@ -346,62 +378,82 @@ class ForumRepository {
   // ============================================================
   // LINE-LEVEL FORUM (NEW FEATURE)
   // ============================================================
-  
+
   // Use real backend now
-  final bool _useMock = false; 
+  final bool _useMock = false;
 
   /// Get or create lines for a general forum post
   Future<List<ForumAnswerLine>> getLinesForPost(String postId) async {
     // 1. Try server first for counts
     try {
       print('DEBUG: Fetching lines for post $postId from server...');
-      final response = await _apiClient.get('/api/v1/forum/posts/$postId/lines');
+      final response = await _apiClient.get(
+        '/api/v1/forum/posts/$postId/lines',
+      );
       final list = response.data['lines'] as List;
-      
+
       print('DEBUG: Server returned ${list.length} lines');
       for (var lineJson in list) {
-        print('DEBUG: Server line ${lineJson['line_id']}: commentCount = ${lineJson['comment_count']}');
+        print(
+          'DEBUG: Server line ${lineJson['line_id']}: commentCount = ${lineJson['comment_count']}',
+        );
       }
-      
-      final lines = list.map((e) => ForumAnswerLine.fromJson(e as Map<String, dynamic>)).toList();
-      
+
+      final lines = list
+          .map((e) => ForumAnswerLine.fromJson(e as Map<String, dynamic>))
+          .toList();
+
       print('DEBUG: Parsed ${lines.length} ForumAnswerLine objects');
       for (var line in lines) {
-        print('DEBUG: Parsed line ${line.lineId}: commentCount = ${line.commentCount}');
+        print(
+          'DEBUG: Parsed line ${line.lineId}: commentCount = ${line.commentCount}',
+        );
       }
 
       // 2. Update local cache
       final serverPostId = int.tryParse(postId);
       if (serverPostId != null) {
-        await _database.batchInsertLines(lines.map((l) => ForumAnswerLinesCompanion.insert(
-          lineId: l.lineId,
-          postId: Value(serverPostId),
-          lineNumber: l.lineNumber,
-          textContent: l.text,
-          discussionTitle: Value(l.discussionTitle),
-          commentCount: Value(l.commentCount),
-        )).toList());
+        await _database.batchInsertLines(
+          lines
+              .map(
+                (l) => ForumAnswerLinesCompanion.insert(
+                  lineId: l.lineId,
+                  postId: Value(serverPostId),
+                  lineNumber: l.lineNumber,
+                  textContent: l.text,
+                  discussionTitle: Value(l.discussionTitle),
+                  commentCount: Value(l.commentCount),
+                ),
+              )
+              .toList(),
+        );
       }
-      
+
       print('DEBUG: Updated local cache with ${lines.length} lines');
 
       return lines;
     } catch (e) {
-      print('DEBUG: getLinesForPost - server failed, falling back to local: $e');
+      print(
+        'DEBUG: getLinesForPost - server failed, falling back to local: $e',
+      );
       // 3. Fallback to local cache
       final intId = int.tryParse(postId);
       if (intId == null) rethrow; // Can't fallback if it's not an int ID
 
       final localLines = await _database.getLinesForPost(intId);
       if (localLines.isNotEmpty) {
-        return localLines.map((l) => ForumAnswerLine(
-          lineId: l.lineId,
-          answerId: l.answerId ?? '',
-          lineNumber: l.lineNumber,
-          text: l.textContent,
-          discussionTitle: l.discussionTitle ?? '',
-          commentCount: l.commentCount,
-        )).toList();
+        return localLines
+            .map(
+              (l) => ForumAnswerLine(
+                lineId: l.lineId,
+                answerId: l.answerId ?? '',
+                lineNumber: l.lineNumber,
+                text: l.textContent,
+                discussionTitle: l.discussionTitle ?? '',
+                commentCount: l.commentCount,
+              ),
+            )
+            .toList();
       }
       rethrow;
     }
@@ -417,32 +469,46 @@ class ForumRepository {
         data: {'answer_id': answerId, 'share_to_forum': true},
       );
       final list = response.data['lines'] as List;
-      final lines = list.map((e) => ForumAnswerLine.fromJson(e as Map<String, dynamic>)).toList();
+      final lines = list
+          .map((e) => ForumAnswerLine.fromJson(e as Map<String, dynamic>))
+          .toList();
 
       // 2. Update local cache
-      await _database.batchInsertLines(lines.map((l) => ForumAnswerLinesCompanion.insert(
-        lineId: l.lineId,
-        answerId: Value(l.answerId),
-        lineNumber: l.lineNumber,
-        textContent: l.text,
-        discussionTitle: Value(l.discussionTitle),
-        commentCount: Value(l.commentCount),
-      )).toList());
+      await _database.batchInsertLines(
+        lines
+            .map(
+              (l) => ForumAnswerLinesCompanion.insert(
+                lineId: l.lineId,
+                answerId: Value(l.answerId),
+                lineNumber: l.lineNumber,
+                textContent: l.text,
+                discussionTitle: Value(l.discussionTitle),
+                commentCount: Value(l.commentCount),
+              ),
+            )
+            .toList(),
+      );
 
       return lines;
     } catch (e) {
-      print('DEBUG: getLinesForAnswer - server failed, falling back to local: $e');
+      print(
+        'DEBUG: getLinesForAnswer - server failed, falling back to local: $e',
+      );
       // 3. Fallback to local cache
       final localLines = await _database.getLinesForAnswer(answerId);
       if (localLines.isNotEmpty) {
-        return localLines.map((l) => ForumAnswerLine(
-          lineId: l.lineId,
-          answerId: l.answerId ?? '',
-          lineNumber: l.lineNumber,
-          text: l.textContent,
-          discussionTitle: l.discussionTitle ?? '',
-          commentCount: l.commentCount,
-        )).toList();
+        return localLines
+            .map(
+              (l) => ForumAnswerLine(
+                lineId: l.lineId,
+                answerId: l.answerId ?? '',
+                lineNumber: l.lineNumber,
+                text: l.textContent,
+                discussionTitle: l.discussionTitle ?? '',
+                commentCount: l.commentCount,
+              ),
+            )
+            .toList();
       }
       rethrow;
     }
@@ -463,29 +529,41 @@ class ForumRepository {
         },
       );
       final list = response.data['comments'] as List;
-      final comments = list.map((e) => ForumLineComment.fromJson(e as Map<String, dynamic>)).toList();
+      final comments = list
+          .map((e) => ForumLineComment.fromJson(e as Map<String, dynamic>))
+          .toList();
 
       // 2. Update local cache (batch insert)
-      await _database.batchInsertLineComments(comments.map((c) => ForumLineCommentsCompanion.insert(
-        localId: c.id,
-        serverId: Value(c.id),
-        lineId: c.lineId,
-        authorId: c.authorId,
-        authorName: c.authorName,
-        authorRole: c.authorRole.name,
-        commentType: c.commentType.name,
-        content: c.text,
-        createdAt: c.createdAt,
-        syncStatus: const Value('synced'),
-      )).toList());
+      await _database.batchInsertLineComments(
+        comments
+            .map(
+              (c) => ForumLineCommentsCompanion.insert(
+                localId: c.id,
+                serverId: Value(c.id),
+                lineId: c.lineId,
+                authorId: c.authorId,
+                authorName: c.authorName,
+                authorRole: c.authorRole.name,
+                commentType: c.commentType.name,
+                content: c.text,
+                createdAt: c.createdAt,
+                syncStatus: const Value('synced'),
+              ),
+            )
+            .toList(),
+      );
 
       return comments;
     } catch (e) {
-      print('DEBUG: getCommentsForLine - server failed, falling back to local: $e');
+      print(
+        'DEBUG: getCommentsForLine - server failed, falling back to local: $e',
+      );
       // 3. Fallback to local cache
       final localComments = await _database.getCommentsForLine(lineId);
       if (localComments.isNotEmpty) {
-        return localComments.map((c) => ForumLineComment.fromDatabase(c)).toList();
+        return localComments
+            .map((c) => ForumLineComment.fromDatabase(c))
+            .toList();
       }
       rethrow;
     }
@@ -525,23 +603,27 @@ class ForumRepository {
           if (parentCommentId != null) 'parent_comment_id': parentCommentId,
         },
       );
-      final comment = ForumLineComment.fromJson(response.data as Map<String, dynamic>);
-      
+      final comment = ForumLineComment.fromJson(
+        response.data as Map<String, dynamic>,
+      );
+
       // Save locally as well
-      await _database.insertLineComment(ForumLineCommentsCompanion.insert(
-        localId: comment.id,
-        serverId: Value(comment.id),
-        lineId: comment.lineId,
-        authorId: comment.authorId,
-        authorName: comment.authorName,
-        authorRole: comment.authorRole.name,
-        commentType: comment.commentType.name,
-        content: comment.text,
-        parentCommentId: Value(comment.parentCommentId),
-        createdAt: comment.createdAt,
-        syncStatus: const Value('synced'),
-      ));
-      
+      await _database.insertLineComment(
+        ForumLineCommentsCompanion.insert(
+          localId: comment.id,
+          serverId: Value(comment.id),
+          lineId: comment.lineId,
+          authorId: comment.authorId,
+          authorName: comment.authorName,
+          authorRole: comment.authorRole.name,
+          commentType: comment.commentType.name,
+          content: comment.text,
+          parentCommentId: Value(comment.parentCommentId),
+          createdAt: comment.createdAt,
+          syncStatus: const Value('synced'),
+        ),
+      );
+
       // Update the comment count in the local database
       await _database.incrementLineCommentCount(comment.lineId);
 
@@ -598,22 +680,26 @@ class ForumRepository {
           if (parentCommentId != null) 'parent_comment_id': parentCommentId,
         },
       );
-      
-      final comment = ForumComment.fromJson(response.data as Map<String, dynamic>);
-      
+
+      final comment = ForumComment.fromJson(
+        response.data as Map<String, dynamic>,
+      );
+
       // Save locally
-      await _database.insertComment(ForumCommentsCompanion.insert(
-        localId: comment.localId,
-        serverId: Value(comment.id),
-        postId: postId,
-        authorId: comment.authorId,
-        authorName: comment.authorName,
-        content: comment.content,
-        parentCommentId: Value(comment.parentCommentId),
-        createdAt: comment.createdAt,
-        syncStatus: const Value('synced'),
-      ));
-      
+      await _database.insertComment(
+        ForumCommentsCompanion.insert(
+          localId: comment.localId,
+          serverId: Value(comment.id),
+          postId: postId,
+          authorId: comment.authorId,
+          authorName: comment.authorName,
+          content: comment.content,
+          parentCommentId: Value(comment.parentCommentId),
+          createdAt: comment.createdAt,
+          syncStatus: const Value('synced'),
+        ),
+      );
+
       return comment;
     } catch (e) {
       throw ForumException('Failed to post comment: ${e.toString()}');
@@ -647,16 +733,21 @@ class ForumRepository {
     final r = role.toLowerCase();
     if (r == 'clinician') return CommentRole.clinician;
     if (r == 'mother') return CommentRole.mother;
-    if (r == 'support_partner' || r == 'supportpartner') return CommentRole.supportPartner;
+    if (r == 'support_partner' || r == 'supportpartner')
+      return CommentRole.supportPartner;
     return CommentRole.community;
   }
 
   SyncStatus _parseSyncStatus(String status) {
     switch (status) {
-      case 'synced': return SyncStatus.synced;
-      case 'pending': return SyncStatus.pending;
-      case 'syncing': return SyncStatus.syncing;
-      default: return SyncStatus.error;
+      case 'synced':
+        return SyncStatus.synced;
+      case 'pending':
+        return SyncStatus.pending;
+      case 'syncing':
+        return SyncStatus.syncing;
+      default:
+        return SyncStatus.error;
     }
   }
 
@@ -668,7 +759,8 @@ class ForumRepository {
         lineId: '${answerId}_L1',
         answerId: answerId,
         lineNumber: 1,
-        text: 'Paracetamol is generally considered safe during pregnancy when used as directed.',
+        text:
+            'Paracetamol is generally considered safe during pregnancy when used as directed.',
         discussionTitle: 'Paracetamol Safety',
         commentCount: 3,
       ),
@@ -684,7 +776,8 @@ class ForumRepository {
         lineId: '${answerId}_L3',
         answerId: answerId,
         lineNumber: 3,
-        text: 'High doses may increase the risk of hepatotoxicity, though standard dosing is safe.',
+        text:
+            'High doses may increase the risk of hepatotoxicity, though standard dosing is safe.',
         discussionTitle: 'Hepatotoxicity Risk',
         commentCount: 5,
       ),
@@ -710,7 +803,8 @@ class ForumRepository {
         authorRole: CommentRole.clinician,
         authorProfession: 'Midwife',
         commentType: CommentType.clinical,
-        text: 'This is accurate for first and second trimester. Third trimester dosing may differ slightly.',
+        text:
+            'This is accurate for first and second trimester. Third trimester dosing may differ slightly.',
         createdAt: DateTime.now().subtract(const Duration(hours: 2)),
       ),
       ForumLineComment(
@@ -722,7 +816,8 @@ class ForumRepository {
         authorRole: CommentRole.mother,
         authorProfession: 'Patient',
         commentType: CommentType.experience,
-        text: 'I used it during my 28th week and it really helped with the migraines.',
+        text:
+            'I used it during my 28th week and it really helped with the migraines.',
         createdAt: DateTime.now().subtract(const Duration(minutes: 45)),
       ),
       ForumLineComment(
@@ -733,7 +828,8 @@ class ForumRepository {
         authorName: 'Health Council',
         authorRole: CommentRole.clinician,
         commentType: CommentType.evidence,
-        text: 'Large systematic reviews support the safety profile described here.',
+        text:
+            'Large systematic reviews support the safety profile described here.',
         createdAt: DateTime.now().subtract(const Duration(days: 1)),
       ),
       ForumLineComment(
@@ -744,22 +840,34 @@ class ForumRepository {
         authorName: 'Kwame',
         authorRole: CommentRole.community,
         commentType: CommentType.concern,
-        text: 'What about the potential link to childhood asthma? Some studies suggest caution.',
+        text:
+            'What about the potential link to childhood asthma? Some studies suggest caution.',
         createdAt: DateTime.now().subtract(const Duration(hours: 5)),
       ),
     ];
 
     if (filter == 'all') return allComments;
-    return allComments.where((c) => c.authorRole.toString().contains(filter) || c.commentType.toString().contains(filter)).toList();
+    return allComments
+        .where(
+          (c) =>
+              c.authorRole.toString().contains(filter) ||
+              c.commentType.toString().contains(filter),
+        )
+        .toList();
   }
 
   CommentType _parseCommentType(String type) {
     switch (type) {
-      case 'clinical': return CommentType.clinical;
-      case 'evidence': return CommentType.evidence;
-      case 'experience': return CommentType.experience;
-      case 'concern': return CommentType.concern;
-      default: return CommentType.general;
+      case 'clinical':
+        return CommentType.clinical;
+      case 'evidence':
+        return CommentType.evidence;
+      case 'experience':
+        return CommentType.experience;
+      case 'concern':
+        return CommentType.concern;
+      default:
+        return CommentType.general;
     }
   }
 
@@ -780,29 +888,32 @@ class ForumRepository {
   /// Seed demo data for testing
   Future<void> seedDemoData() async {
     // await _database.deleteAllPosts(); // Optional: clear old data
-    
+
     await createLocalPost(
       localId: 'demo_1',
       title: 'Is Paracetamol safe during 3rd trimester?',
-      content: 'I have heard mixed things about taking paracetamol late in pregnancy. My doctor said it is fine for high fever, but I am worried about asthma risks. Has anyone looked at the latest studies?',
+      content:
+          'I have heard mixed things about taking paracetamol late in pregnancy. My doctor said it is fine for high fever, but I am worried about asthma risks. Has anyone looked at the latest studies?',
       authorId: 'u_demo_1',
       authorName: 'Sarah K.',
       tags: ['Pregnancy', 'Medication', 'Safety'],
     );
-    
+
     await createLocalPost(
       localId: 'demo_2',
       title: 'Alternative pain relief options',
-      content: 'Apart from paracetamol, what are safe natural remedies for headaches? I am trying to avoid pharmaceuticals if possible during my first trimester.',
+      content:
+          'Apart from paracetamol, what are safe natural remedies for headaches? I am trying to avoid pharmaceuticals if possible during my first trimester.',
       authorId: 'u_demo_2',
       authorName: 'Ama',
       tags: ['Pregnancy', 'Natural', 'PainRelief'],
     );
-    
+
     await createLocalPost(
       localId: 'demo_3',
       title: 'Paracetamol dosing for infants',
-      content: 'Changing topics slightly - what is the correct dosage calculation for a 6-month-old? The bottle is confusing.',
+      content:
+          'Changing topics slightly - what is the correct dosage calculation for a 6-month-old? The bottle is confusing.',
       authorId: 'u_demo_3',
       authorName: 'Kwame',
       tags: ['Medication', 'Pediatrics', 'Dosage'],

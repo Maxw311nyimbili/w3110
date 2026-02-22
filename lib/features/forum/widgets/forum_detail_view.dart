@@ -58,7 +58,7 @@ class ForumDetailView extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              
+
               // Author Info (Byline style)
               Row(
                 children: [
@@ -66,7 +66,9 @@ class ForumDetailView extends StatelessWidget {
                     radius: 14,
                     backgroundColor: AppColors.accentPrimary.withOpacity(0.08),
                     child: Text(
-                      post.authorName.isNotEmpty ? post.authorName[0].toUpperCase() : '?',
+                      post.authorName.isNotEmpty
+                          ? post.authorName[0].toUpperCase()
+                          : '?',
                       style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
@@ -87,7 +89,9 @@ class ForumDetailView extends StatelessWidget {
                       ),
                       Text(
                         _formatTime(post.createdAt),
-                        style: AppTextStyles.caption.copyWith(color: AppColors.textTertiary),
+                        style: AppTextStyles.caption.copyWith(
+                          color: AppColors.textTertiary,
+                        ),
                       ),
                     ],
                   ),
@@ -99,31 +103,38 @@ class ForumDetailView extends StatelessWidget {
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
-                  children: post.tags.map((tag) => Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: AppColors.accentPrimary.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      '#$tag',
-                      style: AppTextStyles.labelSmall.copyWith(
-                        color: AppColors.accentPrimary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  )).toList(),
+                  children: post.tags
+                      .map(
+                        (tag) => Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.accentPrimary.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            '#$tag',
+                            style: AppTextStyles.labelSmall.copyWith(
+                              color: AppColors.accentPrimary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      )
+                      .toList(),
                 ),
               ],
               const SizedBox(height: 24),
-              
+
               // Thread Summary Header - Shows consensus, expert count, and depth
               ThreadSummaryHeader(
                 post: post,
                 comments: state.displayComments,
               ),
               const SizedBox(height: 24),
-              
+
               // Content with Line-Level Discussion
               if (state.answerLines.isNotEmpty)
                 Padding(
@@ -137,21 +148,25 @@ class ForumDetailView extends StatelessWidget {
                   ),
                 ),
               _buildInteractiveContent(context, state),
-              
+
               const SizedBox(height: 48),
-              
+
               // Sources Section
               if (post.sources.isNotEmpty) ...[
                 Text(
                   'Sources',
-                  style: AppTextStyles.labelLarge.copyWith(fontWeight: FontWeight.w800),
+                  style: AppTextStyles.labelLarge.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
                 const SizedBox(height: 12),
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   physics: const BouncingScrollPhysics(),
                   child: Row(
-                    children: post.sources.map((source) => _buildSourceCard(source)).toList(),
+                    children: post.sources
+                        .map((source) => _buildSourceCard(source))
+                        .toList(),
                   ),
                 ),
                 const SizedBox(height: 40),
@@ -161,10 +176,13 @@ class ForumDetailView extends StatelessWidget {
               Builder(
                 builder: (context) {
                   // Safe handling: filter posts that share tags, exclude current
-                  final relatedPosts = state.displayPosts.where((p) {
-                    if (p.id == post.id) return false;
-                    return p.tags.any((t) => post.tags.contains(t));
-                  }).take(3).toList();
+                  final relatedPosts = state.displayPosts
+                      .where((p) {
+                        if (p.id == post.id) return false;
+                        return p.tags.any((t) => post.tags.contains(t));
+                      })
+                      .take(3)
+                      .toList();
 
                   if (relatedPosts.isEmpty) return const SizedBox.shrink();
 
@@ -173,57 +191,74 @@ class ForumDetailView extends StatelessWidget {
                     children: [
                       Text(
                         'Related Discussions',
-                        style: AppTextStyles.labelLarge.copyWith(fontWeight: FontWeight.w800),
+                        style: AppTextStyles.labelLarge.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
                       const SizedBox(height: 16),
-                      ...relatedPosts.map((related) => Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: InkWell(
-                          onTap: () => context.read<ForumCubit>().selectPost(related),
-                          borderRadius: BorderRadius.circular(12),
-                          child: Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: AppColors.borderLight),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        related.title,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: AppTextStyles.labelMedium.copyWith(fontWeight: FontWeight.bold),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        related.content,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
-                                      ),
-                                    ],
-                                  ),
+                      ...relatedPosts.map(
+                        (related) => Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: InkWell(
+                            onTap: () =>
+                                context.read<ForumCubit>().selectPost(related),
+                            borderRadius: BorderRadius.circular(12),
+                            child: Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: AppColors.borderLight,
                                 ),
-                                const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppColors.textTertiary),
-                              ],
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          related.title,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: AppTextStyles.labelMedium
+                                              .copyWith(
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          related.content,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: AppTextStyles.caption.copyWith(
+                                            color: AppColors.textSecondary,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const Icon(
+                                    Icons.arrow_forward_ios_rounded,
+                                    size: 14,
+                                    color: AppColors.textTertiary,
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      )),
+                      ),
                       const SizedBox(height: 40),
                     ],
                   );
-                }
+                },
               ),
 
               const Divider(color: AppColors.borderLight),
               const SizedBox(height: 24),
-              
+
               // Engagement Metrics (Bottom)
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -232,11 +267,16 @@ class ForumDetailView extends StatelessWidget {
                     children: [
                       _buildAction(
                         context,
-                        post.isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                        post.isLiked
+                            ? Icons.favorite_rounded
+                            : Icons.favorite_border_rounded,
                         post.likeCount.toString(),
                         isActive: post.isLiked,
                         onTap: () {
-                          final authStatus = context.read<AuthCubit>().state.status;
+                          final authStatus = context
+                              .read<AuthCubit>()
+                              .state
+                              .status;
                           if (authStatus != AuthStatus.authenticated) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
@@ -290,9 +330,10 @@ class ForumDetailView extends StatelessWidget {
       children: state.answerLines.map((line) {
         final isSelected = state.selectedLineId == line.lineId;
         final hasExpertActivity = line.commentCount > 0;
-        
+
         return GestureDetector(
-          onTap: () => context.read<ForumCubit>().toggleLineSelection(line.lineId),
+          onTap: () =>
+              context.read<ForumCubit>().toggleLineSelection(line.lineId),
           child: Padding(
             padding: const EdgeInsets.only(bottom: 8),
             child: isSelected
@@ -409,12 +450,19 @@ class ForumDetailView extends StatelessWidget {
           children: [
             Row(
               children: [
-                const Icon(Icons.link_rounded, size: 14, color: AppColors.accentPrimary),
+                const Icon(
+                  Icons.link_rounded,
+                  size: 14,
+                  color: AppColors.accentPrimary,
+                ),
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
                     Uri.parse(source.url).host.replaceAll('www.', ''),
-                    style: AppTextStyles.caption.copyWith(color: AppColors.textTertiary, fontWeight: FontWeight.w600),
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.textTertiary,
+                      fontWeight: FontWeight.w600,
+                    ),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -425,7 +473,9 @@ class ForumDetailView extends StatelessWidget {
               source.title,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: AppTextStyles.labelMedium.copyWith(fontWeight: FontWeight.bold),
+              style: AppTextStyles.labelMedium.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ],
         ),
@@ -434,11 +484,12 @@ class ForumDetailView extends StatelessWidget {
   }
 
   Widget _buildAction(
-    BuildContext context, 
-    IconData icon, 
-    String label, 
-    {bool isActive = false, VoidCallback? onTap}
-  ) {
+    BuildContext context,
+    IconData icon,
+    String label, {
+    bool isActive = false,
+    VoidCallback? onTap,
+  }) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),
@@ -462,7 +513,10 @@ class ForumDetailView extends StatelessWidget {
     );
   }
 
-  void _showLineCommentsModal(BuildContext context, ForumAnswerLine line) async {
+  void _showLineCommentsModal(
+    BuildContext context,
+    ForumAnswerLine line,
+  ) async {
     await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -475,12 +529,12 @@ class ForumDetailView extends StatelessWidget {
         ),
       ),
     );
-    
+
     // Refresh lines after modal closes to update comment counts from backend
     if (context.mounted) {
       final cubit = context.read<ForumCubit>();
       final serverPostId = int.tryParse(post.id);
-      
+
       if (serverPostId != null) {
         // Re-select the post to refresh lines with updated counts
         await cubit.selectPost(post);

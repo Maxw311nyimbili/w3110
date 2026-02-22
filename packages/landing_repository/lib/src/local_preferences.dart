@@ -25,7 +25,9 @@ class LocalPreferences {
 
   void _ensureInitialized() {
     if (!_prefsInitialized) {
-      throw StateError('LocalPreferences not initialized. Call initialize() first.');
+      throw StateError(
+        'LocalPreferences not initialized. Call initialize() first.',
+      );
     }
   }
 

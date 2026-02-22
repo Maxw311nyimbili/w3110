@@ -27,7 +27,12 @@ class _ThinkingIndicatorState extends State<ThinkingIndicator>
   // Each dot bounces at a phase offset
   late final Animation<double> _dotAnim;
 
-  final List<String> _words = ['thinking', 'searching', 'analyzing', 'verifying'];
+  final List<String> _words = [
+    'thinking',
+    'searching',
+    'analyzing',
+    'verifying',
+  ];
   int _wordIndex = 0;
   late final Timer _timer;
 
@@ -166,7 +171,9 @@ class _ThinkingIndicatorState extends State<ThinkingIndicator>
         height: 5,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: AppColors.brandDarkTeal.withOpacity(0.6 + sin(phase * pi) * 0.4),
+          color: AppColors.brandDarkTeal.withOpacity(
+            0.6 + sin(phase * pi) * 0.4,
+          ),
         ),
       ),
     );

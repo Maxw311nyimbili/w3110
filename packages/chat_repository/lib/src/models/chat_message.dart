@@ -26,8 +26,11 @@ class SourceReference extends Equatable {
       domain: (sourceMap?['domain'] ?? json['domain'] ?? 'Unknown').toString(),
       title: (sourceMap?['title'] ?? json['title'] ?? 'No title').toString(),
       url: (sourceMap?['url'] ?? json['url'] ?? '').toString(),
-      authority: (sourceMap?['authority'] ?? json['authority'] ?? 'UNKNOWN').toString(),
-      snippet: json['fragment_text'] is String ? json['fragment_text'] as String : null,
+      authority: (sourceMap?['authority'] ?? json['authority'] ?? 'UNKNOWN')
+          .toString(),
+      snippet: json['fragment_text'] is String
+          ? json['fragment_text'] as String
+          : null,
     );
   }
 
@@ -71,7 +74,7 @@ class DualModeAnswer extends Equatable {
       if (json['validated_sentences'] is List &&
           (json['validated_sentences'] as List).isNotEmpty) {
         final firstSentence =
-        (json['validated_sentences'] as List)[0] as Map<String, dynamic>;
+            (json['validated_sentences'] as List)[0] as Map<String, dynamic>;
         detailedAnswer = firstSentence['rewritten'] as String? ?? '';
       }
 
@@ -173,8 +176,8 @@ class ChatMessage extends Equatable {
       if (validatedAnswer['validated_sentences'] is List &&
           (validatedAnswer['validated_sentences'] as List).isNotEmpty) {
         final firstSentence =
-        (validatedAnswer['validated_sentences'] as List)[0]
-        as Map<String, dynamic>;
+            (validatedAnswer['validated_sentences'] as List)[0]
+                as Map<String, dynamic>;
         if (firstSentence['citations'] is List) {
           sources.addAll(
             (firstSentence['citations'] as List)
@@ -194,7 +197,8 @@ class ChatMessage extends Equatable {
           dualMode.quickAnswer.isNotEmpty && dualMode.detailedAnswer.isNotEmpty;
 
       return ChatMessage(
-        id: response['audit_id'] as String? ??
+        id:
+            response['audit_id'] as String? ??
             DateTime.now().millisecondsSinceEpoch.toString(),
         content: primaryContent,
         isUser: false,

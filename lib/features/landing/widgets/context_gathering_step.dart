@@ -26,7 +26,9 @@ class ContextGatheringStep extends StatelessWidget {
                 onPressed: () => context.read<LandingCubit>().skipStep(),
                 child: Text(
                   'Skip',
-                  style: AppTextStyles.labelMedium.copyWith(color: AppColors.textSecondary),
+                  style: AppTextStyles.labelMedium.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ),
             ],
@@ -48,22 +50,27 @@ class ContextGatheringStep extends StatelessWidget {
                   const SizedBox(height: 12),
                   Text(
                     'Select a few to help us get started.',
-                    style: AppTextStyles.bodyLarge.copyWith(color: AppColors.textSecondary),
+                    style: AppTextStyles.bodyLarge.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                   const SizedBox(height: 32),
                   Wrap(
                     spacing: 12,
                     runSpacing: 12,
-                    children: [
-                      'Pregnancy',
-                      'Medications',
-                      'Nutrition',
-                      'Child Health',
-                      'Mental Health',
-                      'Immunizations',
-                      'Postpartum',
-                      'General Health',
-                    ].map((label) => _buildChip(context, label, state)).toList(),
+                    children:
+                        [
+                              'Pregnancy',
+                              'Medications',
+                              'Nutrition',
+                              'Child Health',
+                              'Mental Health',
+                              'Immunizations',
+                              'Postpartum',
+                              'General Health',
+                            ]
+                            .map((label) => _buildChip(context, label, state))
+                            .toList(),
                   ),
                   const Spacer(),
                   SizedBox(
@@ -116,7 +123,9 @@ class ContextGatheringStep extends StatelessWidget {
         child: Text(
           label,
           style: AppTextStyles.labelMedium.copyWith(
-            color: isSelected ? AppColors.backgroundSurface : AppColors.textPrimary,
+            color: isSelected
+                ? AppColors.backgroundSurface
+                : AppColors.textPrimary,
             fontWeight: FontWeight.w500,
           ),
         ),

@@ -10,8 +10,8 @@ import 'package:media_repository/media_repository.dart' hide ScanResult;
 class MedScannerCubit extends Cubit<MedScannerState> {
   MedScannerCubit({
     required MediaRepository mediaRepository,
-  })  : _mediaRepository = mediaRepository,
-        super(const MedScannerState());
+  }) : _mediaRepository = mediaRepository,
+       super(const MedScannerState());
 
   final MediaRepository _mediaRepository;
 
@@ -29,11 +29,13 @@ class MedScannerCubit extends Cubit<MedScannerState> {
       if (!hasPermission) {
         final granted = await _mediaRepository.requestCameraPermission();
         if (!granted) {
-          emit(state.copyWith(
-            status: MedScannerStatus.error,
-            error: 'Camera permission denied. Enable it in app settings.',
-            hasPermission: false,
-          ));
+          emit(
+            state.copyWith(
+              status: MedScannerStatus.error,
+              error: 'Camera permission denied. Enable it in app settings.',
+              hasPermission: false,
+            ),
+          );
           return;
         }
       }
@@ -44,18 +46,22 @@ class MedScannerCubit extends Cubit<MedScannerState> {
       // Initialize camera controller
       await _mediaRepository.initializeCamera();
 
-      emit(state.copyWith(
-        status: MedScannerStatus.cameraReady,
-        isCameraInitialized: true,
-        hasPermission: true,
-      ));
+      emit(
+        state.copyWith(
+          status: MedScannerStatus.cameraReady,
+          isCameraInitialized: true,
+          hasPermission: true,
+        ),
+      );
 
       print('✅ Camera initialized successfully');
     } catch (e) {
-      emit(state.copyWith(
-        status: MedScannerStatus.error,
-        error: 'Failed to initialize camera: ${e.toString()}',
-      ));
+      emit(
+        state.copyWith(
+          status: MedScannerStatus.error,
+          error: 'Failed to initialize camera: ${e.toString()}',
+        ),
+      );
       print('❌ Camera initialization error: ${e.toString()}');
     }
   }
@@ -73,19 +79,23 @@ class MedScannerCubit extends Cubit<MedScannerState> {
       final imagePath = await _mediaRepository.captureImage();
 
       if (imagePath == null) {
-        emit(state.copyWith(
-          status: MedScannerStatus.cameraReady,
-          error: 'Image capture cancelled',
-        ));
+        emit(
+          state.copyWith(
+            status: MedScannerStatus.cameraReady,
+            error: 'Image capture cancelled',
+          ),
+        );
         return;
       }
 
       print('✅ Image captured: $imagePath');
 
-      emit(state.copyWith(
-        status: MedScannerStatus.processing,
-        capturedImagePath: imagePath,
-      ));
+      emit(
+        state.copyWith(
+          status: MedScannerStatus.processing,
+          capturedImagePath: imagePath,
+        ),
+      );
 
       // Step 2: Compress image for upload
       print('🔧 Compressing image...');
@@ -131,16 +141,20 @@ class MedScannerCubit extends Cubit<MedScannerState> {
         imageUrl: uploadResponse.url,
       );
 
-      emit(state.copyWith(
-        status: MedScannerStatus.success,
-        scanResult: scanResult,
-      ));
+      emit(
+        state.copyWith(
+          status: MedScannerStatus.success,
+          scanResult: scanResult,
+        ),
+      );
     } catch (e) {
       print('❌ Scan error: ${e.toString()}');
-      emit(state.copyWith(
-        status: MedScannerStatus.error,
-        error: _formatErrorMessage(e.toString()),
-      ));
+      emit(
+        state.copyWith(
+          status: MedScannerStatus.error,
+          error: _formatErrorMessage(e.toString()),
+        ),
+      );
     }
   }
 
@@ -153,10 +167,12 @@ class MedScannerCubit extends Cubit<MedScannerState> {
       final imagePath = await _mediaRepository.pickImageFromGallery();
 
       if (imagePath == null) {
-        emit(state.copyWith(
-          status: MedScannerStatus.cameraReady,
-          error: 'Image selection cancelled',
-        ));
+        emit(
+          state.copyWith(
+            status: MedScannerStatus.cameraReady,
+            error: 'Image selection cancelled',
+          ),
+        );
         return;
       }
 
@@ -193,17 +209,21 @@ class MedScannerCubit extends Cubit<MedScannerState> {
         imageUrl: uploadResponse.url,
       );
 
-      emit(state.copyWith(
-        status: MedScannerStatus.success,
-        capturedImagePath: imagePath,
-        scanResult: scanResult,
-      ));
+      emit(
+        state.copyWith(
+          status: MedScannerStatus.success,
+          capturedImagePath: imagePath,
+          scanResult: scanResult,
+        ),
+      );
     } catch (e) {
       print('❌ Gallery picker error: ${e.toString()}');
-      emit(state.copyWith(
-        status: MedScannerStatus.error,
-        error: _formatErrorMessage(e.toString()),
-      ));
+      emit(
+        state.copyWith(
+          status: MedScannerStatus.error,
+          error: _formatErrorMessage(e.toString()),
+        ),
+      );
     }
   }
 

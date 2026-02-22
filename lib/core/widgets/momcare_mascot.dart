@@ -73,7 +73,9 @@ class _MomCareMascotState extends State<MomCareMascot>
                   boxShadow: [
                     BoxShadow(
                       color: AppColors.accentPrimary.withOpacity(0.3),
-                      blurRadius: 20 * (1 + math.sin(_controller.value * 2 * math.pi) * 0.2),
+                      blurRadius:
+                          20 *
+                          (1 + math.sin(_controller.value * 2 * math.pi) * 0.2),
                       spreadRadius: 5,
                     ),
                   ],

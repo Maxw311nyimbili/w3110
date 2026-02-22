@@ -14,12 +14,12 @@ class AuthRepository {
   AuthRepository({
     required ApiClient apiClient,
     required SecureStorageHelper secureStorage,
-  })  : _apiClient = apiClient,
-        _secureStorage = secureStorage,
-        _firebaseAuth = firebase_auth.FirebaseAuth.instance,
-        _googleSignIn = GoogleSignIn(
-          scopes: ['email', 'profile'],
-        );
+  }) : _apiClient = apiClient,
+       _secureStorage = secureStorage,
+       _firebaseAuth = firebase_auth.FirebaseAuth.instance,
+       _googleSignIn = GoogleSignIn(
+         scopes: ['email', 'profile'],
+       );
 
   final ApiClient _apiClient;
   final SecureStorageHelper _secureStorage;
@@ -58,7 +58,7 @@ class AuthRepository {
 
       // Step 2: Get authentication details
       final GoogleSignInAuthentication googleAuth =
-      await googleUser.authentication;
+          await googleUser.authentication;
 
       print('✓ Got Google authentication tokens');
 
@@ -71,8 +71,9 @@ class AuthRepository {
       print('✓ Firebase credential created');
 
       // Step 4: Sign in to Firebase
-      final userCredential =
-      await _firebaseAuth.signInWithCredential(credential);
+      final userCredential = await _firebaseAuth.signInWithCredential(
+        credential,
+      );
 
       print('✓ Signed in to Firebase: ${userCredential.user?.email}');
 
@@ -92,23 +93,24 @@ class AuthRepository {
     } on firebase_auth.FirebaseAuthException catch (e) {
       print('❌ Firebase Auth error: [${e.code}] ${e.message}');
       print('   - Full error: $e');
-      throw AuthException(
-          'Firebase authentication failed: ${e.message}');
+      throw AuthException('Firebase authentication failed: ${e.message}');
     } catch (e, stackTrace) {
       print('❌ Unexpected Google Sign-In error: $e');
       print(stackTrace);
-      
+
       String message = e.toString();
       if (message.contains('7:')) {
         message = 'Network error (7). Please check your internet connection.';
       } else if (message.contains('10:')) {
-        message = 'Developer error (10). This usually means the SHA-1 fingerprint or package name is incorrect in the Google Cloud Console.';
+        message =
+            'Developer error (10). This usually means the SHA-1 fingerprint or package name is incorrect in the Google Cloud Console.';
       } else if (message.contains('12500')) {
-        message = 'Sign-in failed (12500). Please ensure Google Play Services is updated.';
+        message =
+            'Sign-in failed (12500). Please ensure Google Play Services is updated.';
       } else if (message.contains('12501')) {
         message = 'Sign-in cancelled by user (12501).';
       }
-      
+
       throw AuthException('Google Sign-In failed: $message');
     }
   }
@@ -121,32 +123,32 @@ class AuthRepository {
   /// Creates a local session with fake tokens and user data.
   Future<User> signInAsDemo() async {
     print('Starting Demo Sign-In flow...');
-    
+
     // Create a fake user
     final demoUser = const User(
-        id: 'demo-user-id', 
-        email: 'demo@example.com', 
-        displayName: 'Demo User',
-        photoUrl: null, // Could add a placeholder image
-        role: 'mother', 
+      id: 'demo-user-id',
+      email: 'demo@example.com',
+      displayName: 'Demo User',
+      photoUrl: null, // Could add a placeholder image
+      role: 'mother',
     );
 
     // Create fake tokens
     final fakeTokens = AuthTokens(
-        accessToken: 'fake-demo-access-token',
-        refreshToken: 'fake-demo-refresh-token',
-        expiresIn: 3600,
+      accessToken: 'fake-demo-access-token',
+      refreshToken: 'fake-demo-refresh-token',
+      expiresIn: 3600,
     );
 
     // Store fake tokens
     await _secureStorage.saveAccessToken(fakeTokens.accessToken);
     await _secureStorage.saveRefreshToken(fakeTokens.refreshToken);
-    
+
     // Store user data
     await _secureStorage.saveUserData(jsonEncode(demoUser.toJson()));
-    
+
     print('✓ Demo session created: ${demoUser.email}');
-    
+
     return demoUser;
   }
 
@@ -191,8 +193,7 @@ class AuthRepository {
 
       // Store user data
       if (responseData['user'] != null) {
-        await _secureStorage
-            .saveUserData(jsonEncode(responseData['user']));
+        await _secureStorage.saveUserData(jsonEncode(responseData['user']));
       }
 
       // Clear temporary Firebase ID token
@@ -208,7 +209,7 @@ class AuthRepository {
   // ============ User Session ============
 
   /// Get current authenticated user
-  /// First checks local storage (unless forceRefresh is true), 
+  /// First checks local storage (unless forceRefresh is true),
   /// then fetches from backend if needed.
   ///
   /// Returns null if user no longer exists or token is invalid.

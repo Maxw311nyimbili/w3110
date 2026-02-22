@@ -9,7 +9,7 @@ class AppTextStyles {
   AppTextStyles._();
 
   // ─── Font bases ────────────────────────────────────────────────────────────
-  static TextStyle get _base    => GoogleFonts.dmSans();
+  static TextStyle get _base => GoogleFonts.dmSans();
   static TextStyle get _display => GoogleFonts.dmSans();
 
   // ─── Display ───────────────────────────────────────────────────────────────

@@ -35,7 +35,7 @@ class AppBentoCard extends StatelessWidget {
           height: height,
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: isSelected 
+            color: isSelected
                 ? themeColor.withOpacity(0.08)
                 : themeColor.withOpacity(0.04),
             borderRadius: BorderRadius.circular(24),
@@ -49,7 +49,7 @@ class AppBentoCard extends StatelessWidget {
                       color: themeColor.withOpacity(0.12),
                       blurRadius: 40,
                       offset: const Offset(0, 12),
-                    )
+                    ),
                   ]
                 : [],
           ),

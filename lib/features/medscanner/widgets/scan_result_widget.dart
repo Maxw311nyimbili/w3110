@@ -212,11 +212,11 @@ class ScanResultWidget extends StatelessWidget {
   }
 
   Widget _buildInfoCard(
-      BuildContext context, {
-        required IconData icon,
-        required String title,
-        required String content,
-      }) {
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String content,
+  }) {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
@@ -284,21 +284,23 @@ class ScanResultWidget extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.md),
-          ...result.warnings.map((warning) => Padding(
-            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('• ', style: TextStyle(fontSize: 16)),
-                Expanded(
-                  child: Text(
-                    warning,
-                    style: AppTextStyles.bodyMedium,
+          ...result.warnings.map(
+            (warning) => Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('• ', style: TextStyle(fontSize: 16)),
+                  Expanded(
+                    child: Text(
+                      warning,
+                      style: AppTextStyles.bodyMedium,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          )),
+          ),
         ],
       ),
     );

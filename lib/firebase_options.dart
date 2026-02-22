@@ -64,7 +64,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '956333738143',
     projectId: 'medlink-app-4f92a',
     storageBucket: 'medlink-app-4f92a.firebasestorage.app',
-    iosClientId: '956333738143-qsma41gddk8hs1s9kt0ud113s7gi338v.apps.googleusercontent.com',
+    iosClientId:
+        '956333738143-qsma41gddk8hs1s9kt0ud113s7gi338v.apps.googleusercontent.com',
     iosBundleId: 'com.example.verygoodcore.cap-project',
   );
 
@@ -74,7 +75,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '956333738143',
     projectId: 'medlink-app-4f92a',
     storageBucket: 'medlink-app-4f92a.firebasestorage.app',
-    iosClientId: '956333738143-7c8e4fcj26784mumbk1jovima9q1qu3d.apps.googleusercontent.com',
+    iosClientId:
+        '956333738143-7c8e4fcj26784mumbk1jovima9q1qu3d.apps.googleusercontent.com',
     iosBundleId: 'com.example.myApp',
   );
 
@@ -87,5 +89,4 @@ class DefaultFirebaseOptions {
     storageBucket: 'medlink-app-4f92a.firebasestorage.app',
     measurementId: 'G-QDSP28433Y',
   );
-
 }

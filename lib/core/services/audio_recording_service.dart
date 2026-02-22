@@ -18,8 +18,11 @@ class AudioRecordingService {
     try {
       if (await _record.hasPermission()) {
         final dir = await getTemporaryDirectory();
-        final path = p.join(dir.path, 'recording_${DateTime.now().millisecondsSinceEpoch}.m4a');
-        
+        final path = p.join(
+          dir.path,
+          'recording_${DateTime.now().millisecondsSinceEpoch}.m4a',
+        );
+
         await _record.start(const RecordConfig(), path: path);
       }
     } catch (e) {

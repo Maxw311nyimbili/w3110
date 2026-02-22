@@ -2,7 +2,8 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:cap_project/features/chat/cubit/chat_state.dart';
-import 'package:cap_project/features/medscanner/cubit/medscanner_state.dart' as scanner;
+import 'package:cap_project/features/medscanner/cubit/medscanner_state.dart'
+    as scanner;
 import 'package:cap_project/core/services/audio_recording_service.dart';
 import 'package:record/record.dart';
 import 'package:audioplayers/audioplayers.dart';
@@ -23,15 +24,15 @@ class ChatCubit extends Cubit<ChatState> {
     String? locale,
     String? userRole,
     List<String>? interests,
-  })  : _chatRepository = chatRepository,
-        _landingRepository = landingRepository,
-        _audioRecordingService = audioRecordingService,
-        _audioPlayer = AudioPlayer(),
-        _uuid = const Uuid(),
-        _currentLocale = locale ?? 'en',
-        _userRole = userRole,
-        _interests = interests,
-        super(const ChatState());
+  }) : _chatRepository = chatRepository,
+       _landingRepository = landingRepository,
+       _audioRecordingService = audioRecordingService,
+       _audioPlayer = AudioPlayer(),
+       _uuid = const Uuid(),
+       _currentLocale = locale ?? 'en',
+       _userRole = userRole,
+       _interests = interests,
+       super(const ChatState());
 
   final repo.ChatRepository _chatRepository;
   final landing.LandingRepository _landingRepository;
@@ -52,19 +53,23 @@ class ChatCubit extends Cubit<ChatState> {
   Future<void> initialize() async {
     try {
       emit(state.copyWith(status: ChatStatus.loading));
-      
+
       // Fetch dynamic greeting in parallel with other initialization if needed
       final greeting = await _landingRepository.fetchGreeting();
-      
-      emit(state.copyWith(
-        status: ChatStatus.success,
-        dynamicGreeting: greeting,
-      ));
+
+      emit(
+        state.copyWith(
+          status: ChatStatus.success,
+          dynamicGreeting: greeting,
+        ),
+      );
     } catch (e) {
-      emit(state.copyWith(
-        status: ChatStatus.error,
-        error: 'Failed to initialize chat',
-      ));
+      emit(
+        state.copyWith(
+          status: ChatStatus.error,
+          error: 'Failed to initialize chat',
+        ),
+      );
     }
   }
 
@@ -79,11 +84,13 @@ class ChatCubit extends Cubit<ChatState> {
       }
 
       await _audioRecordingService.startRecording();
-      
+
       _amplitudeSubscription?.cancel();
-      _amplitudeSubscription = _audioRecordingService.onAmplitudeChanged().listen((amp) {
-        emit(state.copyWith(amplitude: amp.current.toDouble()));
-      });
+      _amplitudeSubscription = _audioRecordingService
+          .onAmplitudeChanged()
+          .listen((amp) {
+            emit(state.copyWith(amplitude: amp.current.toDouble()));
+          });
 
       emit(state.copyWith(isRecording: true));
     } catch (e) {
@@ -96,12 +103,18 @@ class ChatCubit extends Cubit<ChatState> {
       final path = await _audioRecordingService.stopRecording();
       _amplitudeSubscription?.cancel();
       emit(state.copyWith(isRecording: false, amplitude: 0.0));
-      
+
       if (path != null) {
         await sendAudioMessage(path);
       }
     } catch (e) {
-      emit(state.copyWith(isRecording: false, amplitude: 0.0, error: 'Failed to stop recording: $e'));
+      emit(
+        state.copyWith(
+          isRecording: false,
+          amplitude: 0.0,
+          error: 'Failed to stop recording: $e',
+        ),
+      );
     }
   }
 
@@ -121,11 +134,12 @@ class ChatCubit extends Cubit<ChatState> {
 
       final responseData = await _chatRepository.sendVoiceMessage(
         audioPath: audioPath,
-        sessionId: state.sessionId ?? DateTime.now().millisecondsSinceEpoch.toString(),
+        sessionId:
+            state.sessionId ?? DateTime.now().millisecondsSinceEpoch.toString(),
         userRole: _userRole,
         interests: _interests,
       );
-      
+
       if (responseData['transcript'] != null) {
         final userMessage = ChatMessage(
           id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -136,15 +150,21 @@ class ChatCubit extends Cubit<ChatState> {
         emit(state.copyWith(messages: [...state.messages, userMessage]));
       }
       _handleChatResponse(responseData);
-      
     } catch (e) {
       if (e.toString().contains('404')) {
-         emit(state.copyWith(
-           isTyping: false,
-           error: 'Audio chat endpoint not found. Please use text for now.',
-         ));
+        emit(
+          state.copyWith(
+            isTyping: false,
+            error: 'Audio chat endpoint not found. Please use text for now.',
+          ),
+        );
       } else {
-        emit(state.copyWith(isTyping: false, error: 'Failed to send audio: ${e.toString()}'));
+        emit(
+          state.copyWith(
+            isTyping: false,
+            error: 'Failed to send audio: ${e.toString()}',
+          ),
+        );
       }
     }
   }
@@ -155,31 +175,40 @@ class ChatCubit extends Cubit<ChatState> {
 
     if (status == 'out_of_scope') {
       final aiMessage = ChatMessage(
-        id: responseData['audit_id'] as String? ?? DateTime.now().millisecondsSinceEpoch.toString(),
-        content: responseData['message'] as String? ?? 'This query is outside the scope of medical information.',
+        id:
+            responseData['audit_id'] as String? ??
+            DateTime.now().millisecondsSinceEpoch.toString(),
+        content:
+            responseData['message'] as String? ??
+            'This query is outside the scope of medical information.',
         isUser: false,
         timestamp: DateTime.now(),
         isRefusal: true,
         refusalReason: 'Out of scope',
       );
-      emit(state.copyWith(
-        messages: [...state.messages, aiMessage],
-        status: ChatStatus.success,
-        isTyping: false,
-      ));
+      emit(
+        state.copyWith(
+          messages: [...state.messages, aiMessage],
+          status: ChatStatus.success,
+          isTyping: false,
+        ),
+      );
       return;
     }
 
-    final validatedAnswer = responseData['validated_answer'] as Map<String, dynamic>? ?? {};
+    final validatedAnswer =
+        responseData['validated_answer'] as Map<String, dynamic>? ?? {};
     final quickAnswer = validatedAnswer['original_answer'] as String? ?? '';
     final audioUrl = responseData['audio_url'] as String?;
-    
+
     String detailedAnswer = '';
     List<SourceReference> sources = [];
 
     if (validatedAnswer['validated_sentences'] is List &&
         (validatedAnswer['validated_sentences'] as List).isNotEmpty) {
-      final firstSentence = (validatedAnswer['validated_sentences'] as List)[0] as Map<String, dynamic>;
+      final firstSentence =
+          (validatedAnswer['validated_sentences'] as List)[0]
+              as Map<String, dynamic>;
       detailedAnswer = firstSentence['rewritten'] as String? ?? '';
 
       if (firstSentence['citations'] is List) {
@@ -187,27 +216,38 @@ class ChatCubit extends Cubit<ChatState> {
           final citation = c as Map<String, dynamic>;
           final sourceData = citation['source'] as Map<String, dynamic>?;
           return SourceReference(
-            title: (sourceData?['title'] ?? citation['title'] ?? 'No title').toString(),
+            title: (sourceData?['title'] ?? citation['title'] ?? 'No title')
+                .toString(),
             url: (sourceData?['url'] ?? citation['url'] ?? '').toString(),
-            domain: (sourceData?['domain'] ?? citation['domain'] ?? 'Unknown').toString(),
-            authority: (sourceData?['authority'] ?? citation['authority'] ?? 'UNKNOWN').toString(),
+            domain: (sourceData?['domain'] ?? citation['domain'] ?? 'Unknown')
+                .toString(),
+            authority:
+                (sourceData?['authority'] ?? citation['authority'] ?? 'UNKNOWN')
+                    .toString(),
           );
         }).toList();
       }
     }
 
-    final hasDualMode = quickAnswer.trim().isNotEmpty && detailedAnswer.trim().isNotEmpty;
-    final primaryContent = quickAnswer.isNotEmpty ? quickAnswer : detailedAnswer;
+    final hasDualMode =
+        quickAnswer.trim().isNotEmpty && detailedAnswer.trim().isNotEmpty;
+    final primaryContent = quickAnswer.isNotEmpty
+        ? quickAnswer
+        : detailedAnswer;
 
     final aiMessage = ChatMessage(
-      id: responseData['audit_id'] as String? ?? DateTime.now().millisecondsSinceEpoch.toString(),
+      id:
+          responseData['audit_id'] as String? ??
+          DateTime.now().millisecondsSinceEpoch.toString(),
       content: primaryContent,
       isUser: false,
       timestamp: DateTime.now(),
       sources: sources,
       isDualMode: hasDualMode,
       quickAnswer: quickAnswer.trim().isNotEmpty ? quickAnswer.trim() : null,
-      detailedAnswer: detailedAnswer.trim().isNotEmpty ? detailedAnswer.trim() : null,
+      detailedAnswer: detailedAnswer.trim().isNotEmpty
+          ? detailedAnswer.trim()
+          : null,
       audioUrl: audioUrl,
       latencyMs: responseData['processing_time_ms'] as int? ?? 0,
     );
@@ -216,12 +256,14 @@ class ChatCubit extends Cubit<ChatState> {
       _playAudio(audioUrl);
     }
 
-    emit(state.copyWith(
-      messages: [...state.messages, aiMessage],
-      status: ChatStatus.success,
-      isTyping: false,
-      sessionId: state.sessionId ?? responseData['session_id'] as String?,
-    ));
+    emit(
+      state.copyWith(
+        messages: [...state.messages, aiMessage],
+        status: ChatStatus.success,
+        isTyping: false,
+        sessionId: state.sessionId ?? responseData['session_id'] as String?,
+      ),
+    );
   }
 
   Future<void> _playAudio(String url) async {
@@ -272,18 +314,21 @@ class ChatCubit extends Cubit<ChatState> {
       }
     });
 
-    emit(state.copyWith(
-      messages: [...state.messages, userMessage],
-      status: ChatStatus.loading,
-      isTyping: true,
-      loadingMessage: loadingMessages[0],
-    ));
+    emit(
+      state.copyWith(
+        messages: [...state.messages, userMessage],
+        status: ChatStatus.loading,
+        isTyping: true,
+        loadingMessage: loadingMessages[0],
+      ),
+    );
 
     try {
       final request = repo.ChatQueryRequest(
         query: content.trim(),
         imageUrl: imageUrl, // Optionally pass image from UI layer
-        conversationId: state.sessionId ?? DateTime.now().millisecondsSinceEpoch.toString(),
+        conversationId:
+            state.sessionId ?? DateTime.now().millisecondsSinceEpoch.toString(),
         userRole: _userRole,
         interests: _interests,
       );
@@ -296,17 +341,21 @@ class ChatCubit extends Cubit<ChatState> {
       if (status == 'out_of_scope') {
         final aiMessage = ChatMessage(
           id: response.sessionId,
-          content: response.message ?? 'This query is outside the scope of medical information.',
+          content:
+              response.message ??
+              'This query is outside the scope of medical information.',
           isUser: false,
           timestamp: DateTime.now(),
           isRefusal: true,
           refusalReason: 'Out of scope',
         );
-        emit(state.copyWith(
-          messages: [...state.messages, aiMessage],
-          status: ChatStatus.success,
-          isTyping: false,
-        ));
+        emit(
+          state.copyWith(
+            messages: [...state.messages, aiMessage],
+            status: ChatStatus.success,
+            isTyping: false,
+          ),
+        );
         return;
       }
 
@@ -320,12 +369,14 @@ class ChatCubit extends Cubit<ChatState> {
           isRefusal: true,
           refusalReason: 'Backend error',
         );
-        emit(state.copyWith(
-          messages: [...state.messages, aiMessage],
-          status: ChatStatus.error,
-          error: response.message ?? 'Unknown error',
-          isTyping: false,
-        ));
+        emit(
+          state.copyWith(
+            messages: [...state.messages, aiMessage],
+            status: ChatStatus.error,
+            error: response.message ?? 'Unknown error',
+            isTyping: false,
+          ),
+        );
         return;
       }
 
@@ -348,7 +399,7 @@ class ChatCubit extends Cubit<ChatState> {
         // Extract sources from citations
         if (firstSentence.citations.isNotEmpty) {
           sources = firstSentence.citations.map((citation) {
-             return SourceReference(
+            return SourceReference(
               title: citation.source.title,
               url: citation.source.url,
               domain: citation.source.domain,
@@ -364,8 +415,9 @@ class ChatCubit extends Cubit<ChatState> {
           quickAnswer.trim().isNotEmpty && detailedAnswer.trim().isNotEmpty;
 
       // Use quick answer as primary, fall back to detailed
-      final primaryContent =
-      quickAnswer.isNotEmpty ? quickAnswer : detailedAnswer;
+      final primaryContent = quickAnswer.isNotEmpty
+          ? quickAnswer
+          : detailedAnswer;
 
       print('Debug: isDualMode=$hasDualMode, sources=${sources.length}');
 
@@ -376,19 +428,24 @@ class ChatCubit extends Cubit<ChatState> {
         timestamp: DateTime.now(),
         sources: sources,
         isDualMode: hasDualMode,
-        quickAnswer:
-        quickAnswer.trim().isNotEmpty ? quickAnswer.trim() : null,
-        detailedAnswer:
-        detailedAnswer.trim().isNotEmpty ? detailedAnswer.trim() : null,
+        quickAnswer: quickAnswer.trim().isNotEmpty ? quickAnswer.trim() : null,
+        detailedAnswer: detailedAnswer.trim().isNotEmpty
+            ? detailedAnswer.trim()
+            : null,
         latencyMs: response.processingTimeMs,
       );
 
-      emit(state.copyWith(
-        messages: [...state.messages, aiMessage],
-        status: ChatStatus.success,
-        isTyping: false,
-        sessionId: state.sessionId ?? (response.sessionId ?? DateTime.now().millisecondsSinceEpoch.toString()),
-      ));
+      emit(
+        state.copyWith(
+          messages: [...state.messages, aiMessage],
+          status: ChatStatus.success,
+          isTyping: false,
+          sessionId:
+              state.sessionId ??
+              (response.sessionId ??
+                  DateTime.now().millisecondsSinceEpoch.toString()),
+        ),
+      );
     } catch (e) {
       _loadingTimer?.cancel();
       emit(state.resetLoadingMessage());
@@ -401,12 +458,14 @@ class ChatCubit extends Cubit<ChatState> {
         refusalReason: 'Network error',
       );
 
-      emit(state.copyWith(
-        messages: [...state.messages, errorMessage],
-        status: ChatStatus.error,
-        error: e.toString(),
-        isTyping: false,
-      ));
+      emit(
+        state.copyWith(
+          messages: [...state.messages, errorMessage],
+          status: ChatStatus.error,
+          error: e.toString(),
+          isTyping: false,
+        ),
+      );
     }
   }
 
@@ -421,10 +480,12 @@ class ChatCubit extends Cubit<ChatState> {
         timestamp: DateTime.now(),
       );
 
-      emit(state.copyWith(
-        messages: [...state.messages, userMessage],
-        isTyping: true,
-      ));
+      emit(
+        state.copyWith(
+          messages: [...state.messages, userMessage],
+          isTyping: true,
+        ),
+      );
 
       final request = repo.ChatQueryRequest(
         query: content.trim(),
@@ -439,13 +500,15 @@ class ChatCubit extends Cubit<ChatState> {
       for (final sentence in response.sentences) {
         if (sentence.sources != null && sentence.sources!.isNotEmpty) {
           for (final repoSource in sentence.sources!) {
-            allSources.add(SourceReference(
-              title: repoSource.title,
-              url: repoSource.url,
-              snippet: repoSource.snippet,
-              domain: _extractDomain(repoSource.url),
-              authority: null,
-            ));
+            allSources.add(
+              SourceReference(
+                title: repoSource.title,
+                url: repoSource.url,
+                snippet: repoSource.snippet,
+                domain: _extractDomain(repoSource.url),
+                authority: null,
+              ),
+            );
           }
         }
       }
@@ -458,32 +521,40 @@ class ChatCubit extends Cubit<ChatState> {
         sources: allSources.toList(),
       );
 
-      emit(state.copyWith(
-        status: ChatStatus.success,
-        messages: [...state.messages, aiMessage],
-        isTyping: false,
-      ));
+      emit(
+        state.copyWith(
+          status: ChatStatus.success,
+          messages: [...state.messages, aiMessage],
+          isTyping: false,
+        ),
+      );
     } catch (e) {
-      emit(state.copyWith(
-        status: ChatStatus.error,
-        error: 'Failed to process image: ${e.toString()}',
-        isTyping: false,
-      ));
+      emit(
+        state.copyWith(
+          status: ChatStatus.error,
+          error: 'Failed to process image: ${e.toString()}',
+          isTyping: false,
+        ),
+      );
     }
   }
 
   Future<void> clearHistory() async {
     try {
       await _chatRepository.clearCache();
-      emit(state.copyWith(
-        status: ChatStatus.success,
-        messages: [],
-      ));
+      emit(
+        state.copyWith(
+          status: ChatStatus.success,
+          messages: [],
+        ),
+      );
     } catch (e) {
-      emit(state.copyWith(
-        status: ChatStatus.error,
-        error: 'Failed to clear history',
-      ));
+      emit(
+        state.copyWith(
+          status: ChatStatus.error,
+          error: 'Failed to clear history',
+        ),
+      );
     }
   }
 
@@ -494,22 +565,27 @@ class ChatCubit extends Cubit<ChatState> {
         if (status.isDenied) {
           status = await Permission.photos.request();
         }
-        
+
         // On Android 13+, READ_MEDIA_IMAGES might be checking instead
         if (Platform.isAndroid && await Permission.photos.isDenied) {
-           // Fallback or specific Android 13 check if needed, 
-           // but often image_picker handles this internal intent.
+          // Fallback or specific Android 13 check if needed,
+          // but often image_picker handles this internal intent.
         }
-        
+
         if (status.isPermanentlyDenied) {
-           emit(state.copyWith(error: 'Photo library permission permanently denied. Please enable in settings.'));
-           return;
+          emit(
+            state.copyWith(
+              error:
+                  'Photo library permission permanently denied. Please enable in settings.',
+            ),
+          );
+          return;
         }
       }
 
       final picker = ImagePicker();
       final image = await picker.pickImage(source: ImageSource.gallery);
-      
+
       if (image != null) {
         final attachment = PendingAttachment(
           path: image.path,
@@ -517,9 +593,11 @@ class ChatCubit extends Cubit<ChatState> {
           type: AttachmentType.image,
           size: await image.length(),
         );
-        emit(state.copyWith(
-          pendingAttachments: [...state.pendingAttachments, attachment],
-        ));
+        emit(
+          state.copyWith(
+            pendingAttachments: [...state.pendingAttachments, attachment],
+          ),
+        );
       } else {
         // User cancelled, do nothing
       }
@@ -532,9 +610,9 @@ class ChatCubit extends Cubit<ChatState> {
   Future<void> pickDocument() async {
     try {
       print('📂 Picking document...');
-      // File picker often doesn't need explicit permission on newer Android/iOS for picking 
+      // File picker often doesn't need explicit permission on newer Android/iOS for picking
       // as it uses system picker, but let's be safe.
-      
+
       final result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['pdf', 'doc', 'docx', 'txt'],
@@ -548,9 +626,11 @@ class ChatCubit extends Cubit<ChatState> {
           type: AttachmentType.document,
           size: file.size,
         );
-        emit(state.copyWith(
-          pendingAttachments: [...state.pendingAttachments, attachment],
-        ));
+        emit(
+          state.copyWith(
+            pendingAttachments: [...state.pendingAttachments, attachment],
+          ),
+        );
       }
     } catch (e) {
       print('❌ Failed to pick document: $e');
@@ -568,17 +648,20 @@ class ChatCubit extends Cubit<ChatState> {
   void addMedicineResult(scanner.ScanResult result) {
     final summaryMessage = ChatMessage(
       id: _uuid.v4(),
-      content: 'I have successfully scanned: ${result.medicationName}. '
+      content:
+          'I have successfully scanned: ${result.medicationName}. '
           'How can I help you with this medication?',
       isUser: false,
       timestamp: DateTime.now(),
       medicineResult: result,
     );
 
-    emit(state.copyWith(
-      medicineContext: result,
-      messages: [...state.messages, summaryMessage],
-    ));
+    emit(
+      state.copyWith(
+        medicineContext: result,
+        messages: [...state.messages, summaryMessage],
+      ),
+    );
   }
 
   void clearError() {
@@ -592,7 +675,7 @@ class ChatCubit extends Cubit<ChatState> {
       }
       return msg;
     }).toList();
-    
+
     emit(state.copyWith(messages: updatedMessages));
   }
 
@@ -605,4 +688,3 @@ class ChatCubit extends Cubit<ChatState> {
     }
   }
 }
-

@@ -28,7 +28,7 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
   // ─── Main sequence animations ───────────────────────────────────────────────
   late Animation<double> _logoX;
   late Animation<double> _logoRotation;
-  late Animation<double> _logoBlur;     // 12 → 0 (blur-to-sharp on entry)
+  late Animation<double> _logoBlur; // 12 → 0 (blur-to-sharp on entry)
   late Animation<double> _logoY;
   late Animation<Color?> _logoColor;
   late Animation<double> _curtainReveal;
@@ -84,15 +84,16 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
       ),
     );
 
-    _logoColor = ColorTween(
-      begin: AppColors.brandDarkTeal,
-      end: Colors.white,
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.55, 0.85, curve: Curves.linear),
-      ),
-    );
+    _logoColor =
+        ColorTween(
+          begin: AppColors.brandDarkTeal,
+          end: Colors.white,
+        ).animate(
+          CurvedAnimation(
+            parent: _controller,
+            curve: const Interval(0.55, 0.85, curve: Curves.linear),
+          ),
+        );
 
     // 4. Content reveal (4.1s–5.0s)
     _contentOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
@@ -103,15 +104,16 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
     );
 
     // Glass card slides up from below screen (slightly ahead of content)
-    _cardSlide = Tween<Offset>(
-      begin: const Offset(0, 1.5),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.80, 1.0, curve: Curves.easeOutCubic),
-      ),
-    );
+    _cardSlide =
+        Tween<Offset>(
+          begin: const Offset(0, 1.5),
+          end: Offset.zero,
+        ).animate(
+          CurvedAnimation(
+            parent: _controller,
+            curve: const Interval(0.80, 1.0, curve: Curves.easeOutCubic),
+          ),
+        );
 
     // Status bar sync: light icons on teal, dark icons when white curtain fills
     _curtainReveal.addListener(_syncStatusBar);
@@ -199,8 +201,10 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                                       height: 240,
                                       fit: BoxFit.contain,
                                       errorBuilder: (ctx, err, st) =>
-                                          const Icon(Icons.emergency_rounded,
-                                              size: 120),
+                                          const Icon(
+                                            Icons.emergency_rounded,
+                                            size: 120,
+                                          ),
                                     ),
                                   ),
                                 ),
@@ -216,9 +220,18 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                             position: _cardSlide,
                             child: Padding(
                               padding: EdgeInsets.fromLTRB(
-                                  20, 0, 20, 32 + bottomPadding),
+                                20,
+                                0,
+                                20,
+                                32 + bottomPadding,
+                              ),
                               child: GlassCard(
-                                padding: const EdgeInsets.fromLTRB(24, 20, 24, 20),
+                                padding: const EdgeInsets.fromLTRB(
+                                  24,
+                                  20,
+                                  24,
+                                  20,
+                                ),
                                 borderRadius: 28,
                                 tintOpacity: 0.88,
                                 blur: 16,
@@ -248,11 +261,15 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                                       foregroundColor: Colors.white,
                                       onPressed: () {
                                         if (isAuthenticated) {
-                                          AppRouter.replaceTo(context,
-                                              AppRouter.featureChoice);
+                                          AppRouter.replaceTo(
+                                            context,
+                                            AppRouter.featureChoice,
+                                          );
                                         } else {
-                                          AppRouter.navigateTo(context,
-                                              AppRouter.featureChoice);
+                                          AppRouter.navigateTo(
+                                            context,
+                                            AppRouter.featureChoice,
+                                          );
                                         }
                                       },
                                     ),
@@ -317,8 +334,10 @@ class _InvertedCurtainPainter extends CustomPainter {
     path.moveTo(0, size.height);
     path.lineTo(0, currentTopY);
     path.quadraticBezierTo(
-      size.width / 2, currentTopY - currentCurveDepth,
-      size.width, currentTopY,
+      size.width / 2,
+      currentTopY - currentCurveDepth,
+      size.width,
+      currentTopY,
     );
     path.lineTo(size.width, size.height);
     path.close();

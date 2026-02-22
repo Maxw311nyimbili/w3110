@@ -35,8 +35,20 @@ class _BrandOrbState extends State<BrandOrb> with TickerProviderStateMixin {
     )..repeat();
 
     _scaleAnimation = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.1).chain(CurveTween(curve: Curves.easeInOut)), weight: 50),
-      TweenSequenceItem(tween: Tween(begin: 1.1, end: 1.0).chain(CurveTween(curve: Curves.easeInOut)), weight: 50),
+      TweenSequenceItem(
+        tween: Tween(
+          begin: 1.0,
+          end: 1.1,
+        ).chain(CurveTween(curve: Curves.easeInOut)),
+        weight: 50,
+      ),
+      TweenSequenceItem(
+        tween: Tween(
+          begin: 1.1,
+          end: 1.0,
+        ).chain(CurveTween(curve: Curves.easeInOut)),
+        weight: 50,
+      ),
     ]).animate(_breathingController);
   }
 
@@ -103,8 +115,12 @@ class _OrbPainter extends CustomPainter {
       final count = 12;
       for (var i = 0; i < count; i++) {
         final angle = (i * 2 * math.pi / count) + (rotation * 2 * math.pi);
-        final inner = center + Offset(math.cos(angle), math.sin(angle)) * baseRadius;
-        final outer = center + Offset(math.cos(angle), math.sin(angle)) * (baseRadius * (1.2 + 0.2 * progress));
+        final inner =
+            center + Offset(math.cos(angle), math.sin(angle)) * baseRadius;
+        final outer =
+            center +
+            Offset(math.cos(angle), math.sin(angle)) *
+                (baseRadius * (1.2 + 0.2 * progress));
         canvas.drawLine(inner, outer, rayPaint);
       }
     }

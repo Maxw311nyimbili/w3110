@@ -13,8 +13,8 @@ class ChatRepository {
   ChatRepository({
     required ApiClient apiClient,
     required LocalChatCache localCache,
-  })  : _apiClient = apiClient,
-        _localCache = localCache;
+  }) : _apiClient = apiClient,
+       _localCache = localCache;
 
   final ApiClient _apiClient;
   final LocalChatCache _localCache;
@@ -41,8 +41,8 @@ class ChatRepository {
   /// Backend endpoint: POST /chat/validate
   /// This endpoint can take up to 90 seconds, so we use an extended timeout
   Future<ValidatedAnswerResponse> sendMessageValidated(
-      ChatQueryRequest request,
-      ) async {
+    ChatQueryRequest request,
+  ) async {
     try {
       print('🔄 Sending validated request...');
 
@@ -74,7 +74,10 @@ class ChatRepository {
   }) async {
     try {
       final formData = FormData.fromMap({
-        'audio': await MultipartFile.fromFile(audioPath, filename: 'voice_query.m4a'),
+        'audio': await MultipartFile.fromFile(
+          audioPath,
+          filename: 'voice_query.m4a',
+        ),
         'session_id': sessionId,
         if (userRole != null) 'user_role': userRole,
         if (interests != null) 'interests': interests,

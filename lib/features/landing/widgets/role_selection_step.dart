@@ -55,23 +55,61 @@ class RoleSelectionStep extends StatelessWidget {
                     child: ListView(
                       physics: const BouncingScrollPhysics(),
                       children: [
-                        _buildRoleItem(context, 'Mother', UserRole.mother, state, 'I am expecting or have children', index: 0),
-                        _buildRoleItem(context, 'Support Partner', UserRole.supportPartner, state, 'I am supporting a mother', index: 1),
+                        _buildRoleItem(
+                          context,
+                          'Mother',
+                          UserRole.mother,
+                          state,
+                          'I am expecting or have children',
+                          index: 0,
+                        ),
+                        _buildRoleItem(
+                          context,
+                          'Support Partner',
+                          UserRole.supportPartner,
+                          state,
+                          'I am supporting a mother',
+                          index: 1,
+                        ),
                         const Padding(
                           padding: EdgeInsets.symmetric(vertical: 16),
                           child: Divider(height: 1),
                         ),
-                        _buildRoleItem(context, 'Doctor', UserRole.doctor, state, 'Verified medical professional', isProfessional: true, index: 2),
-                        _buildRoleItem(context, 'Midwife', UserRole.midwife, state, 'Verified birth professional', isProfessional: true, index: 3),
-                        _buildRoleItem(context, 'Clinician', UserRole.clinician, state, 'Healthcare facility staff', isProfessional: true, index: 4),
+                        _buildRoleItem(
+                          context,
+                          'Doctor',
+                          UserRole.doctor,
+                          state,
+                          'Verified medical professional',
+                          isProfessional: true,
+                          index: 2,
+                        ),
+                        _buildRoleItem(
+                          context,
+                          'Midwife',
+                          UserRole.midwife,
+                          state,
+                          'Verified birth professional',
+                          isProfessional: true,
+                          index: 3,
+                        ),
+                        _buildRoleItem(
+                          context,
+                          'Clinician',
+                          UserRole.clinician,
+                          state,
+                          'Healthcare facility staff',
+                          isProfessional: true,
+                          index: 4,
+                        ),
                       ],
                     ),
                   ),
                   Padding(
                     padding: const EdgeInsets.only(bottom: 24),
                     child: PremiumButton(
-                      onPressed: state.canProceed 
-                          ? () => context.read<LandingCubit>().nextStep() 
+                      onPressed: state.canProceed
+                          ? () => context.read<LandingCubit>().nextStep()
                           : null,
                       text: 'Continue',
                     ),
@@ -86,15 +124,16 @@ class RoleSelectionStep extends StatelessWidget {
   }
 
   Widget _buildRoleItem(
-    BuildContext context, 
-    String title, 
-    UserRole role, 
+    BuildContext context,
+    String title,
+    UserRole role,
     LandingState state,
-    String subtitle,
-    {bool isProfessional = false, required int index}
-  ) {
+    String subtitle, {
+    bool isProfessional = false,
+    required int index,
+  }) {
     final isSelected = state.selectedRole == role;
-    
+
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0.0, end: 1.0),
       duration: Duration(milliseconds: 400 + (index * 100)),
@@ -132,7 +171,9 @@ class RoleSelectionStep extends StatelessWidget {
                             Text(
                               title,
                               style: AppTextStyles.headlineSmall.copyWith(
-                                color: isSelected ? AppColors.accentPrimary : AppColors.textPrimary,
+                                color: isSelected
+                                    ? AppColors.accentPrimary
+                                    : AppColors.textPrimary,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
@@ -158,12 +199,16 @@ class RoleSelectionStep extends StatelessWidget {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: isSelected ? AppColors.accentPrimary : AppColors.borderLight,
+                        color: isSelected
+                            ? AppColors.accentPrimary
+                            : AppColors.borderLight,
                         width: 2,
                       ),
-                      color: isSelected ? AppColors.accentPrimary : Colors.transparent,
+                      color: isSelected
+                          ? AppColors.accentPrimary
+                          : Colors.transparent,
                     ),
-                    child: isSelected 
+                    child: isSelected
                         ? const Icon(Icons.check, size: 16, color: Colors.white)
                         : null,
                   ),

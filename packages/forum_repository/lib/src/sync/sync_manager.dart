@@ -11,8 +11,8 @@ class SyncManager {
   SyncManager({
     required ApiClient apiClient,
     required ForumDatabase database,
-  })  : _apiClient = apiClient,
-        _database = database;
+  }) : _apiClient = apiClient,
+       _database = database;
 
   final ApiClient _apiClient;
   final ForumDatabase _database;
@@ -23,15 +23,17 @@ class SyncManager {
     // Get pending items AND failed items that are ready for retry
     final pendingItems = await _database.getPendingSyncItems();
     final failedItems = await _database.getFailedSyncItems();
-    
+
     // Filter failed items where nextRetryAt is in the past or null
     final now = DateTime.now();
-    final retryableFailedItems = failedItems.where((item) => 
-      item.nextRetryAt == null || item.nextRetryAt!.isBefore(now)
-    ).toList();
+    final retryableFailedItems = failedItems
+        .where(
+          (item) => item.nextRetryAt == null || item.nextRetryAt!.isBefore(now),
+        )
+        .toList();
 
     final allItems = [...pendingItems, ...retryableFailedItems];
-    
+
     if (allItems.isEmpty) {
       return;
     }
@@ -64,7 +66,9 @@ class SyncManager {
       } catch (e) {
         // Calculate next retry time with exponential backoff
         final backoffSeconds = _calculateBackoff(item.retryCount);
-        final nextRetryAt = DateTime.now().add(Duration(seconds: backoffSeconds));
+        final nextRetryAt = DateTime.now().add(
+          Duration(seconds: backoffSeconds),
+        );
 
         // Update sync queue with error
         await _database.updateSyncQueueStatus(
@@ -147,7 +151,8 @@ class SyncManager {
           data: {
             'content': comment.content,
             'author_id': comment.authorId,
-            'parent_comment_id': comment.parentCommentId, // This can now be a UUID
+            'parent_comment_id':
+                comment.parentCommentId, // This can now be a UUID
             'client_id': comment.localId,
           },
         );
@@ -212,7 +217,9 @@ class SyncManager {
       await _apiClient.delete('/api/v1/forum/comments/${comment.serverId}');
       await _database.deleteLineComment(comment.localId);
     } else {
-      throw SyncException('Action ${item.action} not supported for line comments');
+      throw SyncException(
+        'Action ${item.action} not supported for line comments',
+      );
     }
   }
 
@@ -238,14 +245,15 @@ class SyncManager {
     }
   }
 
-
   /// Fetch comments for a specific post from server
   Future<List<ForumComment>> fetchCommentsFromServer(String postId) async {
     try {
-      final response = await _apiClient.get('/api/v1/forum/posts/$postId/comments');
+      final response = await _apiClient.get(
+        '/api/v1/forum/posts/$postId/comments',
+      );
 
       final List<dynamic> commentsJson =
-      response.data['comments'] as List<dynamic>;
+          response.data['comments'] as List<dynamic>;
 
       return commentsJson
           .map((json) => ForumComment.fromJson(json as Map<String, dynamic>))

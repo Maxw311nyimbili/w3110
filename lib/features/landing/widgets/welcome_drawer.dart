@@ -49,32 +49,38 @@ class WelcomeDrawer extends StatelessWidget {
                   ),
                 ),
               ),
-              
+
               Padding(
                 padding: const EdgeInsets.fromLTRB(32, 16, 32, 48),
                 child: BlocListener<LandingCubit, LandingState>(
                   listener: (context, state) {
                     if (state.authError != null) {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        content: Text(state.authError!),
-                        backgroundColor: AppColors.error,
-                      ));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(state.authError!),
+                          backgroundColor: AppColors.error,
+                        ),
+                      );
                       context.read<LandingCubit>().clearError();
                     }
-                    
+
                     if (state.userName != null && !state.isGuest) {
                       Navigator.of(context).pop(); // Close drawer
-                      
+
                       // If onboarding is already marked complete in the state,
                       // we don't need to go to landing again.
                       if (state.currentStep == OnboardingStep.complete) {
                         // User is already done, just stay on Chat (the page under the drawer)
-                        print('✅ User already onboarded, staying on current page');
+                        print(
+                          '✅ User already onboarded, staying on current page',
+                        );
                       } else {
                         AppRouter.replaceTo<void>(
-                          context, 
-                          AppRouter.landing, 
-                          arguments: {'initialStep': OnboardingStep.roleSelection},
+                          context,
+                          AppRouter.landing,
+                          arguments: {
+                            'initialStep': OnboardingStep.roleSelection,
+                          },
                         );
                       }
                     }
@@ -110,18 +116,24 @@ class WelcomeDrawer extends StatelessWidget {
                               GoogleSignInButton(
                                 onPressed: state.isAuthenticating
                                     ? null
-                                    : () => context.read<LandingCubit>().authenticateWithGoogle(),
+                                    : () => context
+                                          .read<LandingCubit>()
+                                          .authenticateWithGoogle(),
                                 isLoading: state.isAuthenticating,
                               ),
                               if (state.isDemoAvailable) ...[
                                 const SizedBox(height: 12),
                                 Container(
                                   decoration: BoxDecoration(
-                                    color: AppColors.accentPrimary.withOpacity(0.05),
+                                    color: AppColors.accentPrimary.withOpacity(
+                                      0.05,
+                                    ),
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: TextButton(
-                                    onPressed: () => context.read<LandingCubit>().authenticateAsDemo(),
+                                    onPressed: () => context
+                                        .read<LandingCubit>()
+                                        .authenticateAsDemo(),
                                     child: Text(
                                       'DEMO LOGIN (DEVELOPER BYPASS)',
                                       style: AppTextStyles.labelSmall.copyWith(
