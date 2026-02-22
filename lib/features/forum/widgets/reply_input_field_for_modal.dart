@@ -14,14 +14,15 @@ class ReplyInputFieldForModal extends StatefulWidget {
   final bool isGeneral;
 
   const ReplyInputFieldForModal({
-    super.key, 
+    super.key,
     this.lineId,
     this.postId,
     this.isGeneral = false,
   });
 
   @override
-  State<ReplyInputFieldForModal> createState() => _ReplyInputFieldForModalState();
+  State<ReplyInputFieldForModal> createState() =>
+      _ReplyInputFieldForModalState();
 }
 
 class _ReplyInputFieldForModalState extends State<ReplyInputFieldForModal> {
@@ -55,11 +56,13 @@ class _ReplyInputFieldForModalState extends State<ReplyInputFieldForModal> {
         final authState = context.read<AuthCubit>().state;
         final forumState = context.read<ForumCubit>().state;
         final post = forumState.selectedPost!;
-        
+
         await context.read<ForumCubit>().addComment(
           postId: post.id.isEmpty ? post.localId : post.id,
           content: _textController.text,
-          authorId: authState.user?.id ?? 'guest_${DateTime.now().millisecondsSinceEpoch}',
+          authorId:
+              authState.user?.id ??
+              'guest_${DateTime.now().millisecondsSinceEpoch}',
           authorName: authState.user?.displayName ?? 'Guest',
           parentCommentId: forumState.replyingToComment?.localId,
         );
@@ -68,7 +71,11 @@ class _ReplyInputFieldForModalState extends State<ReplyInputFieldForModal> {
           text: _textController.text,
           commentType: _typeController.value,
           lineId: widget.lineId,
-          parentCommentId: context.read<ForumCubit>().state.replyingToComment?.id,
+          parentCommentId: context
+              .read<ForumCubit>()
+              .state
+              .replyingToComment
+              ?.id,
         );
       }
       _textController.clear();
@@ -84,7 +91,8 @@ class _ReplyInputFieldForModalState extends State<ReplyInputFieldForModal> {
   Widget build(BuildContext context) {
     return BlocListener<ForumCubit, ForumState>(
       listenWhen: (previous, current) =>
-          previous.replyingToComment == null && current.replyingToComment != null,
+          previous.replyingToComment == null &&
+          current.replyingToComment != null,
       listener: (context, state) {
         _focusNode.requestFocus();
       },
@@ -97,11 +105,15 @@ class _ReplyInputFieldForModalState extends State<ReplyInputFieldForModal> {
             // Replying To Banner
             BlocBuilder<ForumCubit, ForumState>(
               builder: (context, state) {
-                if (state.replyingToComment == null) return const SizedBox.shrink();
+                if (state.replyingToComment == null)
+                  return const SizedBox.shrink();
 
                 return Container(
                   margin: const EdgeInsets.only(bottom: 12),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.backgroundElevated,
                     borderRadius: BorderRadius.circular(12),
@@ -109,19 +121,30 @@ class _ReplyInputFieldForModalState extends State<ReplyInputFieldForModal> {
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.reply_rounded, size: 16, color: AppColors.textTertiary),
+                      const Icon(
+                        Icons.reply_rounded,
+                        size: 16,
+                        color: AppColors.textTertiary,
+                      ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           'Replying to ${state.replyingToComment!.authorName}',
-                          style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
+                          style: AppTextStyles.caption.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.close_rounded, size: 16, color: AppColors.textTertiary),
-                        onPressed: () => context.read<ForumCubit>().clearReplyingTo(),
+                        icon: const Icon(
+                          Icons.close_rounded,
+                          size: 16,
+                          color: AppColors.textTertiary,
+                        ),
+                        onPressed: () =>
+                            context.read<ForumCubit>().clearReplyingTo(),
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(),
                       ),
@@ -193,12 +216,21 @@ class _ReplyInputFieldForModalState extends State<ReplyInputFieldForModal> {
                       focusNode: _focusNode,
                       minLines: 1,
                       maxLines: 4,
-                      style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary),
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        color: AppColors.textPrimary,
+                      ),
                       decoration: InputDecoration(
-                        hintText: widget.isGeneral ? 'Add to the discussion...' : 'Share your perspective...',
-                        hintStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.textTertiary),
+                        hintText: widget.isGeneral
+                            ? 'Add to the discussion...'
+                            : 'Share your perspective...',
+                        hintStyle: AppTextStyles.bodyMedium.copyWith(
+                          color: AppColors.textTertiary,
+                        ),
                         border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 10,
+                        ),
                       ),
                     ),
                   ),
@@ -223,7 +255,11 @@ class _ReplyInputFieldForModalState extends State<ReplyInputFieldForModal> {
                           shape: BoxShape.circle,
                         ),
                         child: IconButton(
-                          icon: const Icon(Icons.arrow_upward_rounded, size: 20, color: Colors.white),
+                          icon: const Icon(
+                            Icons.arrow_upward_rounded,
+                            size: 20,
+                            color: Colors.white,
+                          ),
                           onPressed: _handlePost,
                           padding: EdgeInsets.zero,
                         ),
@@ -271,9 +307,9 @@ class _TypeChoiceChip extends StatelessWidget {
         child: Row(
           children: [
             Icon(
-              icon, 
-              size: 14, 
-              color: isSelected ? Colors.white : AppColors.textSecondary
+              icon,
+              size: 14,
+              color: isSelected ? Colors.white : AppColors.textSecondary,
             ),
             const SizedBox(width: 6),
             Text(

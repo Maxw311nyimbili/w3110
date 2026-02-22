@@ -52,7 +52,12 @@ class AppConfig extends Equatable {
   bool get isProduction => environment == Environment.production;
 
   @override
-  List<Object?> get props => [apiBaseUrl, environment, enableLogging, apiTimeout];
+  List<Object?> get props => [
+    apiBaseUrl,
+    environment,
+    enableLogging,
+    apiTimeout,
+  ];
 }
 
 /// Environment enumeration

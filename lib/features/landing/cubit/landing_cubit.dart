@@ -19,11 +19,11 @@ class LandingCubit extends Cubit<LandingState> {
     required AuthRepository authRepository,
     required AuthCubit authCubit,
     bool isDevelopment = false,
-  })  : _landingRepository = landingRepository,
-        _authRepository = authRepository,
-        _authCubit = authCubit,
-        _isDevelopment = isDevelopment,
-        super(LandingState(isDemoAvailable: isDevelopment));
+  }) : _landingRepository = landingRepository,
+       _authRepository = authRepository,
+       _authCubit = authCubit,
+       _isDevelopment = isDevelopment,
+       super(LandingState(isDemoAvailable: isDevelopment));
 
   final LandingRepository _landingRepository;
   final AuthRepository _authRepository;
@@ -38,64 +38,78 @@ class LandingCubit extends Cubit<LandingState> {
 
       if (initialStepOverride != null) {
         print('➡️ Jumping directly to step: $initialStepOverride');
-        emit(state.copyWith(
-          currentStep: initialStepOverride,
-          isLoading: false,
-          isGuest: false,
-        ));
+        emit(
+          state.copyWith(
+            currentStep: initialStepOverride,
+            isLoading: false,
+            isGuest: false,
+          ),
+        );
         return;
       }
 
       final status = await _landingRepository.getOnboardingStatus();
       print('  - Onboarding complete: ${status.isComplete}');
-      
+
       final isAuthenticated = await _authRepository.isAuthenticated();
       print('  - User authenticated: $isAuthenticated');
 
       // Prefer backend's source of truth for onboarding status if authenticated
-      final bool isBackendOnboarded = _authCubit.state.user?.onboardingCompleted ?? false;
-      final bool isOnboarded = (status.isComplete || isBackendOnboarded) && isAuthenticated;
+      final bool isBackendOnboarded =
+          _authCubit.state.user?.onboardingCompleted ?? false;
+      final bool isOnboarded =
+          (status.isComplete || isBackendOnboarded) && isAuthenticated;
 
       if (isOnboarded) {
         print('✅ Onboarding already done, moving to complete');
-        emit(state.copyWith(
-          currentStep: OnboardingStep.complete,
-          isGuest: false,
-          selectedRole: _mapStringToRole(status.userRole),
-          userName: status.userName,
-          accountNickname: status.accountNickname,
-          interests: status.interests,
-          consentGiven: status.consentGiven,
-          consentVersion: status.consentVersion,
-          isLoading: false,
-        ));
+        emit(
+          state.copyWith(
+            currentStep: OnboardingStep.complete,
+            isGuest: false,
+            selectedRole: _mapStringToRole(status.userRole),
+            userName: status.userName,
+            accountNickname: status.accountNickname,
+            interests: status.interests,
+            consentGiven: status.consentGiven,
+            consentVersion: status.consentVersion,
+            isLoading: false,
+          ),
+        );
       } else if (isAuthenticated) {
-        print('ℹ️ User authenticated but onboarding incomplete. Jumping to role selection.');
-        emit(state.copyWith(
-          currentStep: OnboardingStep.roleSelection,
-          isGuest: false,
-          selectedRole: _mapStringToRole(status.userRole),
-          userName: status.userName,
-          accountNickname: status.accountNickname,
-          interests: status.interests,
-          consentGiven: status.consentGiven,
-          consentVersion: status.consentVersion,
-          isLoading: false,
-        ));
+        print(
+          'ℹ️ User authenticated but onboarding incomplete. Jumping to role selection.',
+        );
+        emit(
+          state.copyWith(
+            currentStep: OnboardingStep.roleSelection,
+            isGuest: false,
+            selectedRole: _mapStringToRole(status.userRole),
+            userName: status.userName,
+            accountNickname: status.accountNickname,
+            interests: status.interests,
+            consentGiven: status.consentGiven,
+            consentVersion: status.consentVersion,
+            isLoading: false,
+          ),
+        );
       } else {
         print('ℹ️ Starting onboarding flow');
-        emit(state.copyWith(
-          isLoading: false,
-          isGuest: !isAuthenticated,
-        ));
+        emit(
+          state.copyWith(
+            isLoading: false,
+            isGuest: !isAuthenticated,
+          ),
+        );
       }
     } catch (e, stackTrace) {
       print('❌ ERROR in LandingCubit.initialize: $e');
       print(stackTrace);
-      emit(state.copyWith(
-        isLoading: false,
-        error: 'Failed to load onboarding status: ${e.toString()}',
-      ));
+      emit(
+        state.copyWith(
+          isLoading: false,
+          error: 'Failed to load onboarding status: ${e.toString()}',
+        ),
+      );
     }
   }
 
@@ -110,18 +124,22 @@ class LandingCubit extends Cubit<LandingState> {
   /// Continue as a guest (bypass onboarding for now)
   void continueAsGuest() {
     print('👤 Guest access: bypassing auth and jumping to complete');
-    emit(state.copyWith(
-      currentStep: OnboardingStep.complete,
-      isGuest: true,
-    ));
+    emit(
+      state.copyWith(
+        currentStep: OnboardingStep.complete,
+        isGuest: true,
+      ),
+    );
   }
 
   /// Manually start authentication (from CTA or restricted feature)
   void startAuthentication() {
-    emit(state.copyWith(
-      currentStep: OnboardingStep.authentication,
-      isGuest: false,
-    ));
+    emit(
+      state.copyWith(
+        currentStep: OnboardingStep.authentication,
+        isGuest: false,
+      ),
+    );
   }
 
   /// Move to previous onboarding step
@@ -144,10 +162,12 @@ class LandingCubit extends Cubit<LandingState> {
 
       if (firebaseIdToken == null) {
         print('ℹ️ Google Sign-In was cancelled');
-        emit(state.copyWith(
-          isAuthenticating: false,
-          authError: 'Sign-in was cancelled',
-        ));
+        emit(
+          state.copyWith(
+            isAuthenticating: false,
+            authError: 'Sign-in was cancelled',
+          ),
+        );
         return;
       }
 
@@ -177,11 +197,13 @@ class LandingCubit extends Cubit<LandingState> {
         role: user.role,
       );
 
-      emit(state.copyWith(
-        isAuthenticating: false,
-        authError: null,
-        userName: user.displayName,
-      ));
+      emit(
+        state.copyWith(
+          isAuthenticating: false,
+          authError: null,
+          userName: user.displayName,
+        ),
+      );
 
       // Sync global AuthCubit state immediately
       _authCubit.onUserAuthenticated(authUser);
@@ -190,16 +212,20 @@ class LandingCubit extends Cubit<LandingState> {
       nextStep();
     } on AuthException catch (e) {
       print('❌ Auth error: $e');
-      emit(state.copyWith(
-        isAuthenticating: false,
-        authError: e.message,
-      ));
+      emit(
+        state.copyWith(
+          isAuthenticating: false,
+          authError: e.message,
+        ),
+      );
     } catch (e) {
       print('❌ Sign-in error: $e');
-      emit(state.copyWith(
-        isAuthenticating: false,
-        authError: 'Sign-in failed: ${e.toString()}',
-      ));
+      emit(
+        state.copyWith(
+          isAuthenticating: false,
+          authError: 'Sign-in failed: ${e.toString()}',
+        ),
+      );
     }
   }
 
@@ -210,18 +236,20 @@ class LandingCubit extends Cubit<LandingState> {
 
       // Sign in as demo user via AuthCubit
       await _authCubit.signInAsDemo();
-      
+
       final user = _authCubit.state.user;
       if (user == null) throw Exception('Demo login failed');
 
       print('✓ Demo Authentication complete: ${user.email}');
-      
+
       // Update state with Demo user info
-      emit(state.copyWith(
-        isAuthenticating: false,
-        authError: null,
-        userName: user.displayName,
-      ));
+      emit(
+        state.copyWith(
+          isAuthenticating: false,
+          authError: null,
+          userName: user.displayName,
+        ),
+      );
 
       // Sync global AuthCubit state immediately
       _authCubit.onUserAuthenticated(user);
@@ -230,10 +258,12 @@ class LandingCubit extends Cubit<LandingState> {
       nextStep();
     } catch (e) {
       print('❌ Demo Sign-in error: $e');
-      emit(state.copyWith(
-        isAuthenticating: false,
-        authError: 'Demo Sign-in failed: ${e.toString()}',
-      ));
+      emit(
+        state.copyWith(
+          isAuthenticating: false,
+          authError: 'Demo Sign-in failed: ${e.toString()}',
+        ),
+      );
     }
   }
 
@@ -247,17 +277,20 @@ class LandingCubit extends Cubit<LandingState> {
   /// Select user role
   void selectRole(UserRole role) {
     // Professional roles start as unverified
-    final isProfessional = role == UserRole.doctor || 
-                          role == UserRole.midwife || 
-                          role == UserRole.clinician;
-    
-    emit(state.copyWith(
-      selectedRole: role,
-      isVerified: !isProfessional,
-      verificationStatus: isProfessional ? 'pending' : 'none',
-      // Suggest account nickname based on role
-      accountNickname: _suggestNickname(role, state.userName),
-    ));
+    final isProfessional =
+        role == UserRole.doctor ||
+        role == UserRole.midwife ||
+        role == UserRole.clinician;
+
+    emit(
+      state.copyWith(
+        selectedRole: role,
+        isVerified: !isProfessional,
+        verificationStatus: isProfessional ? 'pending' : 'none',
+        // Suggest account nickname based on role
+        accountNickname: _suggestNickname(role, state.userName),
+      ),
+    );
   }
 
   String _suggestNickname(UserRole role, String? name) {
@@ -294,10 +327,12 @@ class LandingCubit extends Cubit<LandingState> {
 
   /// Give consent
   void giveConsent(bool given, String version) {
-    emit(state.copyWith(
-      consentGiven: given,
-      consentVersion: version,
-    ));
+    emit(
+      state.copyWith(
+        consentGiven: given,
+        consentVersion: version,
+      ),
+    );
   }
 
   /// Complete onboarding - save to local storage
@@ -318,15 +353,19 @@ class LandingCubit extends Cubit<LandingState> {
 
       await _landingRepository.saveOnboardingStatus(onboardingStatus);
 
-      emit(state.copyWith(
-        currentStep: OnboardingStep.complete,
-        isLoading: false,
-      ));
+      emit(
+        state.copyWith(
+          currentStep: OnboardingStep.complete,
+          isLoading: false,
+        ),
+      );
     } catch (e) {
-      emit(state.copyWith(
-        isLoading: false,
-        error: 'Failed to complete onboarding',
-      ));
+      emit(
+        state.copyWith(
+          isLoading: false,
+          error: 'Failed to complete onboarding',
+        ),
+      );
     }
   }
 

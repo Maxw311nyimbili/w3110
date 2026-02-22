@@ -17,12 +17,14 @@ class AuthInterceptor extends Interceptor {
 
   @override
   Future<void> onRequest(
-      RequestOptions options,
-      RequestInterceptorHandler handler,
-      ) async {
+    RequestOptions options,
+    RequestInterceptorHandler handler,
+  ) async {
     print('🔑 AuthInterceptor: ${options.method} ${options.path}');
     print('   Full URL: ${options.uri}');
-    print('   Timeouts - Connect: ${options.connectTimeout}, Receive: ${options.receiveTimeout}');
+    print(
+      '   Timeouts - Connect: ${options.connectTimeout}, Receive: ${options.receiveTimeout}',
+    );
 
     // Skip auth for public endpoints
     if (_isPublicEndpoint(options.path)) {
@@ -37,7 +39,9 @@ class AuthInterceptor extends Interceptor {
 
     if (token != null && token.isNotEmpty) {
       options.headers['Authorization'] = 'Bearer $token';
-      print('✅ Authorization header added: Bearer ${token.substring(0, 15)}...');
+      print(
+        '✅ Authorization header added: Bearer ${token.substring(0, 15)}...',
+      );
     } else {
       print('⚠️  No token available - request may fail');
     }
@@ -47,10 +51,12 @@ class AuthInterceptor extends Interceptor {
 
   @override
   Future<void> onError(
-      DioException err,
-      ErrorInterceptorHandler handler,
-      ) async {
-    print('❌ Request error: ${err.response?.statusCode} ${err.requestOptions.path}');
+    DioException err,
+    ErrorInterceptorHandler handler,
+  ) async {
+    print(
+      '❌ Request error: ${err.response?.statusCode} ${err.requestOptions.path}',
+    );
     print('   Error type: ${err.type}');
     print('   Error message: ${err.message}');
     print('   Request: ${err.requestOptions.method} ${err.requestOptions.uri}');

@@ -18,7 +18,6 @@ import 'package:forum_repository/forum_repository.dart';
 import 'package:landing_repository/landing_repository.dart';
 import 'package:media_repository/media_repository.dart';
 
-
 /// Main app widget
 class App extends StatefulWidget {
   const App({
@@ -51,7 +50,7 @@ class _AppState extends State<App> {
     super.initState();
     _initializeRepositories();
     _setupLocaleListener();
-    
+
     // Restore authentication session on startup
     _authCubit.initialize();
   }
@@ -82,7 +81,7 @@ class _AppState extends State<App> {
         if (savedToken != null && savedToken.isNotEmpty) {
           return savedToken;
         }
-        
+
         /* 
         // 2. Fallback to hardcoded demo token if nothing is saved
         // STASHED: Uncomment for stakeholder demos if needed
@@ -240,8 +239,8 @@ class FlavorBanner extends StatelessWidget {
           textDirection: TextDirection.ltr,
           layoutDirection: TextDirection.ltr,
           location: BannerLocation.topEnd,
-          color: config.isDevelopment 
-              ? Colors.green.withOpacity(0.6) 
+          color: config.isDevelopment
+              ? Colors.green.withOpacity(0.6)
               : Colors.orange.withOpacity(0.6),
         ),
       ),

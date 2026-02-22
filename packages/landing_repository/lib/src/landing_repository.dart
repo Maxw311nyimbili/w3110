@@ -11,8 +11,8 @@ class LandingRepository {
   LandingRepository({
     required ApiClient apiClient,
     required LocalPreferences localPreferences,
-  })  : _apiClient = apiClient,
-        _localPreferences = localPreferences;
+  }) : _apiClient = apiClient,
+       _localPreferences = localPreferences;
 
   final ApiClient _apiClient;
   final LocalPreferences _localPreferences;
@@ -26,7 +26,9 @@ class LandingRepository {
       }
       return const OnboardingStatus(isComplete: false);
     } catch (e) {
-      throw LandingException('Failed to get onboarding status: ${e.toString()}');
+      throw LandingException(
+        'Failed to get onboarding status: ${e.toString()}',
+      );
     }
   }
 
@@ -94,7 +96,9 @@ class LandingRepository {
     try {
       await _localPreferences.clearOnboardingStatus();
     } catch (e) {
-      throw LandingException('Failed to clear onboarding status: ${e.toString()}');
+      throw LandingException(
+        'Failed to clear onboarding status: ${e.toString()}',
+      );
     }
   }
 

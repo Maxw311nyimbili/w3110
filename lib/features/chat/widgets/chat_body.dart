@@ -27,7 +27,8 @@ class ChatBody extends StatefulWidget {
   State<ChatBody> createState() => _ChatBodyState();
 }
 
-class _ChatBodyState extends State<ChatBody> with SingleTickerProviderStateMixin {
+class _ChatBodyState extends State<ChatBody>
+    with SingleTickerProviderStateMixin {
   final ScrollController _scrollController = ScrollController();
   late AnimationController _breathingController;
   bool _showScrollToBottom = false;
@@ -37,7 +38,7 @@ class _ChatBodyState extends State<ChatBody> with SingleTickerProviderStateMixin
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-    
+
     // Breathing animation for Greeting
     _breathingController = AnimationController(
       vsync: this,
@@ -83,7 +84,7 @@ class _ChatBodyState extends State<ChatBody> with SingleTickerProviderStateMixin
   @override
   Widget build(BuildContext context) {
     return BlocListener<ChatCubit, ChatState>(
-      listenWhen: (previous, current) => 
+      listenWhen: (previous, current) =>
           previous.messages.length != current.messages.length ||
           (previous.error == null && current.error != null),
       listener: (context, state) {
@@ -106,13 +107,14 @@ class _ChatBodyState extends State<ChatBody> with SingleTickerProviderStateMixin
             ),
           );
         }
-        
+
         if (state.hasMessages) {
           final lastMessage = state.messages.last;
           if (lastMessage.isUser || state.isTyping) {
             _scrollToLatestMessage();
           } else {
-            if (_scrollController.hasClients && _scrollController.offset > 100) {
+            if (_scrollController.hasClients &&
+                _scrollController.offset > 100) {
               setState(() {
                 _showScrollToBottom = true;
                 _unreadCount++;
@@ -152,9 +154,8 @@ class _ChatBodyState extends State<ChatBody> with SingleTickerProviderStateMixin
                         return _buildMessageList(context, state);
                       },
                     ),
-                    if (_showScrollToBottom)
-                      _buildScrollToBottomButton(),
-                    
+                    if (_showScrollToBottom) _buildScrollToBottomButton(),
+
                     // Subtle Floating Sign-In Chip
                     Positioned(
                       bottom: 8,
@@ -162,7 +163,8 @@ class _ChatBodyState extends State<ChatBody> with SingleTickerProviderStateMixin
                       right: 0,
                       child: BlocBuilder<AuthCubit, AuthState>(
                         builder: (context, state) {
-                          if (state.isAuthenticated) return const SizedBox.shrink();
+                          if (state.isAuthenticated)
+                            return const SizedBox.shrink();
                           return _buildFloatingSignInChip(context);
                         },
                       ),
@@ -263,9 +265,11 @@ class _ChatBodyState extends State<ChatBody> with SingleTickerProviderStateMixin
                             animation: _breathingController,
                             builder: (context, child) {
                               return Transform.scale(
-                                scale: 0.98 + (0.02 * _breathingController.value),
+                                scale:
+                                    0.98 + (0.02 * _breathingController.value),
                                 child: Opacity(
-                                  opacity: 0.5 + (0.5 * _breathingController.value),
+                                  opacity:
+                                      0.5 + (0.5 * _breathingController.value),
                                   child: child,
                                 ),
                               );
@@ -300,7 +304,12 @@ class _ChatBodyState extends State<ChatBody> with SingleTickerProviderStateMixin
       'Stress affects baby’s development.',
     ];
 
-    final dayOfYear = int.parse(DateTime.now().difference(DateTime(DateTime.now().year, 1, 1)).inDays.toString());
+    final dayOfYear = int.parse(
+      DateTime.now()
+          .difference(DateTime(DateTime.now().year, 1, 1))
+          .inDays
+          .toString(),
+    );
     final factIndex = dayOfYear % facts.length;
     final dailyFact = facts[factIndex];
 
@@ -385,9 +394,9 @@ class _ChatBodyState extends State<ChatBody> with SingleTickerProviderStateMixin
         final reversedIndex = state.messages.length - 1 - index;
         final message = state.messages[reversedIndex];
         return RefinedMessageBubble(
-            message: message,
-            key: ValueKey(message.id),
-          );
+          message: message,
+          key: ValueKey(message.id),
+        );
       },
     );
   }
@@ -417,10 +426,16 @@ class _ChatBodyState extends State<ChatBody> with SingleTickerProviderStateMixin
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.arrow_downward_rounded, color: Colors.white, size: 18),
+                const Icon(
+                  Icons.arrow_downward_rounded,
+                  color: Colors.white,
+                  size: 18,
+                ),
                 const SizedBox(width: 8),
                 Text(
-                  _unreadCount > 1 ? '$_unreadCount New Messages' : 'New Message',
+                  _unreadCount > 1
+                      ? '$_unreadCount New Messages'
+                      : 'New Message',
                   style: AppTextStyles.labelMedium.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -449,7 +464,10 @@ class _ChatBodyState extends State<ChatBody> with SingleTickerProviderStateMixin
               onTap: () => WelcomeDrawer.show(context),
               borderRadius: BorderRadius.circular(24),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.18),
                   borderRadius: BorderRadius.circular(24),

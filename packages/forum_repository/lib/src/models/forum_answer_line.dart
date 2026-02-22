@@ -16,22 +16,22 @@ class ForumAnswerLine extends Equatable {
 
   /// Unique ID for this line (e.g., "line_ans_123_1")
   final String lineId;
-  
+
   /// The parent answer ID
   final String answerId;
-  
+
   /// 1-based index of the line in the paragraph
   final int lineNumber;
-  
+
   /// The actual text content
   final String text;
-  
+
   /// Auto-generated topic title (e.g., "Paracetamol Safety")
   final String discussionTitle;
-  
+
   /// Number of approved comments on this line
   final int commentCount;
-  
+
   /// Indices of citations relevant to this line
   final List<int> citationRefs;
 
@@ -43,7 +43,8 @@ class ForumAnswerLine extends Equatable {
       text: json['text'] as String,
       discussionTitle: json['discussion_title'] as String,
       commentCount: json['comment_count'] as int? ?? 0,
-      citationRefs: (json['citation_refs'] as List<dynamic>?)
+      citationRefs:
+          (json['citation_refs'] as List<dynamic>?)
               ?.map((e) => e as int)
               .toList() ??
           const [],
@@ -61,7 +62,7 @@ class ForumAnswerLine extends Equatable {
       'citation_refs': citationRefs,
     };
   }
-  
+
   ForumAnswerLine copyWith({
     String? lineId,
     String? answerId,
@@ -84,12 +85,12 @@ class ForumAnswerLine extends Equatable {
 
   @override
   List<Object?> get props => [
-        lineId,
-        answerId,
-        lineNumber,
-        text,
-        discussionTitle,
-        commentCount,
-        citationRefs,
-      ];
+    lineId,
+    answerId,
+    lineNumber,
+    text,
+    discussionTitle,
+    commentCount,
+    citationRefs,
+  ];
 }

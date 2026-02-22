@@ -20,7 +20,8 @@ class ApiClient {
       BaseOptions(
         baseUrl: baseUrl,
         connectTimeout: connectTimeout ?? const Duration(seconds: 15),
-        receiveTimeout: receiveTimeout ?? const Duration(seconds: 300), // 5 minutes max
+        receiveTimeout:
+            receiveTimeout ?? const Duration(seconds: 300), // 5 minutes max
         sendTimeout: const Duration(seconds: 30),
         headers: {
           'Content-Type': 'application/json',
@@ -61,12 +62,12 @@ class ApiClient {
 
   /// GET request
   Future<Response<T>> get<T>(
-      String path, {
-        Map<String, dynamic>? queryParameters,
-        Map<String, dynamic>? headers,
-        CancelToken? cancelToken,
-        Duration? receiveTimeout,
-      }) async {
+    String path, {
+    Map<String, dynamic>? queryParameters,
+    Map<String, dynamic>? headers,
+    CancelToken? cancelToken,
+    Duration? receiveTimeout,
+  }) async {
     try {
       return await _dio.get<T>(
         path,
@@ -84,13 +85,13 @@ class ApiClient {
 
   /// POST request
   Future<Response<T>> post<T>(
-      String path, {
-        dynamic data,
-        Map<String, dynamic>? queryParameters,
-        Map<String, dynamic>? headers,
-        CancelToken? cancelToken,
-        Duration? receiveTimeout,
-      }) async {
+    String path, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    Map<String, dynamic>? headers,
+    CancelToken? cancelToken,
+    Duration? receiveTimeout,
+  }) async {
     try {
       return await _dio.post<T>(
         path,
@@ -109,13 +110,13 @@ class ApiClient {
 
   /// PUT request
   Future<Response<T>> put<T>(
-      String path, {
-        dynamic data,
-        Map<String, dynamic>? queryParameters,
-        Map<String, dynamic>? headers,
-        CancelToken? cancelToken,
-        Duration? receiveTimeout,
-      }) async {
+    String path, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    Map<String, dynamic>? headers,
+    CancelToken? cancelToken,
+    Duration? receiveTimeout,
+  }) async {
     try {
       return await _dio.put<T>(
         path,
@@ -134,13 +135,13 @@ class ApiClient {
 
   /// PATCH request
   Future<Response<T>> patch<T>(
-      String path, {
-        dynamic data,
-        Map<String, dynamic>? queryParameters,
-        Map<String, dynamic>? headers,
-        CancelToken? cancelToken,
-        Duration? receiveTimeout,
-      }) async {
+    String path, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    Map<String, dynamic>? headers,
+    CancelToken? cancelToken,
+    Duration? receiveTimeout,
+  }) async {
     try {
       return await _dio.patch<T>(
         path,
@@ -159,13 +160,13 @@ class ApiClient {
 
   /// DELETE request
   Future<Response<T>> delete<T>(
-      String path, {
-        dynamic data,
-        Map<String, dynamic>? queryParameters,
-        Map<String, dynamic>? headers,
-        CancelToken? cancelToken,
-        Duration? receiveTimeout,
-      }) async {
+    String path, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    Map<String, dynamic>? headers,
+    CancelToken? cancelToken,
+    Duration? receiveTimeout,
+  }) async {
     try {
       return await _dio.delete<T>(
         path,
@@ -184,14 +185,14 @@ class ApiClient {
 
   /// Upload file (multipart)
   Future<Response<T>> uploadFile<T>(
-      String path, {
-        required String filePath,
-        required String fieldName,
-        Map<String, dynamic>? additionalData,
-        Map<String, dynamic>? headers,
-        ProgressCallback? onSendProgress,
-        CancelToken? cancelToken,
-      }) async {
+    String path, {
+    required String filePath,
+    required String fieldName,
+    Map<String, dynamic>? additionalData,
+    Map<String, dynamic>? headers,
+    ProgressCallback? onSendProgress,
+    CancelToken? cancelToken,
+  }) async {
     try {
       final formData = FormData.fromMap({
         fieldName: await MultipartFile.fromFile(filePath),
@@ -212,12 +213,12 @@ class ApiClient {
 
   /// Download file
   Future<Response> downloadFile(
-      String path,
-      String savePath, {
-        Map<String, dynamic>? queryParameters,
-        ProgressCallback? onReceiveProgress,
-        CancelToken? cancelToken,
-      }) async {
+    String path,
+    String savePath, {
+    Map<String, dynamic>? queryParameters,
+    ProgressCallback? onReceiveProgress,
+    CancelToken? cancelToken,
+  }) async {
     try {
       return await _dio.download(
         path,

@@ -38,14 +38,16 @@ class ScanResult extends Equatable {
       medicationName: json['medication_name'] as String,
       confidence: (json['confidence'] as num).toDouble(),
       barcode: json['barcode'] as String?,
-      activeIngredients: (json['active_ingredients'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList() ??
+      activeIngredients:
+          (json['active_ingredients'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
           const [],
       dosageInfo: json['dosage_info'] as String?,
-      warnings: (json['warnings'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList() ??
+      warnings:
+          (json['warnings'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
           const [],
     );
   }

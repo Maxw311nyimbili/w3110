@@ -51,11 +51,11 @@ class ForumLineComment extends Equatable {
   final CommentType commentType;
   final String text;
   final DateTime createdAt;
-  
-  final String? authorProfession; 
+
+  final String? authorProfession;
   final String? authorAvatarUrl;
-  final String? parentCommentId; 
-  
+  final String? parentCommentId;
+
   final int likeCount;
   final bool isLiked;
   final SyncStatus syncStatus;
@@ -65,35 +65,49 @@ class ForumLineComment extends Equatable {
   // Helpers for UI badges
   String get roleLabel {
     switch (authorRole) {
-      case CommentRole.clinician: return 'Clinician';
-      case CommentRole.mother: return 'Mother';
-      case CommentRole.community: return 'Community';
-      case CommentRole.supportPartner: return 'Support Partner';
-      default: return '';
+      case CommentRole.clinician:
+        return 'Clinician';
+      case CommentRole.mother:
+        return 'Mother';
+      case CommentRole.community:
+        return 'Community';
+      case CommentRole.supportPartner:
+        return 'Support Partner';
+      default:
+        return '';
     }
   }
 
   String get typeLabel {
     switch (commentType) {
-      case CommentType.clinical: return 'Clinical Interpretation';
-      case CommentType.evidence: return 'Supporting Evidence';
-      case CommentType.experience: return 'Lived Experience';
-      case CommentType.concern: return 'Concern';
-      default: return 'Comment';
+      case CommentType.clinical:
+        return 'Clinical Interpretation';
+      case CommentType.evidence:
+        return 'Supporting Evidence';
+      case CommentType.experience:
+        return 'Lived Experience';
+      case CommentType.concern:
+        return 'Concern';
+      default:
+        return 'Comment';
     }
   }
 
   factory ForumLineComment.fromJson(Map<String, dynamic> json) {
     return ForumLineComment(
       id: json['comment_id']?.toString() ?? '',
-      localId: json['local_id']?.toString() ?? (json['comment_id']?.toString() ?? ''),
+      localId:
+          json['local_id']?.toString() ??
+          (json['comment_id']?.toString() ?? ''),
       lineId: (json['line_id'] ?? '').toString(),
       authorId: (json['author_id'] ?? '').toString(),
       authorName: json['author_name']?.toString() ?? 'Unknown',
       authorRole: _parseRole(json['author_role'] as String?),
       commentType: _parseType(json['comment_type'] as String?),
       text: json['text']?.toString() ?? '',
-      createdAt: json['created_at'] != null ? DateTime.parse(json['created_at'] as String) : DateTime.now(),
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'] as String)
+          : DateTime.now(),
       authorProfession: json['author_profession'] as String?,
       authorAvatarUrl: json['author_avatar_url'] as String?,
       parentCommentId: json['parent_comment_id']?.toString(),
@@ -109,18 +123,24 @@ class ForumLineComment extends Equatable {
     final r = role?.toLowerCase() ?? '';
     if (r == 'clinician') return CommentRole.clinician;
     if (r == 'mother') return CommentRole.mother;
-    if (r == 'support_partner' || r == 'supportpartner') return CommentRole.supportPartner;
+    if (r == 'support_partner' || r == 'supportpartner')
+      return CommentRole.supportPartner;
     if (r.contains('community')) return CommentRole.community;
     return CommentRole.unknown;
   }
-  
+
   static CommentType _parseType(String? type) {
     switch (type?.toLowerCase()) {
-      case 'clinical': return CommentType.clinical;
-      case 'evidence': return CommentType.evidence;
-      case 'experience': return CommentType.experience;
-      case 'concern': return CommentType.concern;
-      default: return CommentType.general;
+      case 'clinical':
+        return CommentType.clinical;
+      case 'evidence':
+        return CommentType.evidence;
+      case 'experience':
+        return CommentType.experience;
+      case 'concern':
+        return CommentType.concern;
+      default:
+        return CommentType.general;
     }
   }
 
@@ -185,17 +205,34 @@ class ForumLineComment extends Equatable {
 
   static SyncStatus _parseSyncStatus(String status) {
     switch (status) {
-      case 'pending': return SyncStatus.pending;
-      case 'syncing': return SyncStatus.syncing;
-      case 'error': return SyncStatus.error;
-      default: return SyncStatus.synced;
+      case 'pending':
+        return SyncStatus.pending;
+      case 'syncing':
+        return SyncStatus.syncing;
+      case 'error':
+        return SyncStatus.error;
+      default:
+        return SyncStatus.synced;
     }
   }
 
   @override
   List<Object?> get props => [
-    id, localId, lineId, authorId, authorName, authorRole, commentType, 
-    text, createdAt, authorProfession, parentCommentId, 
-    likeCount, isLiked, syncStatus, isDeleted, version
+    id,
+    localId,
+    lineId,
+    authorId,
+    authorName,
+    authorRole,
+    commentType,
+    text,
+    createdAt,
+    authorProfession,
+    parentCommentId,
+    likeCount,
+    isLiked,
+    syncStatus,
+    isDeleted,
+    version,
   ];
 }

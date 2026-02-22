@@ -29,5 +29,11 @@ class ChatQueryRequest extends Equatable {
   }
 
   @override
-  List<Object?> get props => [query, conversationId, imageUrl, userRole, interests];
+  List<Object?> get props => [
+    query,
+    conversationId,
+    imageUrl,
+    userRole,
+    interests,
+  ];
 }

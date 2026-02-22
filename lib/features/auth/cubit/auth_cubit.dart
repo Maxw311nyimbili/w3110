@@ -16,8 +16,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class AuthCubit extends Cubit<AuthState> {
   AuthCubit({
     required AuthRepository authRepository,
-  })  : _authRepository = authRepository,
-        super(const AuthState());
+  }) : _authRepository = authRepository,
+       super(const AuthState());
 
   final AuthRepository _authRepository;
 
@@ -39,13 +39,17 @@ class AuthCubit extends Cubit<AuthState> {
 
         if (user != null) {
           print('✓ User session restored: ${user.email}');
-          emit(state.copyWith(
-            status: AuthStatus.authenticated,
-            user: _mapToAuthUser(user),
-          ));
+          emit(
+            state.copyWith(
+              status: AuthStatus.authenticated,
+              user: _mapToAuthUser(user),
+            ),
+          );
           return;
         } else {
-          print('⚠️ Session tokens valid but user not found on backend. Clearing stale session.');
+          print(
+            '⚠️ Session tokens valid but user not found on backend. Clearing stale session.',
+          );
           await _authRepository.signOut();
         }
       }
@@ -55,10 +59,12 @@ class AuthCubit extends Cubit<AuthState> {
       emit(state.copyWith(status: AuthStatus.unauthenticated));
     } catch (e) {
       print('❌ Auth initialization error: $e');
-      emit(state.copyWith(
-        status: AuthStatus.error,
-        error: 'Failed to initialize authentication',
-      ));
+      emit(
+        state.copyWith(
+          status: AuthStatus.error,
+          error: 'Failed to initialize authentication',
+        ),
+      );
     }
   }
 
@@ -85,10 +91,12 @@ class AuthCubit extends Cubit<AuthState> {
 
       if (firebaseIdToken == null) {
         print('ℹ️ Google Sign-In was cancelled');
-        emit(state.copyWith(
-          status: AuthStatus.unauthenticated,
-          error: 'Sign-in was cancelled',
-        ));
+        emit(
+          state.copyWith(
+            status: AuthStatus.unauthenticated,
+            error: 'Sign-in was cancelled',
+          ),
+        );
         return;
       }
 
@@ -115,22 +123,28 @@ class AuthCubit extends Cubit<AuthState> {
       print('✓ Authentication complete: ${user.email}');
 
       // Step 4: Update state to authenticated
-      emit(state.copyWith(
-        status: AuthStatus.authenticated,
-        user: _mapToAuthUser(user),
-      ));
+      emit(
+        state.copyWith(
+          status: AuthStatus.authenticated,
+          user: _mapToAuthUser(user),
+        ),
+      );
     } on AuthException catch (e) {
       print('❌ Auth error: $e');
-      emit(state.copyWith(
-        status: AuthStatus.error,
-        error: e.message,
-      ));
+      emit(
+        state.copyWith(
+          status: AuthStatus.error,
+          error: e.message,
+        ),
+      );
     } catch (e) {
       print('❌ Sign-in error: $e');
-      emit(state.copyWith(
-        status: AuthStatus.error,
-        error: 'Sign-in failed: ${e.toString()}',
-      ));
+      emit(
+        state.copyWith(
+          status: AuthStatus.error,
+          error: 'Sign-in failed: ${e.toString()}',
+        ),
+      );
     }
   }
 
@@ -139,15 +153,19 @@ class AuthCubit extends Cubit<AuthState> {
     try {
       emit(state.copyWith(status: AuthStatus.loading));
       final user = await _authRepository.signInAsDemo();
-      emit(state.copyWith(
-        status: AuthStatus.authenticated,
-        user: _mapToAuthUser(user),
-      ));
+      emit(
+        state.copyWith(
+          status: AuthStatus.authenticated,
+          user: _mapToAuthUser(user),
+        ),
+      );
     } catch (e) {
-      emit(state.copyWith(
-        status: AuthStatus.error,
-        error: 'Demo sign-in failed',
-      ));
+      emit(
+        state.copyWith(
+          status: AuthStatus.error,
+          error: 'Demo sign-in failed',
+        ),
+      );
     }
   }
 
@@ -169,22 +187,28 @@ class AuthCubit extends Cubit<AuthState> {
 
       print('✓ Signed out successfully');
 
-      emit(state.copyWith(
-        status: AuthStatus.unauthenticated,
-        user: null,
-      ));
+      emit(
+        state.copyWith(
+          status: AuthStatus.unauthenticated,
+          user: null,
+        ),
+      );
     } on AuthException catch (e) {
       print('❌ Sign-out error: $e');
-      emit(state.copyWith(
-        status: AuthStatus.error,
-        error: e.message,
-      ));
+      emit(
+        state.copyWith(
+          status: AuthStatus.error,
+          error: e.message,
+        ),
+      );
     } catch (e) {
       print('❌ Sign-out error: $e');
-      emit(state.copyWith(
-        status: AuthStatus.error,
-        error: 'Sign-out failed: ${e.toString()}',
-      ));
+      emit(
+        state.copyWith(
+          status: AuthStatus.error,
+          error: 'Sign-out failed: ${e.toString()}',
+        ),
+      );
     }
   }
 
@@ -210,18 +234,22 @@ class AuthCubit extends Cubit<AuthState> {
       // Optionally update user info
       final user = await _authRepository.getCurrentUser();
       if (user != null) {
-        emit(state.copyWith(
-          user: _mapToAuthUser(user),
-        ));
+        emit(
+          state.copyWith(
+            user: _mapToAuthUser(user),
+          ),
+        );
       }
     } on AuthException catch (e) {
       print('❌ Token refresh failed: $e');
       // Refresh failed - sign out user
       await signOut();
-      emit(state.copyWith(
-        status: AuthStatus.error,
-        error: 'Session expired. Please sign in again.',
-      ));
+      emit(
+        state.copyWith(
+          status: AuthStatus.error,
+          error: 'Session expired. Please sign in again.',
+        ),
+      );
     } catch (e) {
       print(' Refresh error: $e');
       await signOut();
@@ -231,10 +259,12 @@ class AuthCubit extends Cubit<AuthState> {
   /// Called externally when user authenticates via another flow (e.g. Landing/Onboarding)
   /// to sync the global authentication state immediately.
   void onUserAuthenticated(AuthUser user) {
-    emit(state.copyWith(
-      status: AuthStatus.authenticated,
-      user: user,
-    ));
+    emit(
+      state.copyWith(
+        status: AuthStatus.authenticated,
+        user: user,
+      ),
+    );
   }
 
   /// Clear error state

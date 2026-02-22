@@ -40,7 +40,7 @@ class LanguageSelectorBottomSheet extends StatelessWidget {
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
-            
+
             // Title
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
@@ -52,15 +52,16 @@ class LanguageSelectorBottomSheet extends StatelessWidget {
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Language options
             BlocBuilder<LocaleCubit, LocaleState>(
               builder: (context, state) {
                 return Column(
                   children: LocaleState.supportedLocales.map((locale) {
-                    final isSelected = state.locale.languageCode == locale.languageCode;
+                    final isSelected =
+                        state.locale.languageCode == locale.languageCode;
                     return _LanguageOption(
                       locale: locale,
                       isSelected: isSelected,
@@ -73,7 +74,7 @@ class LanguageSelectorBottomSheet extends StatelessWidget {
                 );
               },
             ),
-            
+
             const SizedBox(height: 8),
           ],
         ),
@@ -127,9 +128,9 @@ class _LanguageOption extends StatelessWidget {
                   size: 20,
                 ),
               ),
-              
+
               const SizedBox(width: 16),
-              
+
               // Language name
               Expanded(
                 child: Text(
@@ -143,7 +144,7 @@ class _LanguageOption extends StatelessWidget {
                   ),
                 ),
               ),
-              
+
               // Selected indicator
               if (isSelected)
                 Icon(

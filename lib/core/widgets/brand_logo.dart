@@ -16,7 +16,8 @@ class BrandLogo extends StatefulWidget {
   State<BrandLogo> createState() => _BrandLogoState();
 }
 
-class _BrandLogoState extends State<BrandLogo> with SingleTickerProviderStateMixin {
+class _BrandLogoState extends State<BrandLogo>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
 

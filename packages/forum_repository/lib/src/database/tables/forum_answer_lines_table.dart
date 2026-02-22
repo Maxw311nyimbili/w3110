@@ -6,15 +6,15 @@ import 'package:drift/drift.dart';
 @DataClassName('ForumAnswerLineData')
 class ForumAnswerLines extends Table {
   TextColumn get lineId => text()();
-  
+
   // Link to parent answer (seed) OR post
   TextColumn get answerId => text().nullable()();
   IntColumn get postId => integer().nullable()();
-  
+
   IntColumn get lineNumber => integer()();
   TextColumn get textContent => text()();
   TextColumn get discussionTitle => text().nullable()();
-  
+
   // Engagement
   IntColumn get commentCount => integer().withDefault(const Constant(0))();
 

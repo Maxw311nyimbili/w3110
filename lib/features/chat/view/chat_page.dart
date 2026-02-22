@@ -10,7 +10,8 @@ import 'package:cap_project/features/auth/cubit/cubit.dart';
 import 'package:cap_project/core/services/audio_recording_service.dart';
 import 'package:cap_project/features/landing/widgets/welcome_drawer.dart';
 import 'package:cap_project/features/landing/cubit/cubit.dart';
-import 'package:cap_project/features/medscanner/cubit/medscanner_state.dart' as scanner;
+import 'package:cap_project/features/medscanner/cubit/medscanner_state.dart'
+    as scanner;
 import '../cubit/cubit.dart';
 import '../widgets/widgets.dart';
 
@@ -45,7 +46,9 @@ class _ChatPageState extends State<ChatPage> {
 
   Future<void> _initializeApp() async {
     try {
-      final status = await context.read<LandingRepository>().getOnboardingStatus();
+      final status = await context
+          .read<LandingRepository>()
+          .getOnboardingStatus();
       if (mounted) {
         setState(() {
           _onboardingStatus = status;
@@ -68,18 +71,18 @@ class _ChatPageState extends State<ChatPage> {
 
   void _handleEntryStatus(OnboardingStatus status) {
     final authState = context.read<AuthCubit>().state;
-    
+
     // 1. If not authenticated, show the Welcome Drawer (Gate)
     if (authState.status != AuthStatus.authenticated) {
       WelcomeDrawer.show(context);
       return;
     }
-    
+
     // 2. If authenticated but hasn't finished personalization, guide them back
     if (!status.isComplete) {
       AppRouter.replaceTo<void>(
-        context, 
-        AppRouter.landing, 
+        context,
+        AppRouter.landing,
         arguments: {'initialStep': OnboardingStep.roleSelection},
       );
     }
@@ -94,7 +97,7 @@ class _ChatPageState extends State<ChatPage> {
     }
 
     final locale = context.read<LocaleCubit>().state.locale.languageCode;
-    
+
     return MultiBlocProvider(
       providers: [
         BlocProvider(
@@ -111,11 +114,11 @@ class _ChatPageState extends State<ChatPage> {
             if (widget.initialScanResult != null) {
               cubit.addMedicineResult(widget.initialScanResult!);
             }
-            
+
             context.read<LocaleCubit>().stream.listen((localeState) {
               cubit.setLocale(localeState.locale.languageCode);
             });
-            
+
             return cubit;
           },
         ),
@@ -154,7 +157,7 @@ class _ChatViewState extends State<ChatView> {
     final authState = context.watch<AuthCubit>().state;
     final user = authState.user;
     final status = widget.onboardingStatus;
-    
+
     return Scaffold(
       resizeToAvoidBottomInset: true,
       backgroundColor: AppColors.backgroundPrimary,
@@ -164,7 +167,10 @@ class _ChatViewState extends State<ChatView> {
             // Custom Header
             if (!_isAudioMode)
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.backgroundPrimary,
                   border: Border(
@@ -178,7 +184,10 @@ class _ChatViewState extends State<ChatView> {
                   children: [
                     // Profile / Settings Button
                     GestureDetector(
-                      onTap: () => AppRouter.navigateTo<void>(context, AppRouter.settings),
+                      onTap: () => AppRouter.navigateTo<void>(
+                        context,
+                        AppRouter.settings,
+                      ),
                       child: Container(
                         width: 40,
                         height: 40,
@@ -225,8 +234,15 @@ class _ChatViewState extends State<ChatView> {
                         border: Border.all(color: AppColors.borderLight),
                       ),
                       child: IconButton(
-                        icon: const Icon(Icons.forum_outlined, size: 20, color: AppColors.textPrimary),
-                        onPressed: () => AppRouter.navigateTo<void>(context, AppRouter.forum),
+                        icon: const Icon(
+                          Icons.forum_outlined,
+                          size: 20,
+                          color: AppColors.textPrimary,
+                        ),
+                        onPressed: () => AppRouter.navigateTo<void>(
+                          context,
+                          AppRouter.forum,
+                        ),
                         tooltip: 'Community Forum',
                       ),
                     ),

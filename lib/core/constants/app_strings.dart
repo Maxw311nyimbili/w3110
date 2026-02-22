@@ -31,7 +31,8 @@ class AppStrings {
   // Chat
   static const String chatInputHint = 'Ask a health question...';
   static const String chatEmptyState = 'Start a conversation';
-  static const String chatErrorGeneric = 'Something went wrong. Please try again.';
+  static const String chatErrorGeneric =
+      'Something went wrong. Please try again.';
 
   // Confidence
   static const String confidenceHigh = 'High confidence';

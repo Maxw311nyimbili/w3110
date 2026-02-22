@@ -18,9 +18,9 @@ class MediaRepository {
   MediaRepository({
     required ApiClient apiClient,
     required ImageProcessor imageProcessor,
-  })  : _apiClient = apiClient,
-        _imageProcessor = imageProcessor,
-        _imagePicker = ImagePicker();
+  }) : _apiClient = apiClient,
+       _imageProcessor = imageProcessor,
+       _imagePicker = ImagePicker();
 
   final ApiClient _apiClient;
   final ImageProcessor _imageProcessor;
@@ -31,7 +31,8 @@ class MediaRepository {
 
   // Getters
   CameraController? get cameraController => _cameraController;
-  bool get isCameraInitialized => _cameraController?.value.isInitialized ?? false;
+  bool get isCameraInitialized =>
+      _cameraController?.value.isInitialized ?? false;
 
   /// Check camera permission
   Future<bool> checkCameraPermission() async {
@@ -76,7 +77,7 @@ class MediaRepository {
 
       // Get back camera (index 0 is usually back camera)
       final backCamera = _cameras.firstWhere(
-            (camera) => camera.lensDirection == CameraLensDirection.back,
+        (camera) => camera.lensDirection == CameraLensDirection.back,
         orElse: () => _cameras.first,
       );
 
@@ -97,7 +98,8 @@ class MediaRepository {
   /// Returns local file path
   Future<String?> captureImage() async {
     try {
-      if (_cameraController == null || !_cameraController!.value.isInitialized) {
+      if (_cameraController == null ||
+          !_cameraController!.value.isInitialized) {
         throw MediaException('Camera not initialized');
       }
 

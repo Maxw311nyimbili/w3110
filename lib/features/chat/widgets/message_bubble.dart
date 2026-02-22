@@ -71,8 +71,8 @@ class RefinedMessageBubble extends StatelessWidget {
   Widget _buildAIMessage(BuildContext context) {
     // Use the persisted state from the message model
     final isDetailed = message.showingDetailedView;
-    
-    var content = isDetailed 
+
+    var content = isDetailed
         ? (message.detailedAnswer ?? message.content)
         : (message.quickAnswer ?? message.content);
 
@@ -80,7 +80,7 @@ class RefinedMessageBubble extends StatelessWidget {
     // We want sources to be available regardless of which view (Quick/Detailed) is active.
     // Priority: Structured sources -> Detailed Answer Text -> Quick Answer Text -> Content
     List<models.SourceReference> displaySources = List.from(message.sources);
-    
+
     if (displaySources.isEmpty) {
       if (message.detailedAnswer != null) {
         displaySources.addAll(_extractSourcesFromText(message.detailedAnswer!));
@@ -96,7 +96,10 @@ class RefinedMessageBubble extends StatelessWidget {
     // 2. Strip References from the CURRENTLY displayed content
     // We don't want to show the duplicate text list if we are showing cards
     // Robust finding of References section
-    final referencesRegex = RegExp(r'(?:^|\n)(?:References|Sources):', caseSensitive: false);
+    final referencesRegex = RegExp(
+      r'(?:^|\n)(?:References|Sources):',
+      caseSensitive: false,
+    );
     final match = referencesRegex.firstMatch(content);
     if (match != null) {
       // Check if it looks like a references section (followed by bullets or content)
@@ -124,8 +127,7 @@ class RefinedMessageBubble extends StatelessWidget {
                     fit: BoxFit.contain,
                   ),
                   const Spacer(),
-                  if (message.isDualMode)
-                    _buildModeToggle(context, isDetailed),
+                  if (message.isDualMode) _buildModeToggle(context, isDetailed),
                 ],
               ),
             ),
@@ -166,10 +168,13 @@ class RefinedMessageBubble extends StatelessWidget {
                       alignment: Alignment.topLeft,
                       child: BlocBuilder<ForumCubit, ForumState>(
                         builder: (context, forumState) {
-                          final isForumOpen = forumState.currentAnswerId == message.id;
+                          final isForumOpen =
+                              forumState.currentAnswerId == message.id;
 
                           if (isForumOpen) {
-                            return AnswerReaderWithComments(answerId: message.id);
+                            return AnswerReaderWithComments(
+                              answerId: message.id,
+                            );
                           }
 
                           return MarkdownBody(
@@ -230,7 +235,9 @@ class RefinedMessageBubble extends StatelessWidget {
                               codeblockDecoration: BoxDecoration(
                                 color: AppColors.backgroundElevated,
                                 borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: AppColors.borderLight),
+                                border: Border.all(
+                                  color: AppColors.borderLight,
+                                ),
                               ),
                               tableHead: AppTextStyles.labelSmall.copyWith(
                                 fontWeight: FontWeight.w700,
@@ -274,62 +281,74 @@ class RefinedMessageBubble extends StatelessWidget {
 
   List<models.SourceReference> _extractSourcesFromText(String text) {
     final List<models.SourceReference> sources = [];
-    final referencesRegex = RegExp(r'(?:^|\n)(?:References|Sources):', caseSensitive: false);
+    final referencesRegex = RegExp(
+      r'(?:^|\n)(?:References|Sources):',
+      caseSensitive: false,
+    );
     final match = referencesRegex.firstMatch(text);
-    
+
     if (match != null) {
       // Get everything after the "References:" header
       final referencesSection = text.substring(match.end).trim();
       final lines = referencesSection.split('\n');
-      
+
       for (final line in lines) {
         final trimmedLine = line.trim();
         // Check if it looks like a list item
-        if (trimmedLine.startsWith('*') || trimmedLine.startsWith('-') || RegExp(r'^\d+\.').hasMatch(trimmedLine)) {
-           // Remove the bullet/number
-           final sourceText = trimmedLine.replaceFirst(RegExp(r'^(\*|-|\d+\.)\s*'), '').trim();
-           
-           if (sourceText.isNotEmpty) {
-             // 1. Try to find a URL
-             // exclude trailing punctuation like ) ] . ,
-             final urlRegex = RegExp(r'https?://[^\s)\]]+'); 
-             final urlMatch = urlRegex.firstMatch(sourceText);
-             var url = urlMatch?.group(0) ?? '';
-             
-             // Clean the URL
-              if (url.endsWith('.') || url.endsWith(',')) {
-                url = url.substring(0, url.length - 1);
-              }
+        if (trimmedLine.startsWith('*') ||
+            trimmedLine.startsWith('-') ||
+            RegExp(r'^\d+\.').hasMatch(trimmedLine)) {
+          // Remove the bullet/number
+          final sourceText = trimmedLine
+              .replaceFirst(RegExp(r'^(\*|-|\d+\.)\s*'), '')
+              .trim();
 
-             final title = sourceText.replaceAll(urlRegex, '').trim().replaceAll(RegExp(r'[\[\]()]'), '');
-             
-             // Fallback for missing URLs: Search Google
-             final finalUrl = url.isNotEmpty 
-                 ? url 
-                 : 'https://www.google.com/search?q=${Uri.encodeComponent(title)}';
-             
-             final finalDomain = url.isNotEmpty 
-                 ? (_extractDomain(url) ?? 'Source') 
-                 : 'Google Search';
+          if (sourceText.isNotEmpty) {
+            // 1. Try to find a URL
+            // exclude trailing punctuation like ) ] . ,
+            final urlRegex = RegExp(r'https?://[^\s)\]]+');
+            final urlMatch = urlRegex.firstMatch(sourceText);
+            var url = urlMatch?.group(0) ?? '';
 
-              sources.add(models.SourceReference(
+            // Clean the URL
+            if (url.endsWith('.') || url.endsWith(',')) {
+              url = url.substring(0, url.length - 1);
+            }
+
+            final title = sourceText
+                .replaceAll(urlRegex, '')
+                .trim()
+                .replaceAll(RegExp(r'[\[\]()]'), '');
+
+            // Fallback for missing URLs: Search Google
+            final finalUrl = url.isNotEmpty
+                ? url
+                : 'https://www.google.com/search?q=${Uri.encodeComponent(title)}';
+
+            final finalDomain = url.isNotEmpty
+                ? (_extractDomain(url) ?? 'Source')
+                : 'Google Search';
+
+            sources.add(
+              models.SourceReference(
                 title: title.isEmpty ? 'Reference' : title,
                 url: finalUrl,
                 domain: finalDomain,
-              ));
-            }
-         }
-       }
-     }
-     return sources;
-   }
+              ),
+            );
+          }
+        }
+      }
+    }
+    return sources;
+  }
 
   Future<void> _launchURL(String url) async {
     if (url.isEmpty) return;
     try {
       final uri = Uri.parse(url);
       if (await canLaunchUrl(uri)) {
-         await launchUrl(uri, mode: LaunchMode.externalApplication);
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
       } else {
         debugPrint('Could not launch $url');
       }
@@ -369,7 +388,10 @@ class RefinedMessageBubble extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: AppColors.backgroundSurface,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppColors.borderLight.withOpacity(0.6), width: 1),
+                    border: Border.all(
+                      color: AppColors.borderLight.withOpacity(0.6),
+                      width: 1,
+                    ),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.03),
@@ -383,37 +405,39 @@ class RefinedMessageBubble extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                           // Clean Index Indicator
-                           Container(
-                             width: 16,
-                             height: 16,
-                             alignment: Alignment.center,
-                             decoration: BoxDecoration(
-                               color: AppColors.accentLight,
-                               shape: BoxShape.circle,
-                             ),
-                             child: Text(
-                               '${index + 1}',
-                               style: const TextStyle(
-                                 fontSize: 10,
-                                 fontWeight: FontWeight.bold,
-                                 color: AppColors.brandDarkTeal,
-                               ),
-                             ),
-                           ),
-                           const SizedBox(width: 8),
-                           // Domain
-                           Expanded(
-                             child: Text(
-                               source.domain ?? _extractDomain(source.url) ?? 'Source',
-                               maxLines: 1,
-                               overflow: TextOverflow.ellipsis,
-                               style: AppTextStyles.caption.copyWith(
-                                 color: AppColors.textSecondary,
-                                 fontSize: 11,
-                               ),
-                             ),
-                           ),
+                          // Clean Index Indicator
+                          Container(
+                            width: 16,
+                            height: 16,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: AppColors.accentLight,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Text(
+                              '${index + 1}',
+                              style: const TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.brandDarkTeal,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          // Domain
+                          Expanded(
+                            child: Text(
+                              source.domain ??
+                                  _extractDomain(source.url) ??
+                                  'Source',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTextStyles.caption.copyWith(
+                                color: AppColors.textSecondary,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                       const Spacer(),
@@ -478,13 +502,15 @@ class RefinedMessageBubble extends StatelessWidget {
         decoration: BoxDecoration(
           color: active ? AppColors.brandDarkTeal : Colors.transparent,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: active ? [
-            BoxShadow(
-              color: AppColors.brandDarkTeal.withOpacity(0.18),
-              blurRadius: 4,
-              offset: const Offset(0, 1),
-            )
-          ] : null,
+          boxShadow: active
+              ? [
+                  BoxShadow(
+                    color: AppColors.brandDarkTeal.withOpacity(0.18),
+                    blurRadius: 4,
+                    offset: const Offset(0, 1),
+                  ),
+                ]
+              : null,
         ),
         child: Text(
           label,
@@ -497,7 +523,10 @@ class RefinedMessageBubble extends StatelessWidget {
     );
   }
 
-  Widget _buildFooter(BuildContext context, List<models.SourceReference> sources) {
+  Widget _buildFooter(
+    BuildContext context,
+    List<models.SourceReference> sources,
+  ) {
     return Row(
       children: [
         _buildActionIcon(Icons.thumb_up_alt_outlined, () {}),
@@ -507,12 +536,12 @@ class RefinedMessageBubble extends StatelessWidget {
         _buildActionIcon(Icons.copy_rounded, () {}),
         const SizedBox(width: 8),
         _buildActionIcon(
-          Icons.forum_outlined, 
+          Icons.forum_outlined,
           () => context.read<ForumCubit>().toggleForumView(message.id),
         ), // Added Forum Discuss Action
         const SizedBox(width: 8),
         _buildActionIcon(
-          Icons.share_outlined, 
+          Icons.share_outlined,
           () => _shareToForum(context, sources),
         ),
         const Spacer(),
@@ -525,7 +554,11 @@ class RefinedMessageBubble extends StatelessWidget {
             ),
             child: Row(
               children: [
-                const Icon(Icons.bolt_rounded, size: 12, color: AppColors.textSecondary),
+                const Icon(
+                  Icons.bolt_rounded,
+                  size: 12,
+                  color: AppColors.textSecondary,
+                ),
                 const SizedBox(width: 4),
                 Text(
                   '${(message.latencyMs! / 1000).toStringAsFixed(1)}s',
@@ -557,10 +590,13 @@ class RefinedMessageBubble extends StatelessWidget {
     );
   }
 
-  Future<void> _shareToForum(BuildContext context, List<models.SourceReference> sources) async {
+  Future<void> _shareToForum(
+    BuildContext context,
+    List<models.SourceReference> sources,
+  ) async {
     final forumCubit = context.read<ForumCubit>();
     final content = message.content;
-    
+
     // Show a quick loading snackbar
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
@@ -579,11 +615,15 @@ class RefinedMessageBubble extends StatelessWidget {
 
       if (!context.mounted) return;
 
-      final forumSources = sources.map((s) => ForumPostSource(
-        title: s.title,
-        url: s.url,
-        snippet: s.snippet,
-      )).toList();
+      final forumSources = sources
+          .map(
+            (s) => ForumPostSource(
+              title: s.title,
+              url: s.url,
+              snippet: s.snippet,
+            ),
+          )
+          .toList();
 
       showModalBottomSheet(
         context: context,

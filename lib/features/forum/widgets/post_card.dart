@@ -79,12 +79,11 @@ class PostCard extends StatelessWidget {
                   ),
                 ),
                 const Spacer(),
-                if (currentUserId == post.authorId)
-                  _buildActions(context),
+                if (currentUserId == post.authorId) _buildActions(context),
               ],
             ),
             const SizedBox(height: 16),
-            
+
             // Title
             Text(
               post.title,
@@ -97,7 +96,7 @@ class PostCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            
+
             // Content Preview
             Text(
               post.content,
@@ -110,7 +109,7 @@ class PostCard extends StatelessWidget {
                 fontWeight: FontWeight.w400,
               ),
             ),
-            
+
             // Footer: Tags and Comments Count
             const SizedBox(height: 16),
             Row(
@@ -121,19 +120,28 @@ class PostCard extends StatelessWidget {
                       scrollDirection: Axis.horizontal,
                       physics: const BouncingScrollPhysics(),
                       child: Row(
-                        children: post.tags.map((tag) => _buildTag(tag)).toList(),
+                        children: post.tags
+                            .map((tag) => _buildTag(tag))
+                            .toList(),
                       ),
                     ),
                   ),
                 if (post.commentCount > 0) ...[
                   const SizedBox(width: 12),
-                  _buildStat(Icons.chat_bubble_outline_rounded, post.commentCount.toString()),
+                  _buildStat(
+                    Icons.chat_bubble_outline_rounded,
+                    post.commentCount.toString(),
+                  ),
                 ],
                 const SizedBox(width: 12),
-                                _buildStat(
-                  post.isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded, 
+                _buildStat(
+                  post.isLiked
+                      ? Icons.favorite_rounded
+                      : Icons.favorite_border_rounded,
                   post.likeCount.toString(),
-                  color: post.isLiked ? AppColors.error : AppColors.textTertiary,
+                  color: post.isLiked
+                      ? AppColors.error
+                      : AppColors.textTertiary,
                 ),
               ],
             ),
@@ -166,7 +174,11 @@ class PostCard extends StatelessWidget {
 
   Widget _buildActions(BuildContext context) {
     return PopupMenuButton<String>(
-      icon: const Icon(Icons.more_vert_rounded, size: 18, color: AppColors.textTertiary),
+      icon: const Icon(
+        Icons.more_vert_rounded,
+        size: 18,
+        color: AppColors.textTertiary,
+      ),
       onSelected: (value) {
         if (value == 'edit') {
           _showEditDialog(context);
@@ -334,5 +346,4 @@ class _PressableScaleState extends State<_PressableScale> {
       ),
     );
   }
-
 }

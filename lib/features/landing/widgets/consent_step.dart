@@ -26,7 +26,10 @@ class ConsentStep extends StatelessWidget {
           ),
           body: SafeArea(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 24),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 24.0,
+                vertical: 24,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -45,19 +48,28 @@ class ConsentStep extends StatelessWidget {
                   ),
 
                   const SizedBox(height: 32),
-                  
+
                   // Staggered Items
                   _buildStaggeredEntrance(
                     delay: 200,
-                    child: _buildTermItem('AI Assistance', 'MedLink uses AI. It is not a substitute for professional medical advice.'),
+                    child: _buildTermItem(
+                      'AI Assistance',
+                      'MedLink uses AI. It is not a substitute for professional medical advice.',
+                    ),
                   ),
                   _buildStaggeredEntrance(
                     delay: 300,
-                    child: _buildTermItem('Emergency', 'If this is an emergency, call 911 immediately.'),
+                    child: _buildTermItem(
+                      'Emergency',
+                      'If this is an emergency, call 911 immediately.',
+                    ),
                   ),
                   _buildStaggeredEntrance(
                     delay: 400,
-                    child: _buildTermItem('Privacy', 'Your data is private and encrypted.'),
+                    child: _buildTermItem(
+                      'Privacy',
+                      'Your data is private and encrypted.',
+                    ),
                   ),
 
                   const Spacer(),
@@ -72,11 +84,16 @@ class ConsentStep extends StatelessWidget {
                           Checkbox(
                             value: state.consentGiven,
                             onChanged: (value) {
-                              context.read<LandingCubit>().giveConsent(value ?? false, AppConstants.currentConsentVersion);
+                              context.read<LandingCubit>().giveConsent(
+                                value ?? false,
+                                AppConstants.currentConsentVersion,
+                              );
                             },
                             activeColor: AppColors.accentPrimary,
                             checkColor: Colors.white,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(6),
+                            ),
                           ),
                           Expanded(
                             child: Text(
@@ -98,7 +115,9 @@ class ConsentStep extends StatelessWidget {
                     delay: 600,
                     child: PremiumButton(
                       onPressed: state.consentGiven
-                          ? () => context.read<LandingCubit>().completeOnboarding()
+                          ? () => context
+                                .read<LandingCubit>()
+                                .completeOnboarding()
                           : null,
                       text: 'Complete Setup',
                     ),
@@ -142,7 +161,11 @@ class ConsentStep extends StatelessWidget {
               color: AppColors.accentPrimary.withOpacity(0.06),
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.info_outline, size: 18, color: AppColors.accentPrimary),
+            child: Icon(
+              Icons.info_outline,
+              size: 18,
+              color: AppColors.accentPrimary,
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(

@@ -40,11 +40,13 @@ class ValidatedAnswerResponse extends Equatable {
       status: json['status'] as String? ?? 'unknown',
       validatedAnswer: json['validated_answer'] != null
           ? ValidatedAnswer.fromJson(
-          json['validated_answer'] as Map<String, dynamic>)
+              json['validated_answer'] as Map<String, dynamic>,
+            )
           : null,
       refusalResponse: json['refusal_response'] != null
           ? RefusalResponse.fromJson(
-          json['refusal_response'] as Map<String, dynamic>)
+              json['refusal_response'] as Map<String, dynamic>,
+            )
           : null,
       processingTimeMs: json['processing_time_ms'] as int? ?? 0,
       sessionId: json['session_id'] as String? ?? '',
@@ -90,12 +92,15 @@ class ValidatedAnswer extends Equatable {
   factory ValidatedAnswer.fromJson(Map<String, dynamic> json) {
     return ValidatedAnswer(
       originalAnswer: json['original_answer'] as String? ?? '',
-      validatedSentences: (json['validated_sentences'] as List?)
-          ?.map((s) =>
-          SentenceValidation.fromJson(s as Map<String, dynamic>))
-          .toList() ??
+      validatedSentences:
+          (json['validated_sentences'] as List?)
+              ?.map(
+                (s) => SentenceValidation.fromJson(s as Map<String, dynamic>),
+              )
+              .toList() ??
           [],
-      overallConfidence: (json['overall_confidence'] as num?)?.toDouble() ?? 0.0,
+      overallConfidence:
+          (json['overall_confidence'] as num?)?.toDouble() ?? 0.0,
       disclaimer: json['disclaimer'] as String? ?? '',
       auditId: json['audit_id'] as String? ?? '',
       processingTimeMs: json['processing_time_ms'] as int? ?? 0,
@@ -140,9 +145,10 @@ class SentenceValidation extends Equatable {
       credibility: (json['credibility'] as num?)?.toDouble() ?? 0.0,
       confidenceLabel: json['confidence_label'] as String? ?? 'LOW',
       status: json['status'] as String? ?? 'UNKNOWN',
-      citations: (json['citations'] as List?)
-          ?.map((c) => Citation.fromJson(c as Map<String, dynamic>))
-          .toList() ??
+      citations:
+          (json['citations'] as List?)
+              ?.map((c) => Citation.fromJson(c as Map<String, dynamic>))
+              .toList() ??
           [],
       warning: json['warning'] as String?,
     );
@@ -177,7 +183,8 @@ class Citation extends Equatable {
       refId: json['ref_id'] as int? ?? 0,
       fragmentText: json['fragment_text'] as String? ?? '',
       source: CitationSource.fromJson(
-          json['source'] as Map<String, dynamic>? ?? {}),
+        json['source'] as Map<String, dynamic>? ?? {},
+      ),
     );
   }
 

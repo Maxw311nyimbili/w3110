@@ -62,7 +62,9 @@ class ImageProcessor {
       final compressedFile = File(compressedFileName);
       await compressedFile.writeAsBytes(compressed);
 
-      print('✅ Image compressed: ${(compressed.length / 1024).toStringAsFixed(2)}KB');
+      print(
+        '✅ Image compressed: ${(compressed.length / 1024).toStringAsFixed(2)}KB',
+      );
       return compressedFileName;
     } catch (e) {
       if (e is MediaException) rethrow;

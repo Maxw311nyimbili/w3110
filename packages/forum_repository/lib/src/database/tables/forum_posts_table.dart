@@ -24,7 +24,8 @@ class ForumPosts extends Table {
   // Engagement metrics
   IntColumn get commentCount => integer().withDefault(const Constant(0))();
   IntColumn get likeCount => integer().withDefault(const Constant(0))();
-  IntColumn get viewCount => integer().nullable().withDefault(const Constant(0))();
+  IntColumn get viewCount =>
+      integer().nullable().withDefault(const Constant(0))();
   BoolColumn get isLiked => boolean().withDefault(const Constant(false))();
 
   // Sync status: 'synced', 'pending', 'syncing', 'error'

@@ -137,7 +137,11 @@ class ConfidenceIndicator extends StatelessWidget {
     );
   }
 
-  Widget _buildConfidenceExample(String title, String description, Color color) {
+  Widget _buildConfidenceExample(
+    String title,
+    String description,
+    Color color,
+  ) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

@@ -5,8 +5,8 @@ class EntryAnimation extends StatefulWidget {
   final Duration delay;
 
   const EntryAnimation({
-    super.key, 
-    required this.child, 
+    super.key,
+    required this.child,
     this.delay = const Duration(milliseconds: 0),
   });
 
@@ -14,7 +14,8 @@ class EntryAnimation extends StatefulWidget {
   State<EntryAnimation> createState() => _EntryAnimationState();
 }
 
-class _EntryAnimationState extends State<EntryAnimation> with SingleTickerProviderStateMixin {
+class _EntryAnimationState extends State<EntryAnimation>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
@@ -32,13 +33,16 @@ class _EntryAnimationState extends State<EntryAnimation> with SingleTickerProvid
       curve: Curves.easeOut,
     );
 
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.1), // Slide up slightly
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOutCubic,
-    ));
+    _slideAnimation =
+        Tween<Offset>(
+          begin: const Offset(0, 0.1), // Slide up slightly
+          end: Offset.zero,
+        ).animate(
+          CurvedAnimation(
+            parent: _controller,
+            curve: Curves.easeOutCubic,
+          ),
+        );
 
     Future.delayed(widget.delay, () {
       if (mounted) _controller.forward();

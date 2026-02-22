@@ -62,8 +62,8 @@ class MedScannerBody extends StatelessWidget {
         // Handle success - navigate back to chat with result
         if (state.status == MedScannerStatus.success && state.hasResult) {
           final result = state.scanResult!;
-          // We need access to ChatCubit here. 
-          // Since MedScannerPage is usually pushed from ChatPage, 
+          // We need access to ChatCubit here.
+          // Since MedScannerPage is usually pushed from ChatPage,
           // we can return the result via Navigator.pop
           Navigator.pop(context, result);
         }
@@ -99,16 +99,16 @@ class MedScannerBody extends StatelessWidget {
           right: 0,
           height: 200,
           child: Container(
-             decoration: BoxDecoration(
-               gradient: LinearGradient(
-                 begin: Alignment.bottomCenter,
-                 end: Alignment.topCenter,
-                 colors: [
-                   Colors.black.withOpacity(0.8),
-                   Colors.transparent,
-                 ],
-               ),
-             ),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.bottomCenter,
+                end: Alignment.topCenter,
+                colors: [
+                  Colors.black.withOpacity(0.8),
+                  Colors.transparent,
+                ],
+              ),
+            ),
           ),
         ),
 
@@ -132,17 +132,19 @@ class MedScannerBody extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
-              
+
               // Controls Row
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                   // Gallery Button (Glassy)
+                  // Gallery Button (Glassy)
                   _GlassActionButton(
                     icon: Icons.photo_library_rounded,
                     onPressed: state.isProcessing
                         ? null
-                        : () => context.read<MedScannerCubit>().pickImageFromGallery(),
+                        : () => context
+                              .read<MedScannerCubit>()
+                              .pickImageFromGallery(),
                   ),
 
                   // Shutter Button (Premium)
@@ -156,7 +158,7 @@ class MedScannerBody extends StatelessWidget {
                   // Spacer/Placeholder for symmetry (or maybe Flash?)
                   // Let's add a placeholder glassy button or nothing for now.
                   // Actually, let's keep it balanced.
-                  const SizedBox(width: 56), 
+                  const SizedBox(width: 56),
                 ],
               ),
             ],
@@ -235,7 +237,7 @@ class _PremiumShutterButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isEnabled = onPressed != null;
-    
+
     return GestureDetector(
       onTap: onPressed,
       child: Container(

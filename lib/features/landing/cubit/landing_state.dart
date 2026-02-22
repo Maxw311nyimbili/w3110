@@ -61,8 +61,10 @@ class LandingState extends Equatable {
       case OnboardingStep.roleSelection:
         return selectedRole != null;
       case OnboardingStep.profileSetup:
-        return userName != null && userName!.isNotEmpty && 
-               accountNickname != null && accountNickname!.isNotEmpty;
+        return userName != null &&
+            userName!.isNotEmpty &&
+            accountNickname != null &&
+            accountNickname!.isNotEmpty;
       case OnboardingStep.contextGathering:
         return true;
       case OnboardingStep.consent:

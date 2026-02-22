@@ -95,7 +95,7 @@ class _NewPostSheetState extends State<NewPostSheet> {
               ),
             ),
           ),
-          
+
           // Action Bar
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
@@ -114,7 +114,10 @@ class _NewPostSheetState extends State<NewPostSheet> {
                 GestureDetector(
                   onTap: _submit,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.accentPrimary,
                       borderRadius: BorderRadius.circular(20),
@@ -131,9 +134,9 @@ class _NewPostSheetState extends State<NewPostSheet> {
               ],
             ),
           ),
-          
+
           const Divider(height: 1, color: AppColors.borderLight),
-          
+
           Flexible(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24),
@@ -151,7 +154,9 @@ class _NewPostSheetState extends State<NewPostSheet> {
                       ),
                       decoration: InputDecoration(
                         hintText: 'Title',
-                        hintStyle: TextStyle(color: AppColors.textTertiary.withOpacity(0.5)),
+                        hintStyle: TextStyle(
+                          color: AppColors.textTertiary.withOpacity(0.5),
+                        ),
                         border: InputBorder.none,
                         enabledBorder: InputBorder.none,
                         focusedBorder: InputBorder.none,
@@ -159,7 +164,9 @@ class _NewPostSheetState extends State<NewPostSheet> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return AppLocalizations.of(context).discussionTitleError;
+                          return AppLocalizations.of(
+                            context,
+                          ).discussionTitleError;
                         }
                         return null;
                       },
@@ -174,7 +181,9 @@ class _NewPostSheetState extends State<NewPostSheet> {
                       ),
                       decoration: InputDecoration(
                         hintText: 'Start a discussion...',
-                        hintStyle: TextStyle(color: AppColors.textTertiary.withOpacity(0.5)),
+                        hintStyle: TextStyle(
+                          color: AppColors.textTertiary.withOpacity(0.5),
+                        ),
                         border: InputBorder.none,
                         enabledBorder: InputBorder.none,
                         focusedBorder: InputBorder.none,
@@ -192,4 +201,3 @@ class _NewPostSheetState extends State<NewPostSheet> {
     );
   }
 }
-

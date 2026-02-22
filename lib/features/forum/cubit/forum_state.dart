@@ -16,8 +16,8 @@ enum ForumView {
 }
 
 enum PostFilter {
-  all,    // Show all community posts
-  mine,   // Show only user's posts
+  all, // Show all community posts
+  mine, // Show only user's posts
 }
 
 /// Helper model for tracking what we are replying to
@@ -48,15 +48,15 @@ class ForumState extends Equatable {
     this.searchQuery = '',
     this.selectedPost,
     this.comments = const [],
-    
+
     this.answerLines = const [],
     this.currentAnswerId,
     this.selectedLineId,
     this.lineComments = const [],
     this.activeFilter = 'all',
-    
+
     this.postFilter = PostFilter.all,
-    
+
     this.error,
     this.isSyncing = false,
     this.isSearching = false,
@@ -67,24 +67,24 @@ class ForumState extends Equatable {
 
   final ForumStatus status;
   final ForumView view;
-  
+
   // Legacy/General Forum
   final List<ForumPost> posts;
   final List<ForumPost> searchResults;
   final String searchQuery;
   final ForumPost? selectedPost;
   final List<ForumComment> comments;
-  
+
   // New: Line-Level Discussion
   final String? currentAnswerId; // The ID of the answer currently in forum view
   final List<ForumAnswerLine> answerLines;
   final String? selectedLineId; // Currently tappable line
   final List<ForumLineComment> lineComments; // Comments for the selected line
   final String activeFilter; // 'all', 'clinician', etc.
-  
+
   // Post filtering
   final PostFilter postFilter;
-  
+
   final String? error;
   final bool isSyncing;
   final bool isSearching;
@@ -96,15 +96,15 @@ class ForumState extends Equatable {
   bool get isLoading => status == ForumStatus.loading;
   bool get hasPosts => posts.isNotEmpty;
   bool get hasComments => comments.isNotEmpty;
-  
+
   List<ForumPost> get displayPosts => isSearching ? searchResults : posts;
-  
+
   // Return either general comments or line comments based on view context
   // BUT UI expects a simple list for ThreadSummaryHeader
   List<ForumComment> get displayComments => comments;
-  
+
   // COMPATIBILITY GETTER for UI
-  String? get errorMessage => error; 
+  String? get errorMessage => error;
 
   ForumState copyWith({
     ForumStatus? status,
@@ -114,15 +114,15 @@ class ForumState extends Equatable {
     String? searchQuery,
     ForumPost? selectedPost,
     List<ForumComment>? comments,
-    
+
     List<ForumAnswerLine>? answerLines,
     String? currentAnswerId,
     String? selectedLineId,
     List<ForumLineComment>? lineComments,
     String? activeFilter,
-    
+
     PostFilter? postFilter,
-    
+
     String? error,
     bool? isSyncing,
     bool? isSearching,
@@ -138,15 +138,15 @@ class ForumState extends Equatable {
       searchQuery: searchQuery ?? this.searchQuery,
       selectedPost: selectedPost ?? this.selectedPost,
       comments: comments ?? this.comments,
-      
+
       answerLines: answerLines ?? this.answerLines,
       currentAnswerId: currentAnswerId ?? this.currentAnswerId,
-      selectedLineId: selectedLineId ?? this.selectedLineId, 
+      selectedLineId: selectedLineId ?? this.selectedLineId,
       lineComments: lineComments ?? this.lineComments,
       activeFilter: activeFilter ?? this.activeFilter,
-      
+
       postFilter: postFilter ?? this.postFilter,
-      
+
       error: error,
       isSyncing: isSyncing ?? this.isSyncing,
       isSearching: isSearching ?? this.isSearching,
@@ -155,7 +155,7 @@ class ForumState extends Equatable {
       replyingToComment: replyingToComment ?? this.replyingToComment,
     );
   }
-  
+
   // Special copyWith to allow clearing nullable fields
   ForumState copyWithNullableLineId({
     List<ForumAnswerLine>? answerLines,
@@ -166,7 +166,7 @@ class ForumState extends Equatable {
     bool clearAnswerId = false,
     bool clearReplyingTo = false,
   }) {
-     return ForumState(
+    return ForumState(
       status: status,
       view: view,
       posts: posts,
@@ -175,8 +175,12 @@ class ForumState extends Equatable {
       selectedPost: selectedPost,
       comments: comments,
       answerLines: answerLines ?? this.answerLines,
-      currentAnswerId: clearAnswerId ? null : (currentAnswerId ?? this.currentAnswerId),
-      selectedLineId: clearLineId ? null : (selectedLineId ?? this.selectedLineId),
+      currentAnswerId: clearAnswerId
+          ? null
+          : (currentAnswerId ?? this.currentAnswerId),
+      selectedLineId: clearLineId
+          ? null
+          : (selectedLineId ?? this.selectedLineId),
       lineComments: lineComments ?? this.lineComments,
       activeFilter: activeFilter,
       postFilter: postFilter,
@@ -185,14 +189,16 @@ class ForumState extends Equatable {
       isSearching: isSearching,
       hasPendingSync: hasPendingSync,
       lastSyncTime: lastSyncTime,
-      replyingToComment: clearReplyingTo ? null : (replyingToComment ?? this.replyingToComment),
+      replyingToComment: clearReplyingTo
+          ? null
+          : (replyingToComment ?? this.replyingToComment),
     );
   }
 
   ForumState clearError() {
     return copyWith(error: null);
   }
-  
+
   // Helper to find title for a line
   String? getLineDiscussionTitle(String lineId) {
     try {
@@ -201,7 +207,7 @@ class ForumState extends Equatable {
       return null;
     }
   }
-  
+
   // Helper to get text for a line
   String getLineText(String lineId) {
     try {
@@ -210,7 +216,7 @@ class ForumState extends Equatable {
       return '';
     }
   }
-  
+
   // Helper to get comment count
   int getCommentCountForLine(String lineId) {
     try {
@@ -219,7 +225,7 @@ class ForumState extends Equatable {
       return 0;
     }
   }
-  
+
   // Helper to retrieve all comments for a line (optionally filtering is done in UI or Cubit, but state has the source)
   List<ForumLineComment> getCommentsForLine(String lineId) {
     // If we only store *currently selected* line comments, this is just that list.

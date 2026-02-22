@@ -16,24 +16,24 @@ class ForumBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-        return BlocBuilder<ForumCubit, ForumState>(
-          builder: (context, state) {
-            if (state.view == ForumView.detail && state.selectedPost != null) {
-              return ForumDetailView(post: state.selectedPost!);
-            }
+    return BlocBuilder<ForumCubit, ForumState>(
+      builder: (context, state) {
+        if (state.view == ForumView.detail && state.selectedPost != null) {
+          return ForumDetailView(post: state.selectedPost!);
+        }
 
-            return Column(
-              children: [
-                _buildSearchBar(context),
-                _buildFilterToggle(context, state),
-                Expanded(
-                  child: _buildMainContent(context, state),
-                ),
-              ],
-            );
-          },
+        return Column(
+          children: [
+            _buildSearchBar(context),
+            _buildFilterToggle(context, state),
+            Expanded(
+              child: _buildMainContent(context, state),
+            ),
+          ],
         );
-      }
+      },
+    );
+  }
 
   Widget _buildFilterToggle(BuildContext context, ForumState state) {
     return Container(
@@ -50,7 +50,8 @@ class ForumBody extends StatelessWidget {
               context,
               label: 'All Posts',
               isSelected: state.postFilter == PostFilter.all,
-              onTap: () => context.read<ForumCubit>().setPostFilter(PostFilter.all),
+              onTap: () =>
+                  context.read<ForumCubit>().setPostFilter(PostFilter.all),
             ),
           ),
           Expanded(
@@ -58,7 +59,8 @@ class ForumBody extends StatelessWidget {
               context,
               label: 'My Posts',
               isSelected: state.postFilter == PostFilter.mine,
-              onTap: () => context.read<ForumCubit>().setPostFilter(PostFilter.mine),
+              onTap: () =>
+                  context.read<ForumCubit>().setPostFilter(PostFilter.mine),
             ),
           ),
         ],
@@ -118,13 +120,13 @@ class ForumBody extends StatelessWidget {
 
     // Get filtered posts based on current filter
     final cubit = context.read<ForumCubit>();
-    
+
     return FutureBuilder<String>(
       future: cubit.getCurrentUserId(),
       builder: (context, snapshot) {
         final userId = snapshot.data ?? '';
-        final displayPosts = state.isSearching 
-            ? state.searchResults 
+        final displayPosts = state.isSearching
+            ? state.searchResults
             : cubit.getFilteredPosts(userId);
 
         if (displayPosts.isEmpty) {
@@ -145,7 +147,11 @@ class ForumBody extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
                   child: Row(
                     children: [
-                      const Icon(Icons.auto_awesome_rounded, size: 18, color: AppColors.accentPrimary),
+                      const Icon(
+                        Icons.auto_awesome_rounded,
+                        size: 18,
+                        color: AppColors.accentPrimary,
+                      ),
                       const SizedBox(width: 8),
                       Text(
                         'Recommended for You',
@@ -182,8 +188,14 @@ class ForumBody extends StatelessWidget {
         style: AppTextStyles.bodyLarge,
         decoration: InputDecoration(
           hintText: 'Search or ask for recommendations...',
-          hintStyle: AppTextStyles.bodyLarge.copyWith(color: AppColors.textTertiary),
-          prefixIcon: Icon(Icons.search_rounded, color: AppColors.textSecondary, size: 20),
+          hintStyle: AppTextStyles.bodyLarge.copyWith(
+            color: AppColors.textTertiary,
+          ),
+          prefixIcon: Icon(
+            Icons.search_rounded,
+            color: AppColors.textSecondary,
+            size: 20,
+          ),
           filled: true,
           fillColor: AppColors.backgroundSurface,
           border: OutlineInputBorder(
@@ -207,7 +219,10 @@ class ForumBody extends StatelessWidget {
               width: 1.5,
             ),
           ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 20,
+            vertical: 14,
+          ),
         ),
       ),
     );
@@ -218,11 +233,24 @@ class ForumBody extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.error_outline_rounded, size: 48, color: AppColors.error),
+          const Icon(
+            Icons.error_outline_rounded,
+            size: 48,
+            color: AppColors.error,
+          ),
           const SizedBox(height: 16),
-          Text(AppLocalizations.of(context).somethingWentWrong, style: AppTextStyles.headlineSmall),
+          Text(
+            AppLocalizations.of(context).somethingWentWrong,
+            style: AppTextStyles.headlineSmall,
+          ),
           const SizedBox(height: 8),
-          Text(state.errorMessage!, style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary), textAlign: TextAlign.center),
+          Text(
+            state.errorMessage!,
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: AppColors.textSecondary,
+            ),
+            textAlign: TextAlign.center,
+          ),
           const SizedBox(height: 24),
           OutlinedButton(
             onPressed: () => context.read<ForumCubit>().initialize(),
@@ -241,22 +269,28 @@ class ForumBody extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              state.isSearching ? Icons.search_off_rounded : Icons.forum_outlined,
+              state.isSearching
+                  ? Icons.search_off_rounded
+                  : Icons.forum_outlined,
               size: 64,
               color: AppColors.textTertiary.withOpacity(0.5),
             ),
             const SizedBox(height: 16),
             Text(
               state.isSearching ? 'No results found' : 'Community is quiet',
-              style: AppTextStyles.headlineSmall.copyWith(color: AppColors.textSecondary),
+              style: AppTextStyles.headlineSmall.copyWith(
+                color: AppColors.textSecondary,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             Text(
-              state.isSearching 
-                  ? 'Try another search term' 
+              state.isSearching
+                  ? 'Try another search term'
                   : 'Discussions start from your consultations. Chat with AI to share a finding.',
-              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textTertiary),
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.textTertiary,
+              ),
               textAlign: TextAlign.center,
             ),
             if (!state.isSearching) ...[

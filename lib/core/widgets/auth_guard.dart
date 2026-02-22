@@ -74,7 +74,11 @@ class AuthGuard extends StatelessWidget {
                 PremiumButton(
                   onPressed: () {
                     // Navigate to landing but force authentication step
-                    AppRouter.navigateTo(context, AppRouter.landing, arguments: {'forceAuth': true});
+                    AppRouter.navigateTo(
+                      context,
+                      AppRouter.landing,
+                      arguments: {'forceAuth': true},
+                    );
                   },
                   text: 'Sign In',
                 ),

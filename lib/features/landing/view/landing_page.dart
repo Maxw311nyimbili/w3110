@@ -20,8 +20,10 @@ class LandingPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Trigger initialization on first build
-    context.read<LandingCubit>().initialize(initialStepOverride: initialStepOverride);
-    
+    context.read<LandingCubit>().initialize(
+      initialStepOverride: initialStepOverride,
+    );
+
     return const LandingView();
   }
 }

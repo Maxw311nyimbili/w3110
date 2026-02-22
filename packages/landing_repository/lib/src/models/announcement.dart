@@ -36,5 +36,12 @@ class Announcement extends Equatable {
   }
 
   @override
-  List<Object?> get props => [id, title, message, createdAt, expiresAt, priority];
+  List<Object?> get props => [
+    id,
+    title,
+    message,
+    createdAt,
+    expiresAt,
+    priority,
+  ];
 }

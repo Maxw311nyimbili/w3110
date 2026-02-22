@@ -135,8 +135,9 @@ class _AppButtonState extends State<AppButton>
                         height: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(_foregroundColor),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            _foregroundColor,
+                          ),
                         ),
                       )
                     : Text(

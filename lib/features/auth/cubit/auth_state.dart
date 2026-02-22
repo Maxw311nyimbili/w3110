@@ -69,5 +69,12 @@ class AuthUser extends Equatable {
   final bool onboardingCompleted;
 
   @override
-  List<Object?> get props => [id, email, displayName, photoUrl, role, onboardingCompleted];
+  List<Object?> get props => [
+    id,
+    email,
+    displayName,
+    photoUrl,
+    role,
+    onboardingCompleted,
+  ];
 }
