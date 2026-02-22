@@ -371,17 +371,17 @@ class ForumCubit extends Cubit<ForumState> {
         authorId: authorId,
         authorName: authorName,
         content: content,
-        createdAt: now,
-        syncStatus: SyncStatus.pending,
-      );
-
-      // Save locally
-      await _forumRepository.createLocalComment(
-        localId: localId,
+    String? parentCommentId,
+  }) async {
+    try {
+      final effectiveParentId = parentCommentId ?? (state.replyingToComment?.isLineComment == false ? state.replyingToComment?.id : null);
+      
+      final comment = await _forumRepository.addComment(
         postId: postId,
         content: content,
         authorId: authorId,
         authorName: authorName,
+        parentCommentId: effectiveParentId,
       );
 
       // Add to sync queue
@@ -402,7 +402,10 @@ class ForumCubit extends Cubit<ForumState> {
         final updatedPost = state.selectedPost!.copyWith(
           commentCount: state.selectedPost!.commentCount + 1,
         );
-        emit(state.copyWith(selectedPost: updatedPost));
+        emit(state.copyWith(
+          selectedPost: updatedPost,
+          replyingToComment: null, // Clear replying indicator
+        ));
       }
 
       // Trigger sync
@@ -742,7 +745,7 @@ class ForumCubit extends Cubit<ForumState> {
     String? parentCommentId,
   }) async {
     final effectiveLineId = lineId ?? state.selectedLineId;
-    final effectiveParentId = parentCommentId ?? state.replyingToComment?.id;
+    final effectiveParentId = parentCommentId ?? (state.replyingToComment?.isLineComment == true ? state.replyingToComment?.id : null);
     if (effectiveLineId == null) return;
     
     try {
@@ -838,8 +841,8 @@ class ForumCubit extends Cubit<ForumState> {
   // End of comments section
   
   /// Set the comment we are currently replying to
-  void setReplyingTo(ForumLineComment comment) {
-    emit(state.copyWith(replyingToComment: comment));
+  void setReplyingTo(ForumReplyTarget target) {
+    emit(state.copyWith(replyingToComment: target));
   }
 
   /// Clear the reply state

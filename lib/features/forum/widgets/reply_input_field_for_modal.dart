@@ -27,6 +27,7 @@ class ReplyInputFieldForModal extends StatefulWidget {
 class _ReplyInputFieldForModalState extends State<ReplyInputFieldForModal> {
   late TextEditingController _textController;
   late ValueNotifier<String> _typeController;
+  late FocusNode _focusNode;
   bool _isPosting = false;
 
   @override
@@ -34,12 +35,14 @@ class _ReplyInputFieldForModalState extends State<ReplyInputFieldForModal> {
     super.initState();
     _textController = TextEditingController();
     _typeController = ValueNotifier('experience');
+    _focusNode = FocusNode();
   }
 
   @override
   void dispose() {
     _textController.dispose();
     _typeController.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
@@ -78,8 +81,14 @@ class _ReplyInputFieldForModalState extends State<ReplyInputFieldForModal> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+    return BlocListener<ForumCubit, ForumState>(
+      listenWhen: (previous, current) => 
+          previous.replyingToComment == null && current.replyingToComment != null,
+      listener: (context, state) {
+        _focusNode.requestFocus();
+      },
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -180,6 +189,7 @@ class _ReplyInputFieldForModalState extends State<ReplyInputFieldForModal> {
                   ),
                   child: TextField(
                     controller: _textController,
+                    focusNode: _focusNode,
                     minLines: 1,
                     maxLines: 4,
                     style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary),

@@ -140,7 +140,15 @@ class GeneralCommentsView extends StatelessWidget {
                                 child: CommentCard(
                                   comment: lineComment,
                                   currentUserId: userId,
-                                  onReply: () {},
+                                  onReply: () {
+                                    context.read<ForumCubit>().setReplyingTo(
+                                      ForumReplyTarget(
+                                        id: comment.id,
+                                        authorName: comment.authorName,
+                                        isLineComment: false,
+                                      ),
+                                    );
+                                  },
                                   onEdit: () => _showEditCommentDialog(context, comment),
                                   onDelete: () => _showDeleteCommentDialog(context, comment.localId),
                                 ),

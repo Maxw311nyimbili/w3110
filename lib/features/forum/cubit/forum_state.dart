@@ -20,6 +20,22 @@ enum PostFilter {
   mine,   // Show only user's posts
 }
 
+/// Helper model for tracking what we are replying to
+class ForumReplyTarget extends Equatable {
+  final String id;
+  final String authorName;
+  final bool isLineComment;
+
+  const ForumReplyTarget({
+    required this.id,
+    required this.authorName,
+    required this.isLineComment,
+  });
+
+  @override
+  List<Object?> get props => [id, authorName, isLineComment];
+}
+
 /// Immutable forum state - manages posts, comments, and sync
 class ForumState extends Equatable {
   const ForumState({
@@ -70,7 +86,7 @@ class ForumState extends Equatable {
   final String? error;
   final bool isSyncing;
   final bool isSearching;
-  final ForumLineComment? replyingToComment;
+  final ForumReplyTarget? replyingToComment;
   final bool hasPendingSync; // Has unsynced local changes
   final DateTime? lastSyncTime;
 
@@ -110,7 +126,7 @@ class ForumState extends Equatable {
     bool? isSearching,
     bool? hasPendingSync,
     DateTime? lastSyncTime,
-    ForumLineComment? replyingToComment,
+    ForumReplyTarget? replyingToComment,
   }) {
     return ForumState(
       status: status ?? this.status,
