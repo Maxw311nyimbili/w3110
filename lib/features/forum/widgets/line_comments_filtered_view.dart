@@ -178,7 +178,13 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
                                       comment: comment,
                                       currentUserId: userId,
                                       onReply: () {
-                                        context.read<ForumCubit>().setReplyingTo(comment);
+                                        context.read<ForumCubit>().setReplyingTo(
+                                          ForumReplyTarget(
+                                            id: comment.id,
+                                            authorName: comment.authorName,
+                                            isLineComment: true,
+                                          ),
+                                        );
                                       },
                                       onEdit: () => _showEditCommentDialog(context, comment),
                                       onDelete: () => _showDeleteCommentDialog(context, comment.localId),
