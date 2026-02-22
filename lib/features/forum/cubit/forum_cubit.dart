@@ -763,9 +763,10 @@ class ForumCubit extends Cubit<ForumState> {
         return line;
       }).toList();
       
-      emit(state.copyWith(
+      emit(state.copyWithNullableLineId(
         lineComments: updatedLineComments,
         answerLines: updatedLines,
+        clearReplyingTo: true,
       ));
     } catch (e) {
       emit(state.copyWith(error: 'Failed to post comment: ${e.toString()}'));
@@ -835,6 +836,16 @@ class ForumCubit extends Cubit<ForumState> {
     }
   }
   // End of comments section
+  
+  /// Set the comment we are currently replying to
+  void setReplyingTo(ForumLineComment comment) {
+    emit(state.copyWith(replyingToComment: comment));
+  }
+
+  /// Clear the reply state
+  void clearReplyingTo() {
+    emit(state.copyWithNullableLineId(clearReplyingTo: true));
+  }
 
   /// Clear error state
   void clearError() {
