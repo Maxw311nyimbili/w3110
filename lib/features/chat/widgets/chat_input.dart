@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:cap_project/app/view/app_router.dart';
+import 'package:cap_project/core/widgets/glass_card.dart';
 import 'package:cap_project/features/medscanner/cubit/medscanner_state.dart' as scanner;
 import 'package:cap_project/features/chat/widgets/audio_waveform.dart';
 import 'package:cap_project/l10n/l10n.dart';
@@ -7,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../cubit/cubit.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 
 class RefinedChatInput extends StatefulWidget {
@@ -78,20 +80,19 @@ class _RefinedChatInputState extends State<RefinedChatInput> with TickerProvider
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (modalContext) => Container(
-        decoration: BoxDecoration(
-          color: AppColors.backgroundSurface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
+      builder: (modalContext) => GlassCard(
+        padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
+        borderRadius: 28,
+        tintOpacity: 0.96,
+        blur: 16,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 40,
+              width: 36,
               height: 4,
               decoration: BoxDecoration(
-                color: AppColors.gray200,
+                color: AppColors.borderMedium,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -104,7 +105,6 @@ class _RefinedChatInputState extends State<RefinedChatInput> with TickerProvider
                     label: 'Scan Medicine',
                     color: AppColors.accentPrimary,
                     onTap: () async {
-                      // Close the bottom sheet FIRST
                       Navigator.pop(modalContext);
                       _focusNode.unfocus(); // Ensure focus doesn't return
                       
@@ -171,23 +171,23 @@ class _RefinedChatInputState extends State<RefinedChatInput> with TickerProvider
   }) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 20),
+        padding: const EdgeInsets.symmetric(vertical: 18),
         decoration: BoxDecoration(
-          color: AppColors.backgroundPrimary,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppColors.gray200.withOpacity(0.5), width: 1),
+          color: AppColors.backgroundElevated,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+          border: Border.all(color: AppColors.borderLight, width: 1),
         ),
         child: Column(
           children: [
-            Icon(icon, color: color ?? AppColors.textPrimary, size: 28),
+            Icon(icon, color: color ?? AppColors.brandDarkTeal, size: 26),
             const SizedBox(height: 8),
             Text(
               label,
               textAlign: TextAlign.center,
               style: AppTextStyles.labelMedium.copyWith(
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w600,
                 color: AppColors.textPrimary,
               ),
             ),
@@ -301,7 +301,7 @@ class _RefinedChatInputState extends State<RefinedChatInput> with TickerProvider
                       child: Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: canSend ? AppColors.accentPrimary : AppColors.borderLight,
+                          color: canSend ? AppColors.brandDarkTeal : AppColors.borderLight,
                           shape: BoxShape.circle,
                           boxShadow: canSend ? [
                             BoxShadow(

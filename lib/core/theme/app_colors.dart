@@ -1,56 +1,72 @@
 // lib/core/theme/app_colors.dart
+// Hope UI Inspired — Warm Light Palette for Maternal Health
 
 import 'package:flutter/material.dart';
 
-/// App-wide color palette - Editorial Modern (Midnight Slate + Optical Alabaster)
 class AppColors {
   AppColors._();
 
-  // Backgrounds - Crisp & Clean
-  static const Color backgroundPrimary = Color(0xFFFAFAF8); // Optical Alabaster (Primary BG)
-  static const Color backgroundSurface = Color(0xFFFFFFFF); // Pure White (Cards/Modals)
-  static const Color backgroundElevated = Color(0xFFF2F2F0); // Subtle Gray Offset
-  
-  // Accents - Sophisticated Teal Identity
-  static const Color accentPrimary = Color(0xFF0C4B4F);   // Brand Dark Teal
-  static const Color accentSecondary = Color(0xFF2C3E50); // Midnight Slate
-  static const Color accentTertiary = Color(0xFFC16E5D);  // Soft Terracotta
-  static const Color brandDarkTeal = Color(0xFF0C4B4F);   // Keep for compatibility
-  
-  // Semantic Colors
-  static const Color success = Color(0xFF3A5A40); // Muted Forest (Health & Growth)
-  static const Color info = Color(0xFF4B6EAF);    // Professional Blue
-  static const Color warning = Color(0xFFC9974C); // Muted Amber
-  static const Color error = Color(0xFF9E3A3A);   // Deep Red
-  
-  // Text Colors - Ink & Grays
-  static const Color textPrimary = Color(0xFF1A1A1A);   // Deep Ink (Optimal Readability)
-  static const Color textSecondary = Color(0xFF4B4B4B); // Slate Graphite
-  static const Color textTertiary = Color(0xFF767676);  // Cool Gray
-  static const Color textInverted = Color(0xFFFFFFFF);  // White
-  
-  // Functional Colors - Precision Borders
-  static const Color borderLight = Color(0xFFE5E5E3);   // Subtle Paper Border
-  static const Color borderMedium = Color(0xFFCACACE);  // Visible Divider
-  static const Color borderDark = Color(0xFF4B4B4B);    // Strong Outline
-  static const Color shadow = Color(0x0A000000);        // Purely neutral soft shadow
-  
-  // Dark Mode - Elegant Night
-  static const Color darkBackgroundPrimary = Color(0xFF121212);
-  static const Color darkBackgroundSurface = Color(0xFF1E1E1E);
-  static const Color darkBackgroundElevated = Color(0xFF2C2C2C);
-  
-  static const Color darkTextPrimary = Color(0xFFF9F9F9);
-  static const Color darkTextSecondary = Color(0xFFCACACE);
-  static const Color darkTextTertiary = Color(0xFF999999);
-  
-  // Compatibility Keys (Mapped to Neutral Palette)
-  static const Color gray100 = Color(0xFFF2F2F0);
-  static const Color gray200 = Color(0xFFE5E5E3);
-  static const Color gray300 = Color(0xFFCACACE);
-  static const Color gray400 = Color(0xFF767676);
-  
-  static const Color confidenceHigh = success;
+  // ─── Backgrounds (Cool White Scale) ──────────────────────────────────────
+  static const Color backgroundPrimary  = Color(0xFFF5F7FA); // Cool off-white base
+  static const Color backgroundSurface  = Color(0xFFFFFFFF); // Pure white cards
+  static const Color backgroundElevated = Color(0xFFEDF0F5); // Cool grey (inputs, chips)
+
+  // ─── Brand — Teal Identity ─────────────────────────────────────────────────
+  static const Color accentPrimary   = Color(0xFF0C7E8A); // Vibrant teal (CTAs, active)
+  static const Color accentSecondary = Color(0xFF0C4B4F); // Deep teal (hover, pressed)
+  static const Color accentLight     = Color(0xFFD6F0F2); // Teal tint (badges, highlights)
+  static const Color brandDarkTeal   = Color(0xFF0C4B4F); // Keep for compatibility
+
+  // ─── Text (Warm, Not Cold Grey) ────────────────────────────────────────────
+  static const Color textPrimary   = Color(0xFF1C1917); // Warm near-black
+  static const Color textSecondary = Color(0xFF6B6358); // Warm mid-grey
+  static const Color textTertiary  = Color(0xFF9C9388); // Warm light-grey
+  static const Color textInverted  = Color(0xFFFFFFFF); // White text on dark
+  static const Color textAccent    = Color(0xFF0C7E8A); // Teal text links
+
+  // ─── Borders ───────────────────────────────────────────────────────────────
+  static const Color borderLight  = Color(0xFFE4E8EF); // Cool light border
+  static const Color borderMedium = Color(0xFFCDD3DD); // Cool visible divider
+  static const Color borderDark   = Color(0xFF6B7280); // Cool strong outline
+  static const Color borderAccent = Color(0xFF0C7E8A); // Teal focus border
+
+  // ─── Semantic ──────────────────────────────────────────────────────────────
+  static const Color success = Color(0xFF2D9D78); // Calm green
+  static const Color info    = Color(0xFF3B82C4); // Soft blue
+  static const Color warning = Color(0xFFD97706); // Warm amber
+  static const Color error   = Color(0xFFDC3545); // Clear red
+
+  // ─── Glassmorphism surfaces ─────────────────────────────────────────────────
+  static const Color glassLight  = Color(0x99FFFFFF); // White glass (60% opacity)
+  static const Color glassBorder = Color(0x80E8E3DC); // Warm glass border (50% opacity)
+  static const Color glassOverlay= Color(0x0DFFFFFF); // Subtle hover overlay
+
+  // ─── Shadow (Teal-tinted, warm) ────────────────────────────────────────────
+  static const Color shadowTeal   = Color(0x200C7E8A); // Teal-tinted card shadow
+  static const Color shadowWarm   = Color(0x141C1917); // Warm-black ambient shadow
+  static const Color shadow       = Color(0x0A000000); // Legacy neutral soft shadow
+
+  // ─── Dark Mode ─────────────────────────────────────────────────────────────
+  // Teal-black base — makes brandDarkTeal brand colour glow naturally
+  static const Color darkBackgroundPrimary  = Color(0xFF111615); // Deep teal-black
+  static const Color darkBackgroundSurface  = Color(0xFF1C2422); // Elevated card surface
+  static const Color darkBackgroundElevated = Color(0xFF253029); // Input / chip fill
+  static const Color darkTextPrimary        = Color(0xFFECF0EF); // Near-white, cool
+  static const Color darkTextSecondary      = Color(0xFF8FA39E); // Muted teal-grey
+  static const Color darkTextTertiary       = Color(0xFF536B66); // Faint label
+
+  // ─── Compatibility aliases (cool-neutral) ──────────────────────────────────
+  static const Color gray100 = Color(0xFFEDF0F5);
+  static const Color gray200 = Color(0xFFE4E8EF);
+  static const Color gray300 = Color(0xFFCDD3DD);
+  static const Color gray400 = Color(0xFF94A3B8);
+
+  static const Color confidenceHigh   = success;
   static const Color confidenceMedium = warning;
-  static const Color confidenceLow = error;
+  static const Color confidenceLow    = error;
+
+  // ─── Splash palette ────────────────────────────────────────────────────────
+  static const Color splashOrange = Color(0xFFFF6719);
+  static const Color splashWhite  = Color(0xFFFFFFFF);
+  static const Color splashDune   = Color(0xFF2B2823);
 }

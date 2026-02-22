@@ -42,6 +42,8 @@ class ForumPosts extends Table {
   // Sync metadata
   DateTimeColumn get lastSyncAttempt => dateTime().nullable()();
   IntColumn get syncRetryCount => integer().withDefault(const Constant(0))();
+  BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
+  IntColumn get version => integer().withDefault(const Constant(1))();
 
   @override
   Set<Column> get primaryKey => {localId};

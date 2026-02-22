@@ -20,6 +20,9 @@ class ForumComment extends Equatable {
     this.syncStatus = SyncStatus.synced,
     this.authorRole = 'user',
     this.authorProfession,
+    this.parentCommentId,
+    this.isDeleted = false,
+    this.version = 1,
   });
 
   final String id; // Server ID
@@ -35,27 +38,33 @@ class ForumComment extends Equatable {
   final SyncStatus syncStatus;
   final String authorRole; // 'user', 'doctor', 'healthcare_professional'
   final String? authorProfession;
+  final String? parentCommentId;
+  final bool isDeleted;
+  final int version;
 
   String get text => content;
 
   bool get isPendingSync => syncStatus == SyncStatus.pending;
 
   /// Create from Drift database row
-  factory ForumComment.fromDatabase(ForumCommentData data) {
+  factory ForumComment.fromDatabase(ForumCommentData d) {
     return ForumComment(
-      id: data.serverId,
-      localId: data.localId,
-      postId: data.postId,
-      authorId: data.authorId,
-      authorName: data.authorName,
-      content: data.content,
-      createdAt: data.createdAt,
-      updatedAt: data.updatedAt,
-      likeCount: data.likeCount,
-      isLiked: data.isLiked,
-      syncStatus: _parseSyncStatus(data.syncStatus),
-      authorRole: data.authorRole ?? 'user',
-      authorProfession: data.authorProfession,
+      id: d.serverId,
+      localId: d.localId,
+      postId: d.postId,
+      authorId: d.authorId,
+      authorName: d.authorName,
+      content: d.content,
+      createdAt: d.createdAt,
+      updatedAt: d.updatedAt,
+      likeCount: d.likeCount,
+      isLiked: d.isLiked,
+      syncStatus: _parseSyncStatus(d.syncStatus),
+      authorRole: d.authorRole ?? 'user',
+      authorProfession: d.authorProfession,
+      parentCommentId: d.parentCommentId,
+      isDeleted: d.isDeleted,
+      version: d.version,
     );
   }
 
@@ -63,20 +72,23 @@ class ForumComment extends Equatable {
   factory ForumComment.fromJson(Map<String, dynamic> json) {
     return ForumComment(
       id: json['id'].toString(),
-      localId: json['id'].toString(), // Use server ID as local ID when from server
+      localId: json['id'].toString(), 
       postId: json['post_id'].toString(),
       authorId: (json['user_id'] ?? json['author_id']).toString(),
       authorName: (json['author_name'] ?? 'Unknown').toString(),
-      content: json['content'] as String,
-      createdAt: DateTime.parse(json['created_at'] as String),
+      content: json['content'] as String? ?? '',
+      createdAt: json['created_at'] != null ? DateTime.parse(json['created_at'] as String) : DateTime.now(),
       updatedAt: json['updated_at'] != null
           ? DateTime.parse(json['updated_at'] as String)
           : null,
       likeCount: json['like_count'] as int? ?? 0,
       isLiked: json['is_liked'] as bool? ?? false,
-      syncStatus: SyncStatus.synced, // From server = already synced
+      syncStatus: SyncStatus.synced,
       authorRole: json['author_role'] as String? ?? 'user',
       authorProfession: json['author_profession'] as String?,
+      parentCommentId: json['parent_comment_id']?.toString(),
+      isDeleted: json['is_deleted'] as bool? ?? false,
+      version: json['version'] as int? ?? 1,
     );
   }
 
@@ -94,6 +106,9 @@ class ForumComment extends Equatable {
     SyncStatus? syncStatus,
     String? authorRole,
     String? authorProfession,
+    String? parentCommentId,
+    bool? isDeleted,
+    int? version,
   }) {
     return ForumComment(
       id: id ?? this.id,
@@ -109,6 +124,9 @@ class ForumComment extends Equatable {
       syncStatus: syncStatus ?? this.syncStatus,
       authorRole: authorRole ?? this.authorRole,
       authorProfession: authorProfession ?? this.authorProfession,
+      parentCommentId: parentCommentId ?? this.parentCommentId,
+      isDeleted: isDeleted ?? this.isDeleted,
+      version: version ?? this.version,
     );
   }
 
@@ -123,18 +141,8 @@ class ForumComment extends Equatable {
 
   @override
   List<Object?> get props => [
-    id,
-    localId,
-    postId,
-    authorId,
-    authorName,
-    content,
-    createdAt,
-    updatedAt,
-    likeCount,
-    isLiked,
-    syncStatus,
-    authorRole,
-    authorProfession,
+    id, localId, postId, authorId, authorName, content, createdAt, updatedAt,
+    likeCount, isLiked, syncStatus, authorRole, authorProfession, parentCommentId,
+    isDeleted, version,
   ];
 }

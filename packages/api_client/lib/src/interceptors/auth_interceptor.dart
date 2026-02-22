@@ -96,7 +96,6 @@ class AuthInterceptor extends Interceptor {
       '/consent/current',
       '/announcements',
       '/health',
-      '/chat/validate'
     ];
 
     return publicPaths.any((p) => path.contains(p));

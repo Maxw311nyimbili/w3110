@@ -25,6 +25,8 @@ class ForumPost extends Equatable {
     this.sources = const [],
     this.tags = const [],
     this.originalAnswerId,
+    this.isDeleted = false,
+    this.version = 1,
   });
 
   final String id; // Server ID
@@ -43,6 +45,8 @@ class ForumPost extends Equatable {
   final List<ForumPostSource> sources;
   final List<String> tags;
   final String? originalAnswerId;
+  final bool isDeleted;
+  final int version;
 
   // Helpers
   bool get isPendingSync => syncStatus == SyncStatus.pending;
@@ -75,6 +79,8 @@ class ForumPost extends Equatable {
           ? List<String>.from(jsonDecode(data.tags!) as List)
           : const [],
       originalAnswerId: data.originalAnswerId,
+      isDeleted: data.isDeleted,
+      version: data.version,
     );
   }
 
@@ -82,12 +88,12 @@ class ForumPost extends Equatable {
   factory ForumPost.fromJson(Map<String, dynamic> json) {
     return ForumPost(
       id: json['id'].toString(),
-      localId: json['id'].toString(), // Use server ID as local ID when from server
+      localId: json['id'].toString(), 
       authorId: (json['user_id'] ?? json['author_id']).toString(),
       authorName: (json['author_name'] ?? 'Unknown').toString(),
-      title: json['title'] as String,
-      content: json['content'] as String,
-      createdAt: DateTime.parse(json['created_at'] as String),
+      title: json['title'] as String? ?? 'Untitled',
+      content: json['content'] as String? ?? '',
+      createdAt: json['created_at'] != null ? DateTime.parse(json['created_at'] as String) : DateTime.now(),
       updatedAt: json['updated_at'] != null
           ? DateTime.parse(json['updated_at'] as String)
           : null,
@@ -95,12 +101,14 @@ class ForumPost extends Equatable {
       likeCount: json['like_count'] as int? ?? 0,
       viewCount: json['view_count'] as int? ?? 0,
       isLiked: json['is_liked'] as bool? ?? false,
-      syncStatus: SyncStatus.synced, // From server = already synced
+      syncStatus: SyncStatus.synced,
       sources: (json['sources'] as List? ?? [])
           .map((e) => ForumPostSource.fromJson(e as Map<String, dynamic>))
           .toList(),
-      tags: (json['tags'] as List? ?? []).map((e) => e as String).toList(),
+      tags: (json['tags'] as List? ?? []).map((e) => e.toString()).toList(),
       originalAnswerId: json['original_answer_id'] as String?,
+      isDeleted: json['is_deleted'] as bool? ?? false,
+      version: json['version'] as int? ?? 1,
     );
   }
 
@@ -118,8 +126,11 @@ class ForumPost extends Equatable {
     int? viewCount,
     bool? isLiked,
     SyncStatus? syncStatus,
+    List<ForumPostSource>? sources,
     List<String>? tags,
     String? originalAnswerId,
+    bool? isDeleted,
+    int? version,
   }) {
     return ForumPost(
       id: id ?? this.id,
@@ -138,6 +149,8 @@ class ForumPost extends Equatable {
       sources: sources ?? this.sources,
       tags: tags ?? this.tags,
       originalAnswerId: originalAnswerId ?? this.originalAnswerId,
+      isDeleted: isDeleted ?? this.isDeleted,
+      version: version ?? this.version,
     );
   }
 
@@ -152,20 +165,8 @@ class ForumPost extends Equatable {
 
   @override
   List<Object?> get props => [
-    id,
-    localId,
-    authorId,
-    authorName,
-    title,
-    content,
-    createdAt,
-    updatedAt,
-    commentCount,
-    likeCount,
-    viewCount,
-    isLiked,
-    syncStatus,
-    sources,
-    tags,
+    id, localId, authorId, authorName, title, content, createdAt, updatedAt,
+    commentCount, likeCount, viewCount, isLiked, syncStatus, sources, tags,
+    originalAnswerId, isDeleted, version,
   ];
 }

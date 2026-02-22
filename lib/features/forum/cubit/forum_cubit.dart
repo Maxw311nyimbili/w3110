@@ -313,6 +313,46 @@ class ForumCubit extends Cubit<ForumState> {
     }
   }
 
+  /// Update a post
+  Future<void> updatePost({
+    required String localId,
+    required String title,
+    required String content,
+  }) async {
+    try {
+      emit(state.copyWith(status: ForumStatus.loading));
+      
+      await _forumRepository.updatePost(
+        localId: localId,
+        title: title,
+        content: content,
+      );
+
+      // Update UI
+      final updatedPosts = state.posts.map((p) {
+        if (p.localId == localId) {
+          return p.copyWith(title: title, content: content);
+        }
+        return p;
+      }).toList();
+
+      emit(state.copyWith(
+        status: ForumStatus.success,
+        posts: updatedPosts,
+        selectedPost: state.selectedPost?.localId == localId 
+            ? state.selectedPost!.copyWith(title: title, content: content)
+            : state.selectedPost,
+      ));
+      
+      syncWithBackend();
+    } catch (e) {
+      emit(state.copyWith(
+        status: ForumStatus.error,
+        error: 'Failed to update post: ${e.toString()}',
+      ));
+    }
+  }
+
   /// Add a comment to a post (offline-first)
   Future<void> addComment({
     required String postId,
@@ -375,6 +415,50 @@ class ForumCubit extends Cubit<ForumState> {
     }
   }
 
+  /// Update an existing comment
+  Future<void> updateComment({
+    required String localId,
+    required String serverId,
+    required String content,
+  }) async {
+    try {
+      await _forumRepository.updateComment(
+        localId: localId,
+        serverId: serverId,
+        content: content,
+      );
+
+      final updatedComments = state.comments.map((c) {
+        if (c.localId == localId) {
+          return c.copyWith(content: content);
+        }
+        return c;
+      }).toList();
+
+      emit(state.copyWith(comments: updatedComments));
+    } catch (e) {
+      emit(state.copyWith(error: 'Failed to update comment: ${e.toString()}'));
+    }
+  }
+
+  /// Delete a comment
+  Future<void> deleteComment(String localId) async {
+    try {
+      await _forumRepository.deleteComment(localId);
+
+      final updatedComments = state.comments.where((c) => c.localId != localId).toList();
+      
+      emit(state.copyWith(
+        comments: updatedComments,
+        selectedPost: state.selectedPost != null 
+            ? state.selectedPost!.copyWith(commentCount: state.selectedPost!.commentCount - 1)
+            : null,
+      ));
+    } catch (e) {
+      emit(state.copyWith(error: 'Failed to delete comment: ${e.toString()}'));
+    }
+  }
+
   /// Sync with backend (upload pending changes, download new content)
   Future<void> syncWithBackend() async {
     if (state.isSyncing) return;
@@ -405,18 +489,43 @@ class ForumCubit extends Cubit<ForumState> {
     }
   }
 
-  /// Search for posts
-  Future<void> searchPosts(String query) async {
+  /// Search posts locally
+  void searchPosts(String query) {
     if (query.isEmpty) {
-      emit(state.copyWith(searchQuery: '', searchResults: const []));
+      emit(state.copyWith(
+        isSearching: false,
+        searchQuery: '',
+        searchResults: [],
+      ));
       return;
     }
 
+    emit(state.copyWith(
+      isSearching: true,
+      searchQuery: query,
+    ));
+    
+    // Simple local search for instant feedback
+    final results = state.posts.where((post) =>
+      post.title.toLowerCase().contains(query.toLowerCase()) ||
+      post.content.toLowerCase().contains(query.toLowerCase())
+    ).toList();
+
+    emit(state.copyWith(
+      searchResults: results,
+    ));
+
+    // Also trigger similarity search if query is long enough
+    if (query.length > 3) {
+      searchSimilarPosts(query);
+    }
+  }
+
+  /// Search for similar posts (Vector Search)
+  Future<void> searchSimilarPosts(String text) async {
     try {
-      emit(state.copyWith(status: ForumStatus.loading, searchQuery: query));
-      
-      final results = await _forumRepository.searchPosts(query);
-      
+      emit(state.copyWith(status: ForumStatus.loading));
+      final results = await _forumRepository.searchSimilarPosts(text);
       emit(state.copyWith(
         status: ForumStatus.success,
         searchResults: results,
@@ -424,7 +533,7 @@ class ForumCubit extends Cubit<ForumState> {
     } catch (e) {
       emit(state.copyWith(
         status: ForumStatus.error,
-        error: 'Search failed: ${e.toString()}',
+        error: 'Similarity search failed: ${e.toString()}',
       ));
     }
   }
@@ -569,7 +678,7 @@ class ForumCubit extends Cubit<ForumState> {
   /// but usually the UI handles the visibility.
   void toggleForumView(String answerId) {
     if (state.currentAnswerId == answerId) {
-      emit(state.copyWith(currentAnswerId: null, answerLines: []));
+      emit(state.copyWithNullableLineId(clearAnswerId: true));
     } else {
       loadAnswerLines(answerId);
     }
@@ -630,8 +739,10 @@ class ForumCubit extends Cubit<ForumState> {
     required String text,
     required String commentType,
     String? lineId,
+    String? parentCommentId,
   }) async {
     final effectiveLineId = lineId ?? state.selectedLineId;
+    final effectiveParentId = parentCommentId ?? state.replyingToComment?.id;
     if (effectiveLineId == null) return;
     
     try {
@@ -639,6 +750,7 @@ class ForumCubit extends Cubit<ForumState> {
         lineId: effectiveLineId,
         text: text,
         commentType: commentType,
+        parentCommentId: effectiveParentId,
       );
       
       final updatedLineComments = List<ForumLineComment>.from(state.lineComments)..add(newComment);
@@ -657,6 +769,69 @@ class ForumCubit extends Cubit<ForumState> {
       ));
     } catch (e) {
       emit(state.copyWith(error: 'Failed to post comment: ${e.toString()}'));
+    }
+  }
+
+  /// Update a line comment
+  Future<void> updateLineComment({
+    required String localId,
+    required String serverId,
+    required String text,
+    String? commentType,
+  }) async {
+    try {
+      await _forumRepository.updateLineComment(
+        localId: localId,
+        serverId: serverId,
+        text: text,
+        commentType: commentType,
+      );
+
+      final updatedLineComments = state.lineComments.map((c) {
+        if (c.localId == localId) {
+          return c.copyWith(text: text, commentType: commentType != null ? _parseCommentType(commentType) : c.commentType);
+        }
+        return c;
+      }).toList();
+
+      emit(state.copyWith(lineComments: updatedLineComments));
+    } catch (e) {
+      emit(state.copyWith(error: 'Failed to update line comment: ${e.toString()}'));
+    }
+  }
+
+  /// Delete a line comment
+  Future<void> deleteLineComment(String localId) async {
+    try {
+      await _forumRepository.deleteLineComment(localId);
+
+      final updatedLineComments = state.lineComments.where((c) => c.localId != localId).toList();
+      
+      // Also update line comment count locally in the answerLines list
+      final selectedLineId = state.selectedLineId;
+      final updatedLines = state.answerLines.map((line) {
+        if (line.lineId == selectedLineId) {
+          return line.copyWith(commentCount: line.commentCount - 1);
+        }
+        return line;
+      }).toList();
+
+      emit(state.copyWith(
+        lineComments: updatedLineComments,
+        answerLines: updatedLines,
+      ));
+    } catch (e) {
+      emit(state.copyWith(error: 'Failed to delete line comment: ${e.toString()}'));
+    }
+  }
+
+  CommentType _parseCommentType(String type) {
+    switch (type.toLowerCase()) {
+      case 'clinical': return CommentType.clinical;
+      case 'evidence': return CommentType.evidence;
+      case 'experience': return CommentType.experience;
+      case 'concern': return CommentType.concern;
+      default: return CommentType.general;
     }
   }
   // End of comments section

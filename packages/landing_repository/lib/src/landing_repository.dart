@@ -30,31 +30,62 @@ class LandingRepository {
     }
   }
 
+  /// Fetch dynamic greeting from backend
+  ///
+  /// Backend endpoint: GET /landing/greeting
+  /// Response: { "greeting": "..." }
+  Future<String> fetchGreeting() async {
+    try {
+      final response = await _apiClient.get('/landing/greeting');
+      final responseData = response.data as Map<String, dynamic>;
+      return responseData['greeting'] as String? ?? 'Hello!';
+    } catch (e) {
+      print('⚠️ Failed to fetch dynamic greeting: $e');
+      return 'Hello!'; // Fallback
+    }
+  }
+
+  /// Update user preferences (interests and role) on backend
+  ///
+  /// Backend endpoint: PUT /landing/preferences
+  /// Request body: { "interests": [...], "role": "..." }
+  Future<void> updatePreferences({
+    List<String>? interests,
+    String? role,
+    bool? onboardingCompleted,
+  }) async {
+    try {
+      await _apiClient.put(
+        '/landing/preferences',
+        data: {
+          if (interests != null) 'interests': interests,
+          if (role != null) 'role': role,
+          if (onboardingCompleted != null)
+            'onboarding_completed': onboardingCompleted,
+        },
+      );
+      print('✅ Preferences updated on backend');
+    } catch (e) {
+      throw LandingException('Failed to update preferences: ${e.toString()}');
+    }
+  }
+
   /// Save onboarding status to local storage and sync with backend if possible
   Future<void> saveOnboardingStatus(OnboardingStatus status) async {
     try {
       // 1. Save locally first (immediate feedback)
       await _localPreferences.saveOnboardingStatus(status.toJson());
-      
+
       // 2. Try to sync with backend
-      // We don't check for token here explicitly because ApiClient will handle it
-      // but we wrap in a try-catch to avoid blocking local success if backend fails
-      try {
-        await _apiClient.put(
-          '/landing/preferences',
-          data: {
-            'role': status.userRole,
-            'onboarding_completed': status.isComplete,
-          },
-        );
-        print('✅ Onboarding status synced to backend');
-      } catch (e) {
-        print('⚠️ Failed to sync onboarding status to backend: $e');
-        // We don't throw here to ensure local storage remains the source of truth
-        // and doesn't break the UI flow if the user is offline or session expired
-      }
+      await updatePreferences(
+        role: status.userRole,
+        interests: status.interests,
+        onboardingCompleted: status.isComplete,
+      );
     } catch (e) {
-      throw LandingException('Failed to save onboarding status: ${e.toString()}');
+      // We log but don't rethrow for background sync in saveOnboardingStatus
+      // to keep legacy behavior of not breaking the UI on sync failure
+      print('⚠️ Failed to sync onboarding status: $e');
     }
   }
 

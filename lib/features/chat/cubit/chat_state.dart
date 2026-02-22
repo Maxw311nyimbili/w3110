@@ -165,6 +165,7 @@ class ChatState extends Equatable {
     this.amplitude = 0.0,
     this.pendingAttachments = const [],
     this.loadingMessage,
+    this.dynamicGreeting,
   });
 
   final ChatStatus status;
@@ -178,6 +179,7 @@ class ChatState extends Equatable {
   final double amplitude;
   final List<Attachment> pendingAttachments;
   final String? loadingMessage;
+  final String? dynamicGreeting;
 
   bool get isLoading => status == ChatStatus.loading;
   bool get hasMessages => messages.isNotEmpty;
@@ -194,6 +196,7 @@ class ChatState extends Equatable {
     double? amplitude,
     List<Attachment>? pendingAttachments,
     String? loadingMessage,
+    String? dynamicGreeting,
   }) {
     return ChatState(
       status: status ?? this.status,
@@ -207,6 +210,7 @@ class ChatState extends Equatable {
       amplitude: amplitude ?? this.amplitude,
       pendingAttachments: pendingAttachments ?? this.pendingAttachments,
       loadingMessage: loadingMessage ?? this.loadingMessage,
+      dynamicGreeting: dynamicGreeting ?? this.dynamicGreeting,
     );
   }
 

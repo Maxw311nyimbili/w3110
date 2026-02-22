@@ -33,15 +33,11 @@ class SyncManager {
     final allItems = [...pendingItems, ...retryableFailedItems];
     
     if (allItems.isEmpty) {
-      print('DEBUG: SyncManager.processSyncQueue - nothing to sync');
       return;
     }
 
-    print('DEBUG: SyncManager.processSyncQueue - found ${allItems.length} total items to process');
-
     for (final item in allItems) {
       try {
-        print('DEBUG: SyncManager.processSyncQueue - processing item: ${item.entityType} ${item.action} for ${item.entityId}');
         // Mark as syncing
         await _database.updateSyncQueueStatus(
           id: item.id,
@@ -65,9 +61,7 @@ class SyncManager {
 
         // Remove from queue on success
         await _database.removeSyncQueueItem(item.id);
-        print('DEBUG: SyncManager.processSyncQueue - successfully synced item: ${item.id}');
       } catch (e) {
-        print('DEBUG: SyncManager.processSyncQueue - ERROR syncing item: ${item.id} - $e');
         // Calculate next retry time with exponential backoff
         final backoffSeconds = _calculateBackoff(item.retryCount);
         final nextRetryAt = DateTime.now().add(Duration(seconds: backoffSeconds));
@@ -92,9 +86,6 @@ class SyncManager {
 
     switch (item.action) {
       case 'create':
-      // Backend endpoint: POST /forum/posts
-      // Request: { "title": "...", "content": "...", "author_id": "..." }
-      // Response: { "id": "server-uuid", ... }
         final postModel = ForumPost.fromDatabase(post);
         final response = await _apiClient.post(
           '/api/v1/forum/posts',
@@ -117,7 +108,6 @@ class SyncManager {
         break;
 
       case 'update':
-      // Backend endpoint: PUT /forum/posts/{id}
         await _apiClient.put(
           '/api/v1/forum/posts/${post.serverId}',
           data: {
@@ -133,7 +123,6 @@ class SyncManager {
         break;
 
       case 'delete':
-      // Backend endpoint: DELETE /forum/posts/{id}
         await _apiClient.delete('/api/v1/forum/posts/${post.serverId}');
         await _database.deletePost(post.localId);
         break;
@@ -152,17 +141,12 @@ class SyncManager {
 
     switch (item.action) {
       case 'create':
-      // Backend endpoint: POST /forum/posts/{post_id}/comments
-      // Request: { "content": "...", "author_id": "..." }
-      // Response: { "id": "server-uuid", ... }
-
-      // Get parent post to find server ID
-        // The postId in the comment might be a localId or a serverId
+        // Get parent post to find server ID
         final post = await _database.getPostByLocalId(comment.postId) ?? 
                     await _database.getPostByServerId(comment.postId);
                     
         if (post == null || post.serverId.isEmpty) {
-          throw SyncException('Parent post not synced yet or not found: ${comment.postId}');
+          throw SyncException('Parent post not synced yet: ${comment.postId}');
         }
 
         final response = await _apiClient.post(
@@ -170,6 +154,7 @@ class SyncManager {
           data: {
             'content': comment.content,
             'author_id': comment.authorId,
+            'parent_comment_id': comment.parentCommentId,
           },
         );
 
@@ -183,7 +168,6 @@ class SyncManager {
         break;
 
       case 'update':
-      // Backend endpoint: PUT /forum/comments/{id}
         await _apiClient.put(
           '/api/v1/forum/comments/${comment.serverId}',
           data: {
@@ -198,9 +182,8 @@ class SyncManager {
         break;
 
       case 'delete':
-      // Backend endpoint: DELETE /forum/comments/{id}
         await _apiClient.delete('/api/v1/forum/comments/${comment.serverId}');
-        // TODO: Implement delete in database
+        await _database.deleteComment(comment.localId);
         break;
 
       default:
@@ -221,6 +204,7 @@ class SyncManager {
         data: {
           'text': comment.content,
           'comment_type': comment.commentType,
+          'parent_comment_id': comment.parentCommentId,
         },
       );
 
@@ -230,14 +214,15 @@ class SyncManager {
         syncStatus: 'synced',
         serverId: serverId,
       );
+    } else if (item.action == 'delete') {
+      await _apiClient.delete('/api/v1/forum/comments/${comment.serverId}');
+      await _database.deleteLineComment(comment.localId);
     } else {
       throw SyncException('Action ${item.action} not supported for line comments');
     }
   }
 
   /// Fetch new/updated posts from server
-  /// Backend endpoint: GET /forum/posts?since={timestamp}
-  /// Response: { "posts": [...] }
   Future<List<ForumPost>> fetchPostsFromServer({DateTime? since}) async {
     try {
       final queryParams = since != null
@@ -261,8 +246,6 @@ class SyncManager {
 
 
   /// Fetch comments for a specific post from server
-  /// Backend endpoint: GET /forum/posts/{id}/comments
-  /// Response: { "comments": [...] }
   Future<List<ForumComment>> fetchCommentsFromServer(String postId) async {
     try {
       final response = await _apiClient.get('/api/v1/forum/posts/$postId/comments');
@@ -278,9 +261,6 @@ class SyncManager {
     }
   }
 
-
-  /// Calculate exponential backoff delay
-  /// Returns delay in seconds: 30s, 60s, 120s, 240s, ... up to 1 hour
   int _calculateBackoff(int retryCount) {
     const baseDelay = 30; // 30 seconds
     const maxDelay = 3600; // 1 hour

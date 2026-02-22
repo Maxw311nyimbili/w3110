@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cap_project/features/forum/cubit/forum_cubit.dart';
 import 'package:cap_project/features/forum/cubit/forum_state.dart';
+import 'package:forum_repository/forum_repository.dart';
 import 'comment_card.dart';
 import 'reply_input_field_for_modal.dart';
 
@@ -141,44 +142,6 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
                             ),
                           ),
 
-                          // 2. Filter Tabs (Scrolls away)
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                            child: SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Row(
-                                children: [
-                                  _FilterTab(
-                                    label: 'All',
-                                    isActive: state.activeFilter == 'all',
-                                    onTap: () => context.read<ForumCubit>().filterComments('all'),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  _FilterTab(
-                                    label: 'Clinician',
-                                    icon: Icons.local_hospital_outlined,
-                                    isActive: state.activeFilter == 'clinician',
-                                    onTap: () => context.read<ForumCubit>().filterComments('clinician'),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  _FilterTab(
-                                    label: 'Experience',
-                                    icon: Icons.face_4_outlined,
-                                    isActive: state.activeFilter == 'experience',
-                                    onTap: () => context.read<ForumCubit>().filterComments('experience'),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  _FilterTab(
-                                    label: 'Concern',
-                                    icon: Icons.help_outline_rounded,
-                                    isActive: state.activeFilter == 'concern',
-                                    onTap: () => context.read<ForumCubit>().filterComments('concern'),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-
                           const Divider(height: 1, color: AppColors.borderLight),
 
                           // 3. Comments List
@@ -208,10 +171,19 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
                             ...comments.expand((comment) => [
                               Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                                child: CommentCard(
-                                  comment: comment,
-                                  onReply: () {
-                                    // Focus management
+                                child: FutureBuilder<String>(
+                                  future: context.read<ForumCubit>().getCurrentUserId(),
+                                  builder: (context, snapshot) {
+                                    final userId = snapshot.data ?? '';
+                                    return CommentCard(
+                                      comment: comment,
+                                      currentUserId: userId,
+                                      onReply: () {
+                                        context.read<ForumCubit>().setReplyingTo(comment);
+                                      },
+                                      onEdit: () => _showEditCommentDialog(context, comment),
+                                      onDelete: () => _showDeleteCommentDialog(context, comment.localId),
+                                    );
                                   },
                                 ),
                               ),
@@ -230,6 +202,63 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  void _showEditCommentDialog(BuildContext context, ForumLineComment comment) {
+    final controller = TextEditingController(text: comment.text);
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text('Edit Comment'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(hintText: 'Your comment...'),
+          maxLines: 3,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              context.read<ForumCubit>().updateLineComment(
+                localId: comment.localId,
+                serverId: comment.id,
+                text: controller.text,
+              );
+              Navigator.pop(dialogContext);
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteCommentDialog(BuildContext context, String localId) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text('Delete Comment'),
+        content: const Text('Are you sure you want to delete this comment?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              context.read<ForumCubit>().deleteLineComment(localId);
+              Navigator.pop(dialogContext);
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
       ),
     );
   }

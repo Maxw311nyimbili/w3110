@@ -13,14 +13,18 @@ import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import 'package:landing_repository/landing_repository.dart' as landing;
+
 class ChatCubit extends Cubit<ChatState> {
   ChatCubit({
     required repo.ChatRepository chatRepository,
+    required landing.LandingRepository landingRepository,
     required AudioRecordingService audioRecordingService,
     String? locale,
     String? userRole,
     List<String>? interests,
   })  : _chatRepository = chatRepository,
+        _landingRepository = landingRepository,
         _audioRecordingService = audioRecordingService,
         _audioPlayer = AudioPlayer(),
         _uuid = const Uuid(),
@@ -30,6 +34,7 @@ class ChatCubit extends Cubit<ChatState> {
         super(const ChatState());
 
   final repo.ChatRepository _chatRepository;
+  final landing.LandingRepository _landingRepository;
   final AudioRecordingService _audioRecordingService;
   final AudioPlayer _audioPlayer;
   final Uuid _uuid;
@@ -47,8 +52,14 @@ class ChatCubit extends Cubit<ChatState> {
   Future<void> initialize() async {
     try {
       emit(state.copyWith(status: ChatStatus.loading));
-      // Any initialization logic here
-      emit(state.copyWith(status: ChatStatus.success));
+      
+      // Fetch dynamic greeting in parallel with other initialization if needed
+      final greeting = await _landingRepository.fetchGreeting();
+      
+      emit(state.copyWith(
+        status: ChatStatus.success,
+        dynamicGreeting: greeting,
+      ));
     } catch (e) {
       emit(state.copyWith(
         status: ChatStatus.error,

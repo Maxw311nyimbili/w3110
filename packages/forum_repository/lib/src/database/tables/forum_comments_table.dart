@@ -20,6 +20,9 @@ class ForumComments extends Table {
   TextColumn get authorRole => text().nullable()();
   TextColumn get authorProfession => text().nullable()();
   TextColumn get content => text()();
+  TextColumn get parentCommentId => text().nullable()();
+  BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
+  IntColumn get version => integer().withDefault(const Constant(1))();
 
   // Engagement metrics
   IntColumn get likeCount => integer().withDefault(const Constant(0))();

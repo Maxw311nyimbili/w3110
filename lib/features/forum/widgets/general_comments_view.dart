@@ -120,6 +120,7 @@ class GeneralCommentsView extends StatelessWidget {
                           // Adapt ForumComment to ForumLineComment for the card
                           final lineComment = ForumLineComment(
                             id: comment.id,
+                            localId: comment.localId,
                             lineId: 'general',
                             authorId: comment.authorId,
                             authorName: comment.authorName,
@@ -130,12 +131,21 @@ class GeneralCommentsView extends StatelessWidget {
                             syncStatus: comment.syncStatus,
                           );
 
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8),
-                            child: CommentCard(
-                              comment: lineComment,
-                              onReply: () {},
-                            ),
+                          return FutureBuilder<String>(
+                            future: context.read<ForumCubit>().getCurrentUserId(),
+                            builder: (context, snapshot) {
+                              final userId = snapshot.data ?? '';
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 8),
+                                child: CommentCard(
+                                  comment: lineComment,
+                                  currentUserId: userId,
+                                  onReply: () {},
+                                  onEdit: () => _showEditCommentDialog(context, comment),
+                                  onDelete: () => _showDeleteCommentDialog(context, comment.localId),
+                                ),
+                              );
+                            },
                           );
                         },
                       );
@@ -153,6 +163,63 @@ class GeneralCommentsView extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  void _showEditCommentDialog(BuildContext context, ForumComment comment) {
+    final controller = TextEditingController(text: comment.content);
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text('Edit Comment'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(hintText: 'Your comment...'),
+          maxLines: 3,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              context.read<ForumCubit>().updateComment(
+                localId: comment.localId,
+                serverId: comment.id,
+                content: controller.text,
+              );
+              Navigator.pop(dialogContext);
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteCommentDialog(BuildContext context, String localId) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text('Delete Comment'),
+        content: const Text('Are you sure you want to delete this comment?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              context.read<ForumCubit>().deleteComment(localId);
+              Navigator.pop(dialogContext);
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
       ),
     );
   }

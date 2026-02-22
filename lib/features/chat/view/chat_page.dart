@@ -101,6 +101,7 @@ class _ChatPageState extends State<ChatPage> {
           create: (context) {
             final cubit = ChatCubit(
               chatRepository: context.read<ChatRepository>(),
+              landingRepository: context.read<LandingRepository>(),
               audioRecordingService: AudioRecordingService(),
               locale: locale,
               userRole: _onboardingStatus?.userRole,
