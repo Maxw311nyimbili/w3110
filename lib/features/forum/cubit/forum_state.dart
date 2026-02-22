@@ -140,6 +140,8 @@ class ForumState extends Equatable {
   
   // Special copyWith to allow clearing nullable fields
   ForumState copyWithNullableLineId({
+    List<ForumAnswerLine>? answerLines,
+    List<ForumLineComment>? lineComments,
     String? selectedLineId,
     String? currentAnswerId,
     bool clearLineId = false,
@@ -154,10 +156,10 @@ class ForumState extends Equatable {
       searchQuery: searchQuery,
       selectedPost: selectedPost,
       comments: comments,
-      answerLines: answerLines,
+      answerLines: answerLines ?? this.answerLines,
       currentAnswerId: clearAnswerId ? null : (currentAnswerId ?? this.currentAnswerId),
       selectedLineId: clearLineId ? null : (selectedLineId ?? this.selectedLineId),
-      lineComments: lineComments,
+      lineComments: lineComments ?? this.lineComments,
       activeFilter: activeFilter,
       postFilter: postFilter,
       error: error,
