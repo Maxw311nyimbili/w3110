@@ -36,6 +36,9 @@ flutter config --enable-web
 echo "Fetching dependencies..."
 flutter pub get
 
+echo "Generating environment variables..."
+dart run build_runner build --delete-conflicting-outputs
+
 echo "Building Web App (Release mode)..."
 # Use --no-color to clean up logs if needed
 flutter build web --release --no-pub -t lib/main_development.dart
