@@ -9,6 +9,8 @@ import 'package:cap_project/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cap_project/core/widgets/entry_animation.dart';
+import 'package:cap_project/core/util/responsive_utils.dart';
+import 'package:cap_project/core/widgets/main_navigation_shell.dart';
 import 'package:forum_repository/forum_repository.dart';
 
 class ForumListPage extends StatelessWidget {
@@ -34,46 +36,35 @@ class ForumListView extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<ForumCubit, ForumState>(
       builder: (context, state) {
-        return Scaffold(
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          appBar: AppBar(
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            elevation: 0,
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-              onPressed: () {
-                if (state.view == ForumView.detail) {
-                  context.read<ForumCubit>().backToList();
-                } else {
-                  Navigator.pop(context);
-                }
-              },
-            ),
-            title: Text(
-              state.view == ForumView.detail
-                  ? 'Discussion'
-                  : AppLocalizations.of(context).community,
-            ),
-            centerTitle: true,
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.refresh_rounded, size: 20),
-                onPressed: () => context.read<ForumCubit>().resetAndReload(),
-                tooltip: 'Reset Forum Data',
-              ),
-              if (state.hasPendingSync)
-                IconButton(
-                  icon: const Icon(
-                    Icons.cloud_upload_outlined,
-                    color: AppColors.warning,
-                  ),
-                  onPressed: () => context.read<ForumCubit>().syncWithBackend(),
-                ),
-            ],
+        return MainNavigationShell(
+          title: Text(
+            state.view == ForumView.detail
+                ? 'Discussion'
+                : AppLocalizations.of(context).community,
           ),
-          body: const SafeArea(
-            child: EntryAnimation(
-              child: ForumBody(),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.refresh_rounded, size: 20),
+              onPressed: () => context.read<ForumCubit>().resetAndReload(),
+              tooltip: 'Reset Forum Data',
+            ),
+            if (state.hasPendingSync)
+              IconButton(
+                icon: const Icon(
+                  Icons.cloud_upload_outlined,
+                  color: AppColors.warning,
+                ),
+                onPressed: () => context.read<ForumCubit>().syncWithBackend(),
+              ),
+          ],
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 800),
+              child: const SafeArea(
+                child: EntryAnimation(
+                  child: ForumBody(),
+                ),
+              ),
             ),
           ),
         );

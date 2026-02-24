@@ -127,11 +127,16 @@ class SideMenu extends StatelessWidget {
         onTap:
             onTap ??
             () {
-              if (Scaffold.of(context).hasDrawer &&
-                  Scaffold.of(context).isDrawerOpen) {
-                Navigator.pop(context);
-              }
               if (route != null && !isSelected) {
+                // Determine if we are in a drawer or a persistent sidebar
+                final scaffold = Scaffold.of(context);
+                final hasDrawer = scaffold.hasDrawer;
+                final isDrawerOpen = scaffold.isDrawerOpen;
+
+                if (hasDrawer && isDrawerOpen) {
+                  Navigator.pop(context); // Close drawer on mobile
+                }
+                
                 AppRouter.replaceTo(context, route);
               }
             },

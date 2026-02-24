@@ -12,6 +12,8 @@ import 'package:cap_project/features/landing/widgets/welcome_drawer.dart';
 import 'package:cap_project/features/landing/cubit/cubit.dart';
 import 'package:cap_project/features/medscanner/cubit/medscanner_state.dart'
     as scanner;
+import 'package:cap_project/core/util/responsive_utils.dart';
+import 'package:cap_project/core/widgets/main_navigation_shell.dart';
 import '../cubit/cubit.dart';
 import '../widgets/widgets.dart';
 
@@ -154,114 +156,60 @@ class _ChatViewState extends State<ChatView> {
 
   @override
   Widget build(BuildContext context) {
-    final authState = context.watch<AuthCubit>().state;
-    final user = authState.user;
-    final status = widget.onboardingStatus;
+    final isDesktop = ResponsiveUtils.isDesktop(context);
 
-    return Scaffold(
-      resizeToAvoidBottomInset: true,
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Custom Header
-            if (!_isAudioMode)
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 12,
-                ),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).scaffoldBackgroundColor,
-                    border: Border(
-                      bottom: BorderSide(
-                        color: Theme.of(context).dividerColor.withOpacity(0.1),
-                        width: 1,
-                      ),
+    return MainNavigationShell(
+      title: !_isAudioMode
+          ? Text(
+              'Thanzi',
+              style: AppTextStyles.headlineSmall.copyWith(
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.5,
+              ),
+            )
+          : null,
+      actions: !_isAudioMode
+          ? [
+              Padding(
+                padding: const EdgeInsets.only(right: 16),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Theme.of(context).dividerColor.withOpacity(0.1),
                     ),
-                ),
-                child: Row(
-                  children: [
-                    // Profile / Settings Button
-                    GestureDetector(
-                      onTap: () => AppRouter.navigateTo<void>(
-                        context,
-                        AppRouter.settings,
-                      ),
-                      child: Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surface,
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: Theme.of(context).dividerColor.withOpacity(0.1),
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Icon(
-                          Icons.menu_rounded,
-                          size: 20,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                      ),
+                  ),
+                  child: IconButton(
+                    icon: Icon(
+                      Icons.forum_outlined,
+                      size: 20,
+                      color: Theme.of(context).colorScheme.primary,
                     ),
-                    const SizedBox(width: 16),
-                    // Title
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Thanzi',
-                            style: AppTextStyles.headlineSmall.copyWith(
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: -0.5,
-                            ),
-                          ),
-                        ],
-                      ),
+                    onPressed: () => AppRouter.navigateTo<void>(
+                      context,
+                      AppRouter.forum,
                     ),
-                    // Actions
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surface,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: Theme.of(context).dividerColor.withOpacity(0.1),
-                        ),
-                      ),
-                      child: IconButton(
-                        icon: Icon(
-                          Icons.forum_outlined,
-                          size: 20,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                        onPressed: () => AppRouter.navigateTo<void>(
-                          context,
-                          AppRouter.forum,
-                        ),
-                        tooltip: 'Community Forum',
-                      ),
-                    ),
-                  ],
+                    tooltip: 'Community Forum',
+                  ),
                 ),
               ),
-
-            // Body
-            Expanded(
-              child: ChatBody(
-                isAudioMode: _isAudioMode,
-                onToggleAudio: _toggleAudioMode,
+            ]
+          : null,
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1000),
+          child: Column(
+            children: [
+              // Body
+              Expanded(
+                child: ChatBody(
+                  isAudioMode: _isAudioMode,
+                  onToggleAudio: _toggleAudioMode,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
