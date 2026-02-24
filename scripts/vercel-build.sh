@@ -38,6 +38,6 @@ flutter pub get
 
 echo "Building Web App (Release mode)..."
 # Use --no-color to clean up logs if needed
-flutter build web --release --no-pub
+flutter build web --release --no-pub -t lib/main_development.dart
 
 echo "Build complete! Output is in build/web"
