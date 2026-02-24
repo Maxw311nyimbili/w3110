@@ -1,10 +1,7 @@
 // packages/forum_repository/lib/src/database/forum_database.dart
 
-import 'dart:io';
 import 'package:drift/drift.dart';
-import 'package:drift/native.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart' as p;
+import 'connection/connection.dart' as c;
 
 import 'tables/forum_posts_table.dart';
 import 'tables/forum_comments_table.dart';
@@ -25,7 +22,7 @@ part 'forum_database.g.dart';
   ],
 )
 class ForumDatabase extends _$ForumDatabase {
-  ForumDatabase() : super(_openConnection());
+  ForumDatabase() : super(c.openConnection());
 
   @override
   int get schemaVersion => 4;
@@ -489,13 +486,3 @@ class ForumDatabase extends _$ForumDatabase {
   }
 }
 
-/// Open database connection
-LazyDatabase _openConnection() {
-  return LazyDatabase(() async {
-    // Get app documents directory
-    final dbFolder = await getApplicationDocumentsDirectory();
-    final file = File(p.join(dbFolder.path, 'forum_db.sqlite'));
-
-    return NativeDatabase(file);
-  });
-}
