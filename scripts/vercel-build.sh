@@ -17,18 +17,27 @@ if [ ! -d "flutter" ]; then
   rm flutter_linux_${FLUTTER_VERSION}-${FLUTTER_CHANNEL}.tar.xz
 fi
 
-# 2. Add Flutter to PATH
+# 2. Add Flutter to PATH and fix ownership
 export PATH="$PATH:`pwd`/flutter/bin"
+
+# Fix "dubious ownership" error in the build environment
+git config --global --add safe.directory "*"
 
 # 3. Configure and Build
 echo "Configuring Flutter..."
+# Avoid root warning if possible, though Vercel runs as root usually
+export PUB_CACHE="`pwd`/.pub-cache"
+export PATH="$PATH:$PUB_CACHE/bin"
+
+flutter config --no-analytics
 flutter config --enable-web
-flutter doctor
+# flutter doctor --android-licenses # Not needed for web
 
 echo "Fetching dependencies..."
 flutter pub get
 
 echo "Building Web App (Release mode)..."
-flutter build web --release
+# Use --no-color to clean up logs if needed
+flutter build web --release --no-pub
 
 echo "Build complete! Output is in build/web"
