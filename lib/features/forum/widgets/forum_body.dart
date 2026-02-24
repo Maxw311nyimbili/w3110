@@ -40,7 +40,7 @@ class ForumBody extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: AppColors.backgroundSurface.withOpacity(0.6),
+        color: Theme.of(context).colorScheme.surface.withOpacity(0.6),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
@@ -81,7 +81,9 @@ class ForumBody extends StatelessWidget {
         curve: Curves.easeInOut,
         padding: const EdgeInsets.symmetric(vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.white : Colors.transparent,
+          color: isSelected 
+              ? Theme.of(context).colorScheme.surface 
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
           boxShadow: isSelected
               ? [
@@ -97,7 +99,9 @@ class ForumBody extends StatelessWidget {
           label,
           textAlign: TextAlign.center,
           style: AppTextStyles.labelLarge.copyWith(
-            color: isSelected ? AppColors.textPrimary : AppColors.textSecondary,
+            color: isSelected 
+              ? Theme.of(context).textTheme.bodyLarge?.color 
+              : Theme.of(context).textTheme.bodySmall?.color,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
           ),
         ),
@@ -193,11 +197,11 @@ class ForumBody extends StatelessWidget {
           ),
           prefixIcon: Icon(
             Icons.search_rounded,
-            color: AppColors.textSecondary,
+            color: Theme.of(context).iconTheme.color,
             size: 20,
           ),
           filled: true,
-          fillColor: AppColors.backgroundSurface,
+          fillColor: Theme.of(context).colorScheme.surface,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(28),
             borderSide: const BorderSide(

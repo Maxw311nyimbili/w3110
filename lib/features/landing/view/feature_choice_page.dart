@@ -66,7 +66,7 @@ class _FeatureChoicePageState extends State<FeatureChoicePage>
     final bottomPadding = MediaQuery.of(context).padding.bottom;
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundPrimary,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Stack(
         children: [
           // Faint watermark
@@ -102,15 +102,15 @@ class _FeatureChoicePageState extends State<FeatureChoicePage>
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: _kBrand.withOpacity(0.08),
+                            color: Theme.of(context).colorScheme.primary.withOpacity(0.08),
                             borderRadius: BorderRadius.circular(
                               AppSpacing.radiusFull,
                             ),
                           ),
                           child: Text(
                             'SELECT INTENT',
-                            style: AppTextStyles.overline.copyWith(
-                              color: _kBrand,
+                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: Theme.of(context).colorScheme.primary,
                               letterSpacing: 2.5,
                             ),
                           ),
@@ -118,14 +118,17 @@ class _FeatureChoicePageState extends State<FeatureChoicePage>
                         const SizedBox(height: 12),
                         Text(
                           'What are we\nfocusing on today?',
-                          style: AppTextStyles.displaySmall.copyWith(
+                          style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                            color: Theme.of(context).textTheme.bodyLarge?.color,
                             height: 1.15,
                           ),
                         ),
                         const SizedBox(height: 6),
                         Text(
                           'Choose one to get started.',
-                          style: AppTextStyles.bodySmall,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).textTheme.bodySmall?.color,
+                          ),
                         ),
                       ],
                     ),
@@ -173,11 +176,11 @@ class _FeatureChoicePageState extends State<FeatureChoicePage>
                         width: 220,
                         borderRadius: AppSpacing.radiusFull,
                         backgroundColor: _selectedFeature != null
-                            ? _kBrand
-                            : AppColors.borderLight,
+                            ? Theme.of(context).colorScheme.primary
+                            : Theme.of(context).dividerColor.withOpacity(0.1),
                         foregroundColor: _selectedFeature != null
                             ? Colors.white
-                            : AppColors.textTertiary,
+                            : Theme.of(context).textTheme.labelSmall?.color,
                         onPressed: _selectedFeature != null
                             ? () => _navigateToFeature(context)
                             : null,
@@ -245,11 +248,11 @@ class _FeatureCard extends StatelessWidget {
         curve: Curves.easeOutCubic,
         decoration: BoxDecoration(
           color: isSelected
-              ? _kBrand.withOpacity(0.06)
-              : AppColors.backgroundSurface,
+              ? Theme.of(context).colorScheme.primary.withOpacity(0.06)
+              : Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
           border: Border.all(
-            color: isSelected ? _kBrand : AppColors.borderLight,
+            color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).dividerColor.withOpacity(0.1),
             width: isSelected ? 1.5 : 1,
           ),
           boxShadow: isSelected
@@ -277,12 +280,12 @@ class _FeatureCard extends StatelessWidget {
               width: 52,
               height: 52,
               decoration: BoxDecoration(
-                color: isSelected ? _kBrand : _kBrand.withOpacity(0.08),
+                color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.primary.withOpacity(0.08),
                 borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
               ),
               child: Icon(
                 def.icon,
-                color: isSelected ? Colors.white : _kBrand,
+                color: isSelected ? Colors.white : Theme.of(context).colorScheme.primary,
                 size: 24,
               ),
             ),
@@ -300,9 +303,9 @@ class _FeatureCard extends StatelessWidget {
                       Expanded(
                         child: Text(
                           def.title,
-                          style: AppTextStyles.headlineSmall.copyWith(
+                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                             fontWeight: FontWeight.w700,
-                            color: isSelected ? _kBrand : AppColors.textPrimary,
+                            color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).textTheme.bodyLarge?.color,
                           ),
                         ),
                       ),
@@ -313,18 +316,18 @@ class _FeatureCard extends StatelessWidget {
                         ),
                         decoration: BoxDecoration(
                           color: isSelected
-                              ? _kBrand.withOpacity(0.1)
-                              : AppColors.backgroundElevated,
+                              ? Theme.of(context).colorScheme.primary.withOpacity(0.1)
+                              : Theme.of(context).colorScheme.surfaceVariant,
                           borderRadius: BorderRadius.circular(
                             AppSpacing.radiusFull,
                           ),
                         ),
                         child: Text(
                           def.tag,
-                          style: AppTextStyles.caption.copyWith(
+                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
                             color: isSelected
-                                ? _kBrand
-                                : AppColors.textTertiary,
+                                ? Theme.of(context).colorScheme.primary
+                                : Theme.of(context).textTheme.bodySmall?.color,
                             letterSpacing: 1.2,
                             fontWeight: FontWeight.w700,
                           ),
@@ -335,7 +338,10 @@ class _FeatureCard extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     def.subtitle,
-                    style: AppTextStyles.bodySmall.copyWith(height: 1.4),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).textTheme.bodySmall?.color,
+                      height: 1.4,
+                    ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -352,17 +358,17 @@ class _FeatureCard extends StatelessWidget {
               height: 22,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: isSelected ? _kBrand : Colors.transparent,
+                color: isSelected ? Theme.of(context).colorScheme.primary : Colors.transparent,
                 border: Border.all(
-                  color: isSelected ? _kBrand : AppColors.borderMedium,
+                  color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).dividerColor.withOpacity(0.1),
                   width: 1.5,
                 ),
               ),
               child: isSelected
-                  ? const Icon(
+                  ? Icon(
                       Icons.check_rounded,
                       size: 14,
-                      color: Colors.white,
+                      color: isSelected ? Colors.white : Theme.of(context).colorScheme.primary,
                     )
                   : null,
             ),

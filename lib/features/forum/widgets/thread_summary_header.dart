@@ -55,10 +55,10 @@ class ThreadSummaryHeader extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: BoxDecoration(
-        color: AppColors.accentPrimary.withOpacity(0.08),
+        color: Theme.of(context).colorScheme.primary.withOpacity(0.08),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: AppColors.accentPrimary.withOpacity(0.15),
+          color: Theme.of(context).colorScheme.primary.withOpacity(0.15),
           width: 1,
         ),
       ),
@@ -74,7 +74,7 @@ class ThreadSummaryHeader extends StatelessWidget {
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: AppColors.accentPrimary,
+                  color: Theme.of(context).colorScheme.primary,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -93,10 +93,10 @@ class ThreadSummaryHeader extends StatelessWidget {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.success.withOpacity(0.15),
+                    color: Colors.green.withOpacity(0.15),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: AppColors.success.withOpacity(0.3),
+                      color: Colors.green.withOpacity(0.3),
                       width: 1,
                     ),
                   ),
@@ -106,13 +106,13 @@ class ThreadSummaryHeader extends StatelessWidget {
                       const Icon(
                         Icons.verified,
                         size: 12,
-                        color: AppColors.success,
+                        color: Colors.green,
                       ),
                       const SizedBox(width: 4),
                       Text(
                         '$expertCount expert',
-                        style: AppTextStyles.labelSmall.copyWith(
-                          color: AppColors.success,
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: Colors.green,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -126,8 +126,8 @@ class ThreadSummaryHeader extends StatelessWidget {
           // Consensus line
           Text(
             _getConsensus(),
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.textSecondary,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).textTheme.bodySmall?.color,
             ),
           ),
           const SizedBox(height: 12),
@@ -139,7 +139,7 @@ class ThreadSummaryHeader extends StatelessWidget {
               child: ElevatedButton.icon(
                 onPressed: onJumpToExperts,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.accentPrimary,
+                  backgroundColor: Theme.of(context).colorScheme.primary,
                   padding: const EdgeInsets.symmetric(vertical: 10),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -148,8 +148,8 @@ class ThreadSummaryHeader extends StatelessWidget {
                 icon: const Icon(Icons.arrow_downward, size: 16),
                 label: Text(
                   'See expert responses',
-                  style: AppTextStyles.labelMedium.copyWith(
-                    color: Colors.white,
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onPrimary,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -178,10 +178,10 @@ class ExpertCommentHighlight extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.success.withOpacity(0.06),
+        color: Colors.green.withOpacity(0.06),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: AppColors.success.withOpacity(0.2),
+          color: Colors.green.withOpacity(0.2),
           width: 1.5,
         ),
       ),
@@ -195,7 +195,7 @@ class ExpertCommentHighlight extends StatelessWidget {
                 width: 32,
                 height: 32,
                 decoration: BoxDecoration(
-                  color: AppColors.success.withOpacity(0.2),
+                  color: Colors.green.withOpacity(0.2),
                   shape: BoxShape.circle,
                 ),
                 child: const Center(
@@ -213,16 +213,16 @@ class ExpertCommentHighlight extends StatelessWidget {
                   children: [
                     Text(
                       comment.authorName,
-                      style: AppTextStyles.labelMedium.copyWith(
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
                         fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
                       ),
                     ),
                     if (comment.authorProfession != null)
                       Text(
                         comment.authorProfession!,
-                        style: AppTextStyles.caption.copyWith(
-                          color: AppColors.success,
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: Colors.green,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -238,9 +238,9 @@ class ExpertCommentHighlight extends StatelessWidget {
             comment.text,
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
-            style: AppTextStyles.bodyMedium.copyWith(
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               height: 1.5,
-              color: AppColors.textPrimary,
+              color: Theme.of(context).textTheme.bodyLarge?.color,
             ),
           ),
         ],
@@ -268,7 +268,7 @@ class ThreadDepthIndicator extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: AppColors.backgroundElevated,
+        color: Theme.of(context).colorScheme.surfaceVariant,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -279,14 +279,14 @@ class ThreadDepthIndicator extends StatelessWidget {
             children: [
               Text(
                 'Discussion depth',
-                style: AppTextStyles.labelSmall.copyWith(
-                  color: AppColors.textSecondary,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: Theme.of(context).textTheme.bodySmall?.color,
                 ),
               ),
               Text(
                 '$currentPosition of $totalComments',
-                style: AppTextStyles.labelSmall.copyWith(
-                  color: AppColors.textPrimary,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -298,9 +298,9 @@ class ThreadDepthIndicator extends StatelessWidget {
             child: LinearProgressIndicator(
               value: progress,
               minHeight: 4,
-              backgroundColor: AppColors.borderLight,
+              backgroundColor: Theme.of(context).dividerColor.withOpacity(0.1),
               valueColor: AlwaysStoppedAnimation<Color>(
-                AppColors.accentPrimary.withOpacity(0.8),
+                Theme.of(context).colorScheme.primary.withOpacity(0.8),
               ),
             ),
           ),
@@ -333,10 +333,10 @@ class CommentGroupHeader extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: AppColors.backgroundElevated,
+          color: Theme.of(context).colorScheme.surfaceVariant,
           border: Border(
             bottom: BorderSide(
-              color: AppColors.borderLight,
+              color: Theme.of(context).dividerColor.withOpacity(0.1),
               width: 1,
             ),
           ),
@@ -345,28 +345,28 @@ class CommentGroupHeader extends StatelessWidget {
           children: [
             Icon(
               isExpanded ? Icons.expand_less : Icons.expand_more,
-              color: AppColors.accentPrimary,
+              color: Theme.of(context).colorScheme.primary,
             ),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
                 theme,
-                style: AppTextStyles.labelMedium.copyWith(
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
                 ),
               ),
             ),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: AppColors.accentPrimary.withOpacity(0.1),
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
                 '$commentCount',
-                style: AppTextStyles.labelSmall.copyWith(
-                  color: AppColors.accentPrimary,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: Theme.of(context).colorScheme.primary,
                   fontWeight: FontWeight.w600,
                 ),
               ),

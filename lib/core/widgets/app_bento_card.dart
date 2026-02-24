@@ -24,7 +24,7 @@ class AppBentoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final themeColor = color ?? AppColors.accentPrimary;
+    final themeColor = color ?? Theme.of(context).colorScheme.primary;
 
     return Expanded(
       child: GestureDetector(
@@ -61,24 +61,28 @@ class AppBentoCard extends StatelessWidget {
                 Icon(
                   icon,
                   size: 28,
-                  color: isSelected ? themeColor : AppColors.textTertiary,
+                  color: isSelected
+                      ? themeColor
+                      : Theme.of(context).textTheme.bodySmall?.color,
                 ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     title.toUpperCase(),
-                    style: AppTextStyles.labelSmall.copyWith(
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
                       letterSpacing: 2.0,
                       fontWeight: FontWeight.w900,
-                      color: isSelected ? themeColor : AppColors.textPrimary,
+                      color: isSelected
+                          ? themeColor
+                          : Theme.of(context).textTheme.bodyLarge?.color,
                     ),
                   ),
                   const SizedBox(height: 6),
                   Text(
                     subtitle,
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: AppColors.textSecondary,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).textTheme.bodySmall?.color,
                       fontSize: 13,
                       height: 1.3,
                     ),

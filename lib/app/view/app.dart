@@ -7,6 +7,8 @@ import 'package:cap_project/app/view/app_router.dart';
 import 'package:cap_project/core/locale/cubit/locale_cubit.dart';
 import 'package:cap_project/core/locale/cubit/locale_state.dart';
 import 'package:cap_project/core/theme/app_theme.dart';
+import 'package:cap_project/core/theme/cubit/theme_cubit.dart';
+import 'package:cap_project/core/theme/cubit/theme_state.dart';
 import 'package:cap_project/features/auth/cubit/auth_cubit.dart';
 import 'package:cap_project/features/landing/cubit/landing_cubit.dart';
 import 'package:cap_project/l10n/l10n.dart';
@@ -44,6 +46,7 @@ class _AppState extends State<App> {
   late final AuthCubit _authCubit;
   late final LandingCubit _landingCubit;
   late final LocaleCubit _localeCubit;
+  late final ThemeCubit _themeCubit;
 
   @override
   void initState() {
@@ -134,6 +137,9 @@ class _AppState extends State<App> {
 
     // Initialize global LocaleCubit
     _localeCubit = LocaleCubit();
+
+    // Initialize global ThemeCubit
+    _themeCubit = ThemeCubit();
   }
 
   void _setupLocaleListener() {
@@ -158,38 +164,36 @@ class _AppState extends State<App> {
           BlocProvider.value(value: _authCubit),
           BlocProvider.value(value: _landingCubit),
           BlocProvider.value(value: _localeCubit),
+          BlocProvider.value(value: _themeCubit),
         ],
-        child: BlocBuilder<LocaleCubit, LocaleState>(
-          builder: (context, localeState) {
-            return MaterialApp(
-              title: 'Thanzi',
-              debugShowCheckedModeBanner: false,
-              theme: AppTheme.lightTheme,
-              darkTheme: AppTheme.darkTheme,
-              themeMode: ThemeMode.system,
-              locale: localeState.locale,
-              supportedLocales: AppLocalizations.supportedLocales,
-              localizationsDelegates: AppLocalizations.localizationsDelegates,
-              localeResolutionCallback: (locale, supportedLocales) {
-                if (locale == null) return supportedLocales.first;
-                for (final supportedLocale in supportedLocales) {
-                  if (supportedLocale.languageCode == locale.languageCode) {
-                    return supportedLocale;
-                  }
-                }
-                return supportedLocales.first;
-              },
-              onGenerateRoute: AppRouter.generateRoute,
-              initialRoute: AppRouter.splash,
-              builder: (context, child) {
-                // Wrap app with environment banner if not production
-                if (!widget.config.isProduction) {
-                  return FlavorBanner(
-                    config: widget.config,
-                    child: child ?? const SizedBox(),
-                  );
-                }
-                return child ?? const SizedBox();
+        child: BlocBuilder<ThemeCubit, ThemeState>(
+          builder: (context, themeState) {
+            return BlocBuilder<LocaleCubit, LocaleState>(
+              builder: (context, localeState) {
+                return MaterialApp(
+                  title: 'Thanzi',
+                  debugShowCheckedModeBanner: false,
+                  theme: AppTheme.lightTheme,
+                  darkTheme: AppTheme.darkTheme,
+                  themeMode: themeState.flutterThemeMode,
+                  locale: localeState.locale,
+                  supportedLocales: AppLocalizations.supportedLocales,
+                  localizationsDelegates: AppLocalizations.localizationsDelegates,
+                  localeResolutionCallback: (locale, supportedLocales) {
+                    if (locale == null) return supportedLocales.first;
+                    for (final supportedLocale in supportedLocales) {
+                      if (supportedLocale.languageCode == locale.languageCode) {
+                        return supportedLocale;
+                      }
+                    }
+                    return supportedLocales.first;
+                  },
+                  onGenerateRoute: AppRouter.generateRoute,
+                  initialRoute: AppRouter.splash,
+                  builder: (context, child) {
+                    return child ?? const SizedBox();
+                  },
+                );
               },
             );
           },
@@ -203,6 +207,7 @@ class _AppState extends State<App> {
     _authCubit.close();
     _landingCubit.close();
     _localeCubit.close();
+    _themeCubit.close();
     super.dispose();
   }
 }

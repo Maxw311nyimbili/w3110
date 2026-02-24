@@ -86,8 +86,8 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
 
     _logoColor =
         ColorTween(
-          begin: AppColors.brandDarkTeal,
-          end: Colors.white,
+          begin: AppColors.accentPrimary,
+          end: Colors.white, // Since it lands on scaffoldBackground which is dark in DM and light in LM, but the brand color is usually white on dark.
         ).animate(
           CurvedAnimation(
             parent: _controller,
@@ -115,7 +115,7 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
           ),
         );
 
-    // Status bar sync: light icons on teal, dark icons when white curtain fills
+    // Status bar sync: light icons on teal, dark icons when theme background fills
     _curtainReveal.addListener(_syncStatusBar);
 
     _controller.forward();
@@ -142,7 +142,7 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
 
     return AndroidOptimized(
       child: Scaffold(
-        backgroundColor: AppColors.brandDarkTeal,
+        backgroundColor: Theme.of(context).colorScheme.primary,
         body: Stack(
           children: [
             // ── Morphing white curtain ─────────────────────────────────────
@@ -153,7 +153,7 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                   child: CustomPaint(
                     painter: _InvertedCurtainPainter(
                       reveal: _curtainReveal.value,
-                      color: Colors.white,
+                      color: Theme.of(context).scaffoldBackgroundColor,
                     ),
                   ),
                 );
@@ -183,7 +183,7 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                             ),
                             child: ColorFiltered(
                               colorFilter: ColorFilter.mode(
-                                _logoColor.value ?? AppColors.brandDarkTeal,
+                                _logoColor.value ?? Theme.of(context).colorScheme.primary,
                                 BlendMode.srcIn,
                               ),
                               child: Transform.rotate(
@@ -242,8 +242,8 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                                     _TypewriterText(
                                       text: tagline,
                                       progress: _contentOpacity.value,
-                                      style: const TextStyle(
-                                        color: AppColors.textSecondary,
+                                      style: TextStyle(
+                                        color: Theme.of(context).textTheme.bodySmall?.color,
                                         fontSize: 10,
                                         fontWeight: FontWeight.w600,
                                         letterSpacing: 1.8,
@@ -257,7 +257,7 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                                           : 'Get Started',
                                       width: 220,
                                       borderRadius: AppSpacing.radiusFull,
-                                      backgroundColor: AppColors.brandDarkTeal,
+                                      backgroundColor: Theme.of(context).colorScheme.primary,
                                       foregroundColor: Colors.white,
                                       onPressed: () {
                                         if (isAuthenticated) {

@@ -160,7 +160,7 @@ class _ChatViewState extends State<ChatView> {
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      backgroundColor: AppColors.backgroundPrimary,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -172,13 +172,13 @@ class _ChatViewState extends State<ChatView> {
                   vertical: 12,
                 ),
                 decoration: BoxDecoration(
-                  color: AppColors.backgroundPrimary,
-                  border: Border(
-                    bottom: BorderSide(
-                      color: AppColors.borderLight.withOpacity(0.5),
-                      width: 1,
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                    border: Border(
+                      bottom: BorderSide(
+                        color: Theme.of(context).dividerColor.withOpacity(0.1),
+                        width: 1,
+                      ),
                     ),
-                  ),
                 ),
                 child: Row(
                   children: [
@@ -192,9 +192,11 @@ class _ChatViewState extends State<ChatView> {
                         width: 40,
                         height: 40,
                         decoration: BoxDecoration(
-                          color: AppColors.backgroundSurface,
+                          color: Theme.of(context).colorScheme.surface,
                           shape: BoxShape.circle,
-                          border: Border.all(color: AppColors.borderLight),
+                          border: Border.all(
+                            color: Theme.of(context).dividerColor.withOpacity(0.1),
+                          ),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withOpacity(0.05),
@@ -203,10 +205,10 @@ class _ChatViewState extends State<ChatView> {
                             ),
                           ],
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.menu_rounded,
                           size: 20,
-                          color: AppColors.accentPrimary,
+                          color: Theme.of(context).colorScheme.primary,
                         ),
                       ),
                     ),
@@ -229,15 +231,17 @@ class _ChatViewState extends State<ChatView> {
                     // Actions
                     Container(
                       decoration: BoxDecoration(
-                        color: AppColors.backgroundSurface,
+                        color: Theme.of(context).colorScheme.surface,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: AppColors.borderLight),
+                        border: Border.all(
+                          color: Theme.of(context).dividerColor.withOpacity(0.1),
+                        ),
                       ),
                       child: IconButton(
-                        icon: const Icon(
+                        icon: Icon(
                           Icons.forum_outlined,
                           size: 20,
-                          color: AppColors.textPrimary,
+                          color: Theme.of(context).colorScheme.primary,
                         ),
                         onPressed: () => AppRouter.navigateTo<void>(
                           context,

@@ -21,9 +21,9 @@ class LanguageSelectorBottomSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        color: AppColors.backgroundSurface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       padding: const EdgeInsets.symmetric(vertical: 24),
       child: SafeArea(
@@ -36,7 +36,7 @@ class LanguageSelectorBottomSheet extends StatelessWidget {
               height: 4,
               margin: const EdgeInsets.only(bottom: 20),
               decoration: BoxDecoration(
-                color: AppColors.borderLight,
+                color: Theme.of(context).dividerColor.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -46,8 +46,7 @@ class LanguageSelectorBottomSheet extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
               child: Text(
                 'Select Language',
-                style: AppTextStyles.headlineMedium.copyWith(
-                  color: AppColors.textPrimary,
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -110,21 +109,21 @@ class _LanguageOption extends StatelessWidget {
                 height: 40,
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? AppColors.accentPrimary.withOpacity(0.15)
-                      : AppColors.backgroundPrimary,
+                      ? Theme.of(context).colorScheme.primary.withOpacity(0.15)
+                      : Theme.of(context).scaffoldBackgroundColor,
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
                     color: isSelected
-                        ? AppColors.accentPrimary
-                        : AppColors.borderLight,
+                        ? Theme.of(context).colorScheme.primary
+                        : Theme.of(context).dividerColor.withOpacity(0.1),
                     width: isSelected ? 2 : 1,
                   ),
                 ),
                 child: Icon(
                   LocaleState.getLanguageIcon(locale),
                   color: isSelected
-                      ? AppColors.accentPrimary
-                      : AppColors.textSecondary,
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(context).textTheme.bodySmall?.color,
                   size: 20,
                 ),
               ),
@@ -135,10 +134,7 @@ class _LanguageOption extends StatelessWidget {
               Expanded(
                 child: Text(
                   LocaleState.getLanguageName(locale),
-                  style: AppTextStyles.bodyLarge.copyWith(
-                    color: isSelected
-                        ? AppColors.textPrimary
-                        : AppColors.textSecondary,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                     fontSize: 17,
                   ),
@@ -149,7 +145,7 @@ class _LanguageOption extends StatelessWidget {
               if (isSelected)
                 Icon(
                   Icons.check_circle_rounded,
-                  color: AppColors.accentPrimary,
+                  color: Theme.of(context).colorScheme.primary,
                   size: 24,
                 ),
             ],

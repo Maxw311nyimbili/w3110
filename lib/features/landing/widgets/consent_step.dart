@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_text_styles.dart';
 import '../../../core/constants/app_constants.dart';
 import '../cubit/cubit.dart';
 import 'package:cap_project/core/widgets/premium_button.dart';
+import 'package:cap_project/core/theme/app_text_styles.dart';
 
 class ConsentStep extends StatelessWidget {
   const ConsentStep({super.key});
@@ -14,13 +13,13 @@ class ConsentStep extends StatelessWidget {
     return BlocBuilder<LandingCubit, LandingState>(
       builder: (context, state) {
         return Scaffold(
-          backgroundColor: AppColors.backgroundPrimary,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           appBar: AppBar(
             backgroundColor: Colors.transparent,
             elevation: 0,
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-              color: AppColors.textPrimary,
+              icon: Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+              color: Theme.of(context).textTheme.bodyLarge?.color,
               onPressed: () => context.read<LandingCubit>().previousStep(),
             ),
           ),
@@ -38,8 +37,8 @@ class ConsentStep extends StatelessWidget {
                     delay: 100,
                     child: Text(
                       'One final commitment',
-                      style: AppTextStyles.displayMedium.copyWith(
-                        color: AppColors.textPrimary,
+                      style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                        color: Theme.of(context).textTheme.displayLarge?.color,
                         letterSpacing: -1.0,
                         fontWeight: FontWeight.w800,
                         fontSize: 34,
@@ -53,6 +52,7 @@ class ConsentStep extends StatelessWidget {
                   _buildStaggeredEntrance(
                     delay: 200,
                     child: _buildTermItem(
+                      context,
                       'AI Assistance',
                       'MedLink uses AI. It is not a substitute for professional medical advice.',
                     ),
@@ -60,6 +60,7 @@ class ConsentStep extends StatelessWidget {
                   _buildStaggeredEntrance(
                     delay: 300,
                     child: _buildTermItem(
+                      context,
                       'Emergency',
                       'If this is an emergency, call 911 immediately.',
                     ),
@@ -67,6 +68,7 @@ class ConsentStep extends StatelessWidget {
                   _buildStaggeredEntrance(
                     delay: 400,
                     child: _buildTermItem(
+                      context,
                       'Privacy',
                       'Your data is private and encrypted.',
                     ),
@@ -89,7 +91,7 @@ class ConsentStep extends StatelessWidget {
                                 AppConstants.currentConsentVersion,
                               );
                             },
-                            activeColor: AppColors.accentPrimary,
+                            activeColor: Theme.of(context).colorScheme.primary,
                             checkColor: Colors.white,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(6),
@@ -100,7 +102,7 @@ class ConsentStep extends StatelessWidget {
                               'I understand and agree to the terms',
                               style: AppTextStyles.bodyMedium.copyWith(
                                 fontWeight: FontWeight.w600,
-                                color: AppColors.textPrimary,
+                                color: Theme.of(context).textTheme.bodyLarge?.color,
                               ),
                             ),
                           ),
@@ -149,7 +151,7 @@ class ConsentStep extends StatelessWidget {
     );
   }
 
-  Widget _buildTermItem(String title, String desc) {
+  Widget _buildTermItem(BuildContext context, String title, String desc) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 24.0),
       child: Row(
@@ -158,13 +160,13 @@ class ConsentStep extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: AppColors.accentPrimary.withOpacity(0.06),
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.06),
               shape: BoxShape.circle,
             ),
             child: Icon(
               Icons.info_outline,
               size: 18,
-              color: AppColors.accentPrimary,
+              color: Theme.of(context).colorScheme.primary,
             ),
           ),
           const SizedBox(width: 16),
@@ -176,14 +178,14 @@ class ConsentStep extends StatelessWidget {
                   title,
                   style: AppTextStyles.labelLarge.copyWith(
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+                    color: Theme.of(context).textTheme.bodyLarge?.color,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   desc,
                   style: AppTextStyles.bodyMedium.copyWith(
-                    color: AppColors.textSecondary,
+                    color: Theme.of(context).textTheme.bodySmall?.color,
                     height: 1.5,
                   ),
                 ),

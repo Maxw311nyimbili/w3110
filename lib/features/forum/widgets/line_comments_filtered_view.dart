@@ -25,19 +25,31 @@ class LineCommentsFilteredView extends StatefulWidget {
 }
 
 class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
+  final Set<String> _expandedCommentIds = {};
+
+  void _toggleExpanded(String commentId) {
+    setState(() {
+      if (_expandedCommentIds.contains(commentId)) {
+        _expandedCommentIds.remove(commentId);
+      } else {
+        _expandedCommentIds.add(commentId);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
       height: MediaQuery.of(context).size.height * 0.85,
-      decoration: const BoxDecoration(
-        color: AppColors.backgroundSurface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       clipBehavior: Clip.antiAlias,
       child: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         child: Scaffold(
-          backgroundColor: AppColors.backgroundSurface,
+          backgroundColor: Theme.of(context).colorScheme.surface,
           resizeToAvoidBottomInset: true,
           body: SafeArea(
             child: Column(
@@ -45,11 +57,11 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
                 // Handle bar
                 Center(
                   child: Container(
-                    margin: const EdgeInsets.only(top: 12, bottom: 8),
-                    width: 40,
+                    margin: const EdgeInsets.only(top: 8, bottom: 8),
+                    width: 36,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: AppColors.backgroundElevated,
+                      color: Theme.of(context).dividerColor.withOpacity(0.4),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -57,40 +69,43 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
 
                 // ========== HEADER ==========
                 Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 8,
-                  ),
+                  padding: const EdgeInsets.fromLTRB(20, 4, 12, 4),
                   child: Row(
                     children: [
                       Expanded(
-                        child: BlocBuilder<ForumCubit, ForumState>(
-                          builder: (context, state) {
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  'Discussion',
-                                  style: AppTextStyles.headlineSmall.copyWith(
-                                    fontWeight: FontWeight.w800,
-                                  ),
-                                ),
-                              ],
-                            );
-                          },
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'Discussion',
+                              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                color: Theme.of(context).textTheme.headlineMedium?.color,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: -0.5,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      IconButton(
-                        icon: const Icon(
-                          Icons.close_rounded,
-                          color: AppColors.textSecondary,
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.surfaceVariant,
+                          shape: BoxShape.circle,
                         ),
-                        onPressed: () => Navigator.pop(context),
+                        child: IconButton(
+                          icon: Icon(
+                            Icons.close_rounded,
+                            size: 20,
+                            color: Theme.of(context).textTheme.bodySmall?.color,
+                          ),
+                          onPressed: () => Navigator.pop(context),
+                        ),
                       ),
                     ],
                   ),
                 ),
+                Divider(height: 1, color: Theme.of(context).dividerColor.withOpacity(0.1)),
 
                 // ========== SCROLLABLE CONTENT ==========
                 Expanded(
@@ -101,30 +116,20 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
                       }
 
                       final comments = state.lineComments;
-                      print(
-                        'DEBUG: LineCommentsFilteredView - Rendering ${comments.length} comments for ${widget.lineId}',
-                      );
-                      for (var c in comments) {
-                        print(
-                          'DEBUG:   - Comment ${c.id} by ${c.authorName} (${c.authorRole})',
-                        );
-                      }
                       final lineText = state.getLineText(widget.lineId);
 
                       return ListView(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        physics: const AlwaysScrollableScrollPhysics(),
                         children: [
                           // 1. Quoted Line (Scrolls away)
                           Container(
-                            margin: const EdgeInsets.symmetric(
-                              horizontal: 20,
-                              vertical: 8,
-                            ),
+                            margin: const EdgeInsets.fromLTRB(20, 8, 20, 16),
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: AppColors.backgroundElevated,
+                              color: Theme.of(context).colorScheme.surfaceVariant,
                               borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: AppColors.borderLight),
+                              border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -133,65 +138,75 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
                                   children: [
                                     Icon(
                                       Icons.format_quote_rounded,
-                                      size: 20,
-                                      color: AppColors.accentPrimary,
+                                      size: 18,
+                                      color: Theme.of(context).colorScheme.primary,
                                     ),
                                     const SizedBox(width: 8),
                                     Text(
                                       'Line ${widget.lineNumber}',
-                                      style: AppTextStyles.labelSmall.copyWith(
-                                        color: AppColors.textSecondary,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                        color: Theme.of(context).textTheme.bodySmall?.color,
+                                        fontWeight: FontWeight.w800,
+                                        letterSpacing: 0.5,
+                                      ).copyWith(fontSize: 10),
                                     ),
                                   ],
                                 ),
-                                const SizedBox(height: 8),
+                                const SizedBox(height: 10),
                                 Text(
                                   lineText,
-                                  style: AppTextStyles.bodyMedium.copyWith(
-                                    color: AppColors.textPrimary,
+                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: Theme.of(context).textTheme.bodyLarge?.color,
                                     height: 1.5,
+                                    fontSize: 14,
+                                    fontStyle: FontStyle.italic,
                                   ),
                                 ),
                               ],
                             ),
                           ),
 
-                          const Divider(
+                          Divider(
                             height: 1,
-                            color: AppColors.borderLight,
+                            color: Theme.of(context).dividerColor.withOpacity(0.1),
                           ),
 
                           // 3. Comments List
                           if (comments.isEmpty)
                             Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 40),
-                              child: Center(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.chat_bubble_outline_rounded,
-                                      size: 48,
-                                      color: AppColors.borderMedium,
+                              padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 40),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(24),
+                                    decoration: BoxDecoration(
+                                    color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    Icons.chat_bubble_outline_rounded,
+                                    size: 40,
+                                    color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+                                  ),
+                                  ),
+                                  const SizedBox(height: 24),
+                                  Text(
+                                    'Help figure this out',
+                                    style: AppTextStyles.headlineSmall.copyWith(
+                                      color: AppColors.textPrimary,
+                                      fontWeight: FontWeight.w700,
                                     ),
-                                    const SizedBox(height: 12),
-                                    Text(
-                                      'No discussions yet',
-                                      style: AppTextStyles.bodyMedium.copyWith(
-                                        color: AppColors.textTertiary,
-                                      ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'No perspectives shared for this line yet.',
+                                    textAlign: TextAlign.center,
+                                    style: AppTextStyles.bodyMedium.copyWith(
+                                      color: AppColors.textSecondary,
                                     ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      'Tap below to start one',
-                                      style: AppTextStyles.caption.copyWith(
-                                        color: AppColors.textTertiary,
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
                             )
                           else
@@ -203,7 +218,7 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
                 ),
 
                 // ========== FIXED REPLY INPUT ==========
-                const Divider(height: 1, color: AppColors.borderLight),
+                Divider(height: 1, color: Theme.of(context).dividerColor.withOpacity(0.1)),
                 ReplyInputFieldForModal(lineId: widget.lineId),
               ],
             ),
@@ -217,7 +232,6 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
     BuildContext context,
     List<ForumLineComment> allComments,
   ) {
-    // 1. Group comments by parentId
     final Map<String?, List<ForumLineComment>> grouped = {};
     for (final comment in allComments) {
       final pid = comment.parentCommentId;
@@ -226,17 +240,21 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
           : grouped[pid] = [comment];
     }
 
-    // 2. Recursive builder
     List<Widget> buildTree(String? parentId, int depth) {
       final children = grouped[parentId] ?? [];
-      // Sort children by date
       children.sort((a, b) => a.createdAt.compareTo(b.createdAt));
 
       final List<Widget> items = [];
-      for (final comment in children) {
+      for (int i = 0; i < children.length; i++) {
+        final comment = children[i];
+        final isLast = i == children.length - 1;
+        final hasReplies = grouped.containsKey(comment.localId);
+        final isExpanded = _expandedCommentIds.contains(comment.localId);
+        final replyCount = grouped[comment.localId]?.length ?? 0;
+
         items.add(
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             child: FutureBuilder<String>(
               future: context.read<ForumCubit>().getCurrentUserId(),
               builder: (context, snapshot) {
@@ -257,6 +275,11 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
                   profession: comment.authorProfession,
                   typeLabel: comment.typeLabel,
                   roleIcon: _getRoleIcon(comment.authorRole),
+                  isLastChild: isLast,
+                  hasReplies: hasReplies,
+                  isExpanded: isExpanded,
+                  replyCount: replyCount,
+                  onExpand: () => _toggleExpanded(comment.localId),
                   onLike: () {
                     context.read<ForumCubit>().toggleCommentLike(
                       comment.id,
@@ -272,6 +295,7 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
                         isLineComment: true,
                       ),
                     );
+                    if (!isExpanded) _toggleExpanded(comment.localId);
                   },
                   onEdit: () => _showEditCommentDialog(context, comment),
                   onDelete: () =>
@@ -282,20 +306,60 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
           ),
         );
 
-        // Add divider (optional, but looks cleaner if not deeply nested)
-        if (depth == 0) {
+        if (isExpanded) {
+          items.addAll(buildTree(comment.localId, depth + 1));
+
+          // After all children are built, add the "Hide replies" button at the END
+          if (hasReplies) {
+            // Match the horizontal alignment of the parent comment's text
+            final double basePadding = 16.0;
+            final double cardPadding = depth > 0 ? 0.0 : 12.0;
+            final double avatarArea = depth > 0 ? 34.0 : 44.0;
+            final double totalIndent = depth * 24.0;
+
+            items.add(
+              Padding(
+                padding: EdgeInsets.only(
+                  left: basePadding + cardPadding + totalIndent + avatarArea,
+                  top: 4,
+                  bottom: 12,
+                ),
+                child: InkWell(
+                  onTap: () => _toggleExpanded(comment.localId),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 18,
+                        height: 1.2,
+                        color: AppColors.borderMedium,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Hide replies',
+                        style: AppTextStyles.labelSmall.copyWith(
+                          color: AppColors.textSecondary,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }
+        }
+
+        if (depth == 0 && !isLast) {
           items.add(
             const Divider(
               height: 1,
-              indent: 20,
-              endIndent: 20,
+              indent: 16,
+              endIndent: 16,
               color: AppColors.borderLight,
             ),
           );
         }
-
-        // Add children recursively
-        items.addAll(buildTree(comment.id, depth + 1));
       }
       return items;
     }
@@ -371,58 +435,6 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
             child: const Text('Delete', style: TextStyle(color: Colors.red)),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _FilterTab extends StatelessWidget {
-  final String label;
-  final IconData? icon;
-  final bool isActive;
-  final VoidCallback onTap;
-
-  const _FilterTab({
-    required this.label,
-    this.icon,
-    required this.isActive,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-        decoration: BoxDecoration(
-          color: isActive ? AppColors.accentPrimary : Colors.transparent,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isActive ? Colors.transparent : AppColors.borderMedium,
-            width: 1,
-          ),
-        ),
-        child: Row(
-          children: [
-            if (icon != null) ...[
-              Icon(
-                icon,
-                size: 16,
-                color: isActive ? Colors.white : AppColors.textSecondary,
-              ),
-              const SizedBox(width: 8),
-            ],
-            Text(
-              label,
-              style: AppTextStyles.labelSmall.copyWith(
-                color: isActive ? Colors.white : AppColors.textSecondary,
-                fontWeight: isActive ? FontWeight.w700 : FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

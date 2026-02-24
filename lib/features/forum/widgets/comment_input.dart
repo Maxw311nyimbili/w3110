@@ -94,7 +94,7 @@ class _CommentInputState extends State<CommentInput> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: AppColors.backgroundSurface,
+      color: Theme.of(context).colorScheme.surface,
       child: SafeArea(
         top: false,
         child: Padding(
@@ -109,10 +109,10 @@ class _CommentInputState extends State<CommentInput> {
                 child: Container(
                   constraints: const BoxConstraints(maxHeight: 100),
                   decoration: BoxDecoration(
-                    color: AppColors.backgroundElevated,
+                    color: Theme.of(context).colorScheme.surfaceVariant,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: AppColors.gray200,
+                      color: Theme.of(context).dividerColor.withOpacity(0.1),
                       width: 1,
                     ),
                   ),
@@ -123,13 +123,13 @@ class _CommentInputState extends State<CommentInput> {
                     textInputAction: TextInputAction.newline,
                     style: TextStyle(
                       fontSize: 15,
-                      color: AppColors.textPrimary,
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
                     ),
                     decoration: InputDecoration(
                       hintText: 'Add a comment...',
                       hintStyle: TextStyle(
                         fontSize: 15,
-                        color: AppColors.textTertiary,
+                        color: Theme.of(context).textTheme.labelSmall?.color,
                       ),
                       border: InputBorder.none,
                       contentPadding: const EdgeInsets.symmetric(
@@ -151,13 +151,15 @@ class _CommentInputState extends State<CommentInput> {
                   height: 40,
                   decoration: BoxDecoration(
                     color: _hasText
-                        ? AppColors.accentPrimary
-                        : AppColors.backgroundElevated,
+                        ? Theme.of(context).colorScheme.primary
+                        : Theme.of(context).colorScheme.surfaceVariant,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
                     Icons.arrow_upward,
-                    color: _hasText ? Colors.white : AppColors.textTertiary,
+                    color: _hasText
+                        ? Theme.of(context).colorScheme.onPrimary
+                        : Theme.of(context).textTheme.labelSmall?.color,
                     size: 18,
                   ),
                 ),

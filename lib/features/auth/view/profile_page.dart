@@ -45,9 +45,9 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     // If loading, show a loading screen or skeleton
     if (_isLoading) {
-      return const Scaffold(
-        backgroundColor: AppColors.backgroundPrimary,
-        body: Center(child: CircularProgressIndicator()),
+      return Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        body: const Center(child: CircularProgressIndicator()),
       );
     }
 
@@ -59,7 +59,7 @@ class _ProfilePageState extends State<ProfilePage> {
     final photoUrl = user?.photoUrl;
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundPrimary,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: EntryAnimation(
           child: CustomScrollView(
@@ -80,10 +80,10 @@ class _ProfilePageState extends State<ProfilePage> {
                             child: Container(
                               padding: const EdgeInsets.all(8),
                               // No decoration
-                              child: const Icon(
+                              child: Icon(
                                 Icons.arrow_back_ios_new_rounded,
                                 size: 22,
-                                color: AppColors.textPrimary,
+                                color: Theme.of(context).textTheme.bodyLarge?.color,
                               ),
                             ),
                           ),
@@ -99,10 +99,10 @@ class _ProfilePageState extends State<ProfilePage> {
                         height: 120,
                         padding: const EdgeInsets.all(4),
                         decoration: BoxDecoration(
-                          color: AppColors.backgroundSurface,
+                          color: Theme.of(context).colorScheme.surface,
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: AppColors.borderLight.withOpacity(0.5),
+                            color: Theme.of(context).dividerColor.withOpacity(0.1),
                           ),
                           boxShadow: [
                             BoxShadow(
@@ -114,7 +114,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
                         child: Container(
                           decoration: BoxDecoration(
-                            color: AppColors.accentPrimary.withOpacity(0.1),
+                            color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
                             shape: BoxShape.circle,
                             image: photoUrl != null
                                 ? DecorationImage(
@@ -127,8 +127,8 @@ class _ProfilePageState extends State<ProfilePage> {
                               ? Center(
                                   child: Text(
                                     initial,
-                                    style: AppTextStyles.displayMedium.copyWith(
-                                      color: AppColors.accentPrimary,
+                                    style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                                      color: Theme.of(context).colorScheme.primary,
                                       fontWeight: FontWeight.w700,
                                       fontSize: 48,
                                     ),
@@ -143,11 +143,10 @@ class _ProfilePageState extends State<ProfilePage> {
                       Text(
                         displayName,
                         textAlign: TextAlign.center,
-                        style: AppTextStyles.displaySmall.copyWith(
-                          color: AppColors.textPrimary,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 28,
-                        ),
+                        style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 28,
+                            ),
                       ),
                       const SizedBox(height: 8),
                       Container(
@@ -156,7 +155,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.accentPrimary,
+                          color: Theme.of(context).colorScheme.primary,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
@@ -187,10 +186,10 @@ class _ProfilePageState extends State<ProfilePage> {
                       _buildSectionHeader('PERSONAL INFORMATION'),
                       Container(
                         decoration: BoxDecoration(
-                          color: AppColors.backgroundSurface,
+                          color: Theme.of(context).colorScheme.surface,
                           borderRadius: BorderRadius.circular(24),
                           border: Border.all(
-                            color: AppColors.borderLight,
+                            color: Theme.of(context).dividerColor.withOpacity(0.1),
                             width: 0.5,
                           ),
                           boxShadow: [
@@ -236,17 +235,17 @@ class _ProfilePageState extends State<ProfilePage> {
                                   vertical: 10,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: AppColors.backgroundElevated,
+                                  color: Theme.of(context).colorScheme.surface,
                                   borderRadius: BorderRadius.circular(16),
                                   border: Border.all(
-                                    color: AppColors.borderLight,
+                                    color: Theme.of(context).dividerColor.withOpacity(0.1),
                                   ),
                                 ),
                                 child: Text(
                                   interest[0].toUpperCase() +
                                       interest.substring(1),
-                                  style: AppTextStyles.labelMedium.copyWith(
-                                    color: AppColors.textPrimary,
+                                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                                    color: Theme.of(context).textTheme.bodyLarge?.color,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -260,9 +259,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       // Footer
                       Text(
                         'Member since ${DateTime.now().year}',
-                        style: AppTextStyles.caption.copyWith(
-                          color: AppColors.textTertiary,
-                        ),
+                        style: Theme.of(context).textTheme.bodySmall,
                       ),
                       const SizedBox(height: 40),
                     ],
@@ -283,8 +280,8 @@ class _ProfilePageState extends State<ProfilePage> {
         alignment: Alignment.centerLeft,
         child: Text(
           title,
-          style: AppTextStyles.labelSmall.copyWith(
-            color: AppColors.textTertiary,
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+            color: Theme.of(context).textTheme.bodySmall?.color,
             fontWeight: FontWeight.w800,
             letterSpacing: 1.2,
             fontSize: 11,
@@ -309,13 +306,13 @@ class _ProfilePageState extends State<ProfilePage> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppColors.backgroundPrimary,
+                  color: Theme.of(context).scaffoldBackgroundColor,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(
                   icon,
                   size: 20,
-                  color: AppColors.accentPrimary,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
               ),
               const SizedBox(width: 16),
@@ -325,16 +322,16 @@ class _ProfilePageState extends State<ProfilePage> {
                   children: [
                     Text(
                       label,
-                      style: AppTextStyles.caption.copyWith(
-                        color: AppColors.textTertiary,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: Theme.of(context).textTheme.bodySmall?.color,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       value,
-                      style: AppTextStyles.bodyMedium.copyWith(
-                        color: AppColors.textPrimary,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -345,11 +342,11 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ),
         if (showDivider)
-          const Divider(
+          Divider(
             height: 1,
             indent: 64,
             endIndent: 0,
-            color: AppColors.borderLight,
+            color: Theme.of(context).dividerColor.withOpacity(0.1),
           ),
       ],
     );

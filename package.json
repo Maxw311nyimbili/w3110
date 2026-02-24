@@ -1,0 +1,11 @@
+{
+    "name": "cap_project",
+    "version": "1.0.0",
+    "description": "Flutter project for Vercel deployment",
+    "scripts": {
+        "build": "bash scripts/vercel-build.sh"
+    },
+    "engines": {
+        "node": ">=18.0.0"
+    }
+}

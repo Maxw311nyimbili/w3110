@@ -65,19 +65,19 @@ class AppColors {
   static const Color shadow = Color(0x0A000000); // Legacy neutral soft shadow
 
   // ─── Dark Mode ─────────────────────────────────────────────────────────────
-  // Teal-black base — makes brandDarkTeal brand colour glow naturally
+  // Charcoal-teal base — premium dark mode that isn't true black
   static const Color darkBackgroundPrimary = Color(
-    0xFF111615,
-  ); // Deep teal-black
+    0xFF151B1A,
+  ); // Dark charcoal-teal
   static const Color darkBackgroundSurface = Color(
-    0xFF1C2422,
+    0xFF1F2927,
   ); // Elevated card surface
   static const Color darkBackgroundElevated = Color(
-    0xFF253029,
+    0xFF2A3633,
   ); // Input / chip fill
-  static const Color darkTextPrimary = Color(0xFFECF0EF); // Near-white, cool
-  static const Color darkTextSecondary = Color(0xFF8FA39E); // Muted teal-grey
-  static const Color darkTextTertiary = Color(0xFF536B66); // Faint label
+  static const Color darkTextPrimary = Color(0xFFE2E8E7); // Off-white, soft teal
+  static const Color darkTextSecondary = Color(0xFFA3B3B0); // Muted teal-grey
+  static const Color darkTextTertiary = Color(0xFF6B827E); // Faint label
 
   // ─── Compatibility aliases (cool-neutral) ──────────────────────────────────
   static const Color gray100 = Color(0xFFEDF0F5);

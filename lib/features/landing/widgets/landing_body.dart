@@ -2,8 +2,6 @@ import 'package:cap_project/core/widgets/brand_logo.dart';
 import 'package:cap_project/core/widgets/premium_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_text_styles.dart';
 import '../../../app/view/app_router.dart';
 import '../cubit/cubit.dart';
 import 'authentication_step.dart';
@@ -20,10 +18,10 @@ class LandingBody extends StatelessWidget {
     return BlocBuilder<LandingCubit, LandingState>(
       builder: (context, state) {
         if (state.isLoading) {
-          return const Scaffold(
+          return Scaffold(
             body: Center(
               child: CircularProgressIndicator(
-                color: AppColors.textPrimary,
+                color: Theme.of(context).colorScheme.primary,
                 strokeWidth: 2,
               ),
             ),
@@ -78,7 +76,7 @@ class _CompleteStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundPrimary,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 40),
@@ -99,8 +97,8 @@ class _CompleteStep extends StatelessWidget {
                       children: [
                         Text(
                           'You\'re all set!',
-                          style: AppTextStyles.displayMedium.copyWith(
-                            color: AppColors.textPrimary,
+                          style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                            color: Theme.of(context).textTheme.displayLarge?.color,
                             fontWeight: FontWeight.w800,
                             letterSpacing: -1.0,
                           ),
@@ -109,8 +107,8 @@ class _CompleteStep extends StatelessWidget {
                         Text(
                           'Personalizing your health guide based on your role and preferences...',
                           textAlign: TextAlign.center,
-                          style: AppTextStyles.bodyLarge.copyWith(
-                            color: AppColors.textSecondary,
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            color: Theme.of(context).textTheme.bodySmall?.color,
                             height: 1.5,
                           ),
                         ),

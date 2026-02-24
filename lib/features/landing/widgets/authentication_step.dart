@@ -26,16 +26,16 @@ class AuthenticationStep extends StatelessWidget {
       child: BlocBuilder<LandingCubit, LandingState>(
         builder: (context, state) {
           return Scaffold(
-            backgroundColor: AppColors.backgroundPrimary,
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             appBar: AppBar(
               backgroundColor: Colors.transparent,
               elevation: 0,
               automaticallyImplyLeading: false,
               actions: [
                 IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.close_rounded,
-                    color: AppColors.textSecondary,
+                    color: Theme.of(context).textTheme.bodySmall?.color,
                   ),
                   onPressed: state.isAuthenticating
                       ? null
@@ -62,8 +62,8 @@ class AuthenticationStep extends StatelessWidget {
                           Text(
                             'Welcome to Thanzi',
                             textAlign: TextAlign.center,
-                            style: AppTextStyles.displayMedium.copyWith(
-                              color: AppColors.textPrimary,
+                            style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                              color: Theme.of(context).textTheme.displayLarge?.color,
                               letterSpacing: -1.0,
                               fontWeight: FontWeight.w800,
                               fontSize: 34,
@@ -81,8 +81,8 @@ class AuthenticationStep extends StatelessWidget {
                       child: Text(
                         'Secure your medical history and personalize your health companion by signing in.',
                         textAlign: TextAlign.center,
-                        style: AppTextStyles.bodyLarge.copyWith(
-                          color: AppColors.textSecondary,
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: Theme.of(context).textTheme.bodySmall?.color,
                           fontSize: 17,
                           height: 1.5,
                         ),
@@ -102,7 +102,7 @@ class AuthenticationStep extends StatelessWidget {
                             color: AppColors.borderLight.withOpacity(0.5),
                           ),
                           borderRadius: BorderRadius.circular(30),
-                          color: AppColors.backgroundSurface,
+                          color: Theme.of(context).colorScheme.surface,
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withOpacity(0.04),
@@ -138,8 +138,8 @@ class AuthenticationStep extends StatelessWidget {
                                   .continueAsGuest(),
                         child: Text(
                           'Continue as Guest',
-                          style: AppTextStyles.labelLarge.copyWith(
-                            color: AppColors.textSecondary,
+                          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                            color: Theme.of(context).textTheme.bodySmall?.color,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -160,8 +160,8 @@ class AuthenticationStep extends StatelessWidget {
                                       .authenticateAsDemo(),
                             child: Text(
                               'Demo Login (Developer Bypass)',
-                              style: AppTextStyles.labelSmall.copyWith(
-                                color: AppColors.textTertiary,
+                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                color: Theme.of(context).textTheme.bodySmall?.color,
                                 fontWeight: FontWeight.bold,
                                 letterSpacing: 0.5,
                               ),

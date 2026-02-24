@@ -50,10 +50,9 @@ class ForumDetailView extends StatelessWidget {
               // Title
               Text(
                 post.title,
-                style: AppTextStyles.displaySmall.copyWith(
+                style: Theme.of(context).textTheme.displaySmall?.copyWith(
                   fontWeight: FontWeight.w800,
                   letterSpacing: -0.5,
-                  color: AppColors.textPrimary,
                   fontSize: 26,
                 ),
               ),
@@ -64,15 +63,15 @@ class ForumDetailView extends StatelessWidget {
                 children: [
                   CircleAvatar(
                     radius: 14,
-                    backgroundColor: AppColors.accentPrimary.withOpacity(0.08),
+                    backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.08),
                     child: Text(
                       post.authorName.isNotEmpty
                           ? post.authorName[0].toUpperCase()
                           : '?',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.accentPrimary,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                     ),
                   ),
@@ -82,16 +81,13 @@ class ForumDetailView extends StatelessWidget {
                     children: [
                       Text(
                         post.authorName,
-                        style: AppTextStyles.labelMedium.copyWith(
+                        style: Theme.of(context).textTheme.labelMedium?.copyWith(
                           fontWeight: FontWeight.w700,
-                          color: AppColors.textPrimary,
                         ),
                       ),
                       Text(
                         _formatTime(post.createdAt),
-                        style: AppTextStyles.caption.copyWith(
-                          color: AppColors.textTertiary,
-                        ),
+                        style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ],
                   ),
@@ -111,13 +107,13 @@ class ForumDetailView extends StatelessWidget {
                             vertical: 6,
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.accentPrimary.withOpacity(0.1),
+                            color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
                             '#$tag',
-                            style: AppTextStyles.labelSmall.copyWith(
-                              color: AppColors.accentPrimary,
+                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: Theme.of(context).colorScheme.primary,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -141,8 +137,7 @@ class ForumDetailView extends StatelessWidget {
                   padding: const EdgeInsets.only(bottom: 12),
                   child: Text(
                     'Tap a sentence to discuss',
-                    style: AppTextStyles.caption.copyWith(
-                      color: AppColors.textTertiary,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       fontStyle: FontStyle.italic,
                     ),
                   ),
@@ -165,7 +160,7 @@ class ForumDetailView extends StatelessWidget {
                   physics: const BouncingScrollPhysics(),
                   child: Row(
                     children: post.sources
-                        .map((source) => _buildSourceCard(source))
+                        .map((source) => _buildSourceCard(context, source))
                         .toList(),
                   ),
                 ),
@@ -207,7 +202,7 @@ class ForumDetailView extends StatelessWidget {
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
                                 border: Border.all(
-                                  color: AppColors.borderLight,
+                                  color: Theme.of(context).dividerColor.withOpacity(0.1),
                                 ),
                                 borderRadius: BorderRadius.circular(12),
                               ),
@@ -222,8 +217,7 @@ class ForumDetailView extends StatelessWidget {
                                           related.title,
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
-                                          style: AppTextStyles.labelMedium
-                                              .copyWith(
+                                          style: Theme.of(context).textTheme.labelMedium?.copyWith(
                                                 fontWeight: FontWeight.bold,
                                               ),
                                         ),
@@ -232,9 +226,7 @@ class ForumDetailView extends StatelessWidget {
                                           related.content,
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
-                                          style: AppTextStyles.caption.copyWith(
-                                            color: AppColors.textSecondary,
-                                          ),
+                                          style: Theme.of(context).textTheme.bodySmall,
                                         ),
                                       ],
                                     ),
@@ -256,7 +248,7 @@ class ForumDetailView extends StatelessWidget {
                 },
               ),
 
-              const Divider(color: AppColors.borderLight),
+              Divider(color: Theme.of(context).dividerColor.withOpacity(0.1)),
               const SizedBox(height: 24),
 
               // Engagement Metrics (Bottom)
@@ -317,10 +309,9 @@ class ForumDetailView extends StatelessWidget {
     if (state.answerLines.isEmpty) {
       return Text(
         post.content,
-        style: AppTextStyles.bodyLarge.copyWith(
+        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
           height: 1.8,
           fontSize: 17,
-          color: AppColors.textSecondary,
         ),
       );
     }
@@ -343,10 +334,10 @@ class ForumDetailView extends StatelessWidget {
                     child: Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: AppColors.backgroundElevated,
+                        color: Theme.of(context).colorScheme.surface,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: AppColors.accentPrimary.withOpacity(0.3),
+                          color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
                           width: 1.5,
                         ),
                       ),
@@ -356,11 +347,10 @@ class ForumDetailView extends StatelessWidget {
                           // Text content
                           Text(
                             line.text,
-                            style: AppTextStyles.bodyLarge.copyWith(
+                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                               height: 1.7,
                               fontSize: 16.5,
                               fontWeight: FontWeight.w500,
-                              color: AppColors.textPrimary,
                             ),
                           ),
                           const SizedBox(height: 8),
@@ -376,7 +366,7 @@ class ForumDetailView extends StatelessWidget {
                               const SizedBox(width: 4),
                               Text(
                                 '${line.commentCount}',
-                                style: AppTextStyles.caption.copyWith(
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                   color: AppColors.success,
                                   fontSize: 12,
                                   fontWeight: FontWeight.w800,
@@ -394,11 +384,10 @@ class ForumDetailView extends StatelessWidget {
                       Expanded(
                         child: Text(
                           line.text,
-                          style: AppTextStyles.bodyLarge.copyWith(
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                             height: 1.7,
                             fontSize: 16.5,
                             fontWeight: FontWeight.w400,
-                            color: AppColors.textSecondary,
                           ),
                         ),
                       ),
@@ -416,7 +405,7 @@ class ForumDetailView extends StatelessWidget {
                               const SizedBox(width: 4),
                               Text(
                                 '${line.commentCount}',
-                                style: AppTextStyles.caption.copyWith(
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                   color: AppColors.success,
                                   fontSize: 11,
                                   fontWeight: FontWeight.w800,
@@ -433,7 +422,7 @@ class ForumDetailView extends StatelessWidget {
     );
   }
 
-  Widget _buildSourceCard(ForumPostSource source) {
+  Widget _buildSourceCard(BuildContext context, ForumPostSource source) {
     return GestureDetector(
       onTap: () => _launchURL(source.url),
       child: Container(
@@ -441,9 +430,9 @@ class ForumDetailView extends StatelessWidget {
         margin: const EdgeInsets.only(right: 12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColors.backgroundSurface,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.borderLight),
+          border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -459,8 +448,7 @@ class ForumDetailView extends StatelessWidget {
                 Expanded(
                   child: Text(
                     Uri.parse(source.url).host.replaceAll('www.', ''),
-                    style: AppTextStyles.caption.copyWith(
-                      color: AppColors.textTertiary,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
                     overflow: TextOverflow.ellipsis,
@@ -473,7 +461,7 @@ class ForumDetailView extends StatelessWidget {
               source.title,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: AppTextStyles.labelMedium.copyWith(
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -503,8 +491,8 @@ class ForumDetailView extends StatelessWidget {
           const SizedBox(width: 8),
           Text(
             label,
-            style: AppTextStyles.labelLarge.copyWith(
-              color: isActive ? AppColors.error : AppColors.textTertiary,
+            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+              color: isActive ? Theme.of(context).colorScheme.error : Theme.of(context).textTheme.bodySmall?.color,
               fontWeight: isActive ? FontWeight.w700 : FontWeight.w600,
             ),
           ),

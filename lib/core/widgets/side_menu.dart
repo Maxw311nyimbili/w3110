@@ -14,10 +14,10 @@ class SideMenu extends StatelessWidget {
       width: 250,
       height: double.infinity,
       decoration: BoxDecoration(
-        color: AppColors.backgroundPrimary,
+        color: Theme.of(context).scaffoldBackgroundColor,
         border: Border(
           right: BorderSide(
-            color: AppColors.borderLight,
+            color: Theme.of(context).dividerColor.withOpacity(0.1),
             width: 1,
           ),
         ),
@@ -26,7 +26,7 @@ class SideMenu extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildHeader(),
+            _buildHeader(context),
             const SizedBox(height: 32),
             Expanded(
               child: SingleChildScrollView(
@@ -34,7 +34,7 @@ class SideMenu extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildNavSection('LIBRARY'),
+                    _buildNavSection(context, 'LIBRARY'),
                     _buildNavItem(
                       context,
                       label: 'New Thread',
@@ -50,7 +50,7 @@ class SideMenu extends StatelessWidget {
                       onTap: () => _showComingSoon(context, 'History'),
                     ),
                     const SizedBox(height: 24),
-                    _buildNavSection('DISCOVER'),
+                    _buildNavSection(context, 'DISCOVER'),
                     _buildNavItem(
                       context,
                       label: 'Med Scanner',
@@ -64,7 +64,7 @@ class SideMenu extends StatelessWidget {
                       route: AppRouter.forum,
                     ),
                     const SizedBox(height: 24),
-                    _buildNavSection('SETTINGS'),
+                    _buildNavSection(context, 'SETTINGS'),
                     _buildNavItem(
                       context,
                       label: 'Preferences',
@@ -82,27 +82,27 @@ class SideMenu extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Text(
         'Thanzi',
-        style: AppTextStyles.headlineMedium.copyWith(
+        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
           fontWeight: FontWeight.w700,
-          color: AppColors.textPrimary,
+          color: Theme.of(context).textTheme.bodyLarge?.color,
           letterSpacing: -0.5,
         ),
       ),
     );
   }
 
-  Widget _buildNavSection(String title) {
+  Widget _buildNavSection(BuildContext context, String title) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8, left: 12),
       child: Text(
         title,
-        style: AppTextStyles.caption.copyWith(
-          color: AppColors.textTertiary,
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+          color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.6),
           fontWeight: FontWeight.w600,
           letterSpacing: 1.0,
         ),
@@ -141,11 +141,14 @@ class SideMenu extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
           decoration: BoxDecoration(
             color: isSelected
-                ? AppColors.backgroundElevated
+                ? Theme.of(context).colorScheme.primary.withOpacity(0.08)
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(12),
             border: isSelected
-                ? Border.all(color: AppColors.borderLight, width: 1.0)
+                ? Border.all(
+                    color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                    width: 1.0,
+                  )
                 : null,
           ),
           child: Row(
@@ -155,24 +158,24 @@ class SideMenu extends StatelessWidget {
                   icon,
                   size: 20,
                   color: isPrimary
-                      ? AppColors.accentPrimary
+                      ? Theme.of(context).colorScheme.primary
                       : (isSelected
-                            ? AppColors.textPrimary
-                            : AppColors.textSecondary),
+                            ? Theme.of(context).textTheme.bodyLarge?.color
+                            : Theme.of(context).textTheme.bodySmall?.color),
                 ),
                 const SizedBox(width: 12),
               ],
               Text(
                 label,
                 style: isPrimary
-                    ? AppTextStyles.labelLarge.copyWith(
-                        color: AppColors.accentPrimary,
+                    ? Theme.of(context).textTheme.labelLarge?.copyWith(
+                        color: Theme.of(context).colorScheme.primary,
                         fontWeight: FontWeight.w700,
                       )
-                    : AppTextStyles.bodyMedium.copyWith(
+                    : Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: isSelected
-                            ? AppColors.textPrimary
-                            : AppColors.textSecondary,
+                            ? Theme.of(context).textTheme.bodyLarge?.color
+                            : Theme.of(context).textTheme.bodySmall?.color,
                         fontWeight: isSelected
                             ? FontWeight.w600
                             : FontWeight.w500,
@@ -191,17 +194,19 @@ class SideMenu extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        border: Border(top: BorderSide(color: AppColors.borderLight)),
+        border: Border(
+          top: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.1)),
+        ),
       ),
       child: Row(
         children: [
           CircleAvatar(
             radius: 16,
-            backgroundColor: AppColors.gray200,
+            backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
             child: Text(
               (user?.displayName ?? 'U')[0].toUpperCase(),
-              style: AppTextStyles.labelMedium.copyWith(
-                color: AppColors.textSecondary,
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                color: Theme.of(context).textTheme.bodySmall?.color,
               ),
             ),
           ),
@@ -218,8 +223,8 @@ class SideMenu extends StatelessWidget {
                 ),
                 Text(
                   'Free Plan', // Placeholder for "Plan" status common in Perplexity/NotebookLM
-                  style: AppTextStyles.caption.copyWith(
-                    color: AppColors.textTertiary,
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.6),
                   ),
                 ),
               ],
@@ -231,7 +236,7 @@ class SideMenu extends StatelessWidget {
               // Show settings or logout options
               _showSignOutDialog(context);
             },
-            color: AppColors.textSecondary,
+            color: Theme.of(context).textTheme.bodySmall?.color,
           ),
         ],
       ),

@@ -58,7 +58,9 @@ class AppTheme {
           statusBarIconBrightness: Brightness.dark,
           systemNavigationBarColor: AppColors.backgroundPrimary,
         ),
-        titleTextStyle: AppTextStyles.headlineMedium,
+        titleTextStyle: AppTextStyles.headlineMedium.copyWith(
+          color: AppColors.textPrimary,
+        ),
         iconTheme: const IconThemeData(
           color: AppColors.textPrimary,
           size: 22,
@@ -187,22 +189,24 @@ class AppTheme {
       ),
 
       // ─── Bottom sheet ─────────────────────────────────────────────────────
-      bottomSheetTheme: const BottomSheetThemeData(
+      bottomSheetTheme: BottomSheetThemeData(
         backgroundColor: AppColors.backgroundSurface,
-        shape: RoundedRectangleBorder(
+        shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(
             top: Radius.circular(AppSpacing.radiusXl),
           ),
         ),
         elevation: 0,
-        modalElevation: 0,
+        surfaceTintColor: AppColors.backgroundSurface,
       ),
 
       // ─── Chip ─────────────────────────────────────────────────────────────
       chipTheme: ChipThemeData(
         backgroundColor: AppColors.backgroundElevated,
         selectedColor: AppColors.accentLight,
-        labelStyle: AppTextStyles.labelMedium,
+        labelStyle: AppTextStyles.labelMedium.copyWith(
+          color: AppColors.textPrimary,
+        ),
         side: const BorderSide(color: AppColors.borderLight),
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.md,
@@ -215,18 +219,18 @@ class AppTheme {
 
       // ─── Text theme ───────────────────────────────────────────────────────
       textTheme: TextTheme(
-        displayLarge: AppTextStyles.displayLarge,
-        displayMedium: AppTextStyles.displayMedium,
-        displaySmall: AppTextStyles.displaySmall,
-        headlineLarge: AppTextStyles.headlineLarge,
-        headlineMedium: AppTextStyles.headlineMedium,
-        headlineSmall: AppTextStyles.headlineSmall,
-        bodyLarge: AppTextStyles.bodyLarge,
-        bodyMedium: AppTextStyles.bodyMedium,
-        bodySmall: AppTextStyles.bodySmall,
-        labelLarge: AppTextStyles.labelLarge,
-        labelMedium: AppTextStyles.labelMedium,
-        labelSmall: AppTextStyles.labelSmall,
+        displayLarge: AppTextStyles.displayLarge.copyWith(color: AppColors.textPrimary),
+        displayMedium: AppTextStyles.displayMedium.copyWith(color: AppColors.textPrimary),
+        displaySmall: AppTextStyles.displaySmall.copyWith(color: AppColors.textPrimary),
+        headlineLarge: AppTextStyles.headlineLarge.copyWith(color: AppColors.textPrimary),
+        headlineMedium: AppTextStyles.headlineMedium.copyWith(color: AppColors.textPrimary),
+        headlineSmall: AppTextStyles.headlineSmall.copyWith(color: AppColors.textPrimary),
+        bodyLarge: AppTextStyles.bodyLarge.copyWith(color: AppColors.textPrimary),
+        bodyMedium: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary),
+        bodySmall: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary),
+        labelLarge: AppTextStyles.labelLarge.copyWith(color: AppColors.textPrimary),
+        labelMedium: AppTextStyles.labelMedium.copyWith(color: AppColors.textSecondary),
+        labelSmall: AppTextStyles.labelSmall.copyWith(color: AppColors.textTertiary),
       ),
     );
   }
