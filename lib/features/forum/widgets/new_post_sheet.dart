@@ -73,9 +73,9 @@ class _NewPostSheetState extends State<NewPostSheet> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        color: AppColors.backgroundSurface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -90,7 +90,7 @@ class _NewPostSheetState extends State<NewPostSheet> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: AppColors.borderMedium,
+                color: Theme.of(context).dividerColor.withOpacity(0.2),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -106,9 +106,9 @@ class _NewPostSheetState extends State<NewPostSheet> {
                   onTap: () => Navigator.pop(context),
                   child: Text(
                     AppLocalizations.of(context).cancel,
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).textTheme.bodySmall?.color,
+                        ),
                   ),
                 ),
                 GestureDetector(
@@ -124,7 +124,7 @@ class _NewPostSheetState extends State<NewPostSheet> {
                     ),
                     child: Text(
                       AppLocalizations.of(context).post,
-                      style: AppTextStyles.labelLarge.copyWith(
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                       ),
@@ -135,7 +135,7 @@ class _NewPostSheetState extends State<NewPostSheet> {
             ),
           ),
 
-          const Divider(height: 1, color: AppColors.borderLight),
+          Divider(height: 1, color: Theme.of(context).dividerColor.withOpacity(0.1)),
 
           Flexible(
             child: SingleChildScrollView(
@@ -148,9 +148,8 @@ class _NewPostSheetState extends State<NewPostSheet> {
                     TextFormField(
                       controller: _titleController,
                       autofocus: true,
-                      style: AppTextStyles.headlineMedium.copyWith(
+                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.w800,
-                        color: AppColors.textPrimary,
                       ),
                       decoration: InputDecoration(
                         hintText: 'Title',
@@ -175,7 +174,7 @@ class _NewPostSheetState extends State<NewPostSheet> {
                     TextFormField(
                       controller: _contentController,
                       maxLines: null,
-                      style: AppTextStyles.bodyLarge.copyWith(
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         height: 1.6,
                         fontSize: 17,
                       ),

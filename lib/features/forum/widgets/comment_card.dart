@@ -1,38 +1,17 @@
 // lib/features/forum/widgets/comment_card.dart
 
-import 'package:cap_project/core/theme/app_colors.dart';
-import 'package:cap_project/core/theme/app_text_styles.dart';
+import 'package:cap_project/features/forum/widgets/thread_line_painter.dart';
 import 'package:flutter/material.dart';
-import 'package:forum_repository/forum_repository.dart';
 
 class CommentCard extends StatelessWidget {
-  final String authorName;
-  final String text;
-  final DateTime createdAt;
-  final int likeCount;
-  final bool isLiked;
-  final String? authorRoleLabel;
-  final String? profession;
-  final bool isExpert;
-  final bool isClinician;
-  final IconData roleIcon;
-  final String? typeLabel;
-  final VoidCallback onReply;
-  final VoidCallback onLike;
-  final int depth;
-  final String? currentUserId;
-  final String authorId;
-  final VoidCallback? onEdit;
-  final VoidCallback? onDelete;
-
   const CommentCard({
     super.key,
     required this.authorName,
+    required this.authorId,
     required this.text,
     required this.createdAt,
     required this.onReply,
     required this.onLike,
-    required this.authorId,
     this.likeCount = 0,
     this.isLiked = false,
     this.authorRoleLabel,
@@ -45,291 +24,316 @@ class CommentCard extends StatelessWidget {
     this.onEdit,
     this.onDelete,
     this.depth = 0,
+    this.isLastChild = false,
+    this.hasReplies = false,
+    this.isExpanded = true,
+    this.onExpand,
+    this.replyCount = 0,
   });
+
+  final String authorName;
+  final String authorId;
+  final String text;
+  final DateTime createdAt;
+  final VoidCallback onReply;
+  final VoidCallback onLike;
+  final int likeCount;
+  final bool isLiked;
+  final String? authorRoleLabel;
+  final String? profession;
+  final bool isExpert;
+  final bool isClinician;
+  final IconData roleIcon;
+  final String? typeLabel;
+  final String? currentUserId;
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
+  final int depth;
+  final bool isLastChild;
+  final bool hasReplies;
+  final bool isExpanded;
+  final VoidCallback? onExpand;
+  final int replyCount;
 
   @override
   Widget build(BuildContext context) {
-    final effectiveIsExpert = isExpert;
-    final effectiveIsClinician = isClinician;
+    final isOwnComment = currentUserId == authorId;
+    const double indentWidth = 24.0;
+    const double parentPadding = 12.0;
 
     return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Thread Line area
-          if (depth > 0)
-            Row(
-              children: List.generate(
-                depth,
-                (index) => Container(
-                  width: 24, // Consistent indentation
-                  alignment: Alignment.centerLeft,
-                  child: VerticalDivider(
-                    color: AppColors.borderLight,
-                    thickness: 1.5,
-                    width: 1,
-                  ),
-                ),
-              ),
-            ),
-
-          // Main Content
-          Expanded(
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Avatar
-                  _buildAvatar(
-                    isExpert: effectiveIsExpert,
-                    isClinician: effectiveIsClinician,
-                    size: depth > 0 ? 28 : 34,
-                  ),
-                  const SizedBox(width: 10),
-
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Header
-                        _buildHeader(
-                          context,
-                          isExpert: effectiveIsExpert,
-                          isClinician: effectiveIsClinician,
-                        ),
-                        const SizedBox(height: 2),
-
-                        // Body
-                        Text(
-                          text,
-                          style: AppTextStyles.bodyMedium.copyWith(
-                            fontSize: depth > 0 ? 13 : 14,
-                            height: 1.4,
-                            color: AppColors.textPrimary,
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: depth > 0 ? 0 : parentPadding, 
+          right: parentPadding, 
+          top: 4, 
+          bottom: 4,
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Indentation area with Curved Lines
+            if (depth > 0)
+              SizedBox(
+                width: depth * indentWidth,
+                child: Stack(
+                  children: [
+                    Positioned(
+                      left: 0,
+                      top: 0,
+                      bottom: 0,
+                      child: SizedBox(
+                        width: depth * indentWidth,
+                        child: CustomPaint(
+                          painter: ThreadLinePainter(
+                            lineColor: Theme.of(context).dividerColor.withOpacity(0.2),
+                            isLastChild: isLastChild,
+                            paddingLeft: 0,
+                            depth: depth,
                           ),
                         ),
-
-                        // Actions
-                        const SizedBox(height: 4),
-                        _buildFooterActions(),
-                      ],
+                      ),
                     ),
+                  ],
+                ),
+              ),
+  
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Avatar
+                      _buildAvatar(context),
+                      const SizedBox(width: 10),
+                      // Content
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildHeader(context, isOwnComment),
+                            const SizedBox(height: 1),
+                            Text(
+                              text,
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: Theme.of(context).textTheme.bodyLarge?.color,
+                                height: 1.4,
+                                fontSize: depth > 0 ? 14 : 15,
+                              ),
+                            ),
+                            const SizedBox(height: 5),
+                            _buildActions(context),
+                            
+                            // "View More" for collapsed threads (Instagram Style)
+                            // "Hide replies" button is now handled by the parent view at the end of the thread
+                            if (hasReplies && !isExpanded && onExpand != null)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 8, bottom: 4),
+                                child: InkWell(
+                                  onTap: onExpand,
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        width: 18,
+                                        height: 1.2,
+                                        color: Theme.of(context).dividerColor.withOpacity(0.2),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        'View $replyCount more replies',
+                                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                          color: Theme.of(context).textTheme.bodySmall?.color,
+                                          fontWeight: FontWeight.w800,
+                                          fontSize: 11,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildAvatar({
-    required bool isExpert,
-    required bool isClinician,
-    required double size,
-  }) {
-    return Stack(
-      children: [
-        Container(
-          width: size,
-          height: size,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: isExpert
-                ? AppColors.success.withOpacity(0.1)
-                : AppColors.backgroundElevated,
-            shape: BoxShape.circle,
-            border: isExpert
-                ? Border.all(
-                    color: isClinician
-                        ? AppColors.success
-                        : AppColors.accentPrimary,
-                    width: 1,
-                  )
-                : null,
+  Widget _buildAvatar(BuildContext context) {
+    final double size = depth > 0 ? 24 : 34;
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceVariant,
+        shape: BoxShape.circle,
+        border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(8),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
           ),
-          child: Icon(
-            roleIcon,
-            size: size * 0.5,
-            color: isExpert
-                ? (isClinician ? AppColors.success : AppColors.accentPrimary)
-                : AppColors.textSecondary,
-          ),
+        ],
+      ),
+      child: Center(
+        child: Icon(
+          roleIcon,
+          size: size * 0.55,
+          color: isExpert
+              ? Theme.of(context).colorScheme.primary
+              : Theme.of(context).textTheme.labelSmall?.color,
         ),
-        if (isExpert)
-          Positioned(
-            right: 0,
-            bottom: 0,
-            child: Container(
-              padding: const EdgeInsets.all(1.5),
-              decoration: const BoxDecoration(
-                color: AppColors.success,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.check,
-                size: 8,
-                color: Colors.white,
-              ),
-            ),
-          ),
-      ],
+      ),
     );
   }
 
-  Widget _buildHeader(
-    BuildContext context, {
-    required bool isExpert,
-    required bool isClinician,
-  }) {
+  Widget _buildHeader(BuildContext context, bool isOwnComment) {
     return Row(
       children: [
-        Text(
-          authorName,
-          style: AppTextStyles.labelMedium.copyWith(
-            fontWeight: FontWeight.w700,
-            fontSize: depth > 0 ? 12 : 13,
-            color: isExpert
-                ? (isClinician ? AppColors.success : AppColors.accentPrimary)
-                : AppColors.textPrimary,
+        Expanded(
+          child: Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 6,
+            children: [
+              Text(
+                authorName,
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  fontSize: depth > 0 ? 13 : 14,
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
+                ),
+              ),
+              if (isExpert)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 1,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primaryContainer.withAlpha(77),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    authorRoleLabel ?? 'Expert',
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: Theme.of(context).colorScheme.primary,
+                      fontWeight: FontWeight.w900,
+                      fontSize: 8,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+              Text(
+                '• ${_formatTime(createdAt)}',
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: Theme.of(context).textTheme.bodySmall?.color,
+                  fontSize: 11,
+                ),
+              ),
+            ],
           ),
         ),
-        if (isExpert) ...[
-          const SizedBox(width: 4),
-          Text(
-            '•',
-            style: TextStyle(color: AppColors.textTertiary, fontSize: 10),
-          ),
-          const SizedBox(width: 4),
-          Text(
-            authorRoleLabel ?? 'Expert',
-            style: AppTextStyles.caption.copyWith(
-              fontSize: depth > 0 ? 9 : 10,
-              color: isClinician ? AppColors.success : AppColors.accentPrimary,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-        const Spacer(),
-        Text(
-          _formatTime(createdAt),
-          style: AppTextStyles.caption.copyWith(
-            fontSize: 9,
-            color: AppColors.textTertiary,
-          ),
-        ),
-        if (currentUserId == authorId) ...[
-          const SizedBox(width: 4),
-          _buildCommentActions(context),
-        ],
+        if (isOwnComment)
+          _buildMenu(context),
       ],
     );
   }
 
-  Widget _buildFooterActions() {
+  Widget _buildMenu(BuildContext context) {
+    return PopupMenuButton<String>(
+      icon: Icon(
+        Icons.more_horiz_rounded,
+        size: 18,
+        color: Theme.of(context).textTheme.labelSmall?.color,
+      ),
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints(),
+      onSelected: (value) {
+        if (value == 'edit') onEdit?.call();
+        if (value == 'delete') onDelete?.call();
+      },
+      itemBuilder: (context) => [
+        const PopupMenuItem(
+          value: 'edit',
+          child: Text('Edit'),
+        ),
+        const PopupMenuItem(
+          value: 'delete',
+          child: Text('Delete', style: TextStyle(color: Colors.red)),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActions(BuildContext context) {
     return Row(
       children: [
         GestureDetector(
           onTap: onLike,
-          behavior: HitTestBehavior.opaque,
           child: Row(
-            mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
-                isLiked
-                    ? Icons.favorite_rounded
-                    : Icons.favorite_outline_rounded,
-                size: 13,
-                color: isLiked ? Colors.red : AppColors.textTertiary,
+                isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                size: 15,
+                color: isLiked ? Colors.red : Theme.of(context).textTheme.bodySmall?.color,
               ),
               if (likeCount > 0) ...[
                 const SizedBox(width: 4),
                 Text(
                   likeCount.toString(),
-                  style: AppTextStyles.caption.copyWith(
-                    color: isLiked ? Colors.red : AppColors.textTertiary,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 10,
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: Theme.of(context).textTheme.bodySmall?.color,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 11,
                   ),
                 ),
               ],
             ],
           ),
         ),
-        const SizedBox(width: 16),
+        const SizedBox(width: 20),
         GestureDetector(
           onTap: onReply,
-          behavior: HitTestBehavior.opaque,
           child: Text(
             'Reply',
-            style: AppTextStyles.labelSmall.copyWith(
-              color: AppColors.textTertiary,
-              fontWeight: FontWeight.w700,
-              fontSize: 10,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: Theme.of(context).textTheme.bodySmall?.color,
+              fontWeight: FontWeight.w800,
+              fontSize: 11,
             ),
           ),
         ),
+        if (typeLabel != null) ...[
+          const SizedBox(width: 14),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceVariant,
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
+            ),
+            child: Text(
+              typeLabel!.toUpperCase(),
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: Theme.of(context).textTheme.labelSmall?.color,
+                fontSize: 8,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+        ],
       ],
     );
-  }
-
-  Widget _buildCommentActions(BuildContext context) {
-    return PopupMenuButton<String>(
-      padding: EdgeInsets.zero,
-      icon: const Icon(
-        Icons.more_horiz_rounded,
-        size: 14,
-        color: AppColors.textTertiary,
-      ),
-      onSelected: (value) {
-        if (value == 'edit') {
-          onEdit?.call();
-        } else if (value == 'delete') {
-          onDelete?.call();
-        }
-      },
-      itemBuilder: (context) => [
-        const PopupMenuItem(
-          value: 'edit',
-          height: 32,
-          child: Row(
-            children: [
-              Icon(Icons.edit_outlined, size: 14),
-              SizedBox(width: 8),
-              Text('Edit', style: TextStyle(fontSize: 12)),
-            ],
-          ),
-        ),
-        const PopupMenuItem(
-          value: 'delete',
-          height: 32,
-          child: Row(
-            children: [
-              Icon(Icons.delete_outline_rounded, size: 14, color: Colors.red),
-              SizedBox(width: 8),
-              Text('Delete', style: TextStyle(color: Colors.red, fontSize: 12)),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  IconData _getRoleIconInfo(CommentRole role) {
-    switch (role) {
-      case CommentRole.clinician:
-        return Icons.local_hospital_outlined;
-      case CommentRole.mother:
-        return Icons.face_4_outlined;
-      case CommentRole.community:
-        return Icons.person_outline;
-      case CommentRole.supportPartner:
-        return Icons.handshake_outlined;
-      default:
-        return Icons.chat_bubble_outline_rounded;
-    }
   }
 
   String _formatTime(DateTime time) {

@@ -8,8 +8,8 @@ import 'package:cap_project/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../cubit/cubit.dart';
-import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
 class RefinedChatInput extends StatefulWidget {
@@ -95,7 +95,7 @@ class _RefinedChatInputState extends State<RefinedChatInput>
               width: 36,
               height: 4,
               decoration: BoxDecoration(
-                color: AppColors.borderMedium,
+                color: Theme.of(context).dividerColor.withOpacity(0.4),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -106,7 +106,7 @@ class _RefinedChatInputState extends State<RefinedChatInput>
                   child: _buildSquarePickerOption(
                     icon: Icons.center_focus_strong_rounded,
                     label: 'Scan Medicine',
-                    color: AppColors.accentPrimary,
+                    color: Theme.of(context).colorScheme.primary,
                     onTap: () async {
                       Navigator.pop(modalContext);
                       _focusNode.unfocus(); // Ensure focus doesn't return
@@ -148,7 +148,7 @@ class _RefinedChatInputState extends State<RefinedChatInput>
                   child: _buildSquarePickerOption(
                     icon: Icons.photo_library_outlined,
                     label: 'Gallery',
-                    color: AppColors.accentSecondary,
+                    color: Theme.of(context).colorScheme.secondary,
                     onTap: () {
                       Navigator.pop(modalContext);
                       _focusNode.unfocus(); // Ensure focus doesn't return
@@ -181,9 +181,12 @@ class _RefinedChatInputState extends State<RefinedChatInput>
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 18),
         decoration: BoxDecoration(
-          color: AppColors.backgroundElevated,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-          border: Border.all(color: AppColors.borderLight, width: 1),
+          border: Border.all(
+            color: Theme.of(context).dividerColor.withOpacity(0.1),
+            width: 1,
+          ),
         ),
         child: Column(
           children: [
@@ -192,9 +195,9 @@ class _RefinedChatInputState extends State<RefinedChatInput>
             Text(
               label,
               textAlign: TextAlign.center,
-              style: AppTextStyles.labelMedium.copyWith(
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
                 fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
+                color: Theme.of(context).textTheme.bodyLarge?.color,
               ),
             ),
           ],
@@ -213,7 +216,7 @@ class _RefinedChatInputState extends State<RefinedChatInput>
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.error!),
-              backgroundColor: AppColors.error,
+              backgroundColor: Colors.red,
               behavior: SnackBarBehavior.floating,
             ),
           );
@@ -223,25 +226,25 @@ class _RefinedChatInputState extends State<RefinedChatInput>
       child: Container(
         padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
         decoration: BoxDecoration(
-          color: AppColors.backgroundPrimary,
+          color: Theme.of(context).scaffoldBackgroundColor,
           border: Border(
             top: BorderSide(
-              color: AppColors.borderLight.withOpacity(0.6),
+              color: Theme.of(context).dividerColor.withOpacity(0.1),
               width: 1,
             ),
           ),
         ),
         child: Container(
           decoration: BoxDecoration(
-            color: AppColors.backgroundSurface,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(28),
             border: Border.all(
-              color: AppColors.borderLight,
+              color: Theme.of(context).dividerColor.withOpacity(0.1),
               width: 1.0,
             ),
             boxShadow: [
               BoxShadow(
-                color: AppColors.accentPrimary.withOpacity(0.08),
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.08),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -267,13 +270,13 @@ class _RefinedChatInputState extends State<RefinedChatInput>
             minLines: 1,
             keyboardType: TextInputType.multiline,
             textInputAction: TextInputAction.newline,
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.textPrimary,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).textTheme.bodyLarge?.color,
             ),
             decoration: InputDecoration(
               hintText: AppLocalizations.of(context).askAnything,
-              hintStyle: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.textTertiary,
+              hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).textTheme.labelSmall?.color,
               ),
               filled: false, // Override global theme
               fillColor: Colors.transparent,
@@ -291,9 +294,9 @@ class _RefinedChatInputState extends State<RefinedChatInput>
           child: Row(
             children: [
               IconButton(
-                icon: const Icon(
+                icon: Icon(
                   Icons.add_rounded,
-                  color: AppColors.textSecondary,
+                  color: Theme.of(context).textTheme.bodySmall?.color,
                   size: 28,
                 ),
                 onPressed: _showPlusMenu,
@@ -301,9 +304,9 @@ class _RefinedChatInputState extends State<RefinedChatInput>
               const Spacer(),
               if (!_hasText)
                 IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.mic_none_rounded,
-                    color: AppColors.textSecondary,
+                    color: Theme.of(context).textTheme.bodySmall?.color,
                     size: 26,
                   ),
                   onPressed: widget.onToggleAudio,
@@ -321,8 +324,8 @@ class _RefinedChatInputState extends State<RefinedChatInput>
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
                           color: canSend
-                              ? AppColors.brandDarkTeal
-                              : AppColors.borderLight,
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).dividerColor.withOpacity(0.1),
                           shape: BoxShape.circle,
                           boxShadow: canSend
                               ? [
@@ -359,9 +362,9 @@ class _RefinedChatInputState extends State<RefinedChatInput>
           child: Row(
             children: [
               IconButton(
-                icon: const Icon(
+                icon: Icon(
                   Icons.close_rounded,
-                  color: AppColors.textTertiary,
+                  color: Theme.of(context).textTheme.labelSmall?.color,
                 ),
                 onPressed: () {
                   context.read<ChatCubit>().cancelRecording();
@@ -395,13 +398,13 @@ class _RefinedChatInputState extends State<RefinedChatInput>
                             width: 44,
                             height: 44,
                             decoration: BoxDecoration(
-                              color: AppColors.error.withOpacity(0.2),
+                              color: Colors.red.withOpacity(0.2),
                               shape: BoxShape.circle,
                             ),
                           ),
                           const Icon(
                             Icons.stop_rounded,
-                            color: AppColors.error,
+                            color: Colors.red,
                             size: 28,
                           ),
                         ],
@@ -422,16 +425,16 @@ class _RefinedChatInputState extends State<RefinedChatInput>
                                 width: 44,
                                 height: 44,
                                 decoration: BoxDecoration(
-                                  color: AppColors.accentPrimary.withOpacity(
+                                  color: Theme.of(context).colorScheme.primary.withOpacity(
                                     0.1,
                                   ),
                                   shape: BoxShape.circle,
                                 ),
                               ),
                             ),
-                            const Icon(
+                            Icon(
                               Icons.mic_rounded,
-                              color: AppColors.accentPrimary,
+                              color: Theme.of(context).colorScheme.primary,
                               size: 28,
                             ),
                           ],
@@ -439,9 +442,9 @@ class _RefinedChatInputState extends State<RefinedChatInput>
                       ),
               ),
               IconButton(
-                icon: const Icon(
+                icon: Icon(
                   Icons.keyboard_outlined,
-                  color: AppColors.textSecondary,
+                  color: Theme.of(context).textTheme.bodySmall?.color,
                 ),
                 onPressed: widget.onToggleAudio,
               ),
@@ -472,9 +475,9 @@ class _RefinedChatInputState extends State<RefinedChatInput>
                         width: 70,
                         height: 70,
                         decoration: BoxDecoration(
-                          color: AppColors.backgroundPrimary,
+                          color: Theme.of(context).scaffoldBackgroundColor,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: AppColors.borderLight),
+                          border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
                         ),
                         child: attachment.type == AttachmentType.image
                             ? ClipRRect(

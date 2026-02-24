@@ -48,14 +48,14 @@ class _MomCareMascotState extends State<MomCareMascot>
               _MascotRing(
                 progress: _controller.value,
                 delay: 0.0,
-                baseColor: AppColors.accentSecondary,
+                baseColor: Theme.of(context).colorScheme.secondary,
                 size: widget.size,
               ),
               // Outer Pulse 2
               _MascotRing(
                 progress: _controller.value,
                 delay: 0.5,
-                baseColor: AppColors.accentPrimary,
+                baseColor: Theme.of(context).colorScheme.primary,
                 size: widget.size,
               ),
               // The Core
@@ -66,13 +66,13 @@ class _MomCareMascotState extends State<MomCareMascot>
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: [
-                      AppColors.textPrimary,
-                      AppColors.accentPrimary.withOpacity(0.8),
+                      Theme.of(context).colorScheme.primary,
+                      Theme.of(context).colorScheme.primary.withOpacity(0.8),
                     ],
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.accentPrimary.withOpacity(0.3),
+                      color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
                       blurRadius:
                           20 *
                           (1 + math.sin(_controller.value * 2 * math.pi) * 0.2),

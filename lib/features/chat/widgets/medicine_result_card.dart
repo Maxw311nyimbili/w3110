@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../medscanner/cubit/medscanner_state.dart';
-import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
 class MedicineResultCard extends StatelessWidget {
@@ -13,9 +12,12 @@ class MedicineResultCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 12),
       decoration: BoxDecoration(
-        color: AppColors.backgroundSurface.withOpacity(0.9),
+        color: Theme.of(context).colorScheme.surface.withOpacity(0.9),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.borderLight, width: 0.8),
+        border: Border.all(
+          color: Theme.of(context).dividerColor.withOpacity(0.1),
+          width: 0.8,
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.04),
@@ -32,9 +34,11 @@ class MedicineResultCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: AppColors.backgroundElevated.withOpacity(0.5),
-              border: const Border(
-                bottom: BorderSide(color: AppColors.borderLight),
+              color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
+              border: Border(
+                bottom: BorderSide(
+                  color: Theme.of(context).dividerColor.withOpacity(0.1),
+                ),
               ),
             ),
             child: Row(
@@ -42,12 +46,12 @@ class MedicineResultCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AppColors.accentPrimary.withOpacity(0.1),
+                    color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.medication_rounded,
-                    color: AppColors.accentPrimary,
+                    color: Theme.of(context).colorScheme.primary,
                     size: 28,
                   ),
                 ),
@@ -58,10 +62,10 @@ class MedicineResultCard extends StatelessWidget {
                     children: [
                       Text(
                         result.medicationName,
-                        style: AppTextStyles.headlineSmall.copyWith(
+                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.w800,
                           fontSize: 20,
-                          color: AppColors.textPrimary,
+                          color: Theme.of(context).textTheme.bodyLarge?.color,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -69,13 +73,13 @@ class MedicineResultCard extends StatelessWidget {
                         children: [
                           _buildBadge(
                             '${(result.confidence * 100).toInt()}% match',
-                            AppColors.success,
+                            Colors.green,
                           ),
                           if (result.barcode != null) ...[
                             const SizedBox(width: 8),
                             _buildBadge(
                               result.barcode!,
-                              AppColors.accentSecondary,
+                              Theme.of(context).colorScheme.secondary,
                             ),
                           ],
                         ],
@@ -94,12 +98,12 @@ class MedicineResultCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (result.dosageInfo != null) ...[
-                  _buildSectionTitle('Standard Dosage'),
+                  _buildSectionTitle(context, 'Standard Dosage'),
                   const SizedBox(height: 4),
                   Text(
                     result.dosageInfo!,
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.textPrimary,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
                       height: 1.5,
                     ),
                   ),
@@ -107,7 +111,7 @@ class MedicineResultCard extends StatelessWidget {
                 ],
 
                 if (result.activeIngredients.isNotEmpty) ...[
-                  _buildSectionTitle('Active Ingredients'),
+                  _buildSectionTitle(context, 'Active Ingredients'),
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 8,
@@ -120,13 +124,13 @@ class MedicineResultCard extends StatelessWidget {
                               vertical: 6,
                             ),
                             decoration: BoxDecoration(
-                              color: AppColors.gray100,
+                              color: Theme.of(context).colorScheme.surfaceVariant,
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
                               i,
-                              style: AppTextStyles.caption.copyWith(
-                                color: AppColors.textSecondary,
+                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                color: Theme.of(context).textTheme.bodySmall?.color,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -141,10 +145,10 @@ class MedicineResultCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: AppColors.error.withOpacity(0.05),
+                      color: Colors.red.withOpacity(0.05),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: AppColors.error.withOpacity(0.1),
+                        color: Colors.red.withOpacity(0.1),
                       ),
                     ),
                     child: Column(
@@ -154,14 +158,14 @@ class MedicineResultCard extends StatelessWidget {
                           children: [
                             Icon(
                               Icons.warning_amber_rounded,
-                              color: AppColors.error,
+                              color: Colors.red,
                               size: 18,
                             ),
                             const SizedBox(width: 8),
                             Text(
                               'Critical Warnings',
-                              style: AppTextStyles.labelMedium.copyWith(
-                                color: AppColors.error,
+                              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                                color: Colors.red,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -179,15 +183,15 @@ class MedicineResultCard extends StatelessWidget {
                                       padding: EdgeInsets.only(top: 6),
                                       child: CircleAvatar(
                                         radius: 2,
-                                        backgroundColor: AppColors.error,
+                                        backgroundColor: Colors.red,
                                       ),
                                     ),
                                     const SizedBox(width: 8),
                                     Expanded(
                                       child: Text(
                                         w,
-                                        style: AppTextStyles.caption.copyWith(
-                                          color: AppColors.textPrimary,
+                                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                          color: Theme.of(context).textTheme.bodyLarge?.color,
                                           height: 1.4,
                                         ),
                                       ),
@@ -209,11 +213,11 @@ class MedicineResultCard extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionTitle(String title) {
+  Widget _buildSectionTitle(BuildContext context, String title) {
     return Text(
       title.toUpperCase(),
-      style: AppTextStyles.labelSmall.copyWith(
-        color: AppColors.textTertiary,
+      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+        color: Theme.of(context).textTheme.labelSmall?.color,
         fontWeight: FontWeight.w700,
         letterSpacing: 1.2,
       ),

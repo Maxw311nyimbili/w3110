@@ -12,13 +12,13 @@ class ContextGatheringStep extends StatelessWidget {
     return BlocBuilder<LandingCubit, LandingState>(
       builder: (context, state) {
         return Scaffold(
-          backgroundColor: AppColors.backgroundPrimary,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           appBar: AppBar(
             backgroundColor: Colors.transparent,
             elevation: 0,
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-              color: AppColors.textPrimary,
+              icon: Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+              color: Theme.of(context).textTheme.bodyLarge?.color,
               onPressed: () => context.read<LandingCubit>().previousStep(),
             ),
             actions: [
@@ -26,8 +26,8 @@ class ContextGatheringStep extends StatelessWidget {
                 onPressed: () => context.read<LandingCubit>().skipStep(),
                 child: Text(
                   'Skip',
-                  style: AppTextStyles.labelMedium.copyWith(
-                    color: AppColors.textSecondary,
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: Theme.of(context).textTheme.bodySmall?.color,
                   ),
                 ),
               ),
@@ -42,16 +42,16 @@ class ContextGatheringStep extends StatelessWidget {
                   const SizedBox(height: 16),
                   Text(
                     'Topics of interest',
-                    style: AppTextStyles.displayMedium.copyWith(
-                      color: AppColors.textPrimary,
+                    style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                      color: Theme.of(context).textTheme.displayLarge?.color,
                       letterSpacing: -0.5,
                     ),
                   ),
                   const SizedBox(height: 12),
                   Text(
                     'Select a few to help us get started.',
-                    style: AppTextStyles.bodyLarge.copyWith(
-                      color: AppColors.textSecondary,
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: Theme.of(context).textTheme.bodySmall?.color,
                     ),
                   ),
                   const SizedBox(height: 32),
@@ -79,8 +79,8 @@ class ContextGatheringStep extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: () => context.read<LandingCubit>().nextStep(),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.textPrimary,
-                        foregroundColor: AppColors.backgroundSurface,
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(30),
@@ -114,18 +114,20 @@ class ContextGatheringStep extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.textPrimary : Colors.transparent,
+          color: isSelected ? Theme.of(context).colorScheme.primary : Colors.transparent,
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
-            color: isSelected ? AppColors.textPrimary : AppColors.gray300,
+            color: isSelected
+                ? Theme.of(context).colorScheme.primary
+                : Theme.of(context).dividerColor.withOpacity(0.2),
           ),
         ),
         child: Text(
           label,
-          style: AppTextStyles.labelMedium.copyWith(
+          style: Theme.of(context).textTheme.labelMedium?.copyWith(
             color: isSelected
-                ? AppColors.backgroundSurface
-                : AppColors.textPrimary,
+                ? Theme.of(context).colorScheme.onPrimary
+                : Theme.of(context).textTheme.bodyLarge?.color,
             fontWeight: FontWeight.w500,
           ),
         ),

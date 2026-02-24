@@ -35,8 +35,10 @@ class ForumListView extends StatelessWidget {
     return BlocBuilder<ForumCubit, ForumState>(
       builder: (context, state) {
         return Scaffold(
-          backgroundColor: AppColors.backgroundPrimary,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           appBar: AppBar(
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            elevation: 0,
             leading: IconButton(
               icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
               onPressed: () {

@@ -28,8 +28,8 @@ class WelcomeDrawer extends StatelessWidget {
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
       ),
-      decoration: const BoxDecoration(
-        color: AppColors.backgroundSurface, // Pure Premium White
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
       ),
       child: Stack(
@@ -44,7 +44,7 @@ class WelcomeDrawer extends StatelessWidget {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: AppColors.gray200,
+                    color: Theme.of(context).dividerColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -93,8 +93,8 @@ class WelcomeDrawer extends StatelessWidget {
                       Text(
                         'Welcome to Thanzi',
                         textAlign: TextAlign.center,
-                        style: AppTextStyles.displayMedium.copyWith(
-                          color: AppColors.textPrimary,
+                        style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                          color: Theme.of(context).textTheme.displayLarge?.color,
                           fontSize: 28,
                           fontWeight: FontWeight.w800,
                         ),
@@ -103,8 +103,8 @@ class WelcomeDrawer extends StatelessWidget {
                       Text(
                         'Your companion for maternal health. Dive into chatting or sign in to sync your journey.',
                         textAlign: TextAlign.center,
-                        style: AppTextStyles.bodyMedium.copyWith(
-                          color: AppColors.textSecondary,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).textTheme.bodySmall?.color,
                           height: 1.5,
                         ),
                       ),
@@ -136,8 +136,8 @@ class WelcomeDrawer extends StatelessWidget {
                                         .authenticateAsDemo(),
                                     child: Text(
                                       'DEMO LOGIN (DEVELOPER BYPASS)',
-                                      style: AppTextStyles.labelSmall.copyWith(
-                                        color: AppColors.accentPrimary,
+                                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                        color: Theme.of(context).colorScheme.primary,
                                         fontWeight: FontWeight.w900,
                                         letterSpacing: 1.0,
                                       ),
@@ -174,10 +174,10 @@ class WelcomeDrawer extends StatelessWidget {
                       shape: BoxShape.circle,
                       border: Border.all(color: Colors.white.withOpacity(0.2)),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.close_rounded,
                       size: 20,
-                      color: AppColors.textPrimary,
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
                     ),
                   ),
                 ),

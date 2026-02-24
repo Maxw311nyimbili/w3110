@@ -14,13 +14,13 @@ class RoleSelectionStep extends StatelessWidget {
     return BlocBuilder<LandingCubit, LandingState>(
       builder: (context, state) {
         return Scaffold(
-          backgroundColor: AppColors.backgroundPrimary,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           appBar: AppBar(
             backgroundColor: Colors.transparent,
             elevation: 0,
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-              color: AppColors.textPrimary,
+              icon: Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+              color: Theme.of(context).textTheme.bodyLarge?.color,
               onPressed: () => Navigator.of(context).pop(),
             ),
           ),
@@ -41,8 +41,8 @@ class RoleSelectionStep extends StatelessWidget {
                         offset: Offset(0, 20 * (1 - value)),
                         child: Text(
                           'Select your role',
-                          style: AppTextStyles.displayMedium.copyWith(
-                            color: AppColors.textPrimary,
+                          style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                            color: Theme.of(context).textTheme.displayLarge?.color,
                             letterSpacing: -1.0,
                             fontWeight: FontWeight.w800,
                           ),
@@ -170,10 +170,10 @@ class RoleSelectionStep extends StatelessWidget {
                           children: [
                             Text(
                               title,
-                              style: AppTextStyles.headlineSmall.copyWith(
+                              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                                 color: isSelected
-                                    ? AppColors.accentPrimary
-                                    : AppColors.textPrimary,
+                                    ? Theme.of(context).colorScheme.primary
+                                    : Theme.of(context).textTheme.bodyLarge?.color,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
@@ -182,8 +182,8 @@ class RoleSelectionStep extends StatelessWidget {
                         const SizedBox(height: 8),
                         Text(
                           subtitle,
-                          style: AppTextStyles.bodyMedium.copyWith(
-                            color: AppColors.textSecondary,
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(context).textTheme.bodySmall?.color,
                             fontSize: 14,
                             height: 1.4,
                           ),
@@ -200,12 +200,12 @@ class RoleSelectionStep extends StatelessWidget {
                       shape: BoxShape.circle,
                       border: Border.all(
                         color: isSelected
-                            ? AppColors.accentPrimary
-                            : AppColors.borderLight,
+                            ? Theme.of(context).colorScheme.primary
+                            : Theme.of(context).dividerColor.withOpacity(0.3),
                         width: 2,
                       ),
                       color: isSelected
-                          ? AppColors.accentPrimary
+                          ? Theme.of(context).colorScheme.primary
                           : Colors.transparent,
                     ),
                     child: isSelected

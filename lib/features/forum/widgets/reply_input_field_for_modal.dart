@@ -111,42 +111,58 @@ class _ReplyInputFieldForModalState extends State<ReplyInputFieldForModal> {
                 return Container(
                   margin: const EdgeInsets.only(bottom: 12),
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
+                    horizontal: 16,
+                    vertical: 10,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.backgroundElevated,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.borderLight),
+                    color: AppColors.accentLight.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: AppColors.accentLight),
                   ),
                   child: Row(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.reply_rounded,
-                        size: 16,
-                        color: AppColors.textTertiary,
+                        size: 18,
+                        color: AppColors.accentPrimary,
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 10),
                       Expanded(
-                        child: Text(
-                          'Replying to ${state.replyingToComment!.authorName}',
-                          style: AppTextStyles.caption.copyWith(
-                            color: AppColors.textSecondary,
+                        child: RichText(
+                          text: TextSpan(
+                            style: AppTextStyles.caption.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                            children: [
+                              const TextSpan(text: 'Replying to '),
+                              TextSpan(
+                                text: state.replyingToComment!.authorName,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w800,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                            ],
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      IconButton(
-                        icon: const Icon(
-                          Icons.close_rounded,
-                          size: 16,
-                          color: AppColors.textTertiary,
-                        ),
-                        onPressed: () =>
+                      GestureDetector(
+                        onTap: () =>
                             context.read<ForumCubit>().clearReplyingTo(),
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.5),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.close_rounded,
+                            size: 14,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -157,6 +173,7 @@ class _ReplyInputFieldForModalState extends State<ReplyInputFieldForModal> {
             if (!widget.isGeneral) ...[
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
                 child: ValueListenableBuilder<String>(
                   valueListenable: _typeController,
                   builder: (context, selectedType, child) {
@@ -198,7 +215,7 @@ class _ReplyInputFieldForModalState extends State<ReplyInputFieldForModal> {
                   },
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
             ],
 
             // Input Row
@@ -209,15 +226,24 @@ class _ReplyInputFieldForModalState extends State<ReplyInputFieldForModal> {
                   child: Container(
                     decoration: BoxDecoration(
                       color: AppColors.backgroundElevated,
-                      borderRadius: BorderRadius.circular(24),
+                      borderRadius: BorderRadius.circular(28),
+                      border: Border.all(color: AppColors.borderLight),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.shadowWarm.withOpacity(0.03),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
                     child: TextField(
                       controller: _textController,
                       focusNode: _focusNode,
                       minLines: 1,
-                      maxLines: 4,
+                      maxLines: 5,
                       style: AppTextStyles.bodyMedium.copyWith(
                         color: AppColors.textPrimary,
+                        fontSize: 15,
                       ),
                       decoration: InputDecoration(
                         hintText: widget.isGeneral
@@ -225,39 +251,52 @@ class _ReplyInputFieldForModalState extends State<ReplyInputFieldForModal> {
                             : 'Share your perspective...',
                         hintStyle: AppTextStyles.bodyMedium.copyWith(
                           color: AppColors.textTertiary,
+                          fontSize: 15,
                         ),
                         border: InputBorder.none,
                         contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 10,
+                          horizontal: 20,
+                          vertical: 12,
                         ),
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 12),
 
                 // Post Button
                 _isPosting
                     ? const SizedBox(
-                        width: 40,
-                        height: 40,
+                        width: 48,
+                        height: 48,
                         child: Padding(
-                          padding: EdgeInsets.all(10),
-                          child: CircularProgressIndicator(strokeWidth: 2),
+                          padding: EdgeInsets.all(12),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              AppColors.accentPrimary,
+                            ),
+                          ),
                         ),
                       )
                     : Container(
-                        height: 40,
-                        width: 40,
+                        height: 48,
+                        width: 48,
                         decoration: BoxDecoration(
                           color: AppColors.accentPrimary,
                           shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.accentPrimary.withOpacity(0.3),
+                              blurRadius: 8,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
                         ),
                         child: IconButton(
                           icon: const Icon(
                             Icons.arrow_upward_rounded,
-                            size: 20,
+                            size: 24,
                             color: Colors.white,
                           ),
                           onPressed: _handlePost,

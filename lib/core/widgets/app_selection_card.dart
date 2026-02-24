@@ -26,16 +26,18 @@ class AppSelectionCard extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: AppColors.backgroundSurface,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? AppColors.accentPrimary : AppColors.borderLight,
+            color: isSelected
+                ? Theme.of(context).colorScheme.primary
+                : Theme.of(context).dividerColor.withOpacity(0.1),
             width: isSelected ? 2 : 1,
           ),
           boxShadow: [
             BoxShadow(
               color: isSelected
-                  ? AppColors.accentPrimary.withOpacity(0.05)
+                  ? Theme.of(context).colorScheme.primary.withOpacity(0.05)
                   : AppColors.shadow.withOpacity(0.05),
               blurRadius: 10,
               offset: const Offset(0, 4),
@@ -51,14 +53,14 @@ class AppSelectionCard extends StatelessWidget {
                   icon,
                   size: 24,
                   color: isSelected
-                      ? AppColors.accentPrimary
-                      : AppColors.textTertiary,
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(context).textTheme.bodySmall?.color,
                 ),
                 const Spacer(),
                 if (isSelected)
-                  const Icon(
+                  Icon(
                     Icons.check_circle,
-                    color: AppColors.accentPrimary,
+                    color: Theme.of(context).colorScheme.primary,
                     size: 20,
                   ),
               ],
@@ -66,16 +68,16 @@ class AppSelectionCard extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               title,
-              style: AppTextStyles.headlineSmall.copyWith(
-                color: AppColors.textPrimary,
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                color: Theme.of(context).textTheme.bodyLarge?.color,
                 fontWeight: FontWeight.w700,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               description,
-              style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.textSecondary,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).textTheme.bodySmall?.color,
                 height: 1.5,
               ),
             ),

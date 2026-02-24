@@ -185,7 +185,7 @@ class RefinedMessageBubble extends StatelessWidget {
                             },
                             styleSheet: MarkdownStyleSheet(
                               p: AppTextStyles.bodyMedium.copyWith(
-                                color: AppColors.textPrimary,
+                                color: Theme.of(context).textTheme.bodyLarge?.color,
                                 height: 1.65,
                                 fontSize: 15.5,
                               ),
@@ -200,7 +200,7 @@ class RefinedMessageBubble extends StatelessWidget {
                                 fontSize: 15.5,
                               ),
                               h1: AppTextStyles.headlineSmall.copyWith(
-                                color: AppColors.textPrimary,
+                                color: Theme.of(context).textTheme.headlineSmall?.color,
                                 fontWeight: FontWeight.w700,
                               ),
                               h2: AppTextStyles.labelLarge.copyWith(
@@ -386,10 +386,10 @@ class RefinedMessageBubble extends StatelessWidget {
                   width: 140,
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: AppColors.backgroundSurface,
+                    color: Theme.of(context).colorScheme.surface,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: AppColors.borderLight.withOpacity(0.6),
+                      color: Theme.of(context).dividerColor.withOpacity(0.1),
                       width: 1,
                     ),
                     boxShadow: [
@@ -449,7 +449,7 @@ class RefinedMessageBubble extends StatelessWidget {
                           fontWeight: FontWeight.w600,
                           fontSize: 12,
                           height: 1.2,
-                          color: AppColors.textPrimary,
+                          color: Theme.of(context).textTheme.bodyLarge?.color,
                         ),
                       ),
                     ],
@@ -477,7 +477,7 @@ class RefinedMessageBubble extends StatelessWidget {
       height: 32, // Slightly taller
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
-        color: AppColors.backgroundElevated,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(

@@ -126,7 +126,7 @@ class _ChatBodyState extends State<ChatBody>
         }
       },
       child: Container(
-        color: AppColors.backgroundPrimary,
+        color: Theme.of(context).scaffoldBackgroundColor,
         child: Column(
           children: [
             Expanded(
@@ -137,11 +137,11 @@ class _ChatBodyState extends State<ChatBody>
                     BlocBuilder<ChatCubit, ChatState>(
                       builder: (context, state) {
                         if (state.isLoading && !state.hasMessages) {
-                          return const Center(
+                          return Center(
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
                               valueColor: AlwaysStoppedAnimation<Color>(
-                                AppColors.accentPrimary,
+                                Theme.of(context).colorScheme.primary,
                               ),
                             ),
                           );
@@ -235,10 +235,10 @@ class _ChatBodyState extends State<ChatBody>
                                 child: Text(
                                   displayGreeting,
                                   textAlign: TextAlign.center,
-                                  style: AppTextStyles.displayLarge.copyWith(
+                                  style: Theme.of(context).textTheme.displayLarge?.copyWith(
                                     fontWeight: FontWeight.w800,
                                     letterSpacing: -1.5,
-                                    color: AppColors.textPrimary,
+                                    color: Theme.of(context).textTheme.displayLarge?.color,
                                     height: 1.1,
                                     fontSize: 40,
                                   ),
@@ -251,8 +251,8 @@ class _ChatBodyState extends State<ChatBody>
                                 child: Text(
                                   'Your personal health guide.',
                                   textAlign: TextAlign.center,
-                                  style: AppTextStyles.bodyLarge.copyWith(
-                                    color: AppColors.textSecondary,
+                                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                    color: Theme.of(context).textTheme.bodySmall?.color,
                                     fontWeight: FontWeight.w500,
                                     fontSize: 16,
                                   ),
@@ -331,7 +331,7 @@ class _ChatBodyState extends State<ChatBody>
                   child: Icon(
                     Icons.format_quote_rounded,
                     size: 140,
-                    color: AppColors.brandDarkTeal.withOpacity(0.06),
+                    color: Theme.of(context).colorScheme.primary.withOpacity(0.06),
                   ),
                 ),
               ),
@@ -341,8 +341,8 @@ class _ChatBodyState extends State<ChatBody>
                   children: [
                     Text(
                       'DAILY INSIGHT',
-                      style: AppTextStyles.labelSmall.copyWith(
-                        color: AppColors.brandDarkTeal,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: Theme.of(context).colorScheme.primary,
                         fontWeight: FontWeight.w800,
                         letterSpacing: 2.0,
                         fontSize: 10,
@@ -352,10 +352,10 @@ class _ChatBodyState extends State<ChatBody>
                     Text(
                       dailyFact,
                       textAlign: TextAlign.center,
-                      style: AppTextStyles.bodyLarge.copyWith(
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         fontSize: 20,
                         height: 1.5,
-                        color: AppColors.textPrimary,
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
                         fontWeight: FontWeight.w500,
                         fontStyle: FontStyle.italic,
                       ),
@@ -365,7 +365,7 @@ class _ChatBodyState extends State<ChatBody>
                       width: 40,
                       height: 2,
                       decoration: BoxDecoration(
-                        color: AppColors.brandDarkTeal.withOpacity(0.25),
+                        color: Theme.of(context).colorScheme.primary.withOpacity(0.25),
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -469,15 +469,15 @@ class _ChatBodyState extends State<ChatBody>
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.18),
+                  color: Theme.of(context).colorScheme.surface.withOpacity(0.8),
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
-                    color: AppColors.brandDarkTeal.withOpacity(0.22),
+                    color: Theme.of(context).colorScheme.primary.withOpacity(0.22),
                     width: 1,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.brandDarkTeal.withOpacity(0.06),
+                      color: Theme.of(context).colorScheme.primary.withOpacity(0.06),
                       blurRadius: 16,
                       offset: const Offset(0, 3),
                     ),
@@ -488,8 +488,8 @@ class _ChatBodyState extends State<ChatBody>
                   children: [
                     Text(
                       'Sign in',
-                      style: AppTextStyles.labelSmall.copyWith(
-                        color: AppColors.brandDarkTeal,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: Theme.of(context).colorScheme.primary,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 0.2,
                       ),
@@ -497,8 +497,8 @@ class _ChatBodyState extends State<ChatBody>
                     const SizedBox(width: 5),
                     Text(
                       'to save history',
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: AppColors.textSecondary,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).textTheme.bodySmall?.color,
                         fontSize: 11,
                       ),
                     ),

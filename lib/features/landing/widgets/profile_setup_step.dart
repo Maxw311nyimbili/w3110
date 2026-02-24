@@ -44,13 +44,13 @@ class _ProfileSetupStepState extends State<ProfileSetupStep> {
     return BlocBuilder<LandingCubit, LandingState>(
       builder: (context, state) {
         return Scaffold(
-          backgroundColor: AppColors.backgroundPrimary,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           appBar: AppBar(
             backgroundColor: Colors.transparent,
             elevation: 0,
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-              color: AppColors.textPrimary,
+              icon: Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+              color: Theme.of(context).textTheme.bodyLarge?.color,
               onPressed: () => context.read<LandingCubit>().previousStep(),
             ),
           ),
@@ -67,8 +67,8 @@ class _ProfileSetupStepState extends State<ProfileSetupStep> {
                     delay: 100,
                     child: Text(
                       'Personalize your care',
-                      style: AppTextStyles.displayMedium.copyWith(
-                        color: AppColors.textPrimary,
+                      style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                        color: Theme.of(context).textTheme.displayLarge?.color,
                         letterSpacing: -1.0,
                         fontWeight: FontWeight.w800,
                         fontSize: 34,
@@ -83,8 +83,8 @@ class _ProfileSetupStepState extends State<ProfileSetupStep> {
                     delay: 200,
                     child: Text(
                       'This helps Thanzi provide more accurate medical context tailored to you.',
-                      style: AppTextStyles.bodyLarge.copyWith(
-                        color: AppColors.textSecondary,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: Theme.of(context).textTheme.bodySmall?.color,
                         fontSize: 17,
                       ),
                     ),
@@ -126,8 +126,8 @@ class _ProfileSetupStepState extends State<ProfileSetupStep> {
                         const SizedBox(height: 8),
                         Text(
                           'Use this to distinguish this account from others.',
-                          style: AppTextStyles.caption.copyWith(
-                            color: AppColors.textTertiary,
+                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: Theme.of(context).textTheme.bodySmall?.color,
                             fontSize: 13,
                           ),
                         ),
@@ -180,8 +180,8 @@ class _ProfileSetupStepState extends State<ProfileSetupStep> {
       padding: const EdgeInsets.only(bottom: 8.0),
       child: Text(
         text,
-        style: AppTextStyles.labelSmall.copyWith(
-          color: AppColors.textTertiary,
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+          color: Theme.of(context).textTheme.bodySmall?.color,
           letterSpacing: 1.0,
           fontWeight: FontWeight.bold,
         ),
@@ -193,19 +193,19 @@ class _ProfileSetupStepState extends State<ProfileSetupStep> {
     return InputDecoration(
       hintText: hint,
       filled: true,
-      fillColor: AppColors.backgroundSurface,
+      fillColor: Theme.of(context).colorScheme.surface,
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide(color: AppColors.borderLight),
+        borderSide: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.1)),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide(color: AppColors.borderLight),
+        borderSide: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.1)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide(color: AppColors.accentPrimary, width: 2),
+        borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
       ),
     );
   }

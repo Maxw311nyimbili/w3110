@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:forum_repository/forum_repository.dart';
 import '../cubit/forum_cubit.dart';
-import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_text_styles.dart';
+import '../cubit/forum_cubit.dart';
 
 class CommentListItem extends StatelessWidget {
   const CommentListItem({
@@ -25,7 +24,7 @@ class CommentListItem extends StatelessWidget {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: AppColors.accentPrimary.withOpacity(0.1),
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
             child: Center(
@@ -33,8 +32,8 @@ class CommentListItem extends StatelessWidget {
                 comment.authorName.isNotEmpty
                     ? comment.authorName[0].toUpperCase()
                     : '?',
-                style: const TextStyle(
-                  color: AppColors.accentPrimary,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
                 ),
@@ -51,24 +50,24 @@ class CommentListItem extends StatelessWidget {
                   children: [
                     Text(
                       comment.authorName,
-                      style: AppTextStyles.labelLarge.copyWith(
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
                       ),
                     ),
                     const SizedBox(width: 8),
                     Text(
                       _formatTimestamp(comment.createdAt),
-                      style: AppTextStyles.labelSmall.copyWith(
-                        color: AppColors.textTertiary,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: Theme.of(context).textTheme.bodySmall?.color,
                       ),
                     ),
                     const Spacer(),
                     if (comment.isPendingSync)
-                      const Icon(
+                      Icon(
                         Icons.cloud_upload_outlined,
                         size: 14,
-                        color: AppColors.textTertiary,
+                        color: Theme.of(context).textTheme.bodySmall?.color,
                       ),
                   ],
                 ),
@@ -76,8 +75,8 @@ class CommentListItem extends StatelessWidget {
                 // Comment text
                 Text(
                   comment.content,
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: AppColors.textSecondary,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).textTheme.bodySmall?.color,
                     height: 1.4,
                   ),
                 ),
@@ -97,15 +96,15 @@ class CommentListItem extends StatelessWidget {
                         size: 16,
                         color: comment.isLiked
                             ? Colors.pink
-                            : AppColors.textTertiary,
+                            : Theme.of(context).textTheme.bodySmall?.color,
                       ),
                       const SizedBox(width: 4),
                       Text(
                         comment.likeCount.toString(),
-                        style: AppTextStyles.labelSmall.copyWith(
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
                           color: comment.isLiked
                               ? Colors.pink
-                              : AppColors.textTertiary,
+                              : Theme.of(context).textTheme.bodySmall?.color,
                           fontWeight: comment.isLiked
                               ? FontWeight.bold
                               : FontWeight.normal,
