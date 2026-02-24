@@ -7,7 +7,7 @@ echo "Starting Vercel Build Process..."
 
 # 1. Install Flutter (using a specific version for stability)
 # Vercel environments are Linux-based
-FLUTTER_VERSION="3.29.0"
+FLUTTER_VERSION="3.35.0"
 FLUTTER_CHANNEL="stable"
 
 if [ ! -d "flutter" ]; then
