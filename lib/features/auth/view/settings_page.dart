@@ -10,6 +10,8 @@ import 'package:cap_project/features/landing/cubit/landing_cubit.dart';
 import 'package:cap_project/l10n/l10n.dart';
 import 'package:cap_project/core/theme/cubit/theme_cubit.dart';
 import 'package:cap_project/core/theme/cubit/theme_state.dart';
+import 'package:cap_project/core/util/responsive_utils.dart';
+import 'package:cap_project/core/widgets/main_navigation_shell.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cap_project/core/widgets/entry_animation.dart';
@@ -27,49 +29,24 @@ class SettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
 
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: SafeArea(
-        child: EntryAnimation(
+    return MainNavigationShell(
+      title: Text(
+        l10n.settings,
+        style: Theme.of(context).textTheme.displaySmall?.copyWith(
+              fontWeight: FontWeight.w800,
+              fontSize: 24,
+            ),
+      ),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 800),
           child: CustomScrollView(
             physics: const BouncingScrollPhysics(),
             slivers: [
-              // Custom Header with big title
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
-                  child: Row(
-                    children: [
-                      InkWell(
-                        onTap: () => Navigator.of(context).pop(),
-                        borderRadius: BorderRadius.circular(12),
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          // Removed white card decoration
-                          child: Icon(
-                            Icons.arrow_back_ios_new_rounded,
-                            size: 22,
-                            color: Theme.of(context).textTheme.bodyLarge?.color,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        l10n.settings,
-                        style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                          fontWeight: FontWeight.w800,
-                          fontSize: 28,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
               // Content
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
                   child: Column(
                     children: [
                       // --- Preferences Section ---
@@ -109,9 +86,9 @@ class SettingsPage extends StatelessWidget {
                               context,
                               title: l10n.darkMode,
                               subtitle: subtitle,
-                              icon: state.themeMode == AppThemeMode.dark 
-                                ? Icons.dark_mode_rounded 
-                                : Icons.dark_mode_outlined,
+                              icon: state.themeMode == AppThemeMode.dark
+                                  ? Icons.dark_mode_rounded
+                                  : Icons.dark_mode_outlined,
                               onTap: () => _showThemeSelector(context, l10n),
                             );
                           },

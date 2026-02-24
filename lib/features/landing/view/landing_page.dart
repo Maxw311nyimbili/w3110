@@ -2,6 +2,7 @@
 
 import 'package:cap_project/features/landing/cubit/cubit.dart';
 import 'package:cap_project/features/landing/widgets/landing_body.dart';
+import 'package:cap_project/core/util/responsive_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -46,9 +47,14 @@ class LandingView extends StatelessWidget {
           context.read<LandingCubit>().clearError();
         }
       },
-      child: const Scaffold(
+      child: Scaffold(
         body: SafeArea(
-          child: LandingBody(),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 600),
+              child: const LandingBody(),
+            ),
+          ),
         ),
       ),
     );

@@ -4,6 +4,7 @@ import 'package:auth_repository/auth_repository.dart';
 import 'package:cap_project/app/view/app_router.dart';
 import 'package:cap_project/features/auth/cubit/cubit.dart';
 import 'package:cap_project/features/auth/widgets/widgets.dart';
+import 'package:cap_project/core/util/responsive_utils.dart';
 import 'package:flutter/material.dart';
 
 /// Auth page - entry point for authentication flow
@@ -66,9 +67,14 @@ class AuthView extends StatelessWidget {
           });
         }
       },
-      child: const Scaffold(
+      child: Scaffold(
         body: SafeArea(
-          child: AuthBody(),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 500),
+              child: const AuthBody(),
+            ),
+          ),
         ),
       ),
     );
