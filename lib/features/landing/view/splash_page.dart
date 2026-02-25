@@ -228,54 +228,55 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                                   32 + bottomPadding,
                                 ),
                                 child: GlassCard(
-                                padding: const EdgeInsets.fromLTRB(
-                                  24,
-                                  20,
-                                  24,
-                                  20,
-                                ),
-                                borderRadius: 28,
-                                tintOpacity: 0.88,
-                                blur: 16,
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    // Typewriter tagline
-                                    _TypewriterText(
-                                      text: tagline,
-                                      progress: _contentOpacity.value,
-                                      style: TextStyle(
-                                        color: Theme.of(context).textTheme.bodySmall?.color,
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w600,
-                                        letterSpacing: 1.8,
-                                        height: 1.8,
+                                  padding: const EdgeInsets.fromLTRB(
+                                    24,
+                                    20,
+                                    24,
+                                    20,
+                                  ),
+                                  borderRadius: 28,
+                                  tintOpacity: 0.88,
+                                  blur: 16,
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      // Typewriter tagline
+                                      _TypewriterText(
+                                        text: tagline,
+                                        progress: _contentOpacity.value,
+                                        style: TextStyle(
+                                          color: Theme.of(context).textTheme.bodySmall?.color,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w600,
+                                          letterSpacing: 1.8,
+                                          height: 1.8,
+                                        ),
                                       ),
-                                    ),
-                                    const SizedBox(height: 20),
-                                    AppButton(
-                                      text: isAuthenticated
-                                          ? 'Resume Session'
-                                          : 'Get Started',
-                                      width: 220,
-                                      borderRadius: AppSpacing.radiusFull,
-                                      backgroundColor: Theme.of(context).colorScheme.primary,
-                                      foregroundColor: Colors.white,
-                                      onPressed: () {
-                                        if (isAuthenticated) {
-                                          AppRouter.replaceTo(
-                                            context,
-                                            AppRouter.chat,
-                                          );
-                                        } else {
-                                          AppRouter.navigateTo(
-                                            context,
-                                            AppRouter.landing,
-                                          );
-                                        }
-                                      },
-                                    ),
-                                  ],
+                                      const SizedBox(height: 20),
+                                      AppButton(
+                                        text: isAuthenticated
+                                            ? 'Resume Session'
+                                            : 'Get Started',
+                                        width: 220,
+                                        borderRadius: AppSpacing.radiusFull,
+                                        backgroundColor: Theme.of(context).colorScheme.primary,
+                                        foregroundColor: Colors.white,
+                                        onPressed: () {
+                                          if (isAuthenticated) {
+                                            AppRouter.replaceTo(
+                                              context,
+                                              AppRouter.chat,
+                                            );
+                                          } else {
+                                            AppRouter.navigateTo(
+                                              context,
+                                              AppRouter.landing,
+                                            );
+                                          }
+                                        },
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
