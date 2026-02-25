@@ -18,10 +18,10 @@ class SecureStorageHelper {
 
   final FlutterSecureStorage _storage;
 
-  static const _accessTokenKey = 'medlink_access_token';
-  static const _refreshTokenKey = 'medlink_refresh_token';
-  static const _userKey = 'medlink_user_data';
-  static const _firebaseIdTokenKey = 'medlink_firebase_id_token';
+  static const _accessTokenKey = 'thanzi_access_token';
+  static const _refreshTokenKey = 'thanzi_refresh_token';
+  static const _userKey = 'thanzi_user_data';
+  static const _firebaseIdTokenKey = 'thanzi_firebase_id_token';
 
   // ============ Access Token ============
 

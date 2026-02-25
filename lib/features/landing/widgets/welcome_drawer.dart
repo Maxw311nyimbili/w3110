@@ -88,27 +88,32 @@ class WelcomeDrawer extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const BrandLogo(size: 80),
-                      const SizedBox(height: 24),
+                      const BrandLogo(size: 100),
+                      const SizedBox(height: 32),
                       Text(
                         'Welcome to Thanzi',
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                          color: Theme.of(context).textTheme.displayLarge?.color,
-                          fontSize: 28,
-                          fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                              fontSize: 32,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -0.5,
+                            ),
+                      ),
+                      const SizedBox(height: 16),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: Text(
+                          'Secure your medical history and personalize your health companion by signing in.',
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: Colors.white.withOpacity(0.6),
+                                height: 1.5,
+                                fontSize: 16,
+                              ),
                         ),
                       ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'Your companion for maternal health. Dive into chatting or sign in to sync your journey.',
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).textTheme.bodySmall?.color,
-                          height: 1.5,
-                        ),
-                      ),
-                      const SizedBox(height: 40),
+                      const SizedBox(height: 56),
                       BlocBuilder<LandingCubit, LandingState>(
                         builder: (context, state) {
                           return Column(
@@ -117,30 +122,37 @@ class WelcomeDrawer extends StatelessWidget {
                                 onPressed: state.isAuthenticating
                                     ? null
                                     : () => context
-                                          .read<LandingCubit>()
-                                          .authenticateWithGoogle(),
+                                        .read<LandingCubit>()
+                                        .authenticateWithGoogle(),
                                 isLoading: state.isAuthenticating,
                               ),
-                              if (state.isDemoAvailable) ...[
-                                const SizedBox(height: 12),
-                                Container(
-                                  decoration: BoxDecoration(
-                                    color: AppColors.accentPrimary.withOpacity(
-                                      0.05,
-                                    ),
-                                    borderRadius: BorderRadius.circular(12),
+                              const SizedBox(height: 24),
+                              TextButton(
+                                onPressed: () {
+                                  context.read<LandingCubit>().continueAsGuest();
+                                  Navigator.pop(context);
+                                },
+                                child: Text(
+                                  'Continue as Guest',
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(0.7),
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 14,
                                   ),
-                                  child: TextButton(
-                                    onPressed: () => context
-                                        .read<LandingCubit>()
-                                        .authenticateAsDemo(),
-                                    child: Text(
-                                      'DEMO LOGIN (DEVELOPER BYPASS)',
-                                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                        color: Theme.of(context).colorScheme.primary,
-                                        fontWeight: FontWeight.w900,
-                                        letterSpacing: 1.0,
-                                      ),
+                                ),
+                              ),
+                              if (state.isDemoAvailable) ...[
+                                const SizedBox(height: 48),
+                                TextButton(
+                                  onPressed: () => context
+                                      .read<LandingCubit>()
+                                      .authenticateAsDemo(),
+                                  child: Text(
+                                    'Demo Login (Developer Bypass)',
+                                    style: TextStyle(
+                                      color: Colors.white.withOpacity(0.4),
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
                                     ),
                                   ),
                                 ),

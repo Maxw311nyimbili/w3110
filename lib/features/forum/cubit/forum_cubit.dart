@@ -135,7 +135,7 @@ class ForumCubit extends Cubit<ForumState> {
   Future<void> _cacheUserId() async {
     try {
       const secureStorage = FlutterSecureStorage();
-      final userDataJson = await secureStorage.read(key: 'medlink_user_data');
+      final userDataJson = await secureStorage.read(key: 'thanzi_user_data');
 
       print(
         '📦 Read from secure storage: ${userDataJson?.substring(0, 50)}...',
