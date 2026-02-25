@@ -247,6 +247,15 @@ class ChatState extends Equatable {
 
   @override
   List<Object?> get props => [
+    status,
+    messages,
+    error,
+    isTyping,
+    currentMessageId,
+    sessionId,
+    medicineContext,
+    isRecording,
+    amplitude,
     pendingAttachments,
     loadingMessage,
     dynamicGreeting,
