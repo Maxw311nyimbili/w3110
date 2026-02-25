@@ -159,7 +159,7 @@ class _ChatViewState extends State<ChatView> {
     final isDesktop = ResponsiveUtils.isDesktop(context);
 
     return MainNavigationShell(
-      title: !_isAudioMode
+      title: (!isDesktop && !_isAudioMode)
           ? Text(
               'Thanzi',
               style: AppTextStyles.headlineSmall.copyWith(
@@ -168,7 +168,7 @@ class _ChatViewState extends State<ChatView> {
               ),
             )
           : null,
-      actions: !_isAudioMode
+      actions: (!isDesktop && !_isAudioMode)
           ? [
               Padding(
                 padding: const EdgeInsets.only(right: 16),
