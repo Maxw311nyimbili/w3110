@@ -18,6 +18,7 @@ class AppRouter {
   static const String splash = '/splash';
   static const String featureChoice = '/feature-choice';
   static const String landing = '/';
+  static const String auth = '/auth';
   static const String chat = '/chat';
   static const String scanner = '/scanner';
   static const String forum = '/forum';
@@ -52,6 +53,11 @@ class AppRouter {
           settings: settings,
         );
 
+      case AppRouter.auth:
+        return CupertinoPageRoute(
+          builder: (_) => const AuthPage(),
+          settings: settings,
+        );
 
       case AppRouter.chat:
         final scanResult = settings.arguments as ScanResult?;
