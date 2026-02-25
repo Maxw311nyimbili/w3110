@@ -6,6 +6,7 @@ import 'package:cap_project/features/auth/cubit/cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cap_project/core/widgets/brand_logo.dart';
+import 'package:cap_project/features/landing/widgets/welcome_drawer.dart';
 
 class SideMenu extends StatelessWidget {
   const SideMenu({super.key});
@@ -110,7 +111,7 @@ class SideMenu extends StatelessWidget {
       return const Center(
         child: Padding(
           padding: EdgeInsets.symmetric(vertical: 24),
-          child: BrandLogo(size: 32, isBreathing: false),
+          child: BrandLogo(size: 40, isBreathing: false),
         ),
       );
     }
@@ -326,7 +327,7 @@ class SideMenu extends StatelessWidget {
               ],
             )
           : InkWell(
-              onTap: () => AppRouter.navigateTo(context, AppRouter.auth),
+              onTap: () => WelcomeDrawer.show(context),
               borderRadius: BorderRadius.circular(12),
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8),
