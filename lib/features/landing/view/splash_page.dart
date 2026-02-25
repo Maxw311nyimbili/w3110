@@ -87,7 +87,7 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
     _logoColor =
         ColorTween(
           begin: AppColors.accentPrimary,
-          end: Colors.white, // Since it lands on scaffoldBackground which is dark in DM and light in LM, but the brand color is usually white on dark.
+          end: Colors.white,
         ).animate(
           CurvedAnimation(
             parent: _controller,
@@ -103,7 +103,7 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
       ),
     );
 
-    // Glass card slides up from below screen (slightly ahead of content)
+    // Glass card slides up from below screen
     _cardSlide =
         Tween<Offset>(
           begin: const Offset(0, 1.5),
@@ -115,10 +115,31 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
           ),
         );
 
-    // Status bar sync: light icons on teal, dark icons when theme background fills
     _curtainReveal.addListener(_syncStatusBar);
 
-    _controller.forward();
+    _handleEntry();
+  }
+
+  Future<void> _handleEntry() async {
+    try {
+      final landingRepo = context.read<LandingRepository>();
+      final lastSplash = await landingRepo.getLastSplashTime();
+      final now = DateTime.now();
+
+      // If seen within last 2 hours, skip animation
+      if (lastSplash != null &&
+          now.difference(lastSplash).inHours < 2) {
+        print('⏩ Recent splash detected, skipping animation');
+        _controller.value = 1.0;
+        _syncStatusBar();
+      } else {
+        print('🎬 Playing full splash animation');
+        _controller.forward();
+        await landingRepo.saveLastSplashTime(now);
+      }
+    } catch (e) {
+      _controller.forward();
+    }
   }
 
   void _syncStatusBar() {
