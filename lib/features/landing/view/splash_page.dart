@@ -8,6 +8,7 @@ import 'package:cap_project/core/widgets/widgets.dart';
 import 'package:cap_project/features/auth/cubit/auth_cubit.dart';
 import 'package:cap_project/features/auth/cubit/auth_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:landing_repository/landing_repository.dart';
 import 'package:cap_project/app/view/app_router.dart';
 import 'dart:math' as math;
 
