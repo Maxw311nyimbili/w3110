@@ -88,7 +88,7 @@ class SideMenu extends StatelessWidget {
                           context,
                           label: 'Preferences',
                           icon: Icons.tune_rounded,
-                          onTap: () => _showComingSoon(context, 'Preferences'),
+                          route: AppRouter.settings,
                           isCollapsed: isCollapsed,
                         ),
                       ],
@@ -110,7 +110,7 @@ class SideMenu extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 24),
           child: Icon(
-            Icons.emergency_rounded, // Temporary logo icon for collapsed state
+            Icons.emergency_rounded,
             color: Theme.of(context).colorScheme.primary,
             size: 24,
           ),
@@ -163,13 +163,12 @@ class SideMenu extends StatelessWidget {
             onTap ??
             () {
               if (route != null && !isSelected) {
-                // Determine if we are in a drawer or a persistent sidebar
                 final scaffold = Scaffold.of(context);
                 final hasDrawer = scaffold.hasDrawer;
                 final isDrawerOpen = scaffold.isDrawerOpen;
 
                 if (hasDrawer && isDrawerOpen) {
-                  Navigator.pop(context); // Close drawer on mobile
+                  Navigator.pop(context);
                 }
 
                 AppRouter.replaceTo(context, route);
@@ -235,8 +234,43 @@ class SideMenu extends StatelessWidget {
     );
   }
 
+  void _showSignOutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Sign Out'),
+        content: const Text('Are you sure you want to sign out?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              context.read<AuthCubit>().signOut();
+              AppRouter.replaceTo(context, AppRouter.auth);
+            },
+            child: const Text('Sign Out', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showComingSoon(BuildContext context, String feature) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('$feature coming soon'),
+        backgroundColor: AppColors.textPrimary,
+      ),
+    );
+  }
+
   Widget _buildFooter(BuildContext context, bool isCollapsed) {
-    final user = context.watch<AuthCubit>().state.user;
+    final authState = context.watch<AuthCubit>().state;
+    final user = authState.user;
+    final isAuthenticated = authState.status == AuthStatus.authenticated;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -245,51 +279,84 @@ class SideMenu extends StatelessWidget {
           top: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.1)),
         ),
       ),
-      child: Row(
-        mainAxisAlignment:
-            isCollapsed ? MainAxisAlignment.center : MainAxisAlignment.start,
-        children: [
-          CircleAvatar(
-            radius: 16,
-            backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
-            child: Text(
-              (user?.displayName ?? 'U')[0].toUpperCase(),
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: Theme.of(context).textTheme.bodySmall?.color,
-              ),
-            ),
-          ),
-          if (!isCollapsed) ...[
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    user?.displayName ?? 'User',
-                    style: AppTextStyles.labelMedium,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+      child: isAuthenticated
+          ? Row(
+              mainAxisAlignment:
+                  isCollapsed ? MainAxisAlignment.center : MainAxisAlignment.start,
+              children: [
+                CircleAvatar(
+                  radius: 16,
+                  backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+                  child: Text(
+                    (user?.displayName ?? 'U')[0].toUpperCase(),
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                          color: Theme.of(context).textTheme.bodySmall?.color,
+                        ),
                   ),
-                  Text(
-                    'Free Plan',
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.6),
+                ),
+                if (!isCollapsed) ...[
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          user?.displayName ?? 'User',
+                          style: AppTextStyles.labelMedium,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Text(
+                          'Free Plan',
+                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                color: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.color
+                                    ?.withOpacity(0.6),
+                              ),
+                        ),
+                      ],
                     ),
                   ),
+                  IconButton(
+                    icon: const Icon(Icons.logout_rounded, size: 18),
+                    onPressed: () => _showSignOutDialog(context),
+                    color: Theme.of(context).textTheme.bodySmall?.color,
+                    tooltip: 'Sign Out',
+                  ),
                 ],
+              ],
+            )
+          : InkWell(
+              onTap: () => AppRouter.navigateTo(context, AppRouter.auth),
+              borderRadius: BorderRadius.circular(12),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Row(
+                  mainAxisAlignment: isCollapsed
+                      ? MainAxisAlignment.center
+                      : MainAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.login_rounded,
+                      size: 20,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    if (!isCollapsed) ...[
+                      const SizedBox(width: 12),
+                      Text(
+                        'Sign In',
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                              color: Theme.of(context).colorScheme.primary,
+                              fontWeight: FontWeight.w700,
+                            ),
+                      ),
+                    ],
+                  ],
+                ),
               ),
             ),
-            IconButton(
-              icon: const Icon(Icons.settings_outlined, size: 18),
-              onPressed: () {
-                _showSignOutDialog(context);
-              },
-              color: Theme.of(context).textTheme.bodySmall?.color,
-            ),
-          ],
-        ],
-      ),
     );
   }
 
