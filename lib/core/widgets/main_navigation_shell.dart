@@ -1,10 +1,12 @@
+import 'package:cap_project/app/cubit/navigation_cubit.dart';
 import 'package:cap_project/core/util/responsive_utils.dart';
 import 'package:cap_project/core/widgets/side_menu.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// A shared shell that provides a consistent navigation experience across screens.
-/// 
-/// On Desktop (>1024px), it shows a fixed SideMenu.
+///
+/// On Desktop (>1024px), it shows a retractable SideMenu.
 /// On Mobile/Tablet (<1024px), it uses a Drawer.
 class MainNavigationShell extends StatelessWidget {
   const MainNavigationShell({
@@ -25,27 +27,44 @@ class MainNavigationShell extends StatelessWidget {
     final isDesktop = ResponsiveUtils.isDesktop(context);
 
     if (isDesktop) {
-      return Scaffold(
-        body: Row(
-          children: [
-            const SideMenu(),
-            Expanded(
-              child: Scaffold(
-                appBar: title != null || actions != null
-                    ? AppBar(
-                        title: title,
-                        actions: actions,
-                        centerTitle: true,
-                        elevation: 0,
-                        backgroundColor: Colors.transparent,
-                      )
-                    : null,
-                body: child,
-                floatingActionButton: floatingActionButton,
-              ),
+      return BlocBuilder<NavigationCubit, NavigationState>(
+        builder: (context, navState) {
+          final isCollapsed = navState.isSidebarCollapsed;
+
+          return Scaffold(
+            body: Row(
+              children: [
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOutCubic,
+                  width: isCollapsed ? 72 : 250,
+                  child: const SideMenu(),
+                ),
+                Expanded(
+                  child: Scaffold(
+                    appBar: AppBar(
+                      leading: IconButton(
+                        icon: Icon(
+                          isCollapsed ? Icons.menu_rounded : Icons.menu_open_rounded,
+                        ),
+                        onPressed: () =>
+                            context.read<NavigationCubit>().toggleSidebar(),
+                        tooltip: isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar',
+                      ),
+                      title: title,
+                      actions: actions,
+                      centerTitle: true,
+                      elevation: 0,
+                      backgroundColor: Colors.transparent,
+                    ),
+                    body: child,
+                    floatingActionButton: floatingActionButton,
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          );
+        },
       );
     }
 

@@ -11,6 +11,7 @@ import 'package:cap_project/core/theme/cubit/theme_cubit.dart';
 import 'package:cap_project/core/theme/cubit/theme_state.dart';
 import 'package:cap_project/features/auth/cubit/auth_cubit.dart';
 import 'package:cap_project/features/landing/cubit/landing_cubit.dart';
+import 'package:cap_project/app/cubit/navigation_cubit.dart';
 import 'package:cap_project/l10n/l10n.dart';
 import 'package:chat_repository/chat_repository.dart';
 import 'package:flutter/material.dart';
@@ -47,6 +48,7 @@ class _AppState extends State<App> {
   late final LandingCubit _landingCubit;
   late final LocaleCubit _localeCubit;
   late final ThemeCubit _themeCubit;
+  late final NavigationCubit _navigationCubit;
 
   @override
   void initState() {
@@ -140,6 +142,9 @@ class _AppState extends State<App> {
 
     // Initialize global ThemeCubit
     _themeCubit = ThemeCubit();
+
+    // Initialize global NavigationCubit
+    _navigationCubit = NavigationCubit();
   }
 
   void _setupLocaleListener() {
@@ -165,6 +170,7 @@ class _AppState extends State<App> {
           BlocProvider.value(value: _landingCubit),
           BlocProvider.value(value: _localeCubit),
           BlocProvider.value(value: _themeCubit),
+          BlocProvider.value(value: _navigationCubit),
         ],
         child: BlocBuilder<ThemeCubit, ThemeState>(
           builder: (context, themeState) {
@@ -208,6 +214,7 @@ class _AppState extends State<App> {
     _landingCubit.close();
     _localeCubit.close();
     _themeCubit.close();
+    _navigationCubit.close();
     super.dispose();
   }
 }
