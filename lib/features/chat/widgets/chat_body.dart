@@ -136,7 +136,6 @@ class _ChatBodyState extends State<ChatBody>
                   children: [
                     BlocBuilder<ChatCubit, ChatState>(
                       builder: (context, state) {
-                        print('Debug: ChatBody BlocBuilder Rebuild. Messages: ${state.messages.length}, Status: ${state.status}');
                         if (state.isLoading && !state.hasMessages) {
                           return Center(
                             child: CircularProgressIndicator(
