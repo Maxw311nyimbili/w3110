@@ -25,6 +25,16 @@ enum AttachmentType {
   document,
 }
 
+enum VoiceLanguage {
+  english('en', 'English'),
+  twi('tw', 'Twi'),
+  ga('gaa', 'Ga');
+
+  final String code;
+  final String label;
+  const VoiceLanguage(this.code, this.label);
+}
+
 class Attachment extends Equatable {
   final String path;
   final String name;
@@ -167,6 +177,7 @@ class ChatState extends Equatable {
     this.pendingAttachments = const [],
     this.loadingMessage,
     this.dynamicGreeting,
+    this.selectedLanguage = VoiceLanguage.english,
   });
 
   final ChatStatus status;
@@ -181,6 +192,7 @@ class ChatState extends Equatable {
   final List<Attachment> pendingAttachments;
   final String? loadingMessage;
   final String? dynamicGreeting;
+  final VoiceLanguage selectedLanguage;
 
   bool get isLoading => status == ChatStatus.loading;
   bool get hasMessages => messages.isNotEmpty;
@@ -198,6 +210,7 @@ class ChatState extends Equatable {
     List<Attachment>? pendingAttachments,
     String? loadingMessage,
     String? dynamicGreeting,
+    VoiceLanguage? selectedLanguage,
   }) {
     return ChatState(
       status: status ?? this.status,
@@ -212,6 +225,7 @@ class ChatState extends Equatable {
       pendingAttachments: pendingAttachments ?? this.pendingAttachments,
       loadingMessage: loadingMessage ?? this.loadingMessage,
       dynamicGreeting: dynamicGreeting ?? this.dynamicGreeting,
+      selectedLanguage: selectedLanguage ?? this.selectedLanguage,
     );
   }
 
@@ -233,12 +247,9 @@ class ChatState extends Equatable {
 
   @override
   List<Object?> get props => [
-    status,
-    messages,
-    error,
-    isTyping,
-    currentMessageId,
-    sessionId,
-    medicineContext,
+    pendingAttachments,
+    loadingMessage,
+    dynamicGreeting,
+    selectedLanguage,
   ];
 }

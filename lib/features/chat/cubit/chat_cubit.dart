@@ -50,6 +50,11 @@ class ChatCubit extends Cubit<ChatState> {
     _currentLocale = locale;
   }
 
+  /// Update the voice language for the Bilingual Bridge
+  void updateLanguage(VoiceLanguage language) {
+    emit(state.copyWith(selectedLanguage: language));
+  }
+
   Future<void> initialize() async {
     try {
       emit(state.copyWith(status: ChatStatus.loading));
@@ -138,6 +143,8 @@ class ChatCubit extends Cubit<ChatState> {
             state.sessionId ?? DateTime.now().millisecondsSinceEpoch.toString(),
         userRole: _userRole,
         interests: _interests,
+        inputLanguage: state.selectedLanguage.code,
+        outputLanguage: state.selectedLanguage.code,
       );
 
       if (responseData['transcript'] != null) {
@@ -271,6 +278,27 @@ class ChatCubit extends Cubit<ChatState> {
       await _audioPlayer.play(UrlSource(url));
     } catch (e) {
       print('Error playing audio: $e');
+    }
+  }
+
+  /// Synthesize a specific message into speech
+  Future<void> speakMessage(String messageId, VoiceLanguage language) async {
+    try {
+      // Find the numeric message ID (backend uses int for primary keys usually)
+      final numericId = int.tryParse(messageId);
+      if (numericId == null) return;
+
+      final response = await _chatRepository.speakMessage(
+        messageId: numericId,
+        language: language.code,
+      );
+
+      final audioUrl = response['audio_url'] as String?;
+      if (audioUrl != null) {
+        await _playAudio(audioUrl);
+      }
+    } catch (e) {
+      emit(state.copyWith(error: 'Failed to speak message: ${e.toString()}'));
     }
   }
 

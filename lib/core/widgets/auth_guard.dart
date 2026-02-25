@@ -34,66 +34,71 @@ class AuthGuard extends StatelessWidget {
               color: AppColors.textPrimary,
             ),
           ),
-          body: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: AppColors.accentPrimary.withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.lock_person_rounded,
-                    size: 64,
-                    color: AppColors.accentPrimary,
-                  ),
-                ),
-                const SizedBox(height: 48),
-                Text(
-                  'Sign in required',
-                  style: AppTextStyles.displayMedium.copyWith(
-                    fontSize: 32,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -1.0,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Unlock full access to the medical scanner, community forum, and persistent history by signing in.',
-                  style: AppTextStyles.bodyLarge.copyWith(
-                    color: AppColors.textSecondary,
-                    height: 1.5,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 48),
-                PremiumButton(
-                  onPressed: () {
-                    // Navigate to landing but force authentication step
-                    AppRouter.navigateTo(
-                      context,
-                      AppRouter.landing,
-                      arguments: {'forceAuth': true},
-                    );
-                  },
-                  text: 'Sign In',
-                ),
-                const SizedBox(height: 16),
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: Text(
-                    'Maybe Later',
-                    style: AppTextStyles.labelLarge.copyWith(
-                      color: AppColors.textTertiary,
-                      fontWeight: FontWeight.bold,
+          body: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 600),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 32.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: AppColors.accentPrimary.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.lock_person_rounded,
+                        size: 64,
+                        color: AppColors.accentPrimary,
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: 48),
+                    Text(
+                      'Sign in required',
+                      style: AppTextStyles.displayMedium.copyWith(
+                        fontSize: 32,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -1.0,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Unlock full access to the medical scanner, community forum, and persistent history by signing in.',
+                      style: AppTextStyles.bodyLarge.copyWith(
+                        color: AppColors.textSecondary,
+                        height: 1.5,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 48),
+                    PremiumButton(
+                      onPressed: () {
+                        // Navigate to landing but force authentication step
+                        AppRouter.navigateTo(
+                          context,
+                          AppRouter.landing,
+                          arguments: {'forceAuth': true},
+                        );
+                      },
+                      text: 'Sign In',
+                    ),
+                    const SizedBox(height: 16),
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: Text(
+                        'Maybe Later',
+                        style: AppTextStyles.labelLarge.copyWith(
+                          color: AppColors.textTertiary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         );
