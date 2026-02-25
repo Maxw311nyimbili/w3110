@@ -372,14 +372,21 @@ class _RefinedChatInputState extends State<RefinedChatInput>
                 },
               ),
               Expanded(
-                child: SizedBox(
-                  height: 60,
-                  child: Center(
-                    child: AudioWaveform(
-                      isRecording: state.isRecording,
-                      amplitude: state.amplitude,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildLanguageSelector(state),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      height: 44,
+                      child: Center(
+                        child: AudioWaveform(
+                          isRecording: state.isRecording,
+                          amplitude: state.amplitude,
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ),
               GestureDetector(
@@ -452,6 +459,45 @@ class _RefinedChatInputState extends State<RefinedChatInput>
           ),
         );
       },
+    );
+  }
+
+  Widget _buildLanguageSelector(ChatState state) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: VoiceLanguage.values.map((lang) {
+        final isSelected = state.selectedLanguage == lang;
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: GestureDetector(
+            onTap: () => context.read<ChatCubit>().updateLanguage(lang),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.surface,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: isSelected
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(context).dividerColor.withOpacity(0.1),
+                ),
+              ),
+              child: Text(
+                lang.label,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: isSelected
+                      ? Colors.white
+                      : Theme.of(context).textTheme.bodyMedium?.color,
+                  fontWeight: isSelected ? FontWeight.bold : null,
+                ),
+              ),
+            ),
+          ),
+        );
+      }).toList(),
     );
   }
 

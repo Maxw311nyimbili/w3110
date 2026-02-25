@@ -71,6 +71,8 @@ class ChatRepository {
     String? sessionId,
     String? userRole,
     List<String>? interests,
+    String? inputLanguage,
+    String? outputLanguage,
   }) async {
     try {
       final formData = FormData.fromMap({
@@ -81,6 +83,8 @@ class ChatRepository {
         'session_id': sessionId,
         if (userRole != null) 'user_role': userRole,
         if (interests != null) 'interests': interests,
+        if (inputLanguage != null) 'input_language': inputLanguage,
+        if (outputLanguage != null) 'output_language': outputLanguage,
       });
 
       final response = await _apiClient.post(
@@ -122,13 +126,20 @@ class ChatRepository {
     }
   }
 
-  /// Test health endpoint
-  Future<bool> isHealthy() async {
+  /// Speak a message in a specific language
+  /// Backend endpoint: POST /chat/{message_id}/speak
+  Future<Map<String, dynamic>> speakMessage({
+    required int messageId,
+    required String language,
+  }) async {
     try {
-      final response = await _apiClient.get('/health');
-      return response.statusCode == 200;
+      final response = await _apiClient.post(
+        '/chat/$messageId/speak',
+        queryParameters: {'language': language},
+      );
+      return response.data as Map<String, dynamic>;
     } catch (e) {
-      return false;
+      throw ChatException('Failed to synthesize speech: ${e.toString()}');
     }
   }
 }

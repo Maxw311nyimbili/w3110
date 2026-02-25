@@ -544,6 +544,11 @@ class RefinedMessageBubble extends StatelessWidget {
           Icons.share_outlined,
           () => _shareToForum(context, sources),
         ),
+        const SizedBox(width: 8),
+        _buildActionIcon(
+          Icons.volume_up_rounded,
+          () => _showListenMenu(context),
+        ),
         const Spacer(),
         if (message.latencyMs != null)
           Container(
@@ -585,6 +590,53 @@ class RefinedMessageBubble extends StatelessWidget {
           icon,
           size: 18,
           color: AppColors.textTertiary, // Subtle icons
+        ),
+      ),
+    );
+  }
+
+  void _showListenMenu(BuildContext context) {
+    final chatCubit = context.read<ChatCubit>();
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (modalContext) => Container(
+        padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Theme.of(context).dividerColor.withOpacity(0.4),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'Listen to Medical Response',
+              style: AppTextStyles.labelLarge.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            ...models.VoiceLanguage.values.map((lang) {
+              return ListTile(
+                leading: Icon(
+                  Icons.play_circle_outline_rounded,
+                  color: AppColors.brandDarkTeal,
+                ),
+                title: Text('Listen in ${lang.label}'),
+                onTap: () {
+                  Navigator.pop(modalContext);
+                  chatCubit.speakMessage(message.id, lang);
+                },
+              );
+            }).toList(),
+          ],
         ),
       ),
     );

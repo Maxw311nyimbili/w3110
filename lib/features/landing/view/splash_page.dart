@@ -143,8 +143,11 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
     return AndroidOptimized(
       child: Scaffold(
         backgroundColor: Theme.of(context).colorScheme.primary,
-        body: Stack(
-          children: [
+        body: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 600),
+            child: Stack(
+              children: [
             // ── Morphing white curtain ─────────────────────────────────────
             AnimatedBuilder(
               animation: _curtainReveal,
@@ -263,12 +266,12 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                                         if (isAuthenticated) {
                                           AppRouter.replaceTo(
                                             context,
-                                            AppRouter.featureChoice,
+                                            AppRouter.chat,
                                           );
                                         } else {
                                           AppRouter.navigateTo(
                                             context,
-                                            AppRouter.featureChoice,
+                                            AppRouter.landing,
                                           );
                                         }
                                       },
