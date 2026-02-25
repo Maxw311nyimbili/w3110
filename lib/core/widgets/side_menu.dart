@@ -247,7 +247,7 @@ class SideMenu extends StatelessWidget {
             onPressed: () {
               Navigator.pop(context);
               context.read<AuthCubit>().signOut();
-              AppRouter.replaceTo(context, AppRouter.splash);
+              AppRouter.replaceTo(context, AppRouter.auth);
             },
             child: const Text('Sign Out', style: TextStyle(color: Colors.red)),
           ),
