@@ -111,7 +111,7 @@ class SideMenu extends StatelessWidget {
       return const Center(
         child: Padding(
           padding: EdgeInsets.symmetric(vertical: 24),
-          child: BrandLogo(size: 40, isBreathing: false),
+          child: BrandLogo(size: 48, isBreathing: false),
         ),
       );
     }
