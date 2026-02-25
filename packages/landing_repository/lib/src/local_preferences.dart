@@ -13,6 +13,7 @@ class LocalPreferences {
 
   static const _onboardingKey = 'onboarding_status';
   static const _languageKey = 'app_language';
+  static const _splashKey = 'last_splash_seen';
 
   bool get isInitialized => _prefsInitialized;
 
@@ -69,5 +70,21 @@ class LocalPreferences {
   Future<String?> getLanguage() async {
     _ensureInitialized();
     return _prefs.getString(_languageKey);
+  }
+
+  /// Save last splash seen time
+  Future<void> saveLastSplashTime(DateTime time) async {
+    _ensureInitialized();
+    await _prefs.setInt(_splashKey, time.millisecondsSinceEpoch);
+  }
+
+  /// Get last splash seen time
+  Future<DateTime?> getLastSplashTime() async {
+    _ensureInitialized();
+    final timestamp = _prefs.getInt(_splashKey);
+    if (timestamp != null) {
+      return DateTime.fromMillisecondsSinceEpoch(timestamp);
+    }
+    return null;
   }
 }

@@ -176,6 +176,24 @@ class LandingRepository {
       throw LandingException('Failed to clear local data: ${e.toString()}');
     }
   }
+
+  /// Save last splash seen time
+  Future<void> saveLastSplashTime(DateTime time) async {
+    try {
+      await _localPreferences.saveLastSplashTime(time);
+    } catch (e) {
+      print('⚠️ Failed to save splash time: $e');
+    }
+  }
+
+  /// Get last splash seen time
+  Future<DateTime?> getLastSplashTime() async {
+    try {
+      return await _localPreferences.getLastSplashTime();
+    } catch (e) {
+      return null;
+    }
+  }
 }
 
 /// Custom exception for landing repository errors

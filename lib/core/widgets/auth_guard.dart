@@ -30,7 +30,7 @@ class AuthGuard extends StatelessWidget {
             elevation: 0,
             leading: IconButton(
               icon: const Icon(Icons.close_rounded),
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: () => AppRouter.replaceTo(context, AppRouter.chat),
               color: AppColors.textPrimary,
             ),
           ),
@@ -87,7 +87,7 @@ class AuthGuard extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     TextButton(
-                      onPressed: () => Navigator.of(context).pop(),
+                      onPressed: () => AppRouter.replaceTo(context, AppRouter.chat),
                       child: Text(
                         'Maybe Later',
                         style: AppTextStyles.labelLarge.copyWith(
