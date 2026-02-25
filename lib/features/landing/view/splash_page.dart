@@ -288,7 +288,9 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                 );
               },
             ),
-          ],
+              ],
+            ),
+          ),
         ),
       ),
     );
