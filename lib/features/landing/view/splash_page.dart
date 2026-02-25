@@ -143,11 +143,8 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
     return AndroidOptimized(
       child: Scaffold(
         backgroundColor: Theme.of(context).colorScheme.primary,
-        body: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 600),
-            child: Stack(
-              children: [
+        body: Stack(
+          children: [
             // ── Morphing white curtain ─────────────────────────────────────
             AnimatedBuilder(
               animation: _curtainReveal,
@@ -195,7 +192,7 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                                   opacity: _controller.value < 0.05 ? 0 : 1,
                                   child: Transform.translate(
                                     offset: Offset(
-                                      screenWidth * (_logoX.value - 0.52),
+                                      math.min(screenWidth, 1000) * (_logoX.value - 0.52),
                                       0,
                                     ),
                                     child: Image.asset(
@@ -221,14 +218,16 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                           alignment: Alignment.bottomCenter,
                           child: SlideTransition(
                             position: _cardSlide,
-                            child: Padding(
-                              padding: EdgeInsets.fromLTRB(
-                                20,
-                                0,
-                                20,
-                                32 + bottomPadding,
-                              ),
-                              child: GlassCard(
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 600),
+                              child: Padding(
+                                padding: EdgeInsets.fromLTRB(
+                                  20,
+                                  0,
+                                  20,
+                                  32 + bottomPadding,
+                                ),
+                                child: GlassCard(
                                 padding: const EdgeInsets.fromLTRB(
                                   24,
                                   20,
@@ -288,9 +287,7 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                 );
               },
             ),
-              ],
-            ),
-          ),
+          ],
         ),
       ),
     );
