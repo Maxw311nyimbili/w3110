@@ -5,7 +5,7 @@ class AppStrings {
   AppStrings._();
 
   // General
-  static const String appName = 'MedLink';
+  static const String appName = 'Thanzi';
   static const String cancel = 'Cancel';
   static const String confirm = 'Confirm';
   static const String save = 'Save';
@@ -15,7 +15,7 @@ class AppStrings {
   static const String done = 'Done';
 
   // Onboarding
-  static const String onboardingWelcomeTitle = 'Welcome to MedLink';
+  static const String onboardingWelcomeTitle = 'Welcome to Thanzi';
   static const String onboardingWelcomeSubtitle =
       'Your trusted companion for health information';
   static const String onboardingRoleTitle = 'I am a...';

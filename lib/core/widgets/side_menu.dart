@@ -106,14 +106,10 @@ class SideMenu extends StatelessWidget {
 
   Widget _buildHeader(BuildContext context, bool isCollapsed) {
     if (isCollapsed) {
-      return Center(
+      return const Center(
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 24),
-          child: Icon(
-            Icons.emergency_rounded,
-            color: Theme.of(context).colorScheme.primary,
-            size: 24,
-          ),
+          padding: EdgeInsets.symmetric(vertical: 24),
+          child: BrandLogo(size: 32, isBreathing: false),
         ),
       );
     }

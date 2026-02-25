@@ -5,7 +5,7 @@ class AppConstants {
   AppConstants._();
 
   // App info
-  static const String appName = 'MedLink';
+  static const String appName = 'Thanzi';
   static const String appVersion = '1.0.0';
 
   // User roles
@@ -35,7 +35,7 @@ class AppConstants {
   static const int maxImageSizeBytes = 5 * 1024 * 1024; // 5MB
 
   // Backend URLs (TODO: Replace with actual backend URLs)
-  static const String baseApiUrl = 'https://api.medlink.example.com';
+  static const String baseApiUrl = 'https://api.thanzi.example.com';
   static const String authEndpoint = '/auth/exchange';
   static const String chatEndpoint = '/chat/query';
   static const String forumEndpoint = '/forum';
