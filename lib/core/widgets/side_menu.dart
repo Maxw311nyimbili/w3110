@@ -1,3 +1,4 @@
+import 'package:cap_project/app/cubit/navigation_cubit.dart';
 import 'package:cap_project/app/view/app_router.dart';
 import 'package:cap_project/core/theme/app_colors.dart';
 import 'package:cap_project/core/theme/app_text_styles.dart';
@@ -10,79 +11,112 @@ class SideMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 250,
-      height: double.infinity,
-      decoration: BoxDecoration(
-        color: Theme.of(context).scaffoldBackgroundColor,
-        border: Border(
-          right: BorderSide(
-            color: Theme.of(context).dividerColor.withOpacity(0.1),
-            width: 1,
-          ),
-        ),
-      ),
-      child: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildHeader(context),
-            const SizedBox(height: 32),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildNavSection(context, 'LIBRARY'),
-                    _buildNavItem(
-                      context,
-                      label: 'New Thread',
-                      icon: Icons.add_rounded,
-                      route: AppRouter.chat,
-                      isPrimary: true,
-                    ),
-                    _buildNavItem(
-                      context,
-                      label: 'History',
-                      icon:
-                          null, // Text only for secondary items if possible, or very subtle icon
-                      onTap: () => _showComingSoon(context, 'History'),
-                    ),
-                    const SizedBox(height: 24),
-                    _buildNavSection(context, 'DISCOVER'),
-                    _buildNavItem(
-                      context,
-                      label: 'Med Scanner',
-                      icon: null,
-                      route: AppRouter.scanner,
-                    ),
-                    _buildNavItem(
-                      context,
-                      label: 'Community',
-                      icon: null,
-                      route: AppRouter.forum,
-                    ),
-                    const SizedBox(height: 24),
-                    _buildNavSection(context, 'SETTINGS'),
-                    _buildNavItem(
-                      context,
-                      label: 'Preferences',
-                      icon: null,
-                      onTap: () => _showComingSoon(context, 'Preferences'),
-                    ),
-                  ],
-                ),
+    return BlocBuilder<NavigationCubit, NavigationState>(
+      builder: (context, navState) {
+        final isCollapsed = navState.isSidebarCollapsed;
+
+        return Container(
+          width: double.infinity,
+          height: double.infinity,
+          decoration: BoxDecoration(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            border: Border(
+              right: BorderSide(
+                color: Theme.of(context).dividerColor.withOpacity(0.1),
+                width: 1,
               ),
             ),
-            _buildFooter(context),
-          ],
-        ),
-      ),
+          ),
+          child: SafeArea(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildHeader(context, isCollapsed),
+                const SizedBox(height: 32),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isCollapsed ? 8 : 16,
+                    ),
+                    child: Column(
+                      crossAxisAlignment:
+                          isCollapsed
+                              ? CrossAxisAlignment.center
+                              : CrossAxisAlignment.start,
+                      children: [
+                        if (!isCollapsed) ...[
+                          _buildNavSection(context, 'LIBRARY'),
+                        ],
+                        _buildNavItem(
+                          context,
+                          label: 'New Thread',
+                          icon: Icons.add_rounded,
+                          route: AppRouter.chat,
+                          isPrimary: true,
+                          isCollapsed: isCollapsed,
+                        ),
+                        _buildNavItem(
+                          context,
+                          label: 'History',
+                          icon: Icons.history_rounded,
+                          onTap: () => _showComingSoon(context, 'History'),
+                          isCollapsed: isCollapsed,
+                        ),
+                        const SizedBox(height: 24),
+                        if (!isCollapsed) ...[
+                          _buildNavSection(context, 'DISCOVER'),
+                        ],
+                        _buildNavItem(
+                          context,
+                          label: 'Med Scanner',
+                          icon: Icons.document_scanner_rounded,
+                          route: AppRouter.scanner,
+                          isCollapsed: isCollapsed,
+                        ),
+                        _buildNavItem(
+                          context,
+                          label: 'Community',
+                          icon: Icons.forum_rounded,
+                          route: AppRouter.forum,
+                          isCollapsed: isCollapsed,
+                        ),
+                        const SizedBox(height: 24),
+                        if (!isCollapsed) ...[
+                          _buildNavSection(context, 'SETTINGS'),
+                        ],
+                        _buildNavItem(
+                          context,
+                          label: 'Preferences',
+                          icon: Icons.tune_rounded,
+                          onTap: () => _showComingSoon(context, 'Preferences'),
+                          isCollapsed: isCollapsed,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                _buildFooter(context, isCollapsed),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
+  Widget _buildHeader(BuildContext context, bool isCollapsed) {
+    if (isCollapsed) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 24),
+          child: Icon(
+            Icons.emergency_rounded, // Temporary logo icon for collapsed state
+            color: Theme.of(context).colorScheme.primary,
+            size: 24,
+          ),
+        ),
+      );
+    }
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Text(
@@ -117,6 +151,7 @@ class SideMenu extends StatelessWidget {
     String? route,
     VoidCallback? onTap,
     bool isPrimary = false,
+    required bool isCollapsed,
   }) {
     final currentRoute = ModalRoute.of(context)?.settings.name;
     final isSelected = route != null && currentRoute == route;
@@ -136,7 +171,7 @@ class SideMenu extends StatelessWidget {
                 if (hasDrawer && isDrawerOpen) {
                   Navigator.pop(context); // Close drawer on mobile
                 }
-                
+
                 AppRouter.replaceTo(context, route);
               }
             },
@@ -157,6 +192,8 @@ class SideMenu extends StatelessWidget {
                 : null,
           ),
           child: Row(
+            mainAxisAlignment:
+                isCollapsed ? MainAxisAlignment.center : MainAxisAlignment.start,
             children: [
               if (icon != null) ...[
                 Icon(
@@ -168,24 +205,29 @@ class SideMenu extends StatelessWidget {
                             ? Theme.of(context).textTheme.bodyLarge?.color
                             : Theme.of(context).textTheme.bodySmall?.color),
                 ),
-                const SizedBox(width: 12),
+                if (!isCollapsed) const SizedBox(width: 12),
               ],
-              Text(
-                label,
-                style: isPrimary
-                    ? Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: Theme.of(context).colorScheme.primary,
-                        fontWeight: FontWeight.w700,
-                      )
-                    : Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: isSelected
-                            ? Theme.of(context).textTheme.bodyLarge?.color
-                            : Theme.of(context).textTheme.bodySmall?.color,
-                        fontWeight: isSelected
-                            ? FontWeight.w600
-                            : FontWeight.w500,
-                      ),
-              ),
+              if (!isCollapsed)
+                Expanded(
+                  child: Text(
+                    label,
+                    style: isPrimary
+                        ? Theme.of(context).textTheme.labelLarge?.copyWith(
+                            color: Theme.of(context).colorScheme.primary,
+                            fontWeight: FontWeight.w700,
+                          )
+                        : Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: isSelected
+                                ? Theme.of(context).textTheme.bodyLarge?.color
+                                : Theme.of(context).textTheme.bodySmall?.color,
+                            fontWeight: isSelected
+                                ? FontWeight.w600
+                                : FontWeight.w500,
+                          ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
             ],
           ),
         ),
@@ -193,7 +235,7 @@ class SideMenu extends StatelessWidget {
     );
   }
 
-  Widget _buildFooter(BuildContext context) {
+  Widget _buildFooter(BuildContext context, bool isCollapsed) {
     final user = context.watch<AuthCubit>().state.user;
 
     return Container(
@@ -204,6 +246,8 @@ class SideMenu extends StatelessWidget {
         ),
       ),
       child: Row(
+        mainAxisAlignment:
+            isCollapsed ? MainAxisAlignment.center : MainAxisAlignment.start,
         children: [
           CircleAvatar(
             radius: 16,
@@ -215,34 +259,35 @@ class SideMenu extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  user?.displayName ?? 'User',
-                  style: AppTextStyles.labelMedium,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(
-                  'Free Plan', // Placeholder for "Plan" status common in Perplexity/NotebookLM
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.6),
+          if (!isCollapsed) ...[
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    user?.displayName ?? 'User',
+                    style: AppTextStyles.labelMedium,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-              ],
+                  Text(
+                    'Free Plan',
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.6),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.settings_outlined, size: 18),
-            onPressed: () {
-              // Show settings or logout options
-              _showSignOutDialog(context);
-            },
-            color: Theme.of(context).textTheme.bodySmall?.color,
-          ),
+            IconButton(
+              icon: const Icon(Icons.settings_outlined, size: 18),
+              onPressed: () {
+                _showSignOutDialog(context);
+              },
+              color: Theme.of(context).textTheme.bodySmall?.color,
+            ),
+          ],
         ],
       ),
     );
