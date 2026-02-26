@@ -2,6 +2,7 @@
 
 import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:api_client/api_client.dart';
 import 'models/auth_tokens.dart';
@@ -18,7 +19,7 @@ class AuthRepository {
        _secureStorage = secureStorage,
        _firebaseAuth = firebase_auth.FirebaseAuth.instance,
        _googleSignIn = GoogleSignIn(
-         clientId: '956333738143-2sr0rd0qfguchkrbbe9jg5bp9se565pq.apps.googleusercontent.com',
+         clientId: kIsWeb ? '956333738143-2sr0rd0qfguchkrbbe9jg5bp9se565pq.apps.googleusercontent.com' : null,
          scopes: ['email', 'profile'],
        );
 
@@ -47,8 +48,11 @@ class AuthRepository {
     try {
       print('Starting Google Sign-In flow...');
 
-      // Step 1: Trigger Google Sign-In UI
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      // Step 0: Try to sign in silently first (best for web)
+      GoogleSignInAccount? googleUser = await _googleSignIn.signInSilently();
+
+      // Step 1: Trigger Google Sign-In UI if silent sign-in failed
+      googleUser ??= await _googleSignIn.signIn();
 
       if (googleUser == null) {
         print('Google Sign-In was cancelled by user');
