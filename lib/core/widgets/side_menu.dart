@@ -88,22 +88,13 @@ class SideMenu extends StatelessWidget {
       child: Row(
         children: [
           // Logo mark
-          Container(
-            width: 26,
-            height: 26,
-            decoration: BoxDecoration(
-              color: AppColors.brandDarkTeal,
-              borderRadius: BorderRadius.circular(7),
-            ),
-            child: Center(
-              child: Text(
-                'T',
-                style: AppTextStyles.labelLarge.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 13,
-                ),
-              ),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(7),
+            child: Image.asset(
+              'assets/images/logo.png',
+              width: 26,
+              height: 26,
+              fit: BoxFit.cover,
             ),
           ),
           const SizedBox(width: 9),
