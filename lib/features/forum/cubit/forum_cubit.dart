@@ -30,25 +30,36 @@ class ForumCubit extends Cubit<ForumState> {
     try {
       emit(state.copyWith(status: ForumStatus.loading));
 
-      // Fetch all posts from server (community feed)
+      // 1. Fetch all posts from server (community feed)
+      // This is the most important part for the UI
       final allPosts = await _forumRepository.fetchAllPostsFromServer();
-
-      // Check if there are pending sync items
-      final hasPendingSync = await _forumRepository.hasPendingSyncItems();
-
+      
+      // 2. Emit success with posts immediately so UI can render
       emit(
         state.copyWith(
           status: ForumStatus.success,
           posts: allPosts,
-          hasPendingSync: hasPendingSync,
         ),
       );
 
-      // Start background sync (if online)
+      // 3. Try local DB operations in a non-blocking way
+      try {
+        final hasPendingSync = await _forumRepository.hasPendingSyncItems();
+        emit(state.copyWith(hasPendingSync: hasPendingSync));
+      } catch (dbError) {
+        print('⚠️ Forum Local DB not available (likely web missing assets): $dbError');
+        // We keep hasPendingSync as false and continue
+      }
+
+      // Start background sync (if online and DB available)
       _startBackgroundSync();
 
-      // Try to sync immediately
-      await syncWithBackend();
+      // Try to sync with backend if DB is available
+      try {
+        await syncWithBackend();
+      } catch (e) {
+        print('⚠️ Background sync skipped: $e');
+      }
     } catch (e) {
       emit(
         state.copyWith(
