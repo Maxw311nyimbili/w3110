@@ -537,23 +537,49 @@ class ForumCubit extends Cubit<ForumState> {
     try {
       emit(state.copyWith(isSyncing: true));
 
-      // Process pending local changes
-      await _forumRepository.processSyncQueue();
+      // Process pending local changes (may fail on web if DB is unavailable)
+      try {
+        await _forumRepository.processSyncQueue();
+      } catch (e) {
+        print('⚠️ syncWithBackend: processSyncQueue skipped: $e');
+      }
 
-      // Fetch latest posts from server
-      await _forumRepository.fetchPostsFromServer();
+      // Fetch latest posts from server and merge into local DB
+      try {
+        await _forumRepository.fetchPostsFromServer();
+      } catch (e) {
+        print('⚠️ syncWithBackend: fetchPostsFromServer skipped: $e');
+      }
 
-      // Reload from local storage to get merged updates
-      final posts = await _forumRepository.getLocalPosts();
-
-      emit(
-        state.copyWith(
-          posts: posts,
-          isSyncing: false,
-          hasPendingSync: false,
-          lastSyncTime: DateTime.now(),
-        ),
-      );
+      // Reload from local storage to get merged updates.
+      // IMPORTANT: Only replace the posts if local DB returned results.
+      // On web, local DB may fail and return empty - we never want to
+      // overwrite server posts that are already displayed.
+      try {
+        final localPosts = await _forumRepository.getLocalPosts();
+        if (localPosts.isNotEmpty) {
+          emit(
+            state.copyWith(
+              posts: localPosts,
+              isSyncing: false,
+              hasPendingSync: false,
+              lastSyncTime: DateTime.now(),
+            ),
+          );
+        } else {
+          // Local DB is empty or unavailable; just clear the syncing flag
+          emit(
+            state.copyWith(
+              isSyncing: false,
+              hasPendingSync: false,
+              lastSyncTime: DateTime.now(),
+            ),
+          );
+        }
+      } catch (e) {
+        print('⚠️ syncWithBackend: getLocalPosts skipped, keeping current state: $e');
+        emit(state.copyWith(isSyncing: false));
+      }
     } catch (e) {
       emit(
         state.copyWith(
