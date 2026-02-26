@@ -126,10 +126,18 @@ class _AppState extends State<App> {
       imageProcessor: ImageProcessor(),
     );
 
-    // Initialize global AuthCubit (will be fully initialized after ThemeCubit)
-    // We'll fix the ordering below
+    // 2. Initialize Cubits with correct dependency order
+    
+    // ThemeCubit depends only on repositories
+    _themeCubit = ThemeCubit(landingRepository: _landingRepository);
 
-    // Initialize global LandingCubit with both repositories
+    // AuthCubit depends on repositories and ThemeCubit
+    _authCubit = AuthCubit(
+      authRepository: _authRepository,
+      themeCubit: _themeCubit,
+    );
+
+    // LandingCubit depends on repositories and AuthCubit
     _landingCubit = LandingCubit(
       landingRepository: _landingRepository,
       authRepository: _authRepository,
@@ -137,19 +145,8 @@ class _AppState extends State<App> {
       isDevelopment: widget.config.isDevelopment,
     );
 
-    // Initialize global LocaleCubit
+    // Other Cubits with no inter-dependencies
     _localeCubit = LocaleCubit();
-
-    // Initialize global ThemeCubit
-    _themeCubit = ThemeCubit(landingRepository: _landingRepository);
-
-    // Initialize global AuthCubit with dependencies
-    _authCubit = AuthCubit(
-      authRepository: _authRepository,
-      themeCubit: _themeCubit,
-    );
-
-    // Initialize global NavigationCubit
     _navigationCubit = NavigationCubit();
   }
 
