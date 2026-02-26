@@ -184,12 +184,18 @@ class ForumCubit extends Cubit<ForumState> {
         ),
       );
 
-      // Use localId if server ID is empty
+      // Use server ID when available, fallback to localId
       final postId = post.id.isEmpty ? post.localId : post.id;
 
-      // Load comments from local DB
-      final comments = await _forumRepository.getLocalComments(postId);
+      // 1. Try to get comments from local DB first (fast on mobile)
+      List<ForumComment> comments = [];
+      try {
+        comments = await _forumRepository.getLocalComments(postId);
+      } catch (_) {
+        // Local DB unavailable (web) - that's fine, we'll fetch from server
+      }
 
+      // Emit immediately with whatever we have so the detail view appears
       emit(
         state.copyWith(
           status: ForumStatus.success,
@@ -198,18 +204,29 @@ class ForumCubit extends Cubit<ForumState> {
         ),
       );
 
-      // Trigger background sync to "heal" any ID drifts or fetch new comments
-      unawaited(_forumRepository.fetchCommentsFromServer(postId));
+      // 2. Always fetch comments from server (updates UI with latest data)
+      // This is awaited so web always gets comments, even without local DB
+      try {
+        final serverComments =
+            await _forumRepository.fetchPostCommentsFromServer(postId);
+        emit(
+          state.copyWith(
+            comments: serverComments,
+          ),
+        );
+      } catch (e) {
+        print('⚠️ selectPost: could not fetch server comments: $e');
+        // Keep whatever we already have
+      }
 
-      // Load authoritative lines from repository (server or cache)
+      // 3. Load lines from server (with local DB cache on mobile)
       List<ForumAnswerLine> lines = [];
       try {
-        // Use either server ID or local UUID - backend now resolves both
         final idToUse = post.id.isNotEmpty ? post.id : post.localId;
         lines = await _forumRepository.getLinesForPost(idToUse);
       } catch (e) {
-        print('DEBUG: Error matching lines: $e');
-        // Fallback to local parsing
+        print('DEBUG: Error loading lines: $e');
+        // Fallback to parsing content into lines
         lines = _parsePostContentToLines(post);
       }
 
@@ -217,24 +234,18 @@ class ForumCubit extends Cubit<ForumState> {
         lines = _parsePostContentToLines(post);
       }
 
-      print('DEBUG: Loaded ${lines.length} lines from backend');
-      for (final line in lines) {
-        print(
-          'DEBUG: Line ${line.lineId} has commentCount: ${line.commentCount}',
-        );
-      }
+      print('DEBUG: Loaded ${lines.length} lines');
 
       emit(
         state.copyWith(
           status: ForumStatus.success,
-          comments: comments,
           currentAnswerId: postId,
           answerLines: lines,
-          lineComments: const [], // Clear line comments when selecting new post
+          lineComments: const [],
         ),
       );
 
-      // Background sync comments
+      // Background sync for mobile offline support
       _syncComments(postId);
     } catch (e) {
       emit(

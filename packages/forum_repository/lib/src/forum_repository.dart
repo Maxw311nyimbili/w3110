@@ -209,6 +209,23 @@ class ForumRepository {
     }
   }
 
+  /// Fetch comments for a post directly from server WITHOUT requiring local DB.
+  /// DB caching is attempted but failures are silently ignored (web-resilient).
+  Future<List<ForumComment>> fetchPostCommentsFromServer(String postId) async {
+    try {
+      final serverComments = await _syncManager.fetchCommentsFromServer(postId);
+
+      // Try to cache locally, but ignore DB failures (e.g. on web)
+      try {
+        await _conflictResolver.mergeServerComments(serverComments);
+      } catch (_) {}
+
+      return serverComments;
+    } catch (e) {
+      throw ForumException('Failed to fetch comments: ${e.toString()}');
+    }
+  }
+
   /// Search for posts
   Future<List<ForumPost>> searchPosts(String query) async {
     try {
@@ -384,7 +401,7 @@ class ForumRepository {
 
   /// Get or create lines for a general forum post
   Future<List<ForumAnswerLine>> getLinesForPost(String postId) async {
-    // 1. Try server first for counts
+    // 1. Always try server first
     try {
       print('DEBUG: Fetching lines for post $postId from server...');
       final response = await _apiClient.get(
@@ -392,69 +409,59 @@ class ForumRepository {
       );
       final list = response.data['lines'] as List;
 
-      print('DEBUG: Server returned ${list.length} lines');
-      for (var lineJson in list) {
-        print(
-          'DEBUG: Server line ${lineJson['line_id']}: commentCount = ${lineJson['comment_count']}',
-        );
-      }
-
       final lines = list
           .map((e) => ForumAnswerLine.fromJson(e as Map<String, dynamic>))
           .toList();
 
-      print('DEBUG: Parsed ${lines.length} ForumAnswerLine objects');
-      for (var line in lines) {
-        print(
-          'DEBUG: Parsed line ${line.lineId}: commentCount = ${line.commentCount}',
-        );
-      }
+      print('DEBUG: Server returned ${lines.length} lines');
 
-      // 2. Update local cache
-      final serverPostId = int.tryParse(postId);
-      if (serverPostId != null) {
-        await _database.batchInsertLines(
-          lines
-              .map(
-                (l) => ForumAnswerLinesCompanion.insert(
-                  lineId: l.lineId,
-                  postId: Value(serverPostId),
-                  lineNumber: l.lineNumber,
-                  textContent: l.text,
-                  discussionTitle: Value(l.discussionTitle),
-                  commentCount: Value(l.commentCount),
-                ),
-              )
-              .toList(),
-        );
+      // 2. Try to cache locally (ignore failures - e.g. on web where DB is unavailable)
+      try {
+        final serverPostId = int.tryParse(postId);
+        if (serverPostId != null) {
+          await _database.batchInsertLines(
+            lines
+                .map(
+                  (l) => ForumAnswerLinesCompanion.insert(
+                    lineId: l.lineId,
+                    postId: Value(serverPostId),
+                    lineNumber: l.lineNumber,
+                    textContent: l.text,
+                    discussionTitle: Value(l.discussionTitle),
+                    commentCount: Value(l.commentCount),
+                  ),
+                )
+                .toList(),
+          );
+        }
+      } catch (dbError) {
+        print('⚠️ getLinesForPost: local cache write failed (web?): $dbError');
       }
-
-      print('DEBUG: Updated local cache with ${lines.length} lines');
 
       return lines;
     } catch (e) {
-      print(
-        'DEBUG: getLinesForPost - server failed, falling back to local: $e',
-      );
-      // 3. Fallback to local cache
-      final intId = int.tryParse(postId);
-      if (intId == null) rethrow; // Can't fallback if it's not an int ID
-
-      final localLines = await _database.getLinesForPost(intId);
-      if (localLines.isNotEmpty) {
-        return localLines
-            .map(
-              (l) => ForumAnswerLine(
-                lineId: l.lineId,
-                answerId: l.answerId ?? '',
-                lineNumber: l.lineNumber,
-                text: l.textContent,
-                discussionTitle: l.discussionTitle ?? '',
-                commentCount: l.commentCount,
-              ),
-            )
-            .toList();
-      }
+      print('DEBUG: getLinesForPost - server failed, falling back to local: $e');
+      // 3. Fallback to local cache (only on mobile where DB is available)
+      try {
+        final intId = int.tryParse(postId);
+        if (intId != null) {
+          final localLines = await _database.getLinesForPost(intId);
+          if (localLines.isNotEmpty) {
+            return localLines
+                .map(
+                  (l) => ForumAnswerLine(
+                    lineId: l.lineId,
+                    answerId: l.answerId ?? '',
+                    lineNumber: l.lineNumber,
+                    text: l.textContent,
+                    discussionTitle: l.discussionTitle ?? '',
+                    commentCount: l.commentCount,
+                  ),
+                )
+                .toList();
+          }
+        }
+      } catch (_) {}
       rethrow;
     }
   }
@@ -515,56 +522,55 @@ class ForumRepository {
   }
 
   /// Get comments for a specific line
-  /// Checks local cache first
   Future<List<ForumLineComment>> getCommentsForLine(
     String lineId, {
     String filter = 'all',
   }) async {
-    // 1. Try server first
+    // 1. Always try server first
     try {
       final response = await _apiClient.get(
         '/api/v1/forum/lines/$lineId/comments',
-        queryParameters: {
-          'filter': filter,
-        },
+        queryParameters: {'filter': filter},
       );
       final list = response.data['comments'] as List;
       final comments = list
           .map((e) => ForumLineComment.fromJson(e as Map<String, dynamic>))
           .toList();
 
-      // 2. Update local cache (batch insert)
-      await _database.batchInsertLineComments(
-        comments
-            .map(
-              (c) => ForumLineCommentsCompanion.insert(
-                localId: c.id,
-                serverId: Value(c.id),
-                lineId: c.lineId,
-                authorId: c.authorId,
-                authorName: c.authorName,
-                authorRole: c.authorRole.name,
-                commentType: c.commentType.name,
-                content: c.text,
-                createdAt: c.createdAt,
-                syncStatus: const Value('synced'),
-              ),
-            )
-            .toList(),
-      );
+      // 2. Try to cache locally (ignore failures on web)
+      try {
+        await _database.batchInsertLineComments(
+          comments
+              .map(
+                (c) => ForumLineCommentsCompanion.insert(
+                  localId: c.id,
+                  serverId: Value(c.id),
+                  lineId: c.lineId,
+                  authorId: c.authorId,
+                  authorName: c.authorName,
+                  authorRole: c.authorRole.name,
+                  commentType: c.commentType.name,
+                  content: c.text,
+                  createdAt: c.createdAt,
+                  syncStatus: const Value('synced'),
+                ),
+              )
+              .toList(),
+        );
+      } catch (dbError) {
+        print('⚠️ getCommentsForLine: local cache write failed (web?): $dbError');
+      }
 
       return comments;
     } catch (e) {
-      print(
-        'DEBUG: getCommentsForLine - server failed, falling back to local: $e',
-      );
-      // 3. Fallback to local cache
-      final localComments = await _database.getCommentsForLine(lineId);
-      if (localComments.isNotEmpty) {
-        return localComments
-            .map((c) => ForumLineComment.fromDatabase(c))
-            .toList();
-      }
+      print('DEBUG: getCommentsForLine - server failed, falling back to local: $e');
+      // 3. Fallback to local cache (only works on mobile)
+      try {
+        final localComments = await _database.getCommentsForLine(lineId);
+        if (localComments.isNotEmpty) {
+          return localComments.map((c) => ForumLineComment.fromDatabase(c)).toList();
+        }
+      } catch (_) {}
       rethrow;
     }
   }
