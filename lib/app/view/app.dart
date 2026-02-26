@@ -19,6 +19,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:forum_repository/forum_repository.dart';
 import 'package:landing_repository/landing_repository.dart';
+import 'package:cap_project/core/widgets/main_navigation_shell.dart';
 import 'package:media_repository/media_repository.dart';
 
 /// Main app widget
@@ -200,7 +201,25 @@ class _AppState extends State<App> {
                   onGenerateRoute: AppRouter.generateRoute,
                   initialRoute: AppRouter.splash,
                   builder: (context, child) {
-                    return child ?? const SizedBox();
+                    if (child == null) return const SizedBox();
+
+                    // Determine if we should show the sidebar based on current route
+                    final routeName = ModalRoute.of(context)?.settings.name;
+                    
+                    final mainRoutes = [
+                      AppRouter.chat,
+                      AppRouter.scanner,
+                      AppRouter.forum,
+                      AppRouter.settings,
+                    ];
+
+                    final showShell = mainRoutes.contains(routeName);
+
+                    if (showShell) {
+                      return MainNavigationShell(child: child);
+                    }
+
+                    return child;
                   },
                 );
               },

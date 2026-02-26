@@ -34,15 +34,16 @@ class MainNavigationShell extends StatelessWidget {
     return BlocBuilder<NavigationCubit, NavigationState>(
       builder: (context, navState) {
         final isCollapsed = navState.isSidebarCollapsed;
-        // On mobile "collapsed" means the overlay is closed.
-        // On desktop "collapsed" means the rail (72 px) state.
-        final isMobileOpen = !isCollapsed; // overlay open on mobile
+        final isMobileOpen = !isCollapsed;
+
+        final effectiveTitle = title ?? navState.title;
+        final effectiveActions = actions ?? navState.actions;
 
         if (isDesktop) {
           return _DesktopLayout(
             isCollapsed: isCollapsed,
-            title: title,
-            actions: actions,
+            title: effectiveTitle,
+            actions: effectiveActions,
             floatingActionButton: floatingActionButton,
             endDrawer: endDrawer,
             child: child,
@@ -61,8 +62,8 @@ class MainNavigationShell extends StatelessWidget {
                   _TopBar(
                     isCollapsed: isCollapsed,
                     isDesktop: false,
-                    title: title,
-                    actions: actions,
+                    title: effectiveTitle,
+                    actions: effectiveActions,
                   ),
                   Expanded(child: child),
                 ],
@@ -141,7 +142,12 @@ class _DesktopLayout extends StatelessWidget {
                   title: title,
                   actions: actions,
                 ),
-                Expanded(child: child),
+                Expanded(
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 250),
+                    child: child,
+                  ),
+                ),
               ],
             ),
           ),

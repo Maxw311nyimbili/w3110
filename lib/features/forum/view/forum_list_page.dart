@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cap_project/core/widgets/entry_animation.dart';
 import 'package:cap_project/core/util/responsive_utils.dart';
-import 'package:cap_project/core/widgets/main_navigation_shell.dart';
+import 'package:cap_project/app/cubit/navigation_cubit.dart';
 import 'package:forum_repository/forum_repository.dart';
 
 class ForumListPage extends StatelessWidget {
@@ -29,35 +29,54 @@ class ForumListPage extends StatelessWidget {
   }
 }
 
-class ForumListView extends StatelessWidget {
+class ForumListView extends StatefulWidget {
   const ForumListView({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<ForumCubit, ForumState>(
-      builder: (context, state) {
-        return MainNavigationShell(
-          title: Text(
-            state.view == ForumView.detail
-                ? 'Discussion'
-                : AppLocalizations.of(context).community,
-          ),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.refresh_rounded, size: 20),
-              onPressed: () => context.read<ForumCubit>().resetAndReload(),
-              tooltip: 'Reset Forum Data',
+  State<ForumListView> createState() => _ForumListViewState();
+}
+
+class _ForumListViewState extends State<ForumListView> {
+  void _updateAppBar(ForumState state) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<NavigationCubit>().updateAppBar(
+            title: Text(
+              state.view == ForumView.detail
+                  ? 'Discussion'
+                  : AppLocalizations.of(context).community,
             ),
-            if (state.hasPendingSync)
+            actions: [
               IconButton(
-                icon: const Icon(
-                  Icons.cloud_upload_outlined,
-                  color: AppColors.warning,
-                ),
-                onPressed: () => context.read<ForumCubit>().syncWithBackend(),
+                icon: const Icon(Icons.refresh_rounded, size: 20),
+                onPressed: () => context.read<ForumCubit>().resetAndReload(),
+                tooltip: 'Reset Forum Data',
               ),
-          ],
-          child: Center(
+              if (state.hasPendingSync)
+                IconButton(
+                  icon: const Icon(
+                    Icons.cloud_upload_outlined,
+                    color: AppColors.warning,
+                  ),
+                  onPressed: () => context.read<ForumCubit>().syncWithBackend(),
+                ),
+            ],
+          );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocConsumer<ForumCubit, ForumState>(
+      listener: (context, state) {
+        _updateAppBar(state);
+      },
+      builder: (context, state) {
+        // Initial update
+        _updateAppBar(state);
+
+        return Scaffold(
+          body: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 800),
               child: const SafeArea(

@@ -36,11 +36,12 @@ class SideMenu extends StatelessWidget {
           decoration: BoxDecoration(
             color: sidebarBg,
             boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.10),
-                blurRadius: 16,
-                offset: const Offset(4, 0),
-              ),
+              if (!isDesktop)
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.10),
+                  blurRadius: 16,
+                  offset: const Offset(4, 0),
+                ),
             ],
           ),
           child: SafeArea(
@@ -72,7 +73,6 @@ class SideMenu extends StatelessWidget {
             ?.withOpacity(0.55) ??
         Colors.black54;
 
-    // Collapsed rail → show only the toggle button centred
     if (isCollapsed) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 14),
@@ -82,12 +82,10 @@ class SideMenu extends StatelessWidget {
       );
     }
 
-    // Expanded → logo + name, toggle on the right
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 10, 4, 8),
       child: Row(
         children: [
-          // Logo mark
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
             child: Image.asset(
@@ -96,7 +94,6 @@ class SideMenu extends StatelessWidget {
               height: 40,
               fit: BoxFit.contain,
               filterQuality: FilterQuality.high,
-              isAntiAlias: true,
             ),
           ),
           const SizedBox(width: 12),
@@ -109,7 +106,6 @@ class SideMenu extends StatelessWidget {
             ),
           ),
           const Spacer(),
-          // Toggle button — on desktop collapses to rail; on mobile closes overlay
           _SidebarToggleButton(color: toggleColor),
         ],
       ),
@@ -119,10 +115,7 @@ class SideMenu extends StatelessWidget {
   // ── Nav list ──────────────────────────────────────────────────────────────
   Widget _buildNavList(BuildContext context, bool isCollapsed) {
     return SingleChildScrollView(
-      padding: EdgeInsets.symmetric(
-        horizontal: isCollapsed ? 8 : 8,
-        vertical: 4,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       child: Column(
         crossAxisAlignment:
             isCollapsed ? CrossAxisAlignment.center : CrossAxisAlignment.start,
@@ -135,7 +128,7 @@ class SideMenu extends StatelessWidget {
             isPrimary: true,
             isCollapsed: isCollapsed,
           ),
-          SizedBox(height: isCollapsed ? 8 : 8),
+          const SizedBox(height: 8),
           if (!isCollapsed) _NavSection(label: 'Discover'),
           _NavItem(
             icon: Icons.document_scanner_outlined,
@@ -149,24 +142,10 @@ class SideMenu extends StatelessWidget {
             route: AppRouter.forum,
             isCollapsed: isCollapsed,
           ),
-          SizedBox(height: isCollapsed ? 8 : 8),
+          const SizedBox(height: 8),
           if (!isCollapsed) _NavSection(label: 'Account'),
-          _NavItem(
-            icon: Icons.history_rounded,
-            label: 'Conversations',
-            onTap: () => _showComingSoon(context, 'History'),
-            isCollapsed: isCollapsed,
-          ),
+          _ExpandableHistoryItem(isCollapsed: isCollapsed),
         ],
-      ),
-    );
-  }
-
-  void _showComingSoon(BuildContext context, String feature) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('$feature coming soon'),
-        backgroundColor: AppColors.textPrimary,
       ),
     );
   }
@@ -178,7 +157,6 @@ class SideMenu extends StatelessWidget {
     final isAuthenticated = authState.status == AuthStatus.authenticated;
 
     if (isCollapsed) {
-      // Rail: show only avatar / login icon
       return Padding(
         padding: const EdgeInsets.all(12),
         child: Center(
@@ -202,7 +180,7 @@ class SideMenu extends StatelessWidget {
       ),
       child: isAuthenticated
           ? _FullAuthFooter(user: user)
-          : _FullGuestFooter(),
+          : const _FullGuestFooter(),
     );
   }
 }
@@ -244,6 +222,7 @@ class _NavItem extends StatelessWidget {
     this.route,
     this.onTap,
     this.isPrimary = false,
+    this.trailing,
   });
 
   final IconData icon;
@@ -252,6 +231,7 @@ class _NavItem extends StatelessWidget {
   final String? route;
   final VoidCallback? onTap;
   final bool isPrimary;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -286,15 +266,18 @@ class _NavItem extends StatelessWidget {
         return;
       }
       if (route != null && !isSelected) {
-        final scaffold = Scaffold.of(context);
-        if (scaffold.hasDrawer && scaffold.isDrawerOpen) {
+        ScaffoldState? scaffold;
+        try {
+          scaffold = Scaffold.of(context);
+        } catch (_) {}
+        
+        if (scaffold != null && scaffold.hasDrawer && scaffold.isDrawerOpen) {
           Navigator.pop(context);
         }
         AppRouter.replaceTo(context, route!);
       }
     }
 
-    // Collapsed (rail): show icon + tooltip only
     if (isCollapsed) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 2),
@@ -324,7 +307,6 @@ class _NavItem extends StatelessWidget {
       );
     }
 
-    // Expanded: icon + label
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
       child: InkWell(
@@ -356,7 +338,10 @@ class _NavItem extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              if (isSelected)
+              if (trailing != null) ...[
+                const SizedBox(width: 8),
+                trailing!,
+              ] else if (isSelected)
                 Container(
                   width: 5,
                   height: 5,
@@ -367,6 +352,116 @@ class _NavItem extends StatelessWidget {
                 ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Expandable History Item ─────────────────────────────────────────────────
+
+class _ExpandableHistoryItem extends StatefulWidget {
+  const _ExpandableHistoryItem({required this.isCollapsed});
+  final bool isCollapsed;
+
+  @override
+  State<_ExpandableHistoryItem> createState() => _ExpandableHistoryItemState();
+}
+
+class _ExpandableHistoryItemState extends State<_ExpandableHistoryItem> {
+  bool _isExpanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.isCollapsed) {
+      return _NavItem(
+        icon: Icons.history_rounded,
+        label: 'Conversations',
+        onTap: () => setState(() => _isExpanded = !_isExpanded),
+        isCollapsed: true,
+      );
+    }
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _NavItem(
+          icon: Icons.history_rounded,
+          label: 'Conversations',
+          onTap: () => setState(() => _isExpanded = !_isExpanded),
+          isCollapsed: false,
+          trailing: Icon(
+            _isExpanded ? Icons.expand_less_rounded : Icons.expand_more_rounded,
+            size: 18,
+            color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.5),
+          ),
+        ),
+        if (_isExpanded)
+          Padding(
+            padding: const EdgeInsets.only(left: 32, top: 4, bottom: 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const _HistorySubItem(label: 'Health Checkup - Feb 26'),
+                const _HistorySubItem(label: 'Medication advice'),
+                const _HistorySubItem(label: 'Symptom analysis'),
+                const SizedBox(height: 4),
+                TextButton(
+                  onPressed: () {},
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    minimumSize: const Size(0, 30),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  child: const Text(
+                    'See all history',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppColors.brandDarkTeal,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _HistorySubItem extends StatelessWidget {
+  const _HistorySubItem({required this.label, super.key});
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () {},
+      borderRadius: BorderRadius.circular(6),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+        child: Row(
+          children: [
+            Icon(Icons.chat_bubble_outline_rounded,
+                size: 14, color: AppColors.textSecondary.withOpacity(0.6)),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                label,
+                style: AppTextStyles.bodySmall.copyWith(
+                  fontSize: 13,
+                  color: Theme.of(context)
+                      .textTheme
+                      .bodyMedium
+                      ?.color
+                      ?.withOpacity(0.8),
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -499,10 +594,13 @@ class _FullAuthFooter extends StatelessWidget {
       ),
     );
   }
+}
 
 // ─── Full guest footer (expanded) ────────────────────────────────────────────
 
 class _FullGuestFooter extends StatelessWidget {
+  const _FullGuestFooter({super.key});
+
   @override
   Widget build(BuildContext context) {
     return InkWell(

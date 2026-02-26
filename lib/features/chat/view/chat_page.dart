@@ -13,7 +13,7 @@ import 'package:cap_project/features/landing/cubit/cubit.dart';
 import 'package:cap_project/features/medscanner/cubit/medscanner_state.dart'
     as scanner;
 import 'package:cap_project/core/util/responsive_utils.dart';
-import 'package:cap_project/core/widgets/main_navigation_shell.dart';
+import 'package:cap_project/app/cubit/navigation_cubit.dart';
 import '../cubit/cubit.dart';
 import '../widgets/widgets.dart';
 import '../widgets/history_drawer.dart';
@@ -153,75 +153,94 @@ class _ChatViewState extends State<ChatView> {
     setState(() {
       _isAudioMode = !_isAudioMode;
     });
+    _updateAppBar();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _updateAppBar();
+  }
+
+  void _updateAppBar() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      
+      context.read<NavigationCubit>().updateAppBar(
+        title: !_isAudioMode
+            ? Text(
+                'Thanzi',
+                style: AppTextStyles.headlineSmall.copyWith(
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.5,
+                ),
+              )
+            : null,
+        actions: !_isAudioMode
+            ? [
+                Padding(
+                  padding: const EdgeInsets.only(right: 16),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: Theme.of(context).dividerColor.withOpacity(0.1),
+                      ),
+                    ),
+                    child: Builder(
+                      builder: (context) => IconButton(
+                        icon: Icon(
+                          Icons.history_rounded,
+                          size: 20,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        onPressed: () => Scaffold.of(context).openEndDrawer(),
+                        tooltip: 'Chat History',
+                      ),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(right: 16),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: Theme.of(context).dividerColor.withOpacity(0.1),
+                      ),
+                    ),
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.forum_outlined,
+                        size: 20,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      onPressed: () => AppRouter.navigateTo<void>(
+                        context,
+                        AppRouter.forum,
+                      ),
+                      tooltip: 'Community Forum',
+                    ),
+                  ),
+                ),
+              ]
+            : null,
+      );
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop = ResponsiveUtils.isDesktop(context);
+    if (_isAudioMode) {
+      // Re-update app bar when mode changes
+      _updateAppBar();
+    }
 
-    return MainNavigationShell(
-      title: !_isAudioMode
-          ? Text(
-              'Thanzi',
-              style: AppTextStyles.headlineSmall.copyWith(
-                fontWeight: FontWeight.w800,
-                letterSpacing: -0.5,
-              ),
-            )
-          : null,
-      actions: !_isAudioMode
-          ? [
-              Padding(
-                padding: const EdgeInsets.only(right: 16),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surface,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: Theme.of(context).dividerColor.withOpacity(0.1),
-                    ),
-                  ),
-                  child: Builder(
-                    builder: (context) => IconButton(
-                      icon: Icon(
-                        Icons.history_rounded,
-                        size: 20,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                      onPressed: () => Scaffold.of(context).openEndDrawer(),
-                      tooltip: 'Chat History',
-                    ),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(right: 16),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surface,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: Theme.of(context).dividerColor.withOpacity(0.1),
-                    ),
-                  ),
-                  child: IconButton(
-                    icon: Icon(
-                      Icons.forum_outlined,
-                      size: 20,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                    onPressed: () => AppRouter.navigateTo<void>(
-                      context,
-                      AppRouter.forum,
-                    ),
-                    tooltip: 'Community Forum',
-                  ),
-                ),
-              ),
-            ]
-          : null,
+    return Scaffold(
       endDrawer: const HistoryDrawer(),
-      child: Center(
+      body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 1000),
           child: Column(
