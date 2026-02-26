@@ -1,6 +1,7 @@
 // lib/features/auth/cubit/auth_cubit.dart - COMPLETE IMPLEMENTATION
 
 import 'package:auth_repository/auth_repository.dart';
+import 'package:cap_project/core/theme/cubit/theme_cubit.dart';
 import 'package:cap_project/features/auth/cubit/auth_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -16,10 +17,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class AuthCubit extends Cubit<AuthState> {
   AuthCubit({
     required AuthRepository authRepository,
+    required ThemeCubit themeCubit,
   }) : _authRepository = authRepository,
+       _themeCubit = themeCubit,
        super(const AuthState());
 
   final AuthRepository _authRepository;
+  final ThemeCubit _themeCubit;
 
   /// Initialize auth - check for existing session
   /// Called when app starts to see if user is already logged in
@@ -39,10 +43,15 @@ class AuthCubit extends Cubit<AuthState> {
 
         if (user != null) {
           print('✓ User session restored: ${user.email}');
+          final authUser = _mapToAuthUser(user);
+          
+          // Sync theme from user preference
+          _themeCubit.updateFromUserPref(user.themeMode);
+          
           emit(
             state.copyWith(
               status: AuthStatus.authenticated,
-              user: _mapToAuthUser(user),
+              user: authUser,
             ),
           );
           return;
@@ -56,6 +65,9 @@ class AuthCubit extends Cubit<AuthState> {
 
       // No valid session
       print('ℹ️ No existing session found');
+      // Set theme to system default or light for guests
+      _themeCubit.updateFromUserPref('light');
+      
       emit(state.copyWith(status: AuthStatus.unauthenticated));
     } catch (e) {
       print('❌ Auth initialization error: $e');
@@ -121,6 +133,9 @@ class AuthCubit extends Cubit<AuthState> {
       }
 
       print('✓ Authentication complete: ${user.email}');
+      
+      // Sync theme from user preference
+      _themeCubit.updateFromUserPref(user.themeMode);
 
       // Step 4: Update state to authenticated
       emit(
@@ -140,10 +155,7 @@ class AuthCubit extends Cubit<AuthState> {
     } catch (e) {
       print('❌ Sign-in error: $e');
       emit(
-        state.copyWith(
-          status: AuthStatus.error,
-          error: 'Sign-in failed: ${e.toString()}',
-        ),
+        state.copyWith(status: AuthStatus.error, error: 'Sign-in failed: ${e.toString()}'),
       );
     }
   }
@@ -153,6 +165,10 @@ class AuthCubit extends Cubit<AuthState> {
     try {
       emit(state.copyWith(status: AuthStatus.loading));
       final user = await _authRepository.signInAsDemo();
+      
+      // Demo user defaults to light (or could be parsed)
+      _themeCubit.updateFromUserPref(user.themeMode);
+      
       emit(
         state.copyWith(
           status: AuthStatus.authenticated,
@@ -186,6 +202,9 @@ class AuthCubit extends Cubit<AuthState> {
       await _authRepository.signOut();
 
       print('✓ Signed out successfully');
+
+      // Reset theme to system default or light for guests
+      _themeCubit.updateFromUserPref('light');
 
       emit(
         state.copyWith(

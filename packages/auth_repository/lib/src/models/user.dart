@@ -12,6 +12,7 @@ class User extends Equatable {
     this.role,
     this.interests = const [],
     this.onboardingCompleted = false,
+    this.themeMode = 'light',
   });
 
   final String id;
@@ -21,6 +22,7 @@ class User extends Equatable {
   final String? role;
   final List<String> interests;
   final bool onboardingCompleted;
+  final String themeMode;
 
   /// Create user from JSON
   factory User.fromJson(Map<String, dynamic> json) {
@@ -36,6 +38,7 @@ class User extends Equatable {
               .toList() ??
           const [],
       onboardingCompleted: json['onboarding_completed'] as bool? ?? false,
+      themeMode: json['theme_mode'] as String? ?? 'light',
     );
   }
 
@@ -49,6 +52,7 @@ class User extends Equatable {
       'role': role,
       'interests': interests,
       'onboarding_completed': onboardingCompleted,
+      'theme_mode': themeMode,
     };
   }
 
@@ -61,5 +65,6 @@ class User extends Equatable {
     role,
     interests,
     onboardingCompleted,
+    themeMode,
   ];
 }

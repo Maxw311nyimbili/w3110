@@ -195,6 +195,7 @@ class LandingCubit extends Cubit<LandingState> {
         displayName: user.displayName,
         photoUrl: user.photoUrl,
         role: user.role,
+        themeMode: user.themeMode,
       );
 
       emit(
