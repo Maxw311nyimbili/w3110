@@ -84,9 +84,9 @@ class _ChatPageState extends State<ChatPage> {
   void _handleEntryStatus(OnboardingStatus status) {
     final authState = context.read<AuthCubit>().state;
 
-    // 1. If not authenticated, show the Welcome Drawer (Gate)
+    // 1. If not authenticated, we don't show the Welcome Drawer automatically.
+    // Guests can already see the sidebar footer to sign in.
     if (authState.status != AuthStatus.authenticated) {
-      WelcomeDrawer.show(context);
       return;
     }
 

@@ -158,9 +158,9 @@ class _ContentArea extends StatelessWidget {
         index: activeTab.index,
         children: const [
           ChatPage(),
-          MedScannerPage(),
-          ForumListPage(),
-          SettingsPage(),
+          AuthGuard(child: MedScannerPage()),
+          AuthGuard(child: ForumListPage()),
+          AuthGuard(child: SettingsPage()),
         ],
       ),
     );

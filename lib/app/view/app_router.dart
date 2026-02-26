@@ -99,7 +99,7 @@ class AppRouter {
       case AppRouter.shell:
         return PageRouteBuilder(
           settings: settings,
-          pageBuilder: (_, __, ___) => const AuthGuard(child: AppShell()),
+          pageBuilder: (_, __, ___) => const AppShell(),
           transitionDuration: Duration.zero,
           reverseTransitionDuration: Duration.zero,
           transitionsBuilder: (_, __, ___, child) => child, // No transition
