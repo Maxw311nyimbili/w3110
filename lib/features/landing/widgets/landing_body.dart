@@ -119,7 +119,7 @@ class _CompleteStep extends StatelessWidget {
               ),
               const SizedBox(height: 64),
               PremiumButton(
-                onPressed: () => AppRouter.replaceTo(context, AppRouter.chat),
+                onPressed: () => AppRouter.replaceTo(context, AppRouter.shell),
                 text: 'Start Chatting',
               ),
             ],
