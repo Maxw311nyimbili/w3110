@@ -127,62 +127,72 @@ class ForumRepository {
     print('DEBUG: ForumRepository.addToSyncQueue - SUCCESS');
   }
 
-  /// Delete a post (sync-aware)
-  Future<void> deletePost(String localId) async {
-    final post = await _database.getPostByLocalId(localId);
-    if (post == null) return;
+  /// Delete a post.
+  /// On mobile, uses local DB to find serverId. On web, pass serverId directly.
+  Future<void> deletePost(String localId, {String? serverId}) async {
+    String? resolvedServerId = serverId;
 
-    if (post.serverId.isNotEmpty) {
-      // Synced: Soft delete locally and queue server delete
+    if (resolvedServerId == null || resolvedServerId.isEmpty) {
+      try {
+        final post = await _database.getPostByLocalId(localId);
+        resolvedServerId = post?.serverId;
+      } catch (_) {}
+    }
+
+    if (resolvedServerId != null && resolvedServerId.isNotEmpty) {
+      await _apiClient.delete('/api/v1/forum/posts/$resolvedServerId');
+    }
+
+    // Try to clean up local DB (ignore failures on web)
+    try {
       await _database.softDeletePost(localId);
-      await addToSyncQueue(
-        entityType: 'post',
-        entityId: localId,
-        action: 'delete',
-      );
-    } else {
-      // Pending: Hard delete is fine
-      await _database.deletePost(localId);
-      // TODO: Also remove from sync queue if it was a 'create' action
-    }
+    } catch (_) {}
   }
 
-  /// Delete a comment (sync-aware)
-  Future<void> deleteComment(String localId) async {
-    final comment = await _database.getCommentByLocalId(localId);
-    if (comment == null) return;
+  /// Delete a comment.
+  /// On mobile, uses local DB to find serverId. On web, pass serverId directly.
+  Future<void> deleteComment(String localId, {String? serverId}) async {
+    // 1. If we have a serverId (passed directly or from local DB), call API
+    String? resolvedServerId = serverId;
 
-    if (comment.serverId.isNotEmpty) {
-      // Synced: Soft delete locally and queue server delete
+    if (resolvedServerId == null || resolvedServerId.isEmpty) {
+      // Try to get from local DB (works on mobile)
+      try {
+        final comment = await _database.getCommentByLocalId(localId);
+        resolvedServerId = comment?.serverId;
+      } catch (_) {}
+    }
+
+    if (resolvedServerId != null && resolvedServerId.isNotEmpty) {
+      // Call API directly
+      await _apiClient.delete('/api/v1/forum/comments/$resolvedServerId');
+    }
+
+    // Try to clean up local DB (ignore failures on web)
+    try {
       await _database.softDeleteComment(localId);
-      await addToSyncQueue(
-        entityType: 'comment',
-        entityId: localId,
-        action: 'delete',
-      );
-    } else {
-      // Pending: Hard delete
-      await _database.deleteComment(localId);
-    }
+    } catch (_) {}
   }
 
-  /// Delete a line comment (sync-aware)
-  Future<void> deleteLineComment(String localId) async {
-    final comment = await _database.getLineCommentByLocalId(localId);
-    if (comment == null) return;
+  /// Delete a line comment.
+  /// On mobile, uses local DB to find serverId. On web, pass serverId directly.
+  Future<void> deleteLineComment(String localId, {String? serverId}) async {
+    String? resolvedServerId = serverId;
 
-    if (comment.serverId.isNotEmpty) {
-      // Synced: Soft delete
-      await _database.softDeleteLineComment(localId);
-      await addToSyncQueue(
-        entityType: 'line_comment',
-        entityId: localId,
-        action: 'delete',
-      );
-    } else {
-      // Pending: Hard delete
-      await _database.deleteLineComment(localId);
+    if (resolvedServerId == null || resolvedServerId.isEmpty) {
+      try {
+        final comment = await _database.getLineCommentByLocalId(localId);
+        resolvedServerId = comment?.serverId;
+      } catch (_) {}
     }
+
+    if (resolvedServerId != null && resolvedServerId.isNotEmpty) {
+      await _apiClient.delete('/api/v1/forum/comments/$resolvedServerId');
+    }
+
+    try {
+      await _database.softDeleteLineComment(localId);
+    } catch (_) {}
   }
 
   /// Process sync queue (upload pending changes)
@@ -206,6 +216,32 @@ class ForumRepository {
           .toList();
     } catch (e) {
       throw ForumException('Failed to fetch posts: ${e.toString()}');
+    }
+  }
+
+  /// Create a post directly on server (web path - no local DB required)
+  Future<ForumPost> createPostOnServer({
+    required String localId,
+    required String title,
+    required String content,
+    List<ForumPostSource> sources = const [],
+    String? originalAnswerId,
+  }) async {
+    try {
+      final response = await _apiClient.post(
+        '/api/v1/forum/posts',
+        data: {
+          'title': title,
+          'content': content,
+          'client_id': localId,
+          'sources': sources.map((e) => e.toJson()).toList(),
+          if (originalAnswerId != null)
+            'original_answer_id': originalAnswerId,
+        },
+      );
+      return ForumPost.fromJson(response.data as Map<String, dynamic>);
+    } catch (e) {
+      throw ForumException('Failed to create post on server: ${e.toString()}');
     }
   }
 
@@ -273,28 +309,39 @@ class ForumRepository {
     }
   }
 
-  /// Update an existing post
+  /// Update an existing post.
+  /// On mobile, uses local DB to find serverId. On web, pass serverId directly.
   Future<void> updatePost({
     required String localId,
     required String title,
     required String content,
+    String? serverId,
   }) async {
     try {
-      final post = await _database.getPostByLocalId(localId);
-      if (post == null) return;
+      // Resolve the server ID
+      String? resolvedServerId = serverId;
+      if (resolvedServerId == null || resolvedServerId.isEmpty) {
+        try {
+          final post = await _database.getPostByLocalId(localId);
+          resolvedServerId = post?.serverId;
+        } catch (_) {}
+      }
 
-      if (post.serverId.isNotEmpty) {
+      if (resolvedServerId != null && resolvedServerId.isNotEmpty) {
         await _apiClient.put(
-          '/api/v1/forum/posts/${post.serverId}',
+          '/api/v1/forum/posts/$resolvedServerId',
           data: {'title': title, 'content': content},
         );
       }
 
-      await _database.updatePostContent(
-        localId: localId,
-        title: title,
-        content: content,
-      );
+      // Try to update local cache (ignore failures on web)
+      try {
+        await _database.updatePostContent(
+          localId: localId,
+          title: title,
+          content: content,
+        );
+      } catch (_) {}
     } catch (e) {
       throw ForumException('Failed to update post: ${e.toString()}');
     }
@@ -661,10 +708,13 @@ class ForumRepository {
         );
       }
 
-      await _database.updateLineCommentContent(
-        localId: localId,
-        content: text,
-      );
+      // Try to update local cache (ignore failures on web)
+      try {
+        await _database.updateLineCommentContent(
+          localId: localId,
+          content: text,
+        );
+      } catch (_) {}
     } catch (e) {
       throw ForumException('Failed to update line comment: ${e.toString()}');
     }
@@ -726,10 +776,13 @@ class ForumRepository {
         );
       }
 
-      await _database.updateCommentContent(
-        localId: localId,
-        content: content,
-      );
+      // Try to update local cache (ignore failures on web)
+      try {
+        await _database.updateCommentContent(
+          localId: localId,
+          content: content,
+        );
+      } catch (_) {}
     } catch (e) {
       throw ForumException('Failed to update comment: ${e.toString()}');
     }
