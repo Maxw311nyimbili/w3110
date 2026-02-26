@@ -9,6 +9,7 @@ import 'package:forum_repository/forum_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
@@ -571,7 +572,19 @@ class RefinedMessageBubble extends StatelessWidget {
         const SizedBox(width: 8),
         _buildActionIcon(Icons.thumb_down_alt_outlined, () {}),
         const SizedBox(width: 8),
-        _buildActionIcon(Icons.copy_rounded, () {}),
+        _buildActionIcon(Icons.copy_rounded, () {
+          final textToCopy = message.showingDetailedView
+              ? (message.detailedAnswer ?? message.content)
+              : (message.quickAnswer ?? message.content);
+          Clipboard.setData(ClipboardData(text: textToCopy));
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Copied to clipboard'),
+              duration: Duration(seconds: 2),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }),
         const SizedBox(width: 8),
         _buildActionIcon(
           Icons.forum_outlined,

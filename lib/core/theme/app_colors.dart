@@ -6,14 +6,14 @@ import 'package:flutter/material.dart';
 class AppColors {
   AppColors._();
 
-  // ─── Backgrounds (Cool White Scale) ──────────────────────────────────────
+  // ─── Backgrounds (Visible Contrast Scale) ──────────────────────────────
   static const Color backgroundPrimary = Color(
-    0xFFF5F7FA,
-  ); // Cool off-white base
+    0xFFE8ECF2,
+  ); // Page bg — visibly grey, distinct from cards
   static const Color backgroundSurface = Color(0xFFFFFFFF); // Pure white cards
   static const Color backgroundElevated = Color(
-    0xFFEDF0F5,
-  ); // Cool grey (inputs, chips)
+    0xFFD8E0EC,
+  ); // Inputs/chips — clearly darker than cards
 
   // ─── Brand — Teal Identity ─────────────────────────────────────────────────
   static const Color accentPrimary = Color(
@@ -31,15 +31,15 @@ class AppColors {
 
   // ─── Text (Warm, Not Cold Grey) ────────────────────────────────────────────
   static const Color textPrimary = Color(0xFF1C1917); // Warm near-black
-  static const Color textSecondary = Color(0xFF6B6358); // Warm mid-grey
-  static const Color textTertiary = Color(0xFF9C9388); // Warm light-grey
+  static const Color textSecondary = Color(0xFF4A4540); // Darker warm mid-grey
+  static const Color textTertiary = Color(0xFF6B6358); // Warm light-grey
   static const Color textInverted = Color(0xFFFFFFFF); // White text on dark
   static const Color textAccent = Color(0xFF0C7E8A); // Teal text links
 
   // ─── Borders ───────────────────────────────────────────────────────────────
-  static const Color borderLight = Color(0xFFE4E8EF); // Cool light border
-  static const Color borderMedium = Color(0xFFCDD3DD); // Cool visible divider
-  static const Color borderDark = Color(0xFF6B7280); // Cool strong outline
+  static const Color borderLight = Color(0xFFC0CAD8); // Visible default border
+  static const Color borderMedium = Color(0xFFA8B5C6); // Strong card outline
+  static const Color borderDark = Color(0xFF6B7280); // Strong outline
   static const Color borderAccent = Color(0xFF0C7E8A); // Teal focus border
 
   // ─── Semantic ──────────────────────────────────────────────────────────────
@@ -79,10 +79,10 @@ class AppColors {
   static const Color darkTextSecondary = Color(0xFFA3B3B0); // Muted teal-grey
   static const Color darkTextTertiary = Color(0xFF6B827E); // Faint label
 
-  // ─── Compatibility aliases (cool-neutral) ──────────────────────────────────
-  static const Color gray100 = Color(0xFFEDF0F5);
-  static const Color gray200 = Color(0xFFE4E8EF);
-  static const Color gray300 = Color(0xFFCDD3DD);
+  // ─── Compatibility aliases ──────────────────────────────────────────────────
+  static const Color gray100 = Color(0xFFD8E0EC); // Elevated/input fill
+  static const Color gray200 = Color(0xFFC0CAD8); // Light border
+  static const Color gray300 = Color(0xFFA8B5C6); // Medium border
   static const Color gray400 = Color(0xFF94A3B8);
 
   static const Color confidenceHigh = success;

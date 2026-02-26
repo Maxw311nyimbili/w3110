@@ -180,6 +180,29 @@ class _ChatViewState extends State<ChatView> {
                       color: Theme.of(context).dividerColor.withOpacity(0.1),
                     ),
                   ),
+                  child: Builder(
+                    builder: (context) => IconButton(
+                      icon: const Icon(
+                        Icons.history_rounded,
+                        size: 20,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      onPressed: () => Scaffold.of(context).openEndDrawer(),
+                      tooltip: 'Chat History',
+                    ),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(right: 16),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Theme.of(context).dividerColor.withOpacity(0.1),
+                    ),
+                  ),
                   child: IconButton(
                     icon: Icon(
                       Icons.forum_outlined,
@@ -196,6 +219,7 @@ class _ChatViewState extends State<ChatView> {
               ),
             ]
           : null,
+      endDrawer: const HistoryDrawer(),
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 1000),
