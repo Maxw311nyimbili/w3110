@@ -304,8 +304,18 @@ class ChatCubit extends Cubit<ChatState> {
 
   Future<void> _playAudio(String url) async {
     try {
-      print('🔊 [TTS] _playAudio called with url: $url');
-      await _audioPlayer.play(UrlSource(url));
+      print('🔊 [TTS] _playAudio called (${url.length > 60 ? url.substring(0, 60) + '...' : url})');
+      if (url.startsWith('data:')) {
+        // Data URI from gTTS or GhanaNLP — decode base64 to bytes
+        final commaIdx = url.indexOf(',');
+        if (commaIdx == -1) throw Exception('Invalid data URI');
+        final base64Str = url.substring(commaIdx + 1);
+        // ignore: avoid_dynamic_calls
+        final bytes = Uri.parse('data:application/octet-stream;base64,$base64Str').data!.contentAsBytes();
+        await _audioPlayer.play(BytesSource(bytes));
+      } else {
+        await _audioPlayer.play(UrlSource(url));
+      }
       print('🔊 [TTS] ✅ Audio playback started successfully');
     } catch (e) {
       print('🔊 [TTS] ❌ Error playing audio: $e');
