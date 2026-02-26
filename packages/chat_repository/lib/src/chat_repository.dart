@@ -158,6 +158,20 @@ class ChatRepository {
     } catch (e) {
       throw ChatException('Failed to synthesize speech: ${e.toString()}');
     }
+  /// Fetch chat history from the backend.
+  /// Backend endpoint: GET /chat/history
+  Future<List<Map<String, dynamic>>> fetchHistory({int limit = 50}) async {
+    try {
+      final response = await _apiClient.get(
+        '/chat/history',
+        queryParameters: {'limit': limit},
+      );
+      final data = response.data as Map<String, dynamic>;
+      final messages = data['messages'] as List<dynamic>? ?? [];
+      return messages.cast<Map<String, dynamic>>();
+    } catch (e) {
+      throw ChatException('Failed to fetch history: ${e.toString()}');
+    }
   }
 }
 

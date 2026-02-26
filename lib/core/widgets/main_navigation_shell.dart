@@ -17,6 +17,7 @@ class MainNavigationShell extends StatelessWidget {
     this.title,
     this.actions,
     this.floatingActionButton,
+    this.endDrawer,
     super.key,
   });
 
@@ -24,6 +25,7 @@ class MainNavigationShell extends StatelessWidget {
   final Widget? title;
   final List<Widget>? actions;
   final Widget? floatingActionButton;
+  final Widget? endDrawer;
 
   @override
   Widget build(BuildContext context) {
@@ -42,12 +44,14 @@ class MainNavigationShell extends StatelessWidget {
             title: title,
             actions: actions,
             floatingActionButton: floatingActionButton,
+            endDrawer: endDrawer,
             child: child,
           );
         }
 
         // ── Mobile / Tablet — overlay drawer ──────────────────────────────
         return Scaffold(
+          endDrawer: endDrawer,
           floatingActionButton: floatingActionButton,
           body: Stack(
             children: [
@@ -102,6 +106,7 @@ class _DesktopLayout extends StatelessWidget {
     this.title,
     this.actions,
     this.floatingActionButton,
+    this.endDrawer,
   });
 
   final bool isCollapsed;
@@ -109,11 +114,13 @@ class _DesktopLayout extends StatelessWidget {
   final Widget? title;
   final List<Widget>? actions;
   final Widget? floatingActionButton;
+  final Widget? endDrawer;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: floatingActionButton,
+      endDrawer: endDrawer,
       body: Row(
         children: [
           // Persistent sidebar — animates between full and rail

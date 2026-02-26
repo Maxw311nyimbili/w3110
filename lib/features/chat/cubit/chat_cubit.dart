@@ -760,6 +760,82 @@ class ChatCubit extends Cubit<ChatState> {
     emit(state.copyWith(messages: updatedMessages));
   }
 
+  Future<void> loadHistory() async {
+    try {
+      emit(state.copyWith(isLoadingHistory: true));
+      final historyData = await _chatRepository.fetchHistory(limit: 100);
+
+      // Group by sessionId and create HistorySession objects
+      final sessions = <String, List<Map<String, dynamic>>>{};
+      for (final msg in historyData) {
+        final sid = msg['session_id'] as String? ?? 'unknown';
+        sessions.putIfAbsent(sid, () => []).add(msg);
+      }
+
+      final historySessions = sessions.entries.map((entry) {
+        final msgs = entry.value;
+        // Search for the first user message in this session to use as title
+        final firstUserMsg = msgs.firstWhere(
+          (m) => m['role'] == 'user',
+          orElse: () => msgs.first,
+        );
+        return HistorySession(
+          sessionId: entry.key,
+          firstMessage: firstUserMsg['content'] as String? ?? 'New Chat',
+          timestamp: DateTime.parse(msgs.first['created_at'] as String),
+        );
+      }).toList();
+
+      // Sort by timestamp descending
+      historySessions.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+
+      emit(state.copyWith(
+        isLoadingHistory: false,
+        historySessions: historySessions,
+      ));
+    } catch (e) {
+      print('❌ Failed to load history: $e');
+      emit(state.copyWith(isLoadingHistory: false));
+    }
+  }
+
+  Future<void> loadSession(String sessionId) async {
+    try {
+      emit(state.copyWith(status: ChatStatus.loading, isTyping: true));
+      final historyData = await _chatRepository.fetchHistory(limit: 50);
+      
+      // Filter for this session
+      final sessionMsgs = historyData.where((m) => m['session_id'] == sessionId).toList();
+      
+      final messages = sessionMsgs.map((m) => _mapRepoMessageToModel(m)).toList();
+
+      emit(state.copyWith(
+        status: ChatStatus.success,
+        messages: messages,
+        sessionId: sessionId,
+        isTyping: false,
+      ));
+    } catch (e) {
+      print('❌ Failed to load session: $e');
+      emit(state.copyWith(status: ChatStatus.error, error: 'Failed to load chat session', isTyping: false));
+    }
+  }
+
+  ChatMessage _mapRepoMessageToModel(Map<String, dynamic> m) {
+    final isUser = m['role'] == 'user';
+    final content = m['content'] as String? ?? '';
+    
+    // Attempt to extract dual mode data if it exists in the raw content or separate fields
+    // For now, mapping simply
+    return ChatMessage(
+      id: m['id'].toString(),
+      content: content,
+      isUser: isUser,
+      timestamp: DateTime.parse(m['created_at'] as String),
+      // Future: parse sources and dual-mode fields if needed
+    );
+  }
+
   String _extractDomain(String url) {
     try {
       final uri = Uri.parse(url);

@@ -161,6 +161,32 @@ class ChatMessage extends Equatable {
   ];
 }
 
+/// Helper model for the history drawer
+class HistorySession extends Equatable {
+  const HistorySession({
+    required this.sessionId,
+    required this.firstMessage,
+    required this.timestamp,
+  });
+
+  final String sessionId;
+  final String firstMessage;
+  final DateTime timestamp;
+
+  String get dateLabel {
+    final now = DateTime.now();
+    final difference = now.difference(timestamp);
+
+    if (difference.inDays == 0) return 'Today';
+    if (difference.inDays == 1) return 'Yesterday';
+    if (difference.inDays < 7) return '${difference.inDays} days ago';
+    return '${timestamp.day}/${timestamp.month}/${timestamp.year}';
+  }
+
+  @override
+  List<Object?> get props => [sessionId, firstMessage, timestamp];
+}
+
 /// Business logic state ONLY
 /// UI state (isRecording, amplitude, audioMode, etc) stays in StatefulWidget
 class ChatState extends Equatable {
@@ -178,6 +204,8 @@ class ChatState extends Equatable {
     this.loadingMessage,
     this.dynamicGreeting,
     this.selectedLanguage = VoiceLanguage.english,
+    this.isLoadingHistory = false,
+    this.historySessions = const [],
   });
 
   final ChatStatus status;
@@ -193,6 +221,8 @@ class ChatState extends Equatable {
   final String? loadingMessage;
   final String? dynamicGreeting;
   final VoiceLanguage selectedLanguage;
+  final bool isLoadingHistory;
+  final List<HistorySession> historySessions;
 
   bool get isLoading => status == ChatStatus.loading;
   bool get hasMessages => messages.isNotEmpty;
@@ -211,6 +241,8 @@ class ChatState extends Equatable {
     String? loadingMessage,
     String? dynamicGreeting,
     VoiceLanguage? selectedLanguage,
+    bool? isLoadingHistory,
+    List<HistorySession>? historySessions,
   }) {
     return ChatState(
       status: status ?? this.status,
@@ -226,6 +258,8 @@ class ChatState extends Equatable {
       loadingMessage: loadingMessage ?? this.loadingMessage,
       dynamicGreeting: dynamicGreeting ?? this.dynamicGreeting,
       selectedLanguage: selectedLanguage ?? this.selectedLanguage,
+      isLoadingHistory: isLoadingHistory ?? this.isLoadingHistory,
+      historySessions: historySessions ?? this.historySessions,
     );
   }
 
@@ -260,5 +294,7 @@ class ChatState extends Equatable {
     loadingMessage,
     dynamicGreeting,
     selectedLanguage,
+    isLoadingHistory,
+    historySessions,
   ];
 }
