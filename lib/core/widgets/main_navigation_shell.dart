@@ -1,12 +1,16 @@
 import 'package:cap_project/app/cubit/navigation_cubit.dart';
+import 'package:cap_project/core/util/responsive_utils.dart';
 import 'package:cap_project/core/widgets/side_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-/// Navigation shell that matches the ChatGPT / Claude / Perplexity drawer pattern:
-/// - Sidebar overlays the content (does not push/shrink it)
-/// - Backdrop scrim dismisses the sidebar on tap
-/// - Toggle button always visible in the top-left
+/// Responsive navigation shell:
+///
+/// • Desktop (≥1024 px): persistent side-by-side sidebar.
+///   Toggle button cycles between expanded (260 px) and collapsed icon-rail (72 px).
+///
+/// • Mobile / Tablet (<1024 px): overlay drawer that slides over content.
+///   Toggle button opens / closes the drawer with a backdrop scrim.
 class MainNavigationShell extends StatelessWidget {
   const MainNavigationShell({
     required this.child,
@@ -23,45 +27,59 @@ class MainNavigationShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDesktop = ResponsiveUtils.isDesktop(context);
+
     return BlocBuilder<NavigationCubit, NavigationState>(
       builder: (context, navState) {
-        // isSidebarCollapsed == true means the sidebar is HIDDEN
-        final isSidebarOpen = !navState.isSidebarCollapsed;
+        final isCollapsed = navState.isSidebarCollapsed;
+        // On mobile "collapsed" means the overlay is closed.
+        // On desktop "collapsed" means the rail (72 px) state.
+        final isMobileOpen = !isCollapsed; // overlay open on mobile
 
+        if (isDesktop) {
+          return _DesktopLayout(
+            isCollapsed: isCollapsed,
+            title: title,
+            actions: actions,
+            floatingActionButton: floatingActionButton,
+            child: child,
+          );
+        }
+
+        // ── Mobile / Tablet — overlay drawer ──────────────────────────────
         return Scaffold(
           floatingActionButton: floatingActionButton,
           body: Stack(
             children: [
-              // ── Main content (full width, never pushed) ──────────────────
+              // Full-width content
               Column(
                 children: [
                   _TopBar(
+                    isCollapsed: isCollapsed,
+                    isDesktop: false,
                     title: title,
                     actions: actions,
-                    isSidebarOpen: isSidebarOpen,
                   ),
                   Expanded(child: child),
                 ],
               ),
 
-              // ── Backdrop scrim (tap to close) ─────────────────────────────
-              if (isSidebarOpen)
+              // Backdrop scrim
+              if (isMobileOpen)
                 Positioned.fill(
                   child: GestureDetector(
                     onTap: () =>
                         context.read<NavigationCubit>().toggleSidebar(),
                     behavior: HitTestBehavior.opaque,
-                    child: Container(
-                      color: Colors.black.withOpacity(0.35),
-                    ),
+                    child: Container(color: Colors.black.withOpacity(0.35)),
                   ),
                 ),
 
-              // ── Sliding sidebar (overlays content) ────────────────────────
+              // Sliding sidebar
               AnimatedPositioned(
                 duration: const Duration(milliseconds: 260),
                 curve: Curves.easeInOutCubic,
-                left: isSidebarOpen ? 0 : -280,
+                left: isMobileOpen ? 0 : -280,
                 top: 0,
                 bottom: 0,
                 width: 280,
@@ -75,16 +93,69 @@ class MainNavigationShell extends StatelessWidget {
   }
 }
 
+// ─── Desktop layout ───────────────────────────────────────────────────────────
+
+class _DesktopLayout extends StatelessWidget {
+  const _DesktopLayout({
+    required this.isCollapsed,
+    required this.child,
+    this.title,
+    this.actions,
+    this.floatingActionButton,
+  });
+
+  final bool isCollapsed;
+  final Widget child;
+  final Widget? title;
+  final List<Widget>? actions;
+  final Widget? floatingActionButton;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      floatingActionButton: floatingActionButton,
+      body: Row(
+        children: [
+          // Persistent sidebar — animates between full and rail
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 280),
+            curve: Curves.easeInOutCubic,
+            width: isCollapsed ? 72 : 260,
+            child: const SideMenu(),
+          ),
+
+          // Main content
+          Expanded(
+            child: Column(
+              children: [
+                _TopBar(
+                  isCollapsed: isCollapsed,
+                  isDesktop: true,
+                  title: title,
+                  actions: actions,
+                ),
+                Expanded(child: child),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 // ─── Top bar ─────────────────────────────────────────────────────────────────
 
 class _TopBar extends StatelessWidget {
   const _TopBar({
-    required this.isSidebarOpen,
+    required this.isCollapsed,
+    required this.isDesktop,
     this.title,
     this.actions,
   });
 
-  final bool isSidebarOpen;
+  final bool isCollapsed;
+  final bool isDesktop;
   final Widget? title;
   final List<Widget>? actions;
 
@@ -96,7 +167,6 @@ class _TopBar extends StatelessWidget {
         height: 44,
         child: Row(
           children: [
-            // Minimal sidebar toggle — small tap area, no background
             Padding(
               padding: const EdgeInsets.only(left: 6),
               child: SizedBox(
@@ -142,7 +212,6 @@ class _TopBar extends StatelessWidget {
 }
 
 // ─── Sidebar toggle icon ──────────────────────────────────────────────────────
-// Thin, minimal — matches ChatGPT / Claude / Perplexity style
 
 class _SidebarToggleIcon extends StatelessWidget {
   const _SidebarToggleIcon({required this.color});
@@ -172,21 +241,19 @@ class _SidebarIconPainter extends CustomPainter {
       ..style = PaintingStyle.stroke;
 
     // Outer rectangle
-    final rect = RRect.fromRectAndRadius(
-      Rect.fromLTWH(0, 0, size.width, size.height),
-      const Radius.circular(2),
-    );
-    canvas.drawRRect(rect, paint);
-
-    // Vertical divider — left panel separator
-    final double divX = size.width * 0.38;
-    canvas.drawLine(
-      Offset(divX, 0),
-      Offset(divX, size.height),
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromLTWH(0, 0, size.width, size.height),
+        const Radius.circular(2),
+      ),
       paint,
     );
 
-    // Three small horizontal lines in the left panel (menu hint)
+    // Vertical divider — left panel separator
+    final double divX = size.width * 0.38;
+    canvas.drawLine(Offset(divX, 0), Offset(divX, size.height), paint);
+
+    // Three small horizontal lines inside the left panel
     final linePaint = Paint()
       ..color = color
       ..strokeWidth = 1.2
