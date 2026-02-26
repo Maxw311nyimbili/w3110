@@ -59,6 +59,7 @@ class AuthUser extends Equatable {
     this.photoUrl,
     this.role,
     this.onboardingCompleted = false,
+    this.themeMode = 'light',
   });
 
   final String id;
@@ -67,6 +68,7 @@ class AuthUser extends Equatable {
   final String? photoUrl;
   final String? role;
   final bool onboardingCompleted;
+  final String themeMode;
 
   @override
   List<Object?> get props => [
@@ -76,5 +78,6 @@ class AuthUser extends Equatable {
     photoUrl,
     role,
     onboardingCompleted,
+    themeMode,
   ];
 }

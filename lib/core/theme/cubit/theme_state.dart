@@ -21,8 +21,25 @@ class ThemeState extends Equatable {
     }
   }
 
+  static AppThemeMode fromString(String? value) {
+    if (value == 'dark') return AppThemeMode.dark;
+    if (value == 'light') return AppThemeMode.light;
+    return AppThemeMode.system;
+  }
+
+  String get name {
+    switch (themeMode) {
+      case AppThemeMode.light:
+        return 'light';
+      case AppThemeMode.dark:
+        return 'dark';
+      case AppThemeMode.system:
+        return 'system';
+    }
+  }
+
   @override
-  List<Object> get props => [themeMode];
+  List<Object?> get props => [themeMode];
 
   ThemeState copyWith({AppThemeMode? themeMode}) {
     return ThemeState(

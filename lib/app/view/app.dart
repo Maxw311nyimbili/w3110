@@ -126,8 +126,8 @@ class _AppState extends State<App> {
       imageProcessor: ImageProcessor(),
     );
 
-    // Initialize global AuthCubit
-    _authCubit = AuthCubit(authRepository: _authRepository);
+    // Initialize global AuthCubit (will be fully initialized after ThemeCubit)
+    // We'll fix the ordering below
 
     // Initialize global LandingCubit with both repositories
     _landingCubit = LandingCubit(
@@ -141,7 +141,13 @@ class _AppState extends State<App> {
     _localeCubit = LocaleCubit();
 
     // Initialize global ThemeCubit
-    _themeCubit = ThemeCubit();
+    _themeCubit = ThemeCubit(landingRepository: _landingRepository);
+
+    // Initialize global AuthCubit with dependencies
+    _authCubit = AuthCubit(
+      authRepository: _authRepository,
+      themeCubit: _themeCubit,
+    );
 
     // Initialize global NavigationCubit
     _navigationCubit = NavigationCubit();
