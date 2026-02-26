@@ -93,14 +93,40 @@ class _TopBar extends StatelessWidget {
     return SafeArea(
       bottom: false,
       child: SizedBox(
-        height: 52,
+        height: 44,
         child: Row(
           children: [
-            IconButton(
-              icon: _PanelToggleIcon(isOpen: isSidebarOpen),
-              onPressed: () =>
-                  context.read<NavigationCubit>().toggleSidebar(),
-              tooltip: isSidebarOpen ? 'Close Sidebar' : 'Open Sidebar',
+            // Minimal sidebar toggle — small tap area, no background
+            Padding(
+              padding: const EdgeInsets.only(left: 6),
+              child: SizedBox(
+                width: 32,
+                height: 32,
+                child: Material(
+                  color: Colors.transparent,
+                  borderRadius: BorderRadius.circular(6),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(6),
+                    hoverColor: Theme.of(context)
+                        .textTheme
+                        .bodySmall
+                        ?.color
+                        ?.withOpacity(0.08),
+                    onTap: () =>
+                        context.read<NavigationCubit>().toggleSidebar(),
+                    child: Center(
+                      child: _SidebarToggleIcon(
+                        color: Theme.of(context)
+                                .textTheme
+                                .bodySmall
+                                ?.color
+                                ?.withOpacity(0.55) ??
+                            Colors.black54,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ),
             if (title != null)
               Expanded(child: Center(child: title!))
@@ -115,64 +141,69 @@ class _TopBar extends StatelessWidget {
   }
 }
 
-// ─── Panel toggle icon ───────────────────────────────────────────────────────
+// ─── Sidebar toggle icon ──────────────────────────────────────────────────────
+// Thin, minimal — matches ChatGPT / Claude / Perplexity style
 
-class _PanelToggleIcon extends StatelessWidget {
-  const _PanelToggleIcon({required this.isOpen});
+class _SidebarToggleIcon extends StatelessWidget {
+  const _SidebarToggleIcon({required this.color});
 
-  final bool isOpen;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
-    final color = Theme.of(context).iconTheme.color ?? Colors.black;
     return CustomPaint(
-      size: const Size(22, 22),
-      painter: _PanelIconPainter(color: color),
+      size: const Size(16, 14),
+      painter: _SidebarIconPainter(color: color),
     );
   }
 }
 
-class _PanelIconPainter extends CustomPainter {
-  const _PanelIconPainter({required this.color});
+class _SidebarIconPainter extends CustomPainter {
+  const _SidebarIconPainter({required this.color});
 
   final Color color;
 
   @override
   void paint(Canvas canvas, Size size) {
-    const double r = 2.5;
-    final outerRect = RRect.fromRectAndRadius(
-      Rect.fromLTWH(0.75, 0.75, size.width - 1.5, size.height - 1.5),
-      const Radius.circular(r),
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 1.4
+      ..strokeCap = StrokeCap.round
+      ..style = PaintingStyle.stroke;
+
+    // Outer rectangle
+    final rect = RRect.fromRectAndRadius(
+      Rect.fromLTWH(0, 0, size.width, size.height),
+      const Radius.circular(2),
     );
+    canvas.drawRRect(rect, paint);
 
-    final borderPaint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5;
-    canvas.drawRRect(outerRect, borderPaint);
-
-    final double panelWidth = size.width * 0.36;
-    final fillPaint = Paint()
-      ..color = color
-      ..style = PaintingStyle.fill;
-
-    final panelRect = RRect.fromRectAndCorners(
-      Rect.fromLTWH(1.5, 1.5, panelWidth - 0.75, size.height - 3),
-      topLeft: const Radius.circular(r - 1),
-      bottomLeft: const Radius.circular(r - 1),
-    );
-    canvas.drawRRect(panelRect, fillPaint);
-
-    final dividerPaint = Paint()
-      ..color = color
-      ..strokeWidth = 1.5;
+    // Vertical divider — left panel separator
+    final double divX = size.width * 0.38;
     canvas.drawLine(
-      Offset(panelWidth, 1.5),
-      Offset(panelWidth, size.height - 1.5),
-      dividerPaint,
+      Offset(divX, 0),
+      Offset(divX, size.height),
+      paint,
     );
+
+    // Three small horizontal lines in the left panel (menu hint)
+    final linePaint = Paint()
+      ..color = color
+      ..strokeWidth = 1.2
+      ..strokeCap = StrokeCap.round;
+
+    final double lx1 = divX * 0.18;
+    final double lx2 = divX * 0.82;
+    final double spacing = size.height / 4;
+    for (var i = 1; i <= 3; i++) {
+      canvas.drawLine(
+        Offset(lx1, spacing * i),
+        Offset(lx2, spacing * i),
+        linePaint,
+      );
+    }
   }
 
   @override
-  bool shouldRepaint(_PanelIconPainter old) => old.color != color;
+  bool shouldRepaint(_SidebarIconPainter old) => old.color != color;
 }
