@@ -82,13 +82,17 @@ class ChatCubit extends Cubit<ChatState> {
 
   Future<void> startRecording() async {
     try {
+      print('🎤 [STT] startRecording called');
       final hasPermission = await _audioRecordingService.hasPermission();
+      print('🎤 [STT]   hasPermission: $hasPermission');
       if (!hasPermission) {
+        print('🎤 [STT] ❌ Microphone permission denied');
         emit(state.copyWith(error: 'Microphone permission denied'));
         return;
       }
 
       await _audioRecordingService.startRecording();
+      print('🎤 [STT] ✅ Recording started');
 
       _amplitudeSubscription?.cancel();
       _amplitudeSubscription = _audioRecordingService
@@ -99,20 +103,27 @@ class ChatCubit extends Cubit<ChatState> {
 
       emit(state.copyWith(isRecording: true));
     } catch (e) {
+      print('🎤 [STT] ❌ startRecording ERROR: $e');
       emit(state.copyWith(error: 'Failed to start recording: $e'));
     }
   }
 
   Future<void> stopRecording() async {
     try {
+      print('🎤 [STT] stopRecording called');
       final path = await _audioRecordingService.stopRecording();
+      print('🎤 [STT]   recording saved to path: $path');
       _amplitudeSubscription?.cancel();
       emit(state.copyWith(isRecording: false, amplitude: 0.0));
 
       if (path != null) {
+        print('🎤 [STT] ✅ Sending audio message...');
         await sendAudioMessage(path);
+      } else {
+        print('🎤 [STT] ⚠️ No recording path returned - audio NOT sent');
       }
     } catch (e) {
+      print('🎤 [STT] ❌ stopRecording ERROR: $e');
       emit(
         state.copyWith(
           isRecording: false,
@@ -135,6 +146,10 @@ class ChatCubit extends Cubit<ChatState> {
 
   Future<void> sendAudioMessage(String audioPath) async {
     try {
+      print('🎤 [VOICE] sendAudioMessage called');
+      print('🎤 [VOICE]   audioPath: $audioPath');
+      print('🎤 [VOICE]   language: ${state.selectedLanguage.code}');
+
       emit(state.copyWith(isTyping: true));
 
       final responseData = await _chatRepository.sendVoiceMessage(
@@ -147,6 +162,11 @@ class ChatCubit extends Cubit<ChatState> {
         outputLanguage: state.selectedLanguage.code,
       );
 
+      print('🎤 [VOICE] Response received:');
+      print('🎤 [VOICE]   transcript: ${responseData['transcript']}');
+      print('🎤 [VOICE]   audio_url: ${responseData['audio_url']}');
+      print('🎤 [VOICE]   status: ${responseData['status']}');
+
       if (responseData['transcript'] != null) {
         final userMessage = ChatMessage(
           id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -158,6 +178,7 @@ class ChatCubit extends Cubit<ChatState> {
       }
       _handleChatResponse(responseData);
     } catch (e) {
+      print('🎤 [VOICE] ❌ ERROR in sendAudioMessage: $e');
       if (e.toString().contains('404')) {
         emit(
           state.copyWith(
@@ -207,6 +228,11 @@ class ChatCubit extends Cubit<ChatState> {
         responseData['validated_answer'] as Map<String, dynamic>? ?? {};
     final quickAnswer = validatedAnswer['original_answer'] as String? ?? '';
     final audioUrl = responseData['audio_url'] as String?;
+
+    print('🔊 [TTS] _handleChatResponse:');
+    print('🔊 [TTS]   status: $status');
+    print('🔊 [TTS]   audio_url: $audioUrl');
+    print('🔊 [TTS]   quickAnswer length: ${quickAnswer.length}');
 
     String detailedAnswer = '';
     List<SourceReference> sources = [];
@@ -260,7 +286,10 @@ class ChatCubit extends Cubit<ChatState> {
     );
 
     if (audioUrl != null) {
+      print('🔊 [TTS] Audio URL found, attempting playback: $audioUrl');
       _playAudio(audioUrl);
+    } else {
+      print('🔊 [TTS] ⚠️ No audio_url in response - TTS will NOT play');
     }
 
     emit(
@@ -275,29 +304,46 @@ class ChatCubit extends Cubit<ChatState> {
 
   Future<void> _playAudio(String url) async {
     try {
+      print('🔊 [TTS] _playAudio called with url: $url');
       await _audioPlayer.play(UrlSource(url));
+      print('🔊 [TTS] ✅ Audio playback started successfully');
     } catch (e) {
-      print('Error playing audio: $e');
+      print('🔊 [TTS] ❌ Error playing audio: $e');
     }
   }
 
-  /// Synthesize a specific message into speech
+  /// Synthesize a specific message into speech (speak button on a message)
   Future<void> speakMessage(String messageId, VoiceLanguage language) async {
     try {
-      // Find the numeric message ID (backend uses int for primary keys usually)
-      final numericId = int.tryParse(messageId);
-      if (numericId == null) return;
+      print('🔊 [TTS] speakMessage called:');
+      print('🔊 [TTS]   messageId (raw): $messageId');
+      print('🔊 [TTS]   language: ${language.code}');
 
+      final numericId = int.tryParse(messageId);
+      print('🔊 [TTS]   numericId (parsed): $numericId');
+
+      if (numericId == null) {
+        print('🔊 [TTS] ⚠️ Cannot speak: messageId "$messageId" is not a numeric DB ID. '
+            'The backend requires a database-assigned integer ID, not a UUID or timestamp.');
+        return;
+      }
+
+      print('🔊 [TTS]   Calling /chat/$numericId/speak ...');
       final response = await _chatRepository.speakMessage(
         messageId: numericId,
         language: language.code,
       );
 
       final audioUrl = response['audio_url'] as String?;
+      print('🔊 [TTS]   speakMessage response audio_url: $audioUrl');
+
       if (audioUrl != null) {
         await _playAudio(audioUrl);
+      } else {
+        print('🔊 [TTS] ⚠️ speakMessage returned no audio_url');
       }
     } catch (e) {
+      print('🔊 [TTS] ❌ speakMessage error: $e');
       emit(state.copyWith(error: 'Failed to speak message: ${e.toString()}'));
     }
   }
