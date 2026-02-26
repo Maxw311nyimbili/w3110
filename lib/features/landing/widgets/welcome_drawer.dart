@@ -94,7 +94,6 @@ class WelcomeDrawer extends StatelessWidget {
                         'Welcome to Thanzi',
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                              color: Colors.white,
                               fontSize: 32,
                               fontWeight: FontWeight.w800,
                               letterSpacing: -0.5,
@@ -107,7 +106,11 @@ class WelcomeDrawer extends StatelessWidget {
                           'Secure your medical history and personalize your health companion by signing in.',
                           textAlign: TextAlign.center,
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: Colors.white.withOpacity(0.6),
+                                color: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.color
+                                    ?.withOpacity(0.7),
                                 height: 1.5,
                                 fontSize: 16,
                               ),
@@ -135,7 +138,11 @@ class WelcomeDrawer extends StatelessWidget {
                                 child: Text(
                                   'Continue as Guest',
                                   style: TextStyle(
-                                    color: Colors.white.withOpacity(0.7),
+                                    color: Theme.of(context)
+                                        .textTheme
+                                        .bodySmall
+                                        ?.color
+                                        ?.withOpacity(0.7),
                                     fontWeight: FontWeight.w600,
                                     fontSize: 14,
                                   ),
@@ -150,7 +157,11 @@ class WelcomeDrawer extends StatelessWidget {
                                   child: Text(
                                     'Demo Login (Developer Bypass)',
                                     style: TextStyle(
-                                      color: Colors.white.withOpacity(0.4),
+                                      color: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.color
+                                          ?.withOpacity(0.4),
                                       fontSize: 12,
                                       fontWeight: FontWeight.w500,
                                     ),

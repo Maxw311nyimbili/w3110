@@ -135,12 +135,6 @@ class SideMenu extends StatelessWidget {
             isPrimary: true,
             isCollapsed: isCollapsed,
           ),
-          _NavItem(
-            icon: Icons.history_rounded,
-            label: 'History',
-            onTap: () => _showComingSoon(context, 'History'),
-            isCollapsed: isCollapsed,
-          ),
           SizedBox(height: isCollapsed ? 8 : 8),
           if (!isCollapsed) _NavSection(label: 'Discover'),
           _NavItem(
@@ -156,11 +150,11 @@ class SideMenu extends StatelessWidget {
             isCollapsed: isCollapsed,
           ),
           SizedBox(height: isCollapsed ? 8 : 8),
-          if (!isCollapsed) _NavSection(label: 'Settings'),
+          if (!isCollapsed) _NavSection(label: 'Account'),
           _NavItem(
-            icon: Icons.tune_outlined,
-            label: 'Preferences',
-            route: AppRouter.settings,
+            icon: Icons.history_rounded,
+            label: 'Conversations',
+            onTap: () => _showComingSoon(context, 'History'),
             isCollapsed: isCollapsed,
           ),
         ],
@@ -425,30 +419,6 @@ class _FullAuthFooter extends StatelessWidget {
   const _FullAuthFooter({required this.user});
   final dynamic user;
 
-  void _showSignOutDialog(BuildContext context) {
-    showDialog<void>(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Sign Out'),
-        content: const Text('Are you sure you want to sign out?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              context.read<AuthCubit>().signOut();
-              AppRouter.replaceTo(context, AppRouter.splash);
-            },
-            child: const Text('Sign Out', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final name = (user?.displayName as String?) ?? 'User';
@@ -460,7 +430,7 @@ class _FullAuthFooter extends StatelessWidget {
         .join();
 
     return InkWell(
-      onTap: () => _showSignOutDialog(context),
+      onTap: () => AppRouter.navigateTo(context, AppRouter.settings),
       borderRadius: BorderRadius.circular(12),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -502,7 +472,7 @@ class _FullAuthFooter extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                   Text(
-                    'Free Plan',
+                    'Profile & Settings',
                     style: AppTextStyles.bodySmall.copyWith(
                       color: Theme.of(context)
                           .textTheme
@@ -516,7 +486,7 @@ class _FullAuthFooter extends StatelessWidget {
               ),
             ),
             Icon(
-              Icons.more_horiz_rounded,
+              Icons.chevron_right_rounded,
               size: 18,
               color: Theme.of(context)
                   .textTheme
@@ -529,7 +499,6 @@ class _FullAuthFooter extends StatelessWidget {
       ),
     );
   }
-}
 
 // ─── Full guest footer (expanded) ────────────────────────────────────────────
 
