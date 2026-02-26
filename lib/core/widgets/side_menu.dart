@@ -65,40 +65,32 @@ class SideMenu extends StatelessWidget {
     bool isDesktop,
     NavigationState navState,
   ) {
+    final toggleColor = Theme.of(context)
+            .textTheme
+            .bodySmall
+            ?.color
+            ?.withOpacity(0.55) ??
+        Colors.black54;
+
+    // Collapsed rail → show only the toggle button centred
     if (isCollapsed) {
-      // Rail mode — just the logo mark
       return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 20),
+        padding: const EdgeInsets.symmetric(vertical: 14),
         child: Center(
-          child: Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: AppColors.brandDarkTeal,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Center(
-              child: Text(
-                'T',
-                style: AppTextStyles.labelLarge.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 15,
-                ),
-              ),
-            ),
-          ),
+          child: _SidebarToggleButton(color: toggleColor),
         ),
       );
     }
 
+    // Expanded → logo + name, toggle on the right
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 18, 12, 12),
+      padding: const EdgeInsets.fromLTRB(16, 14, 4, 10),
       child: Row(
         children: [
+          // Logo mark
           Container(
-            width: 28,
-            height: 28,
+            width: 26,
+            height: 26,
             decoration: BoxDecoration(
               color: AppColors.brandDarkTeal,
               borderRadius: BorderRadius.circular(7),
@@ -109,12 +101,12 @@ class SideMenu extends StatelessWidget {
                 style: AppTextStyles.labelLarge.copyWith(
                   color: Colors.white,
                   fontWeight: FontWeight.w800,
-                  fontSize: 14,
+                  fontSize: 13,
                 ),
               ),
             ),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 9),
           Text(
             'Thanzi',
             style: AppTextStyles.headlineMedium.copyWith(
@@ -124,24 +116,8 @@ class SideMenu extends StatelessWidget {
             ),
           ),
           const Spacer(),
-          // Close button — only on mobile overlay
-          if (!isDesktop)
-            IconButton(
-              icon: Icon(
-                Icons.close_rounded,
-                size: 18,
-                color: Theme.of(context)
-                    .textTheme
-                    .bodySmall
-                    ?.color
-                    ?.withOpacity(0.4),
-              ),
-              onPressed: () =>
-                  context.read<NavigationCubit>().toggleSidebar(),
-              tooltip: 'Close',
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-            ),
+          // Toggle button — on desktop collapses to rail; on mobile closes overlay
+          _SidebarToggleButton(color: toggleColor),
         ],
       ),
     );
@@ -624,4 +600,87 @@ class _FullGuestFooter extends StatelessWidget {
       ),
     );
   }
+}
+
+// ─── Sidebar toggle button (lives inside the sidebar) ────────────────────────
+
+class _SidebarToggleButton extends StatelessWidget {
+  const _SidebarToggleButton({required this.color});
+
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 32,
+      height: 32,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(6),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(6),
+          hoverColor: Theme.of(context)
+              .textTheme
+              .bodySmall
+              ?.color
+              ?.withOpacity(0.08),
+          onTap: () => context.read<NavigationCubit>().toggleSidebar(),
+          child: Center(
+            child: CustomPaint(
+              size: const Size(16, 14),
+              painter: _SidebarIconPainter(color: color),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SidebarIconPainter extends CustomPainter {
+  const _SidebarIconPainter({required this.color});
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 1.4
+      ..strokeCap = StrokeCap.round
+      ..style = PaintingStyle.stroke;
+
+    // Outer rectangle
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromLTWH(0, 0, size.width, size.height),
+        const Radius.circular(2),
+      ),
+      paint,
+    );
+
+    // Vertical divider — left panel separator
+    final double divX = size.width * 0.38;
+    canvas.drawLine(Offset(divX, 0), Offset(divX, size.height), paint);
+
+    // Three small horizontal lines in the left panel
+    final linePaint = Paint()
+      ..color = color
+      ..strokeWidth = 1.2
+      ..strokeCap = StrokeCap.round;
+
+    final double lx1 = divX * 0.18;
+    final double lx2 = divX * 0.82;
+    final double spacing = size.height / 4;
+    for (var i = 1; i <= 3; i++) {
+      canvas.drawLine(
+        Offset(lx1, spacing * i),
+        Offset(lx2, spacing * i),
+        linePaint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_SidebarIconPainter old) => old.color != color;
 }

@@ -167,37 +167,42 @@ class _TopBar extends StatelessWidget {
         height: 44,
         child: Row(
           children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 6),
-              child: SizedBox(
-                width: 32,
-                height: 32,
-                child: Material(
-                  color: Colors.transparent,
-                  borderRadius: BorderRadius.circular(6),
-                  child: InkWell(
+            // On mobile show the toggle to open the overlay;
+            // on desktop the toggle lives inside the sidebar.
+            if (!isDesktop)
+              Padding(
+                padding: const EdgeInsets.only(left: 6),
+                child: SizedBox(
+                  width: 32,
+                  height: 32,
+                  child: Material(
+                    color: Colors.transparent,
                     borderRadius: BorderRadius.circular(6),
-                    hoverColor: Theme.of(context)
-                        .textTheme
-                        .bodySmall
-                        ?.color
-                        ?.withOpacity(0.08),
-                    onTap: () =>
-                        context.read<NavigationCubit>().toggleSidebar(),
-                    child: Center(
-                      child: _SidebarToggleIcon(
-                        color: Theme.of(context)
-                                .textTheme
-                                .bodySmall
-                                ?.color
-                                ?.withOpacity(0.55) ??
-                            Colors.black54,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(6),
+                      hoverColor: Theme.of(context)
+                          .textTheme
+                          .bodySmall
+                          ?.color
+                          ?.withOpacity(0.08),
+                      onTap: () =>
+                          context.read<NavigationCubit>().toggleSidebar(),
+                      child: Center(
+                        child: _SidebarToggleIcon(
+                          color: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.color
+                                  ?.withOpacity(0.55) ??
+                              Colors.black54,
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            ),
+              )
+            else
+              const SizedBox(width: 8),
             if (title != null)
               Expanded(child: Center(child: title!))
             else
