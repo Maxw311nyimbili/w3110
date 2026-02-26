@@ -313,34 +313,31 @@ class ChatCubit extends Cubit<ChatState> {
   }
 
   /// Synthesize a specific message into speech (speak button on a message)
-  Future<void> speakMessage(String messageId, VoiceLanguage language) async {
+  /// Takes the message content directly - no database ID needed.
+  Future<void> speakMessage(String messageContent, VoiceLanguage language) async {
     try {
       print('🔊 [TTS] speakMessage called:');
-      print('🔊 [TTS]   messageId (raw): $messageId');
+      print('🔊 [TTS]   content length: ${messageContent.length}');
       print('🔊 [TTS]   language: ${language.code}');
 
-      final numericId = int.tryParse(messageId);
-      print('🔊 [TTS]   numericId (parsed): $numericId');
-
-      if (numericId == null) {
-        print('🔊 [TTS] ⚠️ Cannot speak: messageId "$messageId" is not a numeric DB ID. '
-            'The backend requires a database-assigned integer ID, not a UUID or timestamp.');
+      if (messageContent.trim().isEmpty) {
+        print('🔊 [TTS] ⚠️ Empty content, skipping synthesis');
         return;
       }
 
-      print('🔊 [TTS]   Calling /chat/$numericId/speak ...');
-      final response = await _chatRepository.speakMessage(
-        messageId: numericId,
+      print('🔊 [TTS]   Calling /chat/synthesize ...');
+      final response = await _chatRepository.synthesizeSpeech(
+        text: messageContent,
         language: language.code,
       );
 
       final audioUrl = response['audio_url'] as String?;
-      print('🔊 [TTS]   speakMessage response audio_url: $audioUrl');
+      print('🔊 [TTS]   synthesize response audio_url: $audioUrl');
 
       if (audioUrl != null) {
         await _playAudio(audioUrl);
       } else {
-        print('🔊 [TTS] ⚠️ speakMessage returned no audio_url');
+        print('🔊 [TTS] ⚠️ synthesize returned no audio_url');
       }
     } catch (e) {
       print('🔊 [TTS] ❌ speakMessage error: $e');

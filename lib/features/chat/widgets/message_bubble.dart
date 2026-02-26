@@ -670,7 +670,11 @@ class RefinedMessageBubble extends StatelessWidget {
                 title: Text('Listen in ${lang.label}'),
                 onTap: () {
                   Navigator.pop(modalContext);
-                  chatCubit.speakMessage(message.id, lang);
+                  // Pass the displayed content (quick or detailed) to synthesize
+                  final textToSpeak = message.showingDetailedView
+                      ? (message.detailedAnswer ?? message.content)
+                      : (message.quickAnswer ?? message.content);
+                  chatCubit.speakMessage(textToSpeak, lang);
                 },
               );
             }).toList(),
