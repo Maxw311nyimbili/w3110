@@ -8,11 +8,11 @@ class AppColors {
 
   // ─── Backgrounds (Visible Contrast Scale) ──────────────────────────────
   static const Color backgroundPrimary = Color(
-    0xFFE8ECF2,
-  ); // Page bg — visibly grey, distinct from cards
+    0xFFDEE5EF,
+  ); // Page bg — visibly greyish-blue, very distinct from cards
   static const Color backgroundSurface = Color(0xFFFFFFFF); // Pure white cards
   static const Color backgroundElevated = Color(
-    0xFFD8E0EC,
+    0xFFD1DAE8,
   ); // Inputs/chips — clearly darker than cards
 
   // ─── Brand — Teal Identity ─────────────────────────────────────────────────
