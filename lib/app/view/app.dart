@@ -200,26 +200,12 @@ class _AppState extends State<App> {
                   },
                   onGenerateRoute: AppRouter.generateRoute,
                   initialRoute: AppRouter.splash,
+                  navigatorObservers: [
+                    _RouteObserver(context.read<NavigationCubit>()),
+                  ],
                   builder: (context, child) {
                     if (child == null) return const SizedBox();
-
-                    // Determine if we should show the sidebar based on current route
-                    final routeName = ModalRoute.of(context)?.settings.name;
-                    
-                    final mainRoutes = [
-                      AppRouter.chat,
-                      AppRouter.scanner,
-                      AppRouter.forum,
-                      AppRouter.settings,
-                    ];
-
-                    final showShell = mainRoutes.contains(routeName);
-
-                    if (showShell) {
-                      return MainNavigationShell(child: child);
-                    }
-
-                    return child;
+                    return MainNavigationShell(child: child);
                   },
                 );
               },
@@ -279,5 +265,25 @@ class FlavorBanner extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class _RouteObserver extends NavigatorObserver {
+  _RouteObserver(this.cubit);
+  final NavigationCubit cubit;
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    cubit.setRoute(route.settings.name);
+  }
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    cubit.setRoute(previousRoute?.settings.name);
+  }
+
+  @override
+  void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
+    cubit.setRoute(newRoute?.settings.name);
   }
 }
