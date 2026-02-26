@@ -277,7 +277,7 @@ class ForumCubit extends Cubit<ForumState> {
     return result;
   }
 
-  /// Create a new post (saved locally immediately, synced in background)
+  /// Create a new post
   Future<void> createPost({
     required String title,
     required String content,
@@ -291,8 +291,8 @@ class ForumCubit extends Cubit<ForumState> {
       final localId = _uuid.v4();
       final now = DateTime.now();
 
-      // Create post locally first (instant feedback)
-      final newPost = ForumPost(
+      // Build the optimistic post for immediate UI feedback
+      var newPost = ForumPost(
         id: '', // No server ID yet
         localId: localId,
         authorId: authorId,
@@ -305,27 +305,7 @@ class ForumCubit extends Cubit<ForumState> {
         originalAnswerId: originalAnswerId,
       );
 
-      // Save to local database
-      print('DEBUG: ForumCubit.createPost - saving local post');
-      await _forumRepository.createLocalPost(
-        localId: localId,
-        title: title,
-        content: content,
-        authorId: authorId,
-        authorName: authorName,
-        sources: sources,
-        originalAnswerId: originalAnswerId,
-      );
-
-      // Add to sync queue
-      print('DEBUG: ForumCubit.createPost - adding to sync queue');
-      await _forumRepository.addToSyncQueue(
-        entityType: 'post',
-        entityId: localId,
-        action: 'create',
-      );
-
-      // Update UI immediately
+      // Update UI immediately (optimistic)
       emit(
         state.copyWith(
           posts: [newPost, ...state.posts],
@@ -333,9 +313,58 @@ class ForumCubit extends Cubit<ForumState> {
         ),
       );
 
-      // Trigger background sync
-      print('DEBUG: ForumCubit.createPost - triggering sync');
-      syncWithBackend();
+      // 1. Try offline-first path (works on mobile)
+      bool savedLocally = false;
+      try {
+        await _forumRepository.createLocalPost(
+          localId: localId,
+          title: title,
+          content: content,
+          authorId: authorId,
+          authorName: authorName,
+          sources: sources,
+          originalAnswerId: originalAnswerId,
+        );
+        await _forumRepository.addToSyncQueue(
+          entityType: 'post',
+          entityId: localId,
+          action: 'create',
+        );
+        savedLocally = true;
+        syncWithBackend();
+      } catch (_) {
+        // Local DB unavailable (web) - fall through to direct API call
+      }
+
+      // 2. If local path failed, call server directly (web path)
+      if (!savedLocally) {
+        print('DEBUG: createPost - local DB unavailable, calling API directly');
+        try {
+          final serverPost = await _forumRepository.createPostOnServer(
+            localId: localId,
+            title: title,
+            content: content,
+            sources: sources,
+            originalAnswerId: originalAnswerId,
+          );
+          // Update the optimistic post with server-assigned ID
+          final updatedPosts = state.posts.map((p) {
+            if (p.localId == localId) return serverPost;
+            return p;
+          }).toList();
+          emit(state.copyWith(posts: updatedPosts, hasPendingSync: false));
+        } catch (apiError) {
+          print('DEBUG: createPost - API also failed: $apiError');
+          // Remove optimistic post on failure
+          emit(
+            state.copyWith(
+              posts: state.posts.where((p) => p.localId != localId).toList(),
+              status: ForumStatus.error,
+              error: 'Failed to create post: ${apiError.toString()}',
+            ),
+          );
+        }
+      }
     } catch (e) {
       print('DEBUG: ForumCubit.createPost - ERROR: $e');
       emit(
@@ -413,7 +442,7 @@ class ForumCubit extends Cubit<ForumState> {
     }
   }
 
-  /// Add a comment to a post (offline-first)
+  /// Add a comment to a post (offline-first; direct API on web)
   Future<void> addComment({
     required String postId,
     required String content,
@@ -429,16 +458,7 @@ class ForumCubit extends Cubit<ForumState> {
               ? state.replyingToComment?.localId
               : null);
 
-      // 1. Create locally for instant feedback
-      await _forumRepository.createLocalComment(
-        localId: localId,
-        postId: postId,
-        content: content,
-        authorId: authorId,
-        authorName: authorName,
-        parentCommentId: effectiveParentId,
-      );
-
+      // Optimistic UI update
       final newComment = ForumComment(
         id: '',
         localId: localId,
@@ -451,36 +471,72 @@ class ForumCubit extends Cubit<ForumState> {
         syncStatus: SyncStatus.pending,
       );
 
-      // 2. Update UI
       emit(
         state.copyWith(
           comments: [...state.comments, newComment],
           hasPendingSync: true,
         ),
       );
-
-      // Update comment count on post
       if (state.selectedPost != null) {
-        final updatedPost = state.selectedPost!.copyWith(
-          commentCount: state.selectedPost!.commentCount + 1,
-        );
         emit(
           state.copyWith(
-            selectedPost: updatedPost,
-            replyingToComment: null, // Clear replying indicator
+            selectedPost: state.selectedPost!.copyWith(
+              commentCount: state.selectedPost!.commentCount + 1,
+            ),
+            replyingToComment: null,
           ),
         );
       }
 
-      // 3. Add to sync queue
-      await _forumRepository.addToSyncQueue(
-        entityType: 'comment',
-        entityId: localId,
-        action: 'create',
-      );
+      // 1. Try offline-first path (mobile)
+      bool savedLocally = false;
+      try {
+        await _forumRepository.createLocalComment(
+          localId: localId,
+          postId: postId,
+          content: content,
+          authorId: authorId,
+          authorName: authorName,
+          parentCommentId: effectiveParentId,
+        );
+        await _forumRepository.addToSyncQueue(
+          entityType: 'comment',
+          entityId: localId,
+          action: 'create',
+        );
+        savedLocally = true;
+        syncWithBackend();
+      } catch (_) {
+        // Local DB unavailable (web)
+      }
 
-      // Trigger sync
-      syncWithBackend();
+      // 2. If local path failed, call server directly (web path)
+      if (!savedLocally) {
+        try {
+          final serverComment = await _forumRepository.addPostComment(
+            postId: postId,
+            content: content,
+            clientId: localId,
+            parentCommentId: effectiveParentId,
+          );
+          // Replace optimistic comment with server-confirmed version
+          final updatedComments = state.comments.map((c) {
+            if (c.localId == localId) return serverComment;
+            return c;
+          }).toList();
+          emit(state.copyWith(comments: updatedComments, hasPendingSync: false));
+        } catch (apiError) {
+          // Remove optimistic comment on failure
+          emit(
+            state.copyWith(
+              comments:
+                  state.comments.where((c) => c.localId != localId).toList(),
+              status: ForumStatus.error,
+              error: 'Failed to add comment: ${apiError.toString()}',
+            ),
+          );
+        }
+      }
     } catch (e) {
       emit(
         state.copyWith(
