@@ -1,31 +1,45 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class NavigationState {
-  final bool isSidebarCollapsed;
-  final Widget? title;
-  final List<Widget>? actions;
-  final String? currentRoute;
+// The four main app tabs
+enum AppTab { chat, scanner, forum, settings }
 
+class NavigationState {
   const NavigationState({
-    this.isSidebarCollapsed = false,
+    this.activeTab = AppTab.chat,
+    this.isDesktopSidebarCollapsed = false,
+    this.isMobileDrawerOpen = false,
     this.title,
     this.actions,
-    this.currentRoute,
   });
 
+  final AppTab activeTab;
+
+  /// Desktop: true = icon rail (72 px), false = full (260 px)
+  final bool isDesktopSidebarCollapsed;
+
+  /// Mobile: true = overlay drawer visible
+  final bool isMobileDrawerOpen;
+
+  /// Optional page-specific top bar overrides
+  final Widget? title;
+  final List<Widget>? actions;
+
   NavigationState copyWith({
-    bool? isSidebarCollapsed,
+    AppTab? activeTab,
+    bool? isDesktopSidebarCollapsed,
+    bool? isMobileDrawerOpen,
     Widget? title,
     List<Widget>? actions,
-    String? currentRoute,
     bool clearAppBar = false,
   }) {
     return NavigationState(
-      isSidebarCollapsed: isSidebarCollapsed ?? this.isSidebarCollapsed,
+      activeTab: activeTab ?? this.activeTab,
+      isDesktopSidebarCollapsed:
+          isDesktopSidebarCollapsed ?? this.isDesktopSidebarCollapsed,
+      isMobileDrawerOpen: isMobileDrawerOpen ?? this.isMobileDrawerOpen,
       title: clearAppBar ? null : (title ?? this.title),
       actions: clearAppBar ? null : (actions ?? this.actions),
-      currentRoute: currentRoute ?? this.currentRoute,
     );
   }
 }
@@ -33,24 +47,26 @@ class NavigationState {
 class NavigationCubit extends Cubit<NavigationState> {
   NavigationCubit() : super(const NavigationState());
 
-  void toggleSidebar() {
-    emit(state.copyWith(isSidebarCollapsed: !state.isSidebarCollapsed));
+  void setTab(AppTab tab) {
+    emit(state.copyWith(activeTab: tab, isMobileDrawerOpen: false));
   }
 
-  void setSidebarCollapsed(bool collapsed) {
-    emit(state.copyWith(isSidebarCollapsed: collapsed));
-  }
-
-  void updateAppBar({Widget? title, List<Widget>? actions}) {
+  void toggleDesktopSidebar() {
     emit(state.copyWith(
-      title: title,
-      actions: actions,
-      clearAppBar: false,
+      isDesktopSidebarCollapsed: !state.isDesktopSidebarCollapsed,
     ));
   }
 
-  void setRoute(String? route) {
-    emit(state.copyWith(currentRoute: route));
+  void openMobileDrawer() {
+    emit(state.copyWith(isMobileDrawerOpen: true));
+  }
+
+  void closeMobileDrawer() {
+    emit(state.copyWith(isMobileDrawerOpen: false));
+  }
+
+  void updateAppBar({Widget? title, List<Widget>? actions}) {
+    emit(state.copyWith(title: title, actions: actions));
   }
 
   void clearAppBar() {

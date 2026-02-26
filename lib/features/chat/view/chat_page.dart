@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:auth_repository/auth_repository.dart';
-import 'package:chat_repository/chat_repository.dart';
 import 'package:cap_project/app/view/app_router.dart';
 import 'package:cap_project/core/locale/cubit/locale_cubit.dart';
-import 'package:cap_project/core/theme/app_colors.dart';
 import 'package:cap_project/core/theme/app_text_styles.dart';
 import 'package:cap_project/features/auth/cubit/cubit.dart';
-import 'package:cap_project/core/services/audio_recording_service.dart';
 import 'package:cap_project/features/landing/widgets/welcome_drawer.dart';
 import 'package:cap_project/features/landing/cubit/cubit.dart';
 import 'package:cap_project/features/medscanner/cubit/medscanner_state.dart'
@@ -58,6 +55,18 @@ class _ChatPageState extends State<ChatPage> {
           _isLoading = false;
         });
 
+        // Update the shared ChatCubit with onboarding profile data
+        if (mounted) {
+          context.read<ChatCubit>().updateProfile(
+            userRole: status.userRole,
+            interests: status.interests,
+          );
+          context.read<ChatCubit>().initialize();
+          if (widget.initialScanResult != null) {
+            context.read<ChatCubit>().addMedicineResult(widget.initialScanResult!);
+          }
+        }
+
         // Handle initial entry (Popup or Onboarding)
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
@@ -99,39 +108,15 @@ class _ChatPageState extends State<ChatPage> {
       );
     }
 
-    final locale = context.read<LocaleCubit>().state.locale.languageCode;
+    context.read<LocaleCubit>().stream.listen((localeState) {
+      context.read<ChatCubit>().setLocale(localeState.locale.languageCode);
+    });
 
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider(
-          create: (context) {
-            final cubit = ChatCubit(
-              chatRepository: context.read<ChatRepository>(),
-              landingRepository: context.read<LandingRepository>(),
-              audioRecordingService: AudioRecordingService(),
-              locale: locale,
-              userRole: _onboardingStatus?.userRole,
-              interests: _onboardingStatus?.interests,
-            )..initialize();
-
-            if (widget.initialScanResult != null) {
-              cubit.addMedicineResult(widget.initialScanResult!);
-            }
-
-            context.read<LocaleCubit>().stream.listen((localeState) {
-              cubit.setLocale(localeState.locale.languageCode);
-            });
-
-            return cubit;
-          },
-        ),
-        BlocProvider(
-          create: (context) => ForumCubit(
-            forumRepository: context.read<ForumRepository>(),
-            authRepository: context.read<AuthRepository>(),
-          ),
-        ),
-      ],
+    return BlocProvider(
+      create: (context) => ForumCubit(
+        forumRepository: context.read<ForumRepository>(),
+        authRepository: context.read<AuthRepository>(),
+      ),
       child: ChatView(onboardingStatus: _onboardingStatus),
     );
   }
@@ -165,7 +150,8 @@ class _ChatViewState extends State<ChatView> {
   void _updateAppBar() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      
+      final isDesktop = ResponsiveUtils.isDesktop(context);
+
       context.read<NavigationCubit>().updateAppBar(
         title: !_isAudioMode
             ? Text(
@@ -176,52 +162,20 @@ class _ChatViewState extends State<ChatView> {
                 ),
               )
             : null,
-        actions: !_isAudioMode
+        // Only show top-bar icons on mobile — desktop uses the sidebar
+        actions: (!_isAudioMode && !isDesktop)
             ? [
                 Padding(
-                  padding: const EdgeInsets.only(right: 16),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surface,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Theme.of(context).dividerColor.withOpacity(0.1),
-                      ),
-                    ),
-                    child: Builder(
-                      builder: (context) => IconButton(
-                        icon: Icon(
-                          Icons.history_rounded,
-                          size: 20,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                        onPressed: () => Scaffold.of(context).openEndDrawer(),
-                        tooltip: 'Chat History',
-                      ),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(right: 16),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surface,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Theme.of(context).dividerColor.withOpacity(0.1),
-                      ),
-                    ),
-                    child: IconButton(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: Builder(
+                    builder: (context) => IconButton(
                       icon: Icon(
-                        Icons.forum_outlined,
-                        size: 20,
+                        Icons.history_rounded,
+                        size: 22,
                         color: Theme.of(context).colorScheme.primary,
                       ),
-                      onPressed: () => AppRouter.navigateTo<void>(
-                        context,
-                        AppRouter.forum,
-                      ),
-                      tooltip: 'Community Forum',
+                      onPressed: () => Scaffold.of(context).openEndDrawer(),
+                      tooltip: 'Chat History',
                     ),
                   ),
                 ),

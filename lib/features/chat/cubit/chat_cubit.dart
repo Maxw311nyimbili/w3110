@@ -40,14 +40,20 @@ class ChatCubit extends Cubit<ChatState> {
   final AudioPlayer _audioPlayer;
   final Uuid _uuid;
   String _currentLocale;
-  final String? _userRole;
-  final List<String>? _interests;
+  String? _userRole;
+  List<String>? _interests;
   StreamSubscription<Amplitude>? _amplitudeSubscription;
   Timer? _loadingTimer;
 
   /// Update the locale for API requests
   void setLocale(String locale) {
     _currentLocale = locale;
+  }
+
+  /// Update user profile (role/interests) — called after onboarding status loads.
+  void updateProfile({String? userRole, List<String>? interests}) {
+    _userRole = userRole;
+    _interests = interests;
   }
 
   /// Update the voice language for the Bilingual Bridge
@@ -843,5 +849,18 @@ class ChatCubit extends Cubit<ChatState> {
     } catch (e) {
       return 'Unknown';
     }
+  }
+
+  /// Clear current conversation and start a fresh session.
+  void startNewSession() {
+    emit(
+      state.copyWith(
+        messages: [],
+        sessionId: null,
+        status: ChatStatus.initial,
+        isTyping: false,
+        error: null,
+      ),
+    );
   }
 }

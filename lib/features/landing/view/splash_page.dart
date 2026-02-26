@@ -287,7 +287,7 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                                           if (isAuthenticated) {
                                             AppRouter.replaceTo(
                                               context,
-                                              AppRouter.chat,
+                                              AppRouter.shell,
                                             );
                                           } else {
                                             AppRouter.navigateTo(

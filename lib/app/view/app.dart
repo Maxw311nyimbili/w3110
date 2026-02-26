@@ -6,10 +6,12 @@ import 'package:cap_project/app/view/app_config.dart';
 import 'package:cap_project/app/view/app_router.dart';
 import 'package:cap_project/core/locale/cubit/locale_cubit.dart';
 import 'package:cap_project/core/locale/cubit/locale_state.dart';
+import 'package:cap_project/core/services/audio_recording_service.dart';
 import 'package:cap_project/core/theme/app_theme.dart';
 import 'package:cap_project/core/theme/cubit/theme_cubit.dart';
 import 'package:cap_project/core/theme/cubit/theme_state.dart';
 import 'package:cap_project/features/auth/cubit/auth_cubit.dart';
+import 'package:cap_project/features/chat/cubit/chat_cubit.dart';
 import 'package:cap_project/features/landing/cubit/landing_cubit.dart';
 import 'package:cap_project/app/cubit/navigation_cubit.dart';
 import 'package:cap_project/l10n/l10n.dart';
@@ -19,7 +21,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:forum_repository/forum_repository.dart';
 import 'package:landing_repository/landing_repository.dart';
-import 'package:cap_project/core/widgets/main_navigation_shell.dart';
+import 'package:cap_project/core/widgets/app_shell.dart';
 import 'package:media_repository/media_repository.dart';
 
 /// Main app widget
@@ -46,6 +48,7 @@ class _AppState extends State<App> {
   late final LandingRepository _landingRepository;
   late final MediaRepository _mediaRepository;
   late final AuthCubit _authCubit;
+  late final ChatCubit _chatCubit;
   late final LandingCubit _landingCubit;
   late final LocaleCubit _localeCubit;
   late final ThemeCubit _themeCubit;
@@ -149,6 +152,14 @@ class _AppState extends State<App> {
     // Other Cubits with no inter-dependencies
     _localeCubit = LocaleCubit();
     _navigationCubit = NavigationCubit();
+
+    // ChatCubit — created at app level so SideMenu can access history.
+    // Profile (userRole/interests) is updated later by ChatPage once onboarding loads.
+    _chatCubit = ChatCubit(
+      chatRepository: _chatRepository,
+      landingRepository: _landingRepository,
+      audioRecordingService: AudioRecordingService(),
+    );
   }
 
   void _setupLocaleListener() {
@@ -171,6 +182,7 @@ class _AppState extends State<App> {
       child: MultiBlocProvider(
         providers: [
           BlocProvider.value(value: _authCubit),
+          BlocProvider.value(value: _chatCubit),
           BlocProvider.value(value: _landingCubit),
           BlocProvider.value(value: _localeCubit),
           BlocProvider.value(value: _themeCubit),
@@ -200,12 +212,9 @@ class _AppState extends State<App> {
                   },
                   onGenerateRoute: AppRouter.generateRoute,
                   initialRoute: AppRouter.splash,
-                  navigatorObservers: [
-                    _RouteObserver(context.read<NavigationCubit>()),
-                  ],
                   builder: (context, child) {
                     if (child == null) return const SizedBox();
-                    return MainNavigationShell(child: child);
+                    return child;
                   },
                 );
               },
@@ -219,6 +228,7 @@ class _AppState extends State<App> {
   @override
   void dispose() {
     _authCubit.close();
+    _chatCubit.close();
     _landingCubit.close();
     _localeCubit.close();
     _themeCubit.close();
@@ -265,25 +275,5 @@ class FlavorBanner extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-class _RouteObserver extends NavigatorObserver {
-  _RouteObserver(this.cubit);
-  final NavigationCubit cubit;
-
-  @override
-  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    cubit.setRoute(route.settings.name);
-  }
-
-  @override
-  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    cubit.setRoute(previousRoute?.settings.name);
-  }
-
-  @override
-  void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
-    cubit.setRoute(newRoute?.settings.name);
   }
 }
