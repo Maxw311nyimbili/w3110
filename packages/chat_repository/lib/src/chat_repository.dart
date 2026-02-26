@@ -142,6 +142,23 @@ class ChatRepository {
       throw ChatException('Failed to synthesize speech: ${e.toString()}');
     }
   }
+
+  /// Synthesize speech from raw text (no DB ID needed).
+  /// Backend endpoint: POST /chat/synthesize
+  Future<Map<String, dynamic>> synthesizeSpeech({
+    required String text,
+    required String language,
+  }) async {
+    try {
+      final response = await _apiClient.post(
+        '/chat/synthesize',
+        data: {'text': text, 'language': language},
+      );
+      return response.data as Map<String, dynamic>;
+    } catch (e) {
+      throw ChatException('Failed to synthesize speech: ${e.toString()}');
+    }
+  }
 }
 
 /// Custom exception for chat repository errors
