@@ -84,20 +84,22 @@ class SideMenu extends StatelessWidget {
 
     // Expanded → logo + name, toggle on the right
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 14, 4, 10),
+      padding: const EdgeInsets.fromLTRB(16, 10, 4, 8),
       child: Row(
         children: [
           // Logo mark
           ClipRRect(
-            borderRadius: BorderRadius.circular(7),
+            borderRadius: BorderRadius.circular(8),
             child: Image.asset(
               'assets/images/logo.png',
-              width: 26,
-              height: 26,
-              fit: BoxFit.cover,
+              width: 40,
+              height: 40,
+              fit: BoxFit.contain,
+              filterQuality: FilterQuality.high,
+              isAntiAlias: true,
             ),
           ),
-          const SizedBox(width: 9),
+          const SizedBox(width: 12),
           Text(
             'Thanzi',
             style: AppTextStyles.headlineMedium.copyWith(
