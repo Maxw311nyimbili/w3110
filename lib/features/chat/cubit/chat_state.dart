@@ -4,7 +4,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:cap_project/features/medscanner/cubit/medscanner_state.dart'
     as scanner;
-import 'package:chat_repository/chat_repository.dart' hide ChatMessage;
+import 'package:chat_repository/chat_repository.dart' hide ChatMessage, SourceReference;
 
 enum ChatStatus {
   initial,

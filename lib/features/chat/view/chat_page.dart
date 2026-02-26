@@ -16,6 +16,7 @@ import 'package:cap_project/core/util/responsive_utils.dart';
 import 'package:cap_project/core/widgets/main_navigation_shell.dart';
 import '../cubit/cubit.dart';
 import '../widgets/widgets.dart';
+import '../widgets/history_drawer.dart';
 
 import 'package:landing_repository/landing_repository.dart';
 import 'package:cap_project/features/forum/cubit/forum_cubit.dart';
@@ -182,7 +183,7 @@ class _ChatViewState extends State<ChatView> {
                   ),
                   child: Builder(
                     builder: (context) => IconButton(
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.history_rounded,
                         size: 20,
                         color: Theme.of(context).colorScheme.primary,
