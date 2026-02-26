@@ -646,8 +646,8 @@ class ChatCubit extends Cubit<ChatState> {
         allowedExtensions: ['pdf', 'doc', 'docx', 'txt'],
       );
 
-      if (result != null && result.files.single.path != null) {
-        final file = result.files.single;
+      if (result != null && result.files.first.path != null) {
+        final file = result.files.first;
         final attachment = PendingAttachment(
           path: file.path!,
           name: file.name,
