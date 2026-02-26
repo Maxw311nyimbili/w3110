@@ -1,6 +1,7 @@
 // lib/app/app_router.dart
 
 import 'package:flutter/cupertino.dart';
+import 'package:cap_project/core/widgets/app_shell.dart';
 import 'package:cap_project/core/widgets/auth_guard.dart';
 import 'package:cap_project/features/auth/auth.dart';
 import 'package:cap_project/features/auth/view/settings_page.dart';
@@ -18,6 +19,7 @@ class AppRouter {
   static const String splash = '/splash';
   static const String featureChoice = '/feature-choice';
   static const String landing = '/';
+  static const String shell = '/app'; // Persistent app shell (post-auth)
   static const String chat = '/chat';
   static const String scanner = '/scanner';
   static const String forum = '/forum';
@@ -92,6 +94,15 @@ class AppRouter {
               child: child,
             );
           },
+        );
+
+      case AppRouter.shell:
+        return PageRouteBuilder(
+          settings: settings,
+          pageBuilder: (_, __, ___) => const AuthGuard(child: AppShell()),
+          transitionDuration: Duration.zero,
+          reverseTransitionDuration: Duration.zero,
+          transitionsBuilder: (_, __, ___, child) => child, // No transition
         );
 
       default:
