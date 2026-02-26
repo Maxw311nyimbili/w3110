@@ -1,4 +1,5 @@
 import 'package:cap_project/app/cubit/navigation_cubit.dart';
+import 'package:cap_project/app/view/app_router.dart';
 import 'package:cap_project/core/util/responsive_utils.dart';
 import 'package:cap_project/core/widgets/side_menu.dart';
 import 'package:flutter/material.dart';
@@ -29,10 +30,24 @@ class MainNavigationShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop = ResponsiveUtils.isDesktop(context);
-
     return BlocBuilder<NavigationCubit, NavigationState>(
       builder: (context, navState) {
+        // Determine if we should show the shell based on current route
+        final mainRoutes = [
+          AppRouter.chat,
+          AppRouter.scanner,
+          AppRouter.forum,
+          AppRouter.settings,
+          AppRouter.landing,
+        ];
+
+        final showShell = mainRoutes.contains(navState.currentRoute);
+
+        if (!showShell) {
+          return child;
+        }
+
+        final isDesktop = ResponsiveUtils.isDesktop(context);
         final isCollapsed = navState.isSidebarCollapsed;
         final isMobileOpen = !isCollapsed;
 
@@ -143,11 +158,8 @@ class _DesktopLayout extends StatelessWidget {
                   actions: actions,
                 ),
                 Expanded(
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 250),
-                    child: child,
-                  ),
-                ),
+                child: child,
+              ),
               ],
             ),
           ),
