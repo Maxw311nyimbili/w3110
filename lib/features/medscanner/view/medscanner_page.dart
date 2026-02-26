@@ -7,7 +7,7 @@ import 'package:cap_project/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:cap_project/core/widgets/entry_animation.dart';
 import 'package:cap_project/core/util/responsive_utils.dart';
-import 'package:cap_project/core/widgets/main_navigation_shell.dart';
+import 'package:cap_project/app/cubit/navigation_cubit.dart';
 import 'package:media_repository/media_repository.dart';
 
 /// MedScanner page - camera and image analysis
@@ -43,23 +43,37 @@ class MedScannerPage extends StatelessWidget {
 }
 
 /// MedScanner view - wraps scanner body
-class MedScannerView extends StatelessWidget {
+class MedScannerView extends StatefulWidget {
   const MedScannerView({super.key});
+
+  @override
+  State<MedScannerView> createState() => _MedScannerViewState();
+}
+
+class _MedScannerViewState extends State<MedScannerView> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<NavigationCubit>().updateAppBar(
+            title: Text(AppLocalizations.of(context).medScanner),
+            actions: [
+              IconButton(
+                onPressed: () => _showInfoDialog(context),
+                icon: const Icon(Icons.info_outline_rounded, size: 22),
+              ),
+            ],
+          );
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<MedScannerCubit, MedScannerState>(
       builder: (context, state) {
-        return MainNavigationShell(
-          title: Text(AppLocalizations.of(context).medScanner),
-          actions: [
-            // Info Button
-            IconButton(
-              onPressed: () => _showInfoDialog(context),
-              icon: const Icon(Icons.info_outline_rounded, size: 22),
-            ),
-          ],
-          child: Container(
+        return Scaffold(
+          body: Container(
             color: Colors.black, // Dark background for camera
             child: Center(
               child: ConstrainedBox(

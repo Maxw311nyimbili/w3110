@@ -1,3 +1,4 @@
+import 'package:cap_project/app/cubit/navigation_cubit.dart';
 import 'package:cap_project/app/view/app_router.dart';
 import 'package:cap_project/core/locale/cubit/locale_cubit.dart';
 import 'package:cap_project/core/locale/cubit/locale_state.dart';
@@ -11,33 +12,43 @@ import 'package:cap_project/l10n/l10n.dart';
 import 'package:cap_project/core/theme/cubit/theme_cubit.dart';
 import 'package:cap_project/core/theme/cubit/theme_state.dart';
 import 'package:cap_project/core/util/responsive_utils.dart';
-import 'package:cap_project/core/widgets/main_navigation_shell.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cap_project/core/widgets/entry_animation.dart';
 
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
 
-  static Route<void> route() {
-    return MaterialPageRoute(
-      builder: (context) => const SettingsPage(),
-    );
+  @override
+  State<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final l10n = AppLocalizations.of(context);
+      context.read<NavigationCubit>().updateAppBar(
+            title: Text(
+              l10n.settings,
+              style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 24,
+                  ),
+            ),
+            actions: [],
+          );
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
 
-    return MainNavigationShell(
-      title: Text(
-        l10n.settings,
-        style: Theme.of(context).textTheme.displaySmall?.copyWith(
-              fontWeight: FontWeight.w800,
-              fontSize: 24,
-            ),
-      ),
-      child: Center(
+    return Scaffold(
+      body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 800),
           child: CustomScrollView(
