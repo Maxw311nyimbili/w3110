@@ -124,7 +124,7 @@ class RefinedMessageBubble extends StatelessWidget {
                 children: [
                   Image.asset(
                     'assets/images/logo.png',
-                    height: 32, // Larger logo
+                    height: 44,
                     fit: BoxFit.contain,
                   ),
                   const Spacer(),
