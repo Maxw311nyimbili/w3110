@@ -9,7 +9,7 @@ class AppColors {
   // ─── Backgrounds (Premium Neutral & Tinted Scale) ─────────────────────────
   static const Color backgroundPrimary = Color(0xFFFFFFFF); // Pure white workspace
   static const Color backgroundSurface = Color(0xFFFFFFFF); // Clean cards
-  static const Color backgroundElevated = Color(0xFFF2F2F7); // airy secondary (Apple/Sidebar)
+  static const Color backgroundElevated = Color(0xFFFFFFFF); // Clean white (Apple/Sidebar)
   static const Color backgroundSecondary = Color(0xFFF9FAFB); // Subtle content containers
 
   // ─── Brand — Teal Identity ─────────────────────────────────────────────────
@@ -28,8 +28,8 @@ class AppColors {
 
   // ─── Text (High-Performance Typography) ───────────────────────────────────
   static const Color textPrimary = Color(0xFF111827); // Deep slate (Tailwind/Inter style)
-  static const Color textSecondary = Color(0xFF4B5563); // Muted slate-grey
-  static const Color textTertiary = Color(0xFF9CA3AF); // Light slate-grey
+  static const Color textSecondary = Color(0xFF374151); // Darker slate-grey
+  static const Color textTertiary = Color(0xFF6B7280); // Medium slate-grey
   static const Color textInverted = Color(0xFFFFFFFF); // White text on dark
   static const Color textAccent = Color(0xFF0C7E8A); // Teal text links
 

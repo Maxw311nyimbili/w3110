@@ -250,20 +250,31 @@ class _RefinedChatInputState extends State<RefinedChatInput>
             color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(28),
             border: Border.all(
-              color: Theme.of(context).dividerColor.withOpacity(0.1),
+              color: Theme.of(context).dividerColor.withOpacity(0.08),
               width: 1.0,
             ),
-            boxShadow: [
-              BoxShadow(
-                color: Theme.of(context).colorScheme.primary.withOpacity(
-                      widget.isLandingMode ? 0.12 : 0.08,
+            boxShadow: widget.isLandingMode
+                ? [
+                    BoxShadow(
+                      color: Theme.of(context).colorScheme.primary.withOpacity(0.08),
+                      blurRadius: 32,
+                      spreadRadius: -4,
+                      offset: const Offset(0, 12),
                     ),
-                blurRadius: widget.isLandingMode ? 16 : 8,
-                offset: widget.isLandingMode
-                    ? const Offset(0, 4)
-                    : const Offset(0, 2),
-              ),
-            ],
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 12,
+                      spreadRadius: 0,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                : [
+                    BoxShadow(
+                      color: Theme.of(context).colorScheme.primary.withOpacity(0.05),
+                      blurRadius: 12,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
           ),
           child: widget.isAudioMode ? _buildAudioBar() : _buildInputBar(),
         ),
