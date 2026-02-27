@@ -270,6 +270,14 @@ class _ChatViewState extends State<ChatView> {
             _updateAppBar();
           },
         ),
+        BlocListener<ChatCubit, ChatState>(
+          listenWhen: (prev, curr) =>
+              prev.activeSessionId != curr.activeSessionId ||
+              prev.isLoadingHistory != curr.isLoadingHistory,
+          listener: (context, state) {
+            _updateAppBar();
+          },
+        ),
       ],
       child: BlocBuilder<ChatCubit, ChatState>(
         builder: (context, chatState) {
