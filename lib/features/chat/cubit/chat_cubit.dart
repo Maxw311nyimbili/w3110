@@ -863,4 +863,9 @@ class ChatCubit extends Cubit<ChatState> {
       ),
     );
   }
+
+  /// Clear the history sessions list locally (e.g., on logout).
+  void clearLocalHistorySessions() {
+    emit(state.copyWith(historySessions: []));
+  }
 }

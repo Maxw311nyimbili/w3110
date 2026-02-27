@@ -33,33 +33,63 @@ class _SideMenuState extends State<SideMenu> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<NavigationCubit, NavigationState>(
-      builder: (context, navState) {
-        final isDesktop = ResponsiveUtils.isDesktop(context);
-        final isCollapsed = isDesktop && navState.isDesktopSidebarCollapsed;
-        final activeTab = navState.activeTab;
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<AuthCubit, AuthState>(
+          listenWhen: (prev, curr) =>
+              prev.status == AuthStatus.authenticated &&
+              curr.status == AuthStatus.unauthenticated,
+          listener: (context, state) {
+            context.read<ChatCubit>().clearLocalHistorySessions();
+            context.read<ChatCubit>().startNewSession();
+          },
+        ),
+        BlocListener<AuthCubit, AuthState>(
+          listenWhen: (prev, curr) =>
+              prev.status != AuthStatus.authenticated &&
+              curr.status == AuthStatus.authenticated,
+          listener: (context, state) {
+            context.read<ChatCubit>().loadHistory();
+          },
+        ),
+      ],
+      child: BlocBuilder<NavigationCubit, NavigationState>(
+        builder: (context, navState) {
+          final authState = context.watch<AuthCubit>().state;
+          final isAuthenticated = authState.status == AuthStatus.authenticated;
+          final isDesktop = ResponsiveUtils.isDesktop(context);
+          final isCollapsed = isDesktop && navState.isDesktopSidebarCollapsed;
+          final activeTab = navState.activeTab;
 
-        final theme = Theme.of(context);
-        final isDark = theme.brightness == Brightness.dark;
-        final sidebarBg =
-            isDark ? AppColors.darkBackgroundSurface : const Color(0xFFF0F2F5);
+          final theme = Theme.of(context);
+          final isDark = theme.brightness == Brightness.dark;
+          final sidebarBg =
+              isDark ? AppColors.darkBackgroundSurface : const Color(0xFFF0F2F5);
 
-        return Container(
-          width: double.infinity,
-          height: double.infinity,
-          color: sidebarBg,
-          child: SafeArea(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _buildHeader(context, isCollapsed, isDesktop),
-                Expanded(child: _buildNavList(context, isCollapsed, activeTab)),
-                _buildFooter(context, isCollapsed),
-              ],
+          return Container(
+            width: double.infinity,
+            height: double.infinity,
+            color: sidebarBg,
+            child: SafeArea(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildHeader(context, isCollapsed, isDesktop),
+                  Expanded(
+                    child: _buildNavList(
+                      context,
+                      isCollapsed,
+                      activeTab,
+                      isAuthenticated,
+                    ),
+                  ),
+                  _buildFooter(context, isCollapsed, authState),
+                ],
+              ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 
@@ -120,6 +150,7 @@ class _SideMenuState extends State<SideMenu> {
     BuildContext context,
     bool isCollapsed,
     AppTab activeTab,
+    bool isAuthenticated,
   ) {
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -166,16 +197,21 @@ class _SideMenuState extends State<SideMenu> {
 
           // Conversations / History
           const SizedBox(height: 8),
-          if (!isCollapsed) _SectionLabel('Conversations'),
-          _ConversationsSection(isCollapsed: isCollapsed),
+          if (!isCollapsed && isAuthenticated) ...[
+            _SectionLabel('Conversations'),
+            _ConversationsSection(isCollapsed: isCollapsed),
+          ],
         ],
       ),
     );
   }
 
   // ── Footer ────────────────────────────────────────────────────────────────
-  Widget _buildFooter(BuildContext context, bool isCollapsed) {
-    final authState = context.watch<AuthCubit>().state;
+  Widget _buildFooter(
+    BuildContext context,
+    bool isCollapsed,
+    AuthState authState,
+  ) {
     final user = authState.user;
     final isAuthenticated = authState.status == AuthStatus.authenticated;
 
@@ -223,7 +259,7 @@ class _ToggleButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(6),
         onTap: () => context.read<NavigationCubit>().toggleDesktopSidebar(),
         child: Center(
-          child: Icon(Icons.menu_rounded, size: 18, color: color),
+          child: Icon(Icons.view_sidebar_rounded, size: 18, color: color),
         ),
       ),
     );
@@ -617,34 +653,28 @@ class _GuestFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(14),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Sign in to save your chats',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
-          ),
-          const SizedBox(height: 8),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () => WelcomeDrawer.show(context),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.brandDarkTeal,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                padding: const EdgeInsets.symmetric(vertical: 10),
-              ),
-              child: const Text('Sign In', style: TextStyle(fontSize: 13)),
+    return InkWell(
+      onTap: () => WelcomeDrawer.show(context),
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+        child: Row(
+          children: [
+            Icon(
+              Icons.login_rounded,
+              size: 20,
+              color: AppColors.brandDarkTeal,
             ),
-          ),
-        ],
+            const SizedBox(width: 12),
+            Text(
+              'Sign In',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.brandDarkTeal,
+                  ),
+            ),
+          ],
+        ),
       ),
     );
   }
