@@ -115,9 +115,12 @@ class _ReplyInputFieldForModalState extends State<ReplyInputFieldForModal> {
                     vertical: 10,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.accentLight.withOpacity(0.5),
+                    color: AppColors.accentLight.withOpacity(0.3),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppColors.accentLight),
+                    border: Border.all(
+                      color: AppColors.accentLight,
+                      width: 1.2,
+                    ),
                   ),
                   child: Row(
                     children: [
@@ -225,13 +228,18 @@ class _ReplyInputFieldForModalState extends State<ReplyInputFieldForModal> {
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
-                      color: AppColors.backgroundElevated,
+                      color: Theme.of(context).colorScheme.surface,
                       borderRadius: BorderRadius.circular(28),
-                      border: Border.all(color: AppColors.borderLight),
+                      border: Border.all(
+                        color: Theme.of(context).brightness == Brightness.light
+                            ? AppColors.accentLight
+                            : AppColors.borderDark,
+                        width: 1.5,
+                      ),
                       boxShadow: [
                         BoxShadow(
-                          color: AppColors.shadowWarm.withOpacity(0.03),
-                          blurRadius: 10,
+                          color: Colors.black.withOpacity(0.04),
+                          blurRadius: 12,
                           offset: const Offset(0, 4),
                         ),
                       ],

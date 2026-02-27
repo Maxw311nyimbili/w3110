@@ -180,16 +180,34 @@ class _GeneralCommentsViewState extends State<GeneralCommentsView> {
     BuildContext context,
     List<ForumComment> allComments,
   ) {
-    final Map<String?, List<ForumComment>> grouped = {};
+    final Map<String, List<ForumComment>> grouped = {};
     for (final comment in allComments) {
       final pid = comment.parentCommentId;
-      grouped.containsKey(pid)
-          ? grouped[pid]!.add(comment)
-          : grouped[pid] = [comment];
+      if (pid == null || pid.isEmpty) {
+        grouped.putIfAbsent(null.toString(), () => []).add(comment);
+      } else {
+        grouped.putIfAbsent(pid, () => []).add(comment);
+      }
     }
 
     List<Widget> buildTree(String? parentId, int depth) {
-      final children = grouped[parentId] ?? [];
+      // Try to find by the provided ID (could be server ID or local ID)
+      final key = parentId ?? null.toString();
+      final children = grouped[key] ?? [];
+      
+      // If we didn't find any children but we have a parentId, 
+      // it's possible some children reference the localId while we were given the server id (or vice versa)
+      if (children.isEmpty && parentId != null) {
+        // Find the parent comment to get its sibling ID
+        try {
+          final parent = allComments.firstWhere((c) => c.id == parentId || c.localId == parentId);
+          final alternativeId = (parent.id == parentId) ? parent.localId : parent.id;
+          if (alternativeId.isNotEmpty) {
+            final altChildren = grouped[alternativeId] ?? [];
+            children.addAll(altChildren);
+          }
+        } catch (_) {}
+      }
       children.sort((a, b) => a.createdAt.compareTo(b.createdAt));
 
       final List<Widget> items = [];

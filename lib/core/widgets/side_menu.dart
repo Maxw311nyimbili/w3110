@@ -326,14 +326,10 @@ class _SectionLabel extends StatelessWidget {
       child: Text(
         label.toUpperCase(),
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: Theme.of(context)
-                  .textTheme
-                  .bodySmall
-                  ?.color
-                  ?.withOpacity(0.45),
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.9,
-              fontSize: 10,
+              color: AppColors.textPrimary.withOpacity(0.8),
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.2,
+              fontSize: 11,
             ),
       ),
     );
@@ -375,15 +371,15 @@ class _NavItem extends StatelessWidget {
     if (isPrimary) {
       iconColor = primaryColor;
       labelColor = primaryColor;
-      labelWeight = FontWeight.w700;
+      labelWeight = FontWeight.w800;
     } else if (isActive) {
-      iconColor = AppColors.brandDarkTeal;
-      labelColor = textColor ?? AppColors.textPrimary;
-      labelWeight = FontWeight.w600;
+      iconColor = AppColors.textPrimary;
+      labelColor = AppColors.textPrimary;
+      labelWeight = FontWeight.w700;
     } else {
-      iconColor = mutedColor ?? AppColors.textSecondary;
-      labelColor = mutedColor ?? AppColors.textSecondary;
-      labelWeight = FontWeight.w400;
+      iconColor = AppColors.textPrimary.withOpacity(0.7);
+      labelColor = AppColors.textPrimary.withOpacity(0.7);
+      labelWeight = FontWeight.w600;
     }
 
     if (isCollapsed) {
