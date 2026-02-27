@@ -287,23 +287,23 @@ class _ChatViewState extends State<ChatView> {
         builder: (context, chatState) {
           return Scaffold(
             body: Center(
-
-
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 1000),
-            child: Column(
-              children: [
-                // Body
-                Expanded(
-                  child: ChatBody(
-                    isAudioMode: _isAudioMode,
-                    onToggleAudio: _toggleAudioMode,
-                  ),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1000),
+                child: Column(
+                  children: [
+                    // Body
+                    Expanded(
+                      child: ChatBody(
+                        isAudioMode: _isAudioMode,
+                        onToggleAudio: _toggleAudioMode,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }
