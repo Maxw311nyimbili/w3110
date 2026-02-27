@@ -6,6 +6,7 @@ import 'package:cap_project/features/medscanner/widgets/widgets.dart';
 import 'package:cap_project/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:cap_project/app/cubit/navigation_cubit.dart';
+import 'package:cap_project/core/util/responsive_utils.dart';
 import 'package:media_repository/media_repository.dart';
 
 /// MedScanner page - camera and image analysis
@@ -56,13 +57,15 @@ class _MedScannerViewState extends State<MedScannerView> {
 
   void _updateAppBar() {
     if (!mounted) return;
+    final isDesktop = ResponsiveUtils.isDesktop(context);
+    
     context.read<NavigationCubit>().updateAppBar(
-          actions: [
+          actions: !isDesktop ? [
             IconButton(
               onPressed: () => _showInfoDialog(context),
               icon: const Icon(Icons.info_outline_rounded, size: 22),
             ),
-          ],
+          ] : null,
         );
   }
 
