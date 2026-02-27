@@ -27,21 +27,8 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      final l10n = AppLocalizations.of(context);
-      context.read<NavigationCubit>().updateAppBar(
-            title: Text(
-              l10n.settings,
-              style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 24,
-                  ),
-            ),
-            actions: [],
-          );
-    });
   }
+
 
   @override
   Widget build(BuildContext context) {

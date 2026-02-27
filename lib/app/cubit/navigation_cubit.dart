@@ -48,8 +48,9 @@ class NavigationCubit extends Cubit<NavigationState> {
   NavigationCubit() : super(const NavigationState());
 
   void setTab(AppTab tab) {
-    emit(state.copyWith(activeTab: tab, isMobileDrawerOpen: false));
+    emit(state.copyWith(activeTab: tab, isMobileDrawerOpen: false, clearAppBar: true));
   }
+
 
   void toggleDesktopSidebar() {
     emit(state.copyWith(
