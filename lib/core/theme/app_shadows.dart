@@ -11,16 +11,16 @@ class AppShadows {
   /// Subtle ambient shadow for cards resting on the background
   static const List<BoxShadow> card = [
     BoxShadow(
-      color: Color(0x140C7E8A), // teal-tinted, 8% opacity
-      blurRadius: 16,
-      spreadRadius: 0,
-      offset: Offset(0, 4),
+      color: Color(0x1A0C7E8A), // teal-tinted, 10% opacity
+      blurRadius: 24,
+      spreadRadius: -2,
+      offset: Offset(0, 8),
     ),
     BoxShadow(
-      color: Color(0x0A1C1917), // warm-black ambient, 4% opacity
-      blurRadius: 8,
+      color: Color(0x0F1C1917), // warm-black ambient, 6% opacity
+      blurRadius: 12,
       spreadRadius: 0,
-      offset: Offset(0, 1),
+      offset: Offset(0, 2),
     ),
   ];
 

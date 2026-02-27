@@ -70,7 +70,17 @@ class _SideMenuState extends State<SideMenu> {
           return Container(
             width: double.infinity,
             height: double.infinity,
-            color: sidebarBg,
+            decoration: BoxDecoration(
+              color: sidebarBg,
+              border: isDark
+                  ? null
+                  : Border(
+                      right: BorderSide(
+                        color: AppColors.borderLight.withOpacity(0.8),
+                        width: 1,
+                      ),
+                    ),
+            ),
             child: SafeArea(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
