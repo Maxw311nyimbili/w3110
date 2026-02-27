@@ -37,11 +37,15 @@ class ForumBody extends StatelessWidget {
 
   Widget _buildFilterToggle(BuildContext context, ForumState state) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      padding: const EdgeInsets.all(4),
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface.withOpacity(0.6),
-        borderRadius: BorderRadius.circular(10),
+        color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.4),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: Theme.of(context).dividerColor.withOpacity(0.05),
+          width: 1,
+        ),
       ),
       child: Row(
         children: [
@@ -186,46 +190,63 @@ class ForumBody extends StatelessWidget {
 
   Widget _buildSearchBar(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-      child: TextField(
-        onChanged: (value) => context.read<ForumCubit>().searchPosts(value),
-        style: AppTextStyles.bodyLarge,
-        decoration: InputDecoration(
-          hintText: 'Search or ask for recommendations...',
-          hintStyle: AppTextStyles.bodyLarge.copyWith(
-            color: AppColors.textTertiary,
-          ),
-          prefixIcon: Icon(
-            Icons.search_rounded,
-            color: Theme.of(context).iconTheme.color,
-            size: 20,
-          ),
-          filled: true,
-          fillColor: Theme.of(context).colorScheme.surface,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(28),
-            borderSide: const BorderSide(
-              color: AppColors.borderLight,
-              width: 1,
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(28),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(28),
-            borderSide: const BorderSide(
-              color: AppColors.borderLight,
-              width: 1,
+          ],
+        ),
+        child: TextField(
+          onChanged: (value) => context.read<ForumCubit>().searchPosts(value),
+          style: AppTextStyles.bodyLarge.copyWith(fontSize: 15),
+          decoration: InputDecoration(
+            hintText: 'Search or ask for recommendations...',
+            hintStyle: AppTextStyles.bodyLarge.copyWith(
+              color: AppColors.textTertiary,
+              fontSize: 15,
             ),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(28),
-            borderSide: const BorderSide(
-              color: AppColors.accentPrimary,
-              width: 1.5,
+            prefixIcon: Icon(
+              Icons.search_rounded,
+              color: AppColors.textTertiary,
+              size: 20,
             ),
-          ),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 20,
-            vertical: 14,
+            filled: true,
+            fillColor: Theme.of(context).colorScheme.surface,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(28),
+              borderSide: BorderSide(
+                color: Theme.of(context).brightness == Brightness.light
+                    ? AppColors.accentLight
+                    : AppColors.borderDark,
+                width: 1.5,
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(28),
+              borderSide: BorderSide(
+                color: Theme.of(context).brightness == Brightness.light
+                    ? AppColors.accentLight
+                    : AppColors.borderDark,
+                width: 1.5,
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(28),
+              borderSide: const BorderSide(
+                color: AppColors.accentPrimary,
+                width: 2.0,
+              ),
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 20,
+              vertical: 14,
+            ),
           ),
         ),
       ),

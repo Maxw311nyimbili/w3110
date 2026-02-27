@@ -1,4 +1,5 @@
 import 'package:cap_project/core/theme/app_colors.dart';
+import 'package:cap_project/core/theme/app_shadows.dart';
 import 'package:cap_project/core/theme/app_text_styles.dart';
 import 'package:cap_project/features/forum/cubit/forum_cubit.dart';
 import 'package:flutter/material.dart';
@@ -38,13 +39,13 @@ class PostCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(24),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
-            ),
-          ],
+          border: Border.all(
+            color: Theme.of(context).brightness == Brightness.light
+                ? AppColors.accentLight
+                : AppColors.borderDark,
+            width: Theme.of(context).brightness == Brightness.light ? 1.0 : 0.5,
+          ),
+          boxShadow: AppShadows.card,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

@@ -232,16 +232,30 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
     BuildContext context,
     List<ForumLineComment> allComments,
   ) {
-    final Map<String?, List<ForumLineComment>> grouped = {};
+    final Map<String, List<ForumLineComment>> grouped = {};
     for (final comment in allComments) {
       final pid = comment.parentCommentId;
-      grouped.containsKey(pid)
-          ? grouped[pid]!.add(comment)
-          : grouped[pid] = [comment];
+      if (pid == null || pid.isEmpty) {
+        grouped.putIfAbsent(null.toString(), () => []).add(comment);
+      } else {
+        grouped.putIfAbsent(pid, () => []).add(comment);
+      }
     }
 
     List<Widget> buildTree(String? parentId, int depth) {
-      final children = grouped[parentId] ?? [];
+      final key = parentId ?? null.toString();
+      final children = grouped[key] ?? [];
+      
+      if (children.isEmpty && parentId != null) {
+        try {
+          final parent = allComments.firstWhere((c) => c.id == parentId || c.localId == parentId);
+          final alternativeId = (parent.id == parentId) ? parent.localId : parent.id;
+          if (alternativeId.isNotEmpty) {
+            final altChildren = grouped[alternativeId] ?? [];
+            children.addAll(altChildren);
+          }
+        } catch (_) {}
+      }
       children.sort((a, b) => a.createdAt.compareTo(b.createdAt));
 
       final List<Widget> items = [];

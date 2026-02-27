@@ -61,14 +61,31 @@ class CommentCard extends StatelessWidget {
     const double indentWidth = 24.0;
     const double parentPadding = 12.0;
 
+    final bool isExpertComment = isExpert || isClinician;
+
     return IntrinsicHeight(
-      child: Padding(
-        padding: EdgeInsets.only(
-          left: depth > 0 ? 0 : parentPadding, 
-          right: parentPadding, 
-          top: 4, 
-          bottom: 4,
-        ),
+      child: Container(
+        decoration: isExpertComment && depth == 0
+            ? BoxDecoration(
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.04),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                  width: 1,
+                ),
+              )
+            : null,
+        margin: isExpertComment && depth == 0
+            ? const EdgeInsets.symmetric(vertical: 8, horizontal: 8)
+            : null,
+        padding: isExpertComment && depth == 0
+            ? const EdgeInsets.all(12)
+            : EdgeInsets.only(
+                left: depth > 0 ? 0 : parentPadding,
+                right: parentPadding,
+                top: 4,
+                bottom: 4,
+              ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -86,7 +103,7 @@ class CommentCard extends StatelessWidget {
                         width: depth * indentWidth,
                         child: CustomPaint(
                           painter: ThreadLinePainter(
-                            lineColor: Theme.of(context).dividerColor.withOpacity(0.2),
+                            lineColor: Theme.of(context).dividerColor.withOpacity(0.3),
                             isLastChild: isLastChild,
                             paddingLeft: 0,
                             depth: depth,
@@ -108,46 +125,48 @@ class CommentCard extends StatelessWidget {
                     children: [
                       // Avatar
                       _buildAvatar(context),
-                      const SizedBox(width: 10),
+                      const SizedBox(width: 12),
                       // Content
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             _buildHeader(context, isOwnComment),
-                            const SizedBox(height: 1),
+                            const SizedBox(height: 4),
                             Text(
                               text,
                               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: Theme.of(context).textTheme.bodyLarge?.color,
-                                height: 1.4,
+                                color: Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.9),
+                                height: 1.5,
                                 fontSize: depth > 0 ? 14 : 15,
                               ),
                             ),
-                            const SizedBox(height: 5),
+                            const SizedBox(height: 8),
                             _buildActions(context),
                             
-                            // "View More" for collapsed threads (Instagram Style)
-                            // "Hide replies" button is now handled by the parent view at the end of the thread
                             if (hasReplies && !isExpanded && onExpand != null)
                               Padding(
-                                padding: const EdgeInsets.only(top: 8, bottom: 4),
+                                padding: const EdgeInsets.only(top: 10, bottom: 4),
                                 child: InkWell(
                                   onTap: onExpand,
+                                  borderRadius: BorderRadius.circular(12),
                                   child: Row(
                                     children: [
                                       Container(
-                                        width: 18,
-                                        height: 1.2,
-                                        color: Theme.of(context).dividerColor.withOpacity(0.2),
+                                        width: 24,
+                                        height: 1.5,
+                                        decoration: BoxDecoration(
+                                          color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                                          borderRadius: BorderRadius.circular(1),
+                                        ),
                                       ),
-                                      const SizedBox(width: 8),
+                                      const SizedBox(width: 10),
                                       Text(
                                         'View $replyCount more replies',
                                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                          color: Theme.of(context).textTheme.bodySmall?.color,
+                                          color: Theme.of(context).colorScheme.primary,
                                           fontWeight: FontWeight.w800,
-                                          fontSize: 11,
+                                          fontSize: 12,
                                         ),
                                       ),
                                     ],
@@ -169,26 +188,26 @@ class CommentCard extends StatelessWidget {
   }
 
   Widget _buildAvatar(BuildContext context) {
-    final double size = depth > 0 ? 24 : 34;
+    final double size = depth > 0 ? 28 : 38;
     return Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceVariant,
+        color: isExpert
+            ? Theme.of(context).colorScheme.primary.withOpacity(0.1)
+            : Theme.of(context).colorScheme.surfaceVariant,
         shape: BoxShape.circle,
-        border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1), width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withAlpha(8),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        border: Border.all(
+          color: isExpert
+              ? Theme.of(context).colorScheme.primary.withOpacity(0.2)
+              : Theme.of(context).dividerColor.withOpacity(0.1),
+          width: 1.5,
+        ),
       ),
       child: Center(
         child: Icon(
           roleIcon,
-          size: size * 0.55,
+          size: size * 0.5,
           color: isExpert
               ? Theme.of(context).colorScheme.primary
               : Theme.of(context).textTheme.labelSmall?.color,

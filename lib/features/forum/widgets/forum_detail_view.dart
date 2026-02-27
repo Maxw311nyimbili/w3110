@@ -135,11 +135,22 @@ class ForumDetailView extends StatelessWidget {
               if (state.answerLines.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 12),
-                  child: Text(
-                    'Tap a sentence to discuss',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      fontStyle: FontStyle.italic,
-                    ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.touch_app_outlined,
+                        size: 14,
+                        color: AppColors.textTertiary,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Tap a sentence to discuss',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontStyle: FontStyle.italic,
+                          color: AppColors.textTertiary,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               _buildInteractiveContent(context, state),
@@ -152,12 +163,14 @@ class ForumDetailView extends StatelessWidget {
                   'Sources',
                   style: AppTextStyles.labelLarge.copyWith(
                     fontWeight: FontWeight.w800,
+                    letterSpacing: 0.2,
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   physics: const BouncingScrollPhysics(),
+                  padding: const EdgeInsets.only(bottom: 8),
                   child: Row(
                     children: post.sources
                         .map((source) => _buildSourceCard(context, source))
@@ -332,14 +345,23 @@ class ForumDetailView extends StatelessWidget {
                     onTap: () => _showLineCommentsModal(context, line),
                     borderRadius: BorderRadius.circular(12),
                     child: Container(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(18),
                       decoration: BoxDecoration(
                         color: Theme.of(context).colorScheme.surface,
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                          color: Theme.of(context).brightness == Brightness.light
+                              ? AppColors.accentLight
+                              : AppColors.borderDark,
                           width: 1.5,
                         ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.04),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -351,25 +373,37 @@ class ForumDetailView extends StatelessWidget {
                               height: 1.7,
                               fontSize: 16.5,
                               fontWeight: FontWeight.w500,
+                              color: Theme.of(context).textTheme.bodyLarge?.color,
                             ),
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 12),
                           // Comment icon and count in bottom-left
                           Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(
-                                Icons.chat_bubble_outline_rounded,
-                                size: 16,
-                                color: AppColors.success,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                '${line.commentCount}',
-                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: AppColors.success,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w800,
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: AppColors.success.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.chat_bubble_outline_rounded,
+                                      size: 14,
+                                      color: AppColors.success,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      '${line.commentCount}',
+                                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                        color: AppColors.success,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w900,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
@@ -430,9 +464,14 @@ class ForumDetailView extends StatelessWidget {
         margin: const EdgeInsets.only(right: 12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
+          color: Theme.of(context).cardTheme.color,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
+          border: Border.all(
+            color: Theme.of(context).brightness == Brightness.light
+                ? AppColors.borderMedium.withOpacity(0.5)
+                : AppColors.borderDark,
+            width: 1.0,
+          ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
