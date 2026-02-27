@@ -1,10 +1,11 @@
+import 'package:cap_project/app/cubit/navigation_cubit.dart';
 import 'package:cap_project/app/view/app_router.dart';
+import 'package:cap_project/core/theme/app_colors.dart';
+import 'package:cap_project/core/theme/app_text_styles.dart';
+import 'package:cap_project/core/widgets/premium_button.dart';
 import 'package:cap_project/features/auth/cubit/cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../theme/app_colors.dart';
-import '../theme/app_text_styles.dart';
-import '../widgets/premium_button.dart';
 
 class AuthGuard extends StatelessWidget {
   const AuthGuard({
@@ -30,7 +31,8 @@ class AuthGuard extends StatelessWidget {
             elevation: 0,
             leading: IconButton(
               icon: const Icon(Icons.close_rounded),
-              onPressed: () => context.read<NavigationCubit>().setTab(AppTab.chat),
+              onPressed: () =>
+                  context.read<NavigationCubit>().setTab(AppTab.chat),
               color: AppColors.textPrimary,
             ),
           ),
@@ -87,7 +89,8 @@ class AuthGuard extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     TextButton(
-                      onPressed: () => context.read<NavigationCubit>().setTab(AppTab.chat),
+                      onPressed: () =>
+                          context.read<NavigationCubit>().setTab(AppTab.chat),
                       child: Text(
                         'Maybe Later',
                         style: AppTextStyles.labelLarge.copyWith(
