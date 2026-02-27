@@ -170,23 +170,95 @@ class _ChatViewState extends State<ChatView> {
         // Only show top-bar icons on mobile — desktop uses the sidebar
         actions: (!_isAudioMode && !isDesktop)
             ? [
-                Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: IconButton(
-                    icon: Icon(
-                      Icons.add_circle_outline_rounded,
-                      size: 24,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                    onPressed: () => context.read<ChatCubit>().startNewSession(),
-                    tooltip: 'New Chat',
+                // 1. New Chat Button
+                IconButton(
+                  icon: Icon(
+                    Icons.add_circle_outline_rounded,
+                    size: 22,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
+                  onPressed: () => context.read<ChatCubit>().startNewSession(),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  tooltip: 'New Chat',
                 ),
+                const SizedBox(width: 14),
+
+                // 2. Auth Dependent Action
+                _buildAuthAction(context),
+
+                const SizedBox(width: 12),
               ]
             : null,
       );
     });
   }
+
+  Widget _buildAuthAction(BuildContext context) {
+    final authState = context.read<AuthCubit>().state;
+    final isAuthenticated = authState.status == AuthStatus.authenticated;
+    final theme = Theme.of(context);
+
+    if (isAuthenticated) {
+      final name = (authState.user?.displayName as String?) ?? 'User';
+      final initials = name
+          .trim()
+          .split(' ')
+          .take(2)
+          .map((p) => p.isEmpty ? '' : p[0].toUpperCase())
+          .join();
+
+      return InkWell(
+        onTap: () => context.read<NavigationCubit>().setTab(AppTab.settings),
+        borderRadius: BorderRadius.circular(100),
+        child: Container(
+          width: 32,
+          height: 32,
+          decoration: BoxDecoration(
+            color: theme.colorScheme.primary.withOpacity(0.1),
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: theme.colorScheme.primary.withOpacity(0.2),
+              width: 1,
+            ),
+          ),
+          child: Center(
+            child: Text(
+              initials.isEmpty ? 'U' : initials,
+              style: TextStyle(
+                color: theme.colorScheme.primary,
+                fontWeight: FontWeight.w700,
+                fontSize: 12,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Guest CTA
+    return TextButton(
+      onPressed: () => WelcomeDrawer.show(context),
+      style: TextButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        minimumSize: Size.zero,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+      ),
+      child: Text(
+        'Sign In',
+        style: TextStyle(
+          color: theme.colorScheme.primary,
+          fontWeight: FontWeight.w700,
+          fontSize: 12,
+        ),
+      ),
+    );
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -195,15 +267,27 @@ class _ChatViewState extends State<ChatView> {
       _updateAppBar();
     }
 
-    return BlocListener<NavigationCubit, NavigationState>(
-      listenWhen: (prev, curr) => prev.activeTab != curr.activeTab,
-      listener: (context, state) {
-        if (state.activeTab == AppTab.chat) {
-          _updateAppBar();
-        }
-      },
-      child: Scaffold(
-        body: Center(
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<NavigationCubit, NavigationState>(
+          listenWhen: (prev, curr) => prev.activeTab != curr.activeTab,
+          listener: (context, state) {
+            if (state.activeTab == AppTab.chat) {
+              _updateAppBar();
+            }
+          },
+        ),
+        BlocListener<AuthCubit, AuthState>(
+          listener: (context, state) {
+            _updateAppBar();
+          },
+        ),
+      ],
+      child: BlocBuilder<ChatCubit, ChatState>(
+        builder: (context, chatState) {
+          return Scaffold(
+            body: Center(
+
 
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 1000),
