@@ -134,8 +134,8 @@ class _SideMenuState extends State<SideMenu> {
             borderRadius: BorderRadius.circular(8),
             child: Image.asset(
               'assets/images/logo.png',
-              width: 38,
-              height: 38,
+              width: 52,
+              height: 52,
               fit: BoxFit.contain,
               filterQuality: FilterQuality.high,
             ),

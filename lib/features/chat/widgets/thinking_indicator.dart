@@ -82,10 +82,9 @@ class _ThinkingIndicatorState extends State<ThinkingIndicator>
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          // Logo
           Image.asset(
             'assets/images/logo.png',
-            height: 24, // Slightly larger logo
+            height: 36,
             fit: BoxFit.contain,
           ),
           const SizedBox(width: 10),

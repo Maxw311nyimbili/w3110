@@ -36,9 +36,9 @@
         "description": "French language name in French"
     },
 
-    "darkMode": "Dark Mode",
+    "darkMode": "Appearance",
     "@darkMode": {
-        "description": "Dark mode setting label"
+        "description": "Theme appearance setting label"
     },
 
     "systemDefault": "System Default",
