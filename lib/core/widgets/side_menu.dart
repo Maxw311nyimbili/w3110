@@ -72,14 +72,14 @@ class _SideMenuState extends State<SideMenu> {
             height: double.infinity,
             decoration: BoxDecoration(
               color: sidebarBg,
-              border: isDark
-                  ? null
-                  : Border(
-                      right: BorderSide(
-                        color: AppColors.borderLight.withOpacity(0.8),
-                        width: 1,
-                      ),
-                    ),
+              border: Border(
+                right: BorderSide(
+                  color: isDark
+                      ? Colors.white.withOpacity(0.08)
+                      : AppColors.borderLight.withOpacity(0.8),
+                  width: 1,
+                ),
+              ),
             ),
             child: SafeArea(
               child: Column(
