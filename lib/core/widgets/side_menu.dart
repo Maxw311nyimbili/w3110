@@ -63,8 +63,9 @@ class _SideMenuState extends State<SideMenu> {
 
           final theme = Theme.of(context);
           final isDark = theme.brightness == Brightness.dark;
-          final sidebarBg =
-              isDark ? AppColors.darkBackgroundSurface : const Color(0xFFF0F2F5);
+          final sidebarBg = isDark
+              ? AppColors.darkBackgroundPrimary.withOpacity(0.95)
+              : AppColors.backgroundElevated;
 
           return Container(
             width: double.infinity,
@@ -234,8 +235,12 @@ class _SideMenuState extends State<SideMenu> {
     return Container(
       margin: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface.withOpacity(0.5),
+        color: Theme.of(context).colorScheme.surface.withOpacity(isDark ? 0.05 : 0.4),
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isDark ? Colors.white.withOpacity(0.05) : AppColors.borderLight,
+          width: 0.5,
+        ),
       ),
       child: isAuthenticated
           ? _AuthFooter(user: user)

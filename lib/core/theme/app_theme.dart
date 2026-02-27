@@ -41,18 +41,22 @@ class AppTheme {
         surface: AppColors.backgroundSurface,
         onSurface: AppColors.textPrimary,
         outline: AppColors.borderLight,
-        outlineVariant: AppColors.backgroundElevated,
+        outlineVariant: AppColors.backgroundSecondary,
       ),
 
       scaffoldBackgroundColor: AppColors.backgroundPrimary,
 
-      // ─── AppBar ──────────────────────────────────────────────────────────
+      // ─── AppBar (Premium Airy) ──────────────────────────────────────────
       appBarTheme: AppBarTheme(
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: true,
         backgroundColor: AppColors.backgroundPrimary,
         foregroundColor: AppColors.textPrimary,
+        surfaceTintColor: Colors.transparent,
+        shape: const Border(
+          bottom: BorderSide(color: AppColors.borderLight, width: 0.5),
+        ),
         systemOverlayStyle: const SystemUiOverlayStyle(
           statusBarBrightness: Brightness.light,
           statusBarIconBrightness: Brightness.dark,
@@ -60,6 +64,7 @@ class AppTheme {
         ),
         titleTextStyle: AppTextStyles.headlineMedium.copyWith(
           color: AppColors.textPrimary,
+          fontWeight: FontWeight.w700,
         ),
         iconTheme: const IconThemeData(
           color: AppColors.textPrimary,
@@ -67,15 +72,16 @@ class AppTheme {
         ),
       ),
 
-      // ─── Card ─────────────────────────────────────────────────────────────
+      // ─── Card (Elevation via Environment Shadow) ─────────────────────────
       cardTheme: CardThemeData(
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-          side: const BorderSide(color: AppColors.borderLight, width: 1),
+          side: const BorderSide(color: AppColors.borderLight, width: 0.5),
         ),
         color: AppColors.backgroundSurface,
         margin: EdgeInsets.zero,
+        shadowColor: AppColors.shadowWarm.withOpacity(0.04),
       ),
 
       // ─── Inputs ───────────────────────────────────────────────────────────
@@ -258,7 +264,7 @@ class AppTheme {
         onError: Colors.white,
         surface: AppColors.darkBackgroundSurface,
         onSurface: AppColors.darkTextPrimary,
-        outline: AppColors.borderDark,
+        outline: AppColors.darkBorder,
         outlineVariant: AppColors.darkBackgroundPrimary,
       ),
 
@@ -270,9 +276,14 @@ class AppTheme {
         centerTitle: true,
         backgroundColor: AppColors.darkBackgroundPrimary,
         foregroundColor: AppColors.darkTextPrimary,
+        surfaceTintColor: Colors.transparent,
+        shape: Border(
+          bottom: BorderSide(color: Colors.white.withOpacity(0.05), width: 0.5),
+        ),
         systemOverlayStyle: SystemUiOverlayStyle.light,
         titleTextStyle: AppTextStyles.headlineMedium.copyWith(
           color: AppColors.darkTextPrimary,
+          fontWeight: FontWeight.w700,
         ),
         iconTheme: const IconThemeData(
           color: AppColors.darkTextPrimary,
