@@ -31,6 +31,8 @@ class NavigationState {
     bool? isMobileDrawerOpen,
     Widget? title,
     List<Widget>? actions,
+    bool clearTitle = false,
+    bool clearActions = false,
     bool clearAppBar = false,
   }) {
     return NavigationState(
@@ -38,8 +40,8 @@ class NavigationState {
       isDesktopSidebarCollapsed:
           isDesktopSidebarCollapsed ?? this.isDesktopSidebarCollapsed,
       isMobileDrawerOpen: isMobileDrawerOpen ?? this.isMobileDrawerOpen,
-      title: clearAppBar ? null : (title ?? this.title),
-      actions: clearAppBar ? null : (actions ?? this.actions),
+      title: (clearAppBar || clearTitle) ? null : (title ?? this.title),
+      actions: (clearAppBar || clearActions) ? null : (actions ?? this.actions),
     );
   }
 }
@@ -67,7 +69,12 @@ class NavigationCubit extends Cubit<NavigationState> {
   }
 
   void updateAppBar({Widget? title, List<Widget>? actions}) {
-    emit(state.copyWith(title: title, actions: actions));
+    emit(state.copyWith(
+      title: title,
+      actions: actions,
+      clearTitle: title == null,
+      clearActions: actions == null,
+    ));
   }
 
   void clearAppBar() {

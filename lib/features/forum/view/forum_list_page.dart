@@ -45,13 +45,15 @@ class _ForumListViewState extends State<ForumListView> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
+      final isDesktop = ResponsiveUtils.isDesktop(context);
+
       context.read<NavigationCubit>().updateAppBar(
             title: Text(
               state.view == ForumView.detail
                   ? 'Discussion'
                   : AppLocalizations.of(context).community,
             ),
-            actions: [
+            actions: !isDesktop ? [
               IconButton(
                 icon: const Icon(Icons.refresh_rounded, size: 20),
                 onPressed: () => context.read<ForumCubit>().resetAndReload(),
@@ -65,7 +67,7 @@ class _ForumListViewState extends State<ForumListView> {
                   ),
                   onPressed: () => context.read<ForumCubit>().syncWithBackend(),
                 ),
-            ],
+            ] : null,
           );
     });
   }
