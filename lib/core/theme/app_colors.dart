@@ -7,10 +7,10 @@ class AppColors {
   AppColors._();
 
   // ─── Backgrounds (Premium Neutral & Tinted Scale) ─────────────────────────
-  static const Color backgroundPrimary = Color(0xFFF5F7F7); // Subtle off-white teal-tint (Pop pure white cards)
+  static const Color backgroundPrimary = Color(0xFFF8FAFA); // Even lighter off-white teal-tint
   static const Color backgroundSurface = Color(0xFFFFFFFF); // Clean cards
   static const Color backgroundElevated = Color(0xFFFFFFFF); // Clean white (Apple/Sidebar)
-  static const Color backgroundSecondary = Color(0xFFF0F2F2); // Slightly deeper tint
+  static const Color backgroundSecondary = Color(0xFFF5F7F7); // Subtle tint
 
   // ─── Brand — Teal Identity ─────────────────────────────────────────────────
   static const Color accentPrimary = Color(
