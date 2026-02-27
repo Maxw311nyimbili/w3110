@@ -250,7 +250,9 @@ class _RefinedChatInputState extends State<RefinedChatInput>
             color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(28),
             border: Border.all(
-              color: Theme.of(context).dividerColor.withOpacity(0.08),
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Theme.of(context).dividerColor.withOpacity(0.08)
+                  : AppColors.accentLight.withOpacity(0.7),
               width: 1.0,
             ),
             boxShadow: widget.isLandingMode
