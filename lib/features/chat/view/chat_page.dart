@@ -170,9 +170,6 @@ class _ChatViewState extends State<ChatView> {
         // Only show top-bar icons on mobile — desktop uses the sidebar
         actions: (!_isAudioMode && !isDesktop)
             ? [
-        // Only show top-bar icons on mobile — desktop uses the sidebar
-        actions: (!_isAudioMode && !isDesktop)
-            ? [
                 // 1. Auth Dependent Action
                 _buildAuthAction(context),
 
@@ -182,6 +179,7 @@ class _ChatViewState extends State<ChatView> {
       );
     });
   }
+
 
 
   Widget _buildAuthAction(BuildContext context) {
