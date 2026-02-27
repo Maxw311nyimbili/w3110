@@ -13,7 +13,7 @@ import 'package:cap_project/core/util/responsive_utils.dart';
 import 'package:cap_project/app/cubit/navigation_cubit.dart';
 import '../cubit/cubit.dart';
 import '../widgets/widgets.dart';
-import '../widgets/history_drawer.dart';
+
 
 import 'package:landing_repository/landing_repository.dart';
 import 'package:cap_project/features/forum/cubit/forum_cubit.dart';
@@ -172,16 +172,14 @@ class _ChatViewState extends State<ChatView> {
             ? [
                 Padding(
                   padding: const EdgeInsets.only(right: 8),
-                  child: Builder(
-                    builder: (context) => IconButton(
-                      icon: Icon(
-                        Icons.history_rounded,
-                        size: 22,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                      onPressed: () => Scaffold.of(context).openEndDrawer(),
-                      tooltip: 'Chat History',
+                  child: IconButton(
+                    icon: Icon(
+                      Icons.add_circle_outline_rounded,
+                      size: 24,
+                      color: Theme.of(context).colorScheme.primary,
                     ),
+                    onPressed: () => context.read<ChatCubit>().startNewSession(),
+                    tooltip: 'New Chat',
                   ),
                 ),
               ]
@@ -205,8 +203,8 @@ class _ChatViewState extends State<ChatView> {
         }
       },
       child: Scaffold(
-        endDrawer: const HistoryDrawer(),
         body: Center(
+
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 1000),
             child: Column(
