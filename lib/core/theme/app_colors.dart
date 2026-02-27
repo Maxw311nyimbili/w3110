@@ -6,14 +6,11 @@ import 'package:flutter/material.dart';
 class AppColors {
   AppColors._();
 
-  // ─── Backgrounds (Visible Contrast Scale) ──────────────────────────────
-  static const Color backgroundPrimary = Color(
-    0xFFDEE5EF,
-  ); // Page bg — visibly greyish-blue, very distinct from cards
-  static const Color backgroundSurface = Color(0xFFFFFFFF); // Pure white cards
-  static const Color backgroundElevated = Color(
-    0xFFD1DAE8,
-  ); // Inputs/chips — clearly darker than cards
+  // ─── Backgrounds (Premium Neutral & Tinted Scale) ─────────────────────────
+  static const Color backgroundPrimary = Color(0xFFFFFFFF); // Pure white workspace
+  static const Color backgroundSurface = Color(0xFFFFFFFF); // Clean cards
+  static const Color backgroundElevated = Color(0xFFF2F2F7); // airy secondary (Apple/Sidebar)
+  static const Color backgroundSecondary = Color(0xFFF9FAFB); // Subtle content containers
 
   // ─── Brand — Teal Identity ─────────────────────────────────────────────────
   static const Color accentPrimary = Color(
@@ -29,17 +26,17 @@ class AppColors {
     0xFF0C4B4F,
   ); // Keep for compatibility
 
-  // ─── Text (Warm, Not Cold Grey) ────────────────────────────────────────────
-  static const Color textPrimary = Color(0xFF1C1917); // Warm near-black
-  static const Color textSecondary = Color(0xFF4A4540); // Darker warm mid-grey
-  static const Color textTertiary = Color(0xFF6B6358); // Warm light-grey
+  // ─── Text (High-Performance Typography) ───────────────────────────────────
+  static const Color textPrimary = Color(0xFF111827); // Deep slate (Tailwind/Inter style)
+  static const Color textSecondary = Color(0xFF4B5563); // Muted slate-grey
+  static const Color textTertiary = Color(0xFF9CA3AF); // Light slate-grey
   static const Color textInverted = Color(0xFFFFFFFF); // White text on dark
   static const Color textAccent = Color(0xFF0C7E8A); // Teal text links
 
-  // ─── Borders ───────────────────────────────────────────────────────────────
-  static const Color borderLight = Color(0xFFC0CAD8); // Visible default border
-  static const Color borderMedium = Color(0xFFA8B5C6); // Strong card outline
-  static const Color borderDark = Color(0xFF6B7280); // Strong outline
+  // ─── Borders (Subtle & Hairline) ──────────────────────────────────────────
+  static const Color borderLight = Color(0xFFE5E7EB); // Subtle default border
+  static const Color borderMedium = Color(0xFFD1D5DB); // Stronger outline
+  static const Color borderDark = Color(0xFF374151); // High contrast outline
   static const Color borderAccent = Color(0xFF0C7E8A); // Teal focus border
 
   // ─── Semantic ──────────────────────────────────────────────────────────────
@@ -64,20 +61,14 @@ class AppColors {
   ); // Warm-black ambient shadow
   static const Color shadow = Color(0x0A000000); // Legacy neutral soft shadow
 
-  // ─── Dark Mode ─────────────────────────────────────────────────────────────
-  // Charcoal-teal base — premium dark mode that isn't true black
-  static const Color darkBackgroundPrimary = Color(
-    0xFF151B1A,
-  ); // Dark charcoal-teal
-  static const Color darkBackgroundSurface = Color(
-    0xFF1F2927,
-  ); // Elevated card surface
-  static const Color darkBackgroundElevated = Color(
-    0xFF2A3633,
-  ); // Input / chip fill
-  static const Color darkTextPrimary = Color(0xFFE2E8E7); // Off-white, soft teal
-  static const Color darkTextSecondary = Color(0xFFA3B3B0); // Muted teal-grey
-  static const Color darkTextTertiary = Color(0xFF6B827E); // Faint label
+  // ─── Dark Mode (Deep "Ink" & Tinted Elevation) ────────────────────────────
+  static const Color darkBackgroundPrimary = Color(0xFF090E0D); // Deep charcoal-teal backdrop
+  static const Color darkBackgroundSurface = Color(0xFF131C1A); // Slightly lifted card
+  static const Color darkBackgroundElevated = Color(0xFF1C2826); // High proximity lift
+  static const Color darkTextPrimary = Color(0xFFF8FAFC); // High contrast, anti-halation
+  static const Color darkTextSecondary = Color(0xFF94A3B8); // Muted slate
+  static const Color darkTextTertiary = Color(0xFF64748B); // Faint/disabled
+  static const Color darkBorder = Color(0x1F2B3633); // Subtle inner bordre
 
   // ─── Compatibility aliases ──────────────────────────────────────────────────
   static const Color gray100 = Color(0xFFD8E0EC); // Elevated/input fill
