@@ -297,8 +297,10 @@ class _ChatBodyState extends State<ChatBody>
         color: Theme.of(context).colorScheme.surface.withOpacity(0.5),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: Theme.of(context).dividerColor.withOpacity(0.08),
-          width: 0.8,
+          color: Theme.of(context).brightness == Brightness.dark
+              ? Theme.of(context).dividerColor.withOpacity(0.08)
+              : AppColors.accentLight.withOpacity(0.6),
+          width: 1.0,
         ),
         boxShadow: [
           BoxShadow(
