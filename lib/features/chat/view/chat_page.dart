@@ -148,6 +148,11 @@ class _ChatViewState extends State<ChatView> {
   }
 
   void _updateAppBar() {
+    if (!mounted) return;
+    // Only update if this tab is active
+    final activeTab = context.read<NavigationCubit>().state.activeTab;
+    if (activeTab != AppTab.chat) return;
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       final isDesktop = ResponsiveUtils.isDesktop(context);
@@ -192,21 +197,29 @@ class _ChatViewState extends State<ChatView> {
       _updateAppBar();
     }
 
-    return Scaffold(
-      endDrawer: const HistoryDrawer(),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1000),
-          child: Column(
-            children: [
-              // Body
-              Expanded(
-                child: ChatBody(
-                  isAudioMode: _isAudioMode,
-                  onToggleAudio: _toggleAudioMode,
+    return BlocListener<NavigationCubit, NavigationState>(
+      listenWhen: (prev, curr) => prev.activeTab != curr.activeTab,
+      listener: (context, state) {
+        if (state.activeTab == AppTab.chat) {
+          _updateAppBar();
+        }
+      },
+      child: Scaffold(
+        endDrawer: const HistoryDrawer(),
+        body: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1000),
+            child: Column(
+              children: [
+                // Body
+                Expanded(
+                  child: ChatBody(
+                    isAudioMode: _isAudioMode,
+                    onToggleAudio: _toggleAudioMode,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

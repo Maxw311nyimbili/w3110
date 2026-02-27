@@ -5,8 +5,6 @@ import 'package:cap_project/features/medscanner/cubit/cubit.dart';
 import 'package:cap_project/features/medscanner/widgets/widgets.dart';
 import 'package:cap_project/l10n/l10n.dart';
 import 'package:flutter/material.dart';
-import 'package:cap_project/core/widgets/entry_animation.dart';
-import 'package:cap_project/core/util/responsive_utils.dart';
 import 'package:cap_project/app/cubit/navigation_cubit.dart';
 import 'package:media_repository/media_repository.dart';
 
@@ -25,19 +23,8 @@ class MedScannerPage extends StatelessWidget {
     return BlocProvider(
       create: (context) => MedScannerCubit(
         mediaRepository: context.read<MediaRepository>(),
-      )..initialize(),
-      child: Builder(
-        builder: (context) {
-          // Check for arguments after the cubit is created
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            final args = ModalRoute.of(context)?.settings.arguments;
-            if (args == 'gallery') {
-              context.read<MedScannerCubit>().pickImageFromGallery();
-            }
-          });
-          return const MedScannerView();
-        },
       ),
+      child: const MedScannerView(),
     );
   }
 }
@@ -54,41 +41,57 @@ class _MedScannerViewState extends State<MedScannerView> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      context.read<NavigationCubit>().updateAppBar(
-            title: Text(AppLocalizations.of(context).medScanner),
-            actions: [
-              IconButton(
-                onPressed: () => _showInfoDialog(context),
-                icon: const Icon(Icons.info_outline_rounded, size: 22),
-              ),
-            ],
-          );
-    });
+    // Initial update if active
+    _handleTabChange(context.read<NavigationCubit>().state.activeTab);
+  }
+
+  void _handleTabChange(AppTab activeTab) {
+    if (activeTab == AppTab.scanner) {
+      context.read<MedScannerCubit>().initialize();
+      _updateAppBar();
+    } else {
+      context.read<MedScannerCubit>().stopCamera();
+    }
+  }
+
+  void _updateAppBar() {
+    if (!mounted) return;
+    context.read<NavigationCubit>().updateAppBar(
+          title: Text(AppLocalizations.of(context).medScanner),
+          actions: [
+            IconButton(
+              onPressed: () => _showInfoDialog(context),
+              icon: const Icon(Icons.info_outline_rounded, size: 22),
+            ),
+          ],
+        );
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<MedScannerCubit, MedScannerState>(
-      builder: (context, state) {
-        return Scaffold(
-          body: Container(
-            color: Colors.black, // Dark background for camera
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 800),
-                child: const MedScannerBody(),
+    return BlocListener<NavigationCubit, NavigationState>(
+      listenWhen: (prev, curr) => prev.activeTab != curr.activeTab,
+      listener: (context, state) => _handleTabChange(state.activeTab),
+      child: BlocBuilder<MedScannerCubit, MedScannerState>(
+        builder: (context, state) {
+          return Scaffold(
+            body: Container(
+              color: Colors.black, // Dark background for camera
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 800),
+                  child: const MedScannerBody(),
+                ),
               ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 
   void _showInfoDialog(BuildContext context) {
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,

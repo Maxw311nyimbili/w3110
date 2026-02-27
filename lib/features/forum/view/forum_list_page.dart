@@ -38,6 +38,11 @@ class ForumListView extends StatefulWidget {
 
 class _ForumListViewState extends State<ForumListView> {
   void _updateAppBar(ForumState state) {
+    if (!mounted) return;
+    // Only update if this tab is active
+    final activeTab = context.read<NavigationCubit>().state.activeTab;
+    if (activeTab != AppTab.forum) return;
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       context.read<NavigationCubit>().updateAppBar(
@@ -67,27 +72,33 @@ class _ForumListViewState extends State<ForumListView> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<ForumCubit, ForumState>(
+    return BlocListener<NavigationCubit, NavigationState>(
+      listenWhen: (prev, curr) => prev.activeTab != curr.activeTab,
       listener: (context, state) {
-        _updateAppBar(state);
+        if (state.activeTab == AppTab.forum) {
+          _updateAppBar(context.read<ForumCubit>().state);
+        }
       },
-      builder: (context, state) {
-        // Initial update
-        _updateAppBar(state);
-
-        return Scaffold(
-          body: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 800),
-              child: const SafeArea(
-                child: EntryAnimation(
-                  child: ForumBody(),
+      child: BlocConsumer<ForumCubit, ForumState>(
+        listener: (context, state) {
+          _updateAppBar(state);
+        },
+        builder: (context, state) {
+          // Initial update handled by initState/BlocListener
+          return Scaffold(
+            body: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 800),
+                child: const SafeArea(
+                  child: EntryAnimation(
+                    child: ForumBody(),
+                  ),
                 ),
               ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }
