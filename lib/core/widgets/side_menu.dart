@@ -213,6 +213,7 @@ class _SideMenuState extends State<SideMenu> {
     bool isCollapsed,
     AuthState authState,
   ) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final user = authState.user;
     final isAuthenticated = authState.status == AuthStatus.authenticated;
 

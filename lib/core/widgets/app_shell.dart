@@ -11,6 +11,7 @@ import 'package:cap_project/features/auth/view/settings_page.dart';
 import 'package:cap_project/features/chat/chat.dart';
 import 'package:cap_project/features/forum/forum.dart';
 import 'package:cap_project/features/medscanner/medscanner.dart';
+import 'package:cap_project/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -42,6 +43,7 @@ class _DesktopShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final isCollapsed = navState.isDesktopSidebarCollapsed;
 
     return Scaffold(
@@ -66,15 +68,15 @@ class _DesktopShell extends StatelessWidget {
                   Container(
                     height: 64,
                     padding: const EdgeInsets.symmetric(horizontal: 24),
-                    decoration: BoxDecoration(
-                      color: theme.scaffoldBackgroundColor,
-                      border: Border(
-                        bottom: BorderSide(
-                          color: theme.dividerColor.withOpacity(0.08),
-                          width: 1,
+                      decoration: BoxDecoration(
+                        color: theme.scaffoldBackgroundColor,
+                        border: Border(
+                          bottom: BorderSide(
+                            color: isDark ? Colors.white.withOpacity(0.05) : AppColors.borderLight,
+                            width: 0.5,
+                          ),
                         ),
                       ),
-                    ),
                     child: Row(
                       children: [
                         if (navState.title != null)
