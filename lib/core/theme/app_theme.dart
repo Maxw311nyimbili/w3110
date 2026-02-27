@@ -6,6 +6,8 @@ import 'package:cap_project/core/theme/app_spacing.dart';
 import 'package:cap_project/core/theme/app_text_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
+
 
 class AppTheme {
   AppTheme._();
