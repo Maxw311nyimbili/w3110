@@ -15,11 +15,13 @@ import '../../../core/theme/app_text_styles.dart';
 class RefinedChatInput extends StatefulWidget {
   final bool isAudioMode;
   final VoidCallback onToggleAudio;
+  final bool isLandingMode;
 
   const RefinedChatInput({
     super.key,
     required this.isAudioMode,
     required this.onToggleAudio,
+    this.isLandingMode = false,
   });
 
   @override
@@ -224,17 +226,26 @@ class _RefinedChatInputState extends State<RefinedChatInput>
         }
       },
       child: Container(
-        padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+        padding: widget.isLandingMode
+            ? const EdgeInsets.symmetric(horizontal: 0, vertical: 0)
+            : const EdgeInsets.fromLTRB(16, 4, 16, 8),
         decoration: BoxDecoration(
-          color: Theme.of(context).scaffoldBackgroundColor,
-          border: Border(
-            top: BorderSide(
-              color: Theme.of(context).dividerColor.withOpacity(0.1),
-              width: 1,
-            ),
-          ),
+          color: widget.isLandingMode
+              ? Colors.transparent
+              : Theme.of(context).scaffoldBackgroundColor,
+          border: widget.isLandingMode
+              ? null
+              : Border(
+                  top: BorderSide(
+                    color: Theme.of(context).dividerColor.withOpacity(0.1),
+                    width: 1,
+                  ),
+                ),
         ),
         child: Container(
+          constraints: widget.isLandingMode
+              ? const BoxConstraints(maxWidth: 720)
+              : null,
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(28),
@@ -244,9 +255,13 @@ class _RefinedChatInputState extends State<RefinedChatInput>
             ),
             boxShadow: [
               BoxShadow(
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.08),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
+                color: Theme.of(context).colorScheme.primary.withOpacity(
+                      widget.isLandingMode ? 0.12 : 0.08,
+                    ),
+                blurRadius: widget.isLandingMode ? 16 : 8,
+                offset: widget.isLandingMode
+                    ? const Offset(0, 4)
+                    : const Offset(0, 2),
               ),
             ],
           ),

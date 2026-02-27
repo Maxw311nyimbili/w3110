@@ -30,7 +30,6 @@ class ChatBody extends StatefulWidget {
 class _ChatBodyState extends State<ChatBody>
     with SingleTickerProviderStateMixin {
   final ScrollController _scrollController = ScrollController();
-  late AnimationController _breathingController;
   bool _showScrollToBottom = false;
   int _unreadCount = 0;
 
@@ -39,12 +38,6 @@ class _ChatBodyState extends State<ChatBody>
     super.initState();
     _scrollController.addListener(_onScroll);
 
-    // Breathing animation for Greeting
-    _breathingController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 4),
-    )..repeat(reverse: true);
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ChatCubit>().initialize();
     });
@@ -52,7 +45,6 @@ class _ChatBodyState extends State<ChatBody>
 
   @override
   void dispose() {
-    _breathingController.dispose();
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     super.dispose();
@@ -125,72 +117,68 @@ class _ChatBodyState extends State<ChatBody>
           }
         }
       },
-      child: Container(
-        color: Theme.of(context).scaffoldBackgroundColor,
-        child: Column(
-          children: [
-            Expanded(
-              child: SafeArea(
-                bottom: false,
-                child: Stack(
-                  children: [
-                    BlocBuilder<ChatCubit, ChatState>(
-                      builder: (context, state) {
-                        if (state.isLoading && !state.hasMessages) {
-                          return Center(
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                Theme.of(context).colorScheme.primary,
-                              ),
-                            ),
-                          );
-                        }
-
-                        if (!state.hasMessages) {
-                          return _buildEmptyState(context);
-                        }
-
-                        return _buildMessageList(context, state);
-                      },
-                    ),
-                    if (_showScrollToBottom) _buildScrollToBottomButton(),
-
-                    // Subtle Floating Sign-In Chip
-                    Positioned(
-                      bottom: 8,
-                      left: 0,
-                      right: 0,
-                      child: BlocBuilder<AuthCubit, AuthState>(
-                        builder: (context, state) {
-                          if (state.isAuthenticated)
-                            return const SizedBox.shrink();
-                          return _buildFloatingSignInChip(context);
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+      child: BlocBuilder<ChatCubit, ChatState>(
+        builder: (context, state) {
+          return Container(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 600),
+              switchInCurve: Curves.easeInOutCubic,
+              switchOutCurve: Curves.easeInOutCubic,
+              child: !state.hasMessages
+                  ? _buildLandingView(context, state)
+                  : _buildActiveView(context, state),
             ),
-            BlocBuilder<ChatCubit, ChatState>(
-              builder: (context, state) {
-                if (state.isTyping) {
-                  return _buildTypingIndicator();
-                }
-                return const SizedBox.shrink();
-              },
-            ),
-            SafeArea(
-              top: false,
-              child: RefinedChatInput(
-                isAudioMode: widget.isAudioMode,
-                onToggleAudio: widget.onToggleAudio,
-              ),
-            ),
-          ],
-        ),
+          );
+        },
       ),
+    );
+  }
+
+  Widget _buildLandingView(BuildContext context, ChatState state) {
+    if (state.isLoading && !state.hasMessages) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    return _buildEmptyState(context);
+  }
+
+  Widget _buildActiveView(BuildContext context, ChatState state) {
+    return Column(
+      children: [
+        Expanded(
+          child: SafeArea(
+            bottom: false,
+            child: Stack(
+              children: [
+                _buildMessageList(context, state),
+                if (_showScrollToBottom) _buildScrollToBottomButton(),
+                // Subtle Floating Sign-In Chip
+                Positioned(
+                  bottom: 8,
+                  left: 0,
+                  right: 0,
+                  child: BlocBuilder<AuthCubit, AuthState>(
+                    builder: (context, state) {
+                      if (state.isAuthenticated) return const SizedBox.shrink();
+                      return _buildFloatingSignInChip(context);
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        if (state.isTyping) _buildTypingIndicator(),
+        SafeArea(
+          top: false,
+          child: RefinedChatInput(
+            key: const ValueKey('active_input'),
+            isAudioMode: widget.isAudioMode,
+            onToggleAudio: widget.onToggleAudio,
+          ),
+        ),
+      ],
     );
   }
 
@@ -211,74 +199,64 @@ class _ChatBodyState extends State<ChatBody>
 
         return LayoutBuilder(
           builder: (context, constraints) {
+            final isDesktop = constraints.maxWidth > 900;
             return SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom + 40,
+              ),
               child: ConstrainedBox(
                 constraints: BoxConstraints(
                   minHeight: constraints.maxHeight,
+                  maxWidth: 1000,
                 ),
-                child: IntrinsicHeight(
-                  child: Center(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 24,
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          const Spacer(),
-                          Column(
-                            children: [
-                              EntryAnimation(
-                                child: Text(
-                                  displayGreeting,
-                                  textAlign: TextAlign.center,
-                                  style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                                    fontWeight: FontWeight.w800,
-                                    letterSpacing: -1.5,
-                                    color: Theme.of(context).textTheme.displayLarge?.color,
-                                    height: 1.1,
-                                    fontSize: 40,
-                                  ),
-                                  key: ValueKey(displayGreeting),
+                child: Center(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isDesktop ? 40 : 20,
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const SizedBox(height: 60),
+                        // 1. GREETING
+                        EntryAnimation(
+                          child: Text(
+                            displayGreeting,
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: -1.0,
+                                  color: Theme.of(context).textTheme.displayLarge?.color,
+                                  height: 1.1,
+                                  fontSize: isDesktop ? 44 : 32,
                                 ),
-                              ),
-                              const SizedBox(height: 12),
-                              EntryAnimation(
-                                delay: const Duration(milliseconds: 200),
-                                child: Text(
-                                  'Your personal health guide.',
-                                  textAlign: TextAlign.center,
-                                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                    color: Theme.of(context).textTheme.bodySmall?.color,
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ),
-                            ],
+                            key: ValueKey(displayGreeting),
                           ),
-                          const SizedBox(height: 56),
-                          AnimatedBuilder(
-                            animation: _breathingController,
-                            builder: (context, child) {
-                              return Transform.scale(
-                                scale:
-                                    0.98 + (0.02 * _breathingController.value),
-                                child: Opacity(
-                                  opacity:
-                                      0.5 + (0.5 * _breathingController.value),
-                                  child: child,
-                                ),
-                              );
-                            },
+                        ),
+                        const SizedBox(height: 40),
+
+                        // 2. DAILY INSIGHT CARD
+                        ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 600),
+                          child: EntryAnimation(
+                            delay: const Duration(milliseconds: 200),
                             child: _buildDailyFact(context),
                           ),
-                          const Spacer(),
-                        ],
-                      ),
+                        ),
+                        const SizedBox(height: 48),
+
+                        // 3. CENTERED INPUT PILL
+                        EntryAnimation(
+                          delay: const Duration(milliseconds: 400),
+                          child: RefinedChatInput(
+                            key: const ValueKey('landing_input'),
+                            isAudioMode: widget.isAudioMode,
+                            onToggleAudio: widget.onToggleAudio,
+                            isLandingMode: true,
+                          ),
+                        ),
+                        const SizedBox(height: 60),
+                      ],
                     ),
                   ),
                 ),
@@ -313,69 +291,54 @@ class _ChatBodyState extends State<ChatBody>
     final factIndex = dayOfYear % facts.length;
     final dailyFact = facts[factIndex];
 
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0.0, end: 1.0),
-      duration: const Duration(milliseconds: 2000),
-      curve: Curves.easeOutQuart,
-      builder: (context, value, child) {
-        return Opacity(
-          opacity: value,
-          child: Stack(
-            alignment: Alignment.center,
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: Theme.of(context).dividerColor.withOpacity(0.05),
+        ),
+      ),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Positioned(
+            top: -10,
+            left: -10,
+            child: Icon(
+              Icons.format_quote_rounded,
+              size: 60,
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.05),
+            ),
+          ),
+          Column(
             children: [
-              Positioned(
-                top: -20,
-                left: 20,
-                child: Transform.rotate(
-                  angle: -0.2,
-                  child: Icon(
-                    Icons.format_quote_rounded,
-                    size: 140,
-                    color: Theme.of(context).colorScheme.primary.withOpacity(0.06),
-                  ),
-                ),
+              Text(
+                'DAILY INSIGHT',
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: Theme.of(context).colorScheme.primary,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 2.0,
+                      fontSize: 10,
+                    ),
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 32),
-                child: Column(
-                  children: [
-                    Text(
-                      'DAILY INSIGHT',
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: Theme.of(context).colorScheme.primary,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 2.0,
-                        fontSize: 10,
-                      ),
+              const SizedBox(height: 12),
+              Text(
+                dailyFact,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      fontSize: 18,
+                      height: 1.5,
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
+                      fontWeight: FontWeight.w500,
+                      fontStyle: FontStyle.italic,
                     ),
-                    const SizedBox(height: 16),
-                    Text(
-                      dailyFact,
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        fontSize: 20,
-                        height: 1.5,
-                        color: Theme.of(context).textTheme.bodyLarge?.color,
-                        fontWeight: FontWeight.w500,
-                        fontStyle: FontStyle.italic,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Container(
-                      width: 40,
-                      height: 2,
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primary.withOpacity(0.25),
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                  ],
-                ),
               ),
             ],
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 
