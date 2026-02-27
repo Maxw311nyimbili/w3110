@@ -272,7 +272,7 @@ class _ChatViewState extends State<ChatView> {
         ),
         BlocListener<ChatCubit, ChatState>(
           listenWhen: (prev, curr) =>
-              prev.activeSessionId != curr.activeSessionId ||
+              prev.sessionId != curr.sessionId ||
               prev.isLoadingHistory != curr.isLoadingHistory,
           listener: (context, state) {
             _updateAppBar();
