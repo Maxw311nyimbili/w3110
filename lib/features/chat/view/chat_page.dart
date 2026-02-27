@@ -170,21 +170,10 @@ class _ChatViewState extends State<ChatView> {
         // Only show top-bar icons on mobile — desktop uses the sidebar
         actions: (!_isAudioMode && !isDesktop)
             ? [
-                // 1. New Chat Button
-                IconButton(
-                  icon: Icon(
-                    Icons.add_circle_outline_rounded,
-                    size: 22,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  onPressed: () => context.read<ChatCubit>().startNewSession(),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                  tooltip: 'New Chat',
-                ),
-                const SizedBox(width: 14),
-
-                // 2. Auth Dependent Action
+        // Only show top-bar icons on mobile — desktop uses the sidebar
+        actions: (!_isAudioMode && !isDesktop)
+            ? [
+                // 1. Auth Dependent Action
                 _buildAuthAction(context),
 
                 const SizedBox(width: 12),
@@ -193,6 +182,7 @@ class _ChatViewState extends State<ChatView> {
       );
     });
   }
+
 
   Widget _buildAuthAction(BuildContext context) {
     final authState = context.read<AuthCubit>().state;
