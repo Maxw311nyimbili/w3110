@@ -16,6 +16,8 @@ class AppTheme {
       useMaterial3: true,
       brightness: Brightness.light,
       platform: TargetPlatform.iOS,
+      fontFamily: GoogleFonts.dmSans().fontFamily,
+
 
       textSelectionTheme: const TextSelectionThemeData(
         selectionColor: AppColors.accentLight,
@@ -247,6 +249,8 @@ class AppTheme {
       useMaterial3: true,
       brightness: Brightness.dark,
       platform: TargetPlatform.iOS,
+      fontFamily: GoogleFonts.dmSans().fontFamily,
+
 
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: {

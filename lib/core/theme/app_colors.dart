@@ -27,7 +27,8 @@ class AppColors {
   ); // Keep for compatibility
 
   // ─── Text (High-Performance Typography) ───────────────────────────────────
-  static const Color textPrimary = Color(0xFF111827); // Deep slate (Tailwind/Inter style)
+  static const Color textPrimary = Color(0xFF090E0D); // Deep charcoal (Matched to dark-mode background)
+
   static const Color textSecondary = Color(0xFF374151); // Darker slate-grey
   static const Color textTertiary = Color(0xFF6B7280); // Medium slate-grey
   static const Color textInverted = Color(0xFFFFFFFF); // White text on dark

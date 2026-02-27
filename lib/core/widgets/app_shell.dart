@@ -45,6 +45,9 @@ class _DesktopShell extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final isCollapsed = navState.isDesktopSidebarCollapsed;
+    
+    // Resolve Title
+    final title = navState.title ?? _getDefaultTitle(context, navState.activeTab);
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -63,7 +66,7 @@ class _DesktopShell extends StatelessWidget {
             child: Column(
               children: [
                 // Clean Header (only shown if title/actions exist)
-                if (navState.title != null ||
+                if (title != null ||
                     (navState.actions != null && navState.actions!.isNotEmpty))
                   Container(
                     height: 64,
@@ -79,13 +82,13 @@ class _DesktopShell extends StatelessWidget {
                       ),
                     child: Row(
                       children: [
-                        if (navState.title != null)
+                        if (title != null)
                           DefaultTextStyle(
                             style: theme.textTheme.titleLarge!.copyWith(
                               fontWeight: FontWeight.w700,
                               fontSize: 18,
                             ),
-                            child: navState.title!,
+                            child: title,
                           ),
                         const Spacer(),
                         if (navState.actions != null) ...navState.actions!,
@@ -104,6 +107,21 @@ class _DesktopShell extends StatelessWidget {
       ),
     );
   }
+
+  Widget? _getDefaultTitle(BuildContext context, AppTab tab) {
+    // We use a simple switch here. For production, these would be in l10n.
+    // However, keeping it in the shell ensures they appear IMMEDIATELY.
+    switch (tab) {
+      case AppTab.chat:
+        return const Text('Thanzi'); // Or "Chat"
+      case AppTab.scanner:
+        return const Text('Scanner');
+      case AppTab.forum:
+        return const Text('Community');
+      case AppTab.settings:
+        return const Text('Settings');
+    }
+  }
 }
 
 // ── Mobile ────────────────────────────────────────────────────────────────────
@@ -114,10 +132,12 @@ class _MobileShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final title = navState.title ?? _getDefaultTitle(context, navState.activeTab);
+    
     return Scaffold(
       // Keep state using IndexedStack via _ContentArea
       appBar: AppBar(
-        title: navState.title,
+        title: title,
         actions: navState.actions,
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
@@ -130,6 +150,19 @@ class _MobileShell extends StatelessWidget {
       ),
       body: _ContentArea(activeTab: navState.activeTab),
     );
+  }
+
+  Widget? _getDefaultTitle(BuildContext context, AppTab tab) {
+    switch (tab) {
+      case AppTab.chat:
+        return const Text('Thanzi');
+      case AppTab.scanner:
+        return const Text('Scanner');
+      case AppTab.forum:
+        return const Text('Community');
+      case AppTab.settings:
+        return const Text('Settings');
+    }
   }
 }
 

@@ -57,7 +57,6 @@ class _MedScannerViewState extends State<MedScannerView> {
   void _updateAppBar() {
     if (!mounted) return;
     context.read<NavigationCubit>().updateAppBar(
-          title: Text(AppLocalizations.of(context).medScanner),
           actions: [
             IconButton(
               onPressed: () => _showInfoDialog(context),
@@ -65,6 +64,14 @@ class _MedScannerViewState extends State<MedScannerView> {
             ),
           ],
         );
+  }
+
+
+  @override
+  void dispose() {
+    // Safety check - stop camera on disposal
+    context.read<MedScannerCubit>().stopCamera();
+    super.dispose();
   }
 
   @override
@@ -89,6 +96,7 @@ class _MedScannerViewState extends State<MedScannerView> {
       ),
     );
   }
+
 
   void _showInfoDialog(BuildContext context) {
     showModalBottomSheet<void>(
