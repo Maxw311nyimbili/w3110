@@ -259,8 +259,39 @@ class _ToggleButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(6),
         onTap: () => context.read<NavigationCubit>().toggleDesktopSidebar(),
         child: Center(
-          child: Icon(Icons.view_sidebar_rounded, size: 18, color: color),
+          child: _SidebarIcon(color: color),
         ),
+      ),
+    );
+  }
+}
+
+// ─── Sidebar Icon (Custom to match ChatGPT style) ──────────────────────────────
+
+class _SidebarIcon extends StatelessWidget {
+  const _SidebarIcon({required this.color});
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 19,
+      height: 17,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: color, width: 1.6),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 5,
+            decoration: BoxDecoration(
+              border: Border(
+                right: BorderSide(color: color, width: 1.6),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
