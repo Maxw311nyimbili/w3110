@@ -1,16 +1,11 @@
 // lib/core/widgets/app_shell.dart
 //
 // Persistent app shell — sidebar + content area.
-// • Desktop (≥1024 px): sidebar always visible, content fills the rest.
-//   No transition when switching tabs (IndexedStack).
-// • Mobile (<1024 px): standard Flutter Scaffold drawer, correct scrim/close.
-//
-// This widget never re-mounts during tab navigation — that's the key
-// difference from the old MaterialApp.builder wrapping approach.
 
 import 'package:cap_project/app/cubit/navigation_cubit.dart';
 import 'package:cap_project/core/util/responsive_utils.dart';
 import 'package:cap_project/core/widgets/side_menu.dart';
+import 'package:cap_project/core/widgets/auth_guard.dart';
 import 'package:cap_project/features/auth/auth.dart';
 import 'package:cap_project/features/auth/view/settings_page.dart';
 import 'package:cap_project/features/chat/chat.dart';
@@ -144,9 +139,6 @@ class _ContentArea extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // IndexedStack keeps all pages alive (scroll / state preserved, like ChatGPT).
-    // Wrap with a keyed AnimatedSwitcher so switching tabs fades the content
-    // while the sidebar stays completely still.
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 180),
       switchInCurve: Curves.easeOut,
