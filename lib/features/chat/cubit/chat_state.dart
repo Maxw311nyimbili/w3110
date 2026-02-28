@@ -27,8 +27,7 @@ enum AttachmentType {
 
 enum VoiceLanguage {
   english('en', 'English'),
-  twi('tw', 'Twi'),
-  ga('gaa', 'Ga');
+  twi('tw', 'Twi');
 
   final String code;
   final String label;
