@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:cap_project/features/chat/widgets/chat_input.dart';
 import 'package:cap_project/features/chat/widgets/message_bubble.dart';
 import 'package:cap_project/features/chat/widgets/thinking_indicator.dart';
+import 'package:cap_project/features/chat/widgets/audio_playback_pill.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../cubit/cubit.dart';
@@ -164,6 +165,13 @@ class _ChatBodyState extends State<ChatBody>
                       return _buildFloatingSignInChip(context);
                     },
                   ),
+                ),
+                // Audio Playback Indicator Pill
+                const Positioned(
+                  bottom: 12,
+                  left: 0,
+                  right: 0,
+                  child: AudioPlaybackPill(),
                 ),
               ],
             ),

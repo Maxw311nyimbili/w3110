@@ -205,6 +205,9 @@ class ChatState extends Equatable {
     this.selectedLanguage = VoiceLanguage.english,
     this.isLoadingHistory = false,
     this.historySessions = const [],
+    this.isSynthesizingAudio = false,
+    this.isPlayingAudio = false,
+    this.playingLanguage,
   });
 
   final ChatStatus status;
@@ -222,6 +225,9 @@ class ChatState extends Equatable {
   final VoiceLanguage selectedLanguage;
   final bool isLoadingHistory;
   final List<HistorySession> historySessions;
+  final bool isSynthesizingAudio;
+  final bool isPlayingAudio;
+  final VoiceLanguage? playingLanguage;
 
   bool get isLoading => status == ChatStatus.loading;
   bool get hasMessages => messages.isNotEmpty;
@@ -242,6 +248,9 @@ class ChatState extends Equatable {
     VoiceLanguage? selectedLanguage,
     bool? isLoadingHistory,
     List<HistorySession>? historySessions,
+    bool? isSynthesizingAudio,
+    bool? isPlayingAudio,
+    VoiceLanguage? playingLanguage,
   }) {
     return ChatState(
       status: status ?? this.status,
@@ -259,6 +268,9 @@ class ChatState extends Equatable {
       selectedLanguage: selectedLanguage ?? this.selectedLanguage,
       isLoadingHistory: isLoadingHistory ?? this.isLoadingHistory,
       historySessions: historySessions ?? this.historySessions,
+      isSynthesizingAudio: isSynthesizingAudio ?? this.isSynthesizingAudio,
+      isPlayingAudio: isPlayingAudio ?? this.isPlayingAudio,
+      playingLanguage: playingLanguage ?? this.playingLanguage,
     );
   }
 
@@ -293,7 +305,9 @@ class ChatState extends Equatable {
     loadingMessage,
     dynamicGreeting,
     selectedLanguage,
-    isLoadingHistory,
     historySessions,
+    isSynthesizingAudio,
+    isPlayingAudio,
+    playingLanguage,
   ];
 }

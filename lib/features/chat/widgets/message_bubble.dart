@@ -674,7 +674,7 @@ class RefinedMessageBubble extends StatelessWidget {
               style: AppTextStyles.labelLarge.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-            ...models.VoiceLanguage.values.map((lang) {
+            ...models.VoiceLanguage.values.map<Widget>((lang) {
               return ListTile(
                 leading: Icon(
                   Icons.play_circle_outline_rounded,
@@ -723,7 +723,7 @@ class RefinedMessageBubble extends StatelessWidget {
       if (!context.mounted) return;
 
       final forumSources = sources
-          .map(
+          .map<ForumPostSource>(
             (s) => ForumPostSource(
               title: s.title,
               url: s.url,

@@ -493,7 +493,7 @@ class _RefinedChatInputState extends State<RefinedChatInput>
   Widget _buildLanguageSelector(ChatState state) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: VoiceLanguage.values.map((lang) {
+      children: VoiceLanguage.values.map<Widget>((lang) {
         final isSelected = state.selectedLanguage == lang;
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -539,7 +539,7 @@ class _RefinedChatInputState extends State<RefinedChatInput>
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
-              children: state.pendingAttachments.map((attachment) {
+              children: state.pendingAttachments.map<Widget>((attachment) {
                 return Padding(
                   padding: const EdgeInsets.only(right: 12),
                   child: Stack(

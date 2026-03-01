@@ -117,7 +117,7 @@ class MedicineResultCard extends StatelessWidget {
                     spacing: 8,
                     runSpacing: 8,
                     children: result.activeIngredients
-                        .map(
+                        .map<Widget>(
                           (i) => Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 10,
@@ -173,7 +173,7 @@ class MedicineResultCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 12),
                         ...result.warnings
-                            .map(
+                            .map<Widget>(
                               (w) => Padding(
                                 padding: const EdgeInsets.only(bottom: 4),
                                 child: Row(
