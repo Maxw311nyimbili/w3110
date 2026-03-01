@@ -32,7 +32,21 @@ class ChatCubit extends Cubit<ChatState> {
        _currentLocale = locale ?? 'en',
        _userRole = userRole,
        _interests = interests,
-       super(const ChatState());
+       super(const ChatState()) {
+    _initAudioListeners();
+  }
+
+  void _initAudioListeners() {
+    _audioPlayer.onPlayerStateChanged.listen((state) {
+      if (state == PlayerState.playing) {
+        emit(this.state.copyWith(isPlayingAudio: true));
+      } else if (state == PlayerState.completed ||
+                 state == PlayerState.stopped ||
+                 state == PlayerState.paused) {
+        emit(this.state.copyWith(isPlayingAudio: false, playingLanguage: null));
+      }
+    });
+  }
 
   final repo.ChatRepository _chatRepository;
   final landing.LandingRepository _landingRepository;
@@ -251,7 +265,7 @@ class ChatCubit extends Cubit<ChatState> {
       detailedAnswer = firstSentence['rewritten'] as String? ?? '';
 
       if (firstSentence['citations'] is List) {
-        sources = (firstSentence['citations'] as List).map((c) {
+        sources = (firstSentence['citations'] as List).map<SourceReference>((c) {
           final citation = c as Map<String, dynamic>;
           final sourceData = citation['source'] as Map<String, dynamic>?;
           return SourceReference(
@@ -293,7 +307,8 @@ class ChatCubit extends Cubit<ChatState> {
 
     if (audioUrl != null) {
       print('🔊 [TTS] Audio URL found, attempting playback: $audioUrl');
-      _playAudio(audioUrl);
+      // Default to English if not specified, or use the selected language if it's the AI response
+      _playAudio(audioUrl, language: state.selectedLanguage);
     } else {
       print('🔊 [TTS] ⚠️ No audio_url in response - TTS will NOT play');
     }
@@ -308,8 +323,18 @@ class ChatCubit extends Cubit<ChatState> {
     );
   }
 
-  Future<void> _playAudio(String url) async {
+  Future<void> stopAudio() async {
     try {
+      await _audioPlayer.stop();
+      emit(state.copyWith(isPlayingAudio: false, isSynthesizingAudio: false, playingLanguage: null));
+    } catch (e) {
+      print('🔊 [TTS] ❌ Error stopping audio: $e');
+    }
+  }
+
+  Future<void> _playAudio(String url, {VoiceLanguage? language}) async {
+    try {
+      emit(state.copyWith(playingLanguage: language));
       print('🔊 [TTS] _playAudio called (${url.length > 60 ? url.substring(0, 60) + '...' : url})');
       if (url.startsWith('data:')) {
         // Data URI from gTTS or GhanaNLP — decode base64 to bytes
@@ -341,17 +366,21 @@ class ChatCubit extends Cubit<ChatState> {
         return;
       }
 
+      emit(state.copyWith(isSynthesizingAudio: true));
+
       print('🔊 [TTS]   Calling /chat/synthesize ...');
       final response = await _chatRepository.synthesizeSpeech(
         text: messageContent,
         language: language.code,
       );
 
+      emit(state.copyWith(isSynthesizingAudio: false));
+
       final audioUrl = response['audio_url'] as String?;
       print('🔊 [TTS]   synthesize response audio_url: $audioUrl');
 
       if (audioUrl != null) {
-        await _playAudio(audioUrl);
+        await _playAudio(audioUrl, language: language);
       } else {
         print('🔊 [TTS] ⚠️ synthesize returned no audio_url');
       }
@@ -485,7 +514,7 @@ class ChatCubit extends Cubit<ChatState> {
 
         // Extract sources from citations
         if (firstSentence.citations.isNotEmpty) {
-          sources = firstSentence.citations.map((citation) {
+          sources = firstSentence.citations.map<SourceReference>((citation) {
             return SourceReference(
               title: citation.source.title,
               url: citation.source.url,
@@ -756,7 +785,7 @@ class ChatCubit extends Cubit<ChatState> {
   }
 
   void toggleMessageView(String messageId) {
-    final updatedMessages = state.messages.map((msg) {
+    final List<ChatMessage> updatedMessages = state.messages.map<ChatMessage>((msg) {
       if (msg.id == messageId) {
         return msg.copyWith(showingDetailedView: !msg.showingDetailedView);
       }
@@ -778,10 +807,10 @@ class ChatCubit extends Cubit<ChatState> {
         sessions.putIfAbsent(sid, () => []).add(msg);
       }
 
-      final historySessions = sessions.entries.map((entry) {
+      final List<HistorySession> historySessions = sessions.entries.map<HistorySession>((entry) {
         final msgs = entry.value;
         // Search for the first user message in this session to use as title
-        final firstUserMsg = msgs.firstWhere(
+        final Map<String, dynamic> firstUserMsg = msgs.firstWhere(
           (m) => m['role'] == 'user',
           orElse: () => msgs.first,
         );
@@ -811,9 +840,9 @@ class ChatCubit extends Cubit<ChatState> {
       final historyData = await _chatRepository.fetchHistory(limit: 50);
       
       // Filter for this session
-      final sessionMsgs = historyData.where((m) => m['session_id'] == sessionId).toList();
+      final List<Map<String, dynamic>> sessionMsgs = historyData.where((m) => m['session_id'] == sessionId).toList();
       
-      final messages = sessionMsgs.map((m) => _mapRepoMessageToModel(m)).toList();
+      final List<ChatMessage> messages = sessionMsgs.map<ChatMessage>((m) => _mapRepoMessageToModel(m)).toList();
 
       emit(state.copyWith(
         status: ChatStatus.success,

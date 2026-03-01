@@ -193,7 +193,7 @@ class _ChatViewState extends State<ChatView> {
           .trim()
           .split(' ')
           .take(2)
-          .map((p) => p.isEmpty ? '' : p[0].toUpperCase())
+          .map<String>((p) => p.isEmpty ? '' : p[0].toUpperCase())
           .join();
 
       return InkWell(

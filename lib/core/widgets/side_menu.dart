@@ -538,7 +538,7 @@ class _ConversationsSectionState extends State<_ConversationsSection> {
                             ),
                           )
                         : Column(
-                            children: sessions.take(8).map((session) {
+                            children: sessions.take(8).map<Widget>((HistorySession session) {
                               return _SessionTile(
                                 session: session,
                                 onTap: () {
@@ -615,7 +615,7 @@ class _AuthFooter extends StatelessWidget {
         .trim()
         .split(' ')
         .take(2)
-        .map((p) => p.isEmpty ? '' : p[0].toUpperCase())
+        .map<String>((p) => p.isEmpty ? '' : p[0].toUpperCase())
         .join();
 
     return InkWell(
@@ -736,7 +736,7 @@ class _RailAvatar extends StatelessWidget {
         .trim()
         .split(' ')
         .take(2)
-        .map((p) => p.isEmpty ? '' : p[0].toUpperCase())
+        .map<String>((p) => p.isEmpty ? '' : p[0].toUpperCase())
         .join();
 
     return Tooltip(
