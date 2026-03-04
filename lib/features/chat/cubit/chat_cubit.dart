@@ -408,6 +408,11 @@ class ChatCubit extends Cubit<ChatState> {
   Future<void> sendMessage(String content, {String? imageUrl}) async {
     if (content.trim().isEmpty) return;
 
+    // Generate or reuse the sessionId for the entire conversation.
+    // This must be done BEFORE any async call so every message in the same
+    // session always carries the same ID — regardless of network timing.
+    final sessionId = state.sessionId ?? _uuid.v4();
+
     final userMessage = ChatMessage(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       content: content,
@@ -436,15 +441,17 @@ class ChatCubit extends Cubit<ChatState> {
         status: ChatStatus.loading,
         isTyping: true,
         loadingMessage: loadingMessages[0],
+        // Pin the sessionId into state immediately so the next sendMessage
+        // call picks up the same ID even before this response returns.
+        sessionId: sessionId,
       ),
     );
 
     try {
       final request = repo.ChatQueryRequest(
         query: content.trim(),
-        imageUrl: imageUrl, // Optionally pass image from UI layer
-        conversationId:
-            state.sessionId ?? DateTime.now().millisecondsSinceEpoch.toString(),
+        imageUrl: imageUrl,
+        conversationId: sessionId,
         userRole: _userRole,
         interests: _interests,
       );
@@ -556,10 +563,8 @@ class ChatCubit extends Cubit<ChatState> {
           messages: [...state.messages, aiMessage],
           status: ChatStatus.success,
           isTyping: false,
-          sessionId:
-              state.sessionId ??
-              (response.sessionId ??
-                  DateTime.now().millisecondsSinceEpoch.toString()),
+          // sessionId was pinned into state before the request was sent.
+          sessionId: sessionId,
         ),
       );
     } catch (e) {

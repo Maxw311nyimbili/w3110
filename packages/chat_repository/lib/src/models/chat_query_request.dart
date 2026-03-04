@@ -21,7 +21,7 @@ class ChatQueryRequest extends Equatable {
   Map<String, dynamic> toJson() {
     return {
       'query': query,
-      if (conversationId != null) 'conversation_id': conversationId,
+      if (conversationId != null) 'session_id': conversationId,
       if (imageUrl != null) 'image_url': imageUrl,
       if (userRole != null) 'user_role': userRole,
       if (interests != null) 'interests': interests,
