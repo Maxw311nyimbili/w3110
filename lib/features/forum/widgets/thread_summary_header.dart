@@ -78,7 +78,7 @@ class ThreadSummaryHeader extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  '${comments.length} responses',
+                  '${post.commentCount} responses',
                   style: AppTextStyles.labelSmall.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,

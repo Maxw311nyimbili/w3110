@@ -187,7 +187,7 @@ class ForumRepository {
     }
 
     if (resolvedServerId != null && resolvedServerId.isNotEmpty) {
-      await _apiClient.delete('/api/v1/forum/comments/$resolvedServerId');
+      await _apiClient.delete('/api/v1/forum/lines/comments/$resolvedServerId');
     }
 
     try {
