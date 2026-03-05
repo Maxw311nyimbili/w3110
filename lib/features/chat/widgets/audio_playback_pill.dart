@@ -39,8 +39,13 @@ class _AudioPlaybackPillState extends State<AudioPlaybackPill>
           return const SizedBox.shrink();
         }
 
-        final isTwi = state.playingLanguage == VoiceLanguage.twi || 
-                     (state.isSynthesizingAudio && state.selectedLanguage == VoiceLanguage.twi);
+        final currentLang = state.isSynthesizingAudio 
+            ? state.selectedLanguage 
+            : state.playingLanguage;
+            
+        final langLabel = currentLang?.code.toUpperCase() == 'TW' 
+            ? 'TWI' 
+            : currentLang?.code.toUpperCase() ?? 'EN';
 
         final isDark = Theme.of(context).brightness == Brightness.dark;
         final textColor = isDark ? Colors.white : AppColors.textPrimary;
@@ -107,7 +112,7 @@ class _AudioPlaybackPillState extends State<AudioPlaybackPill>
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
-                                isTwi ? 'TWI' : 'EN',
+                                langLabel,
                                 style: const TextStyle(
                                   fontSize: 8,
                                   fontWeight: FontWeight.w900,

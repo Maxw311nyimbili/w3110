@@ -13,6 +13,7 @@ class LocaleState extends Equatable {
   /// List of supported locales
   static const List<Locale> supportedLocales = [
     Locale('en'), // English
+    Locale('tw'), // Twi
     Locale('ar'), // Arabic
     Locale('fr'), // French
   ];
@@ -22,6 +23,8 @@ class LocaleState extends Equatable {
     switch (locale.languageCode) {
       case 'en':
         return 'English';
+      case 'tw':
+        return 'Twi';
       case 'ar':
         return 'العربية';
       case 'fr':
