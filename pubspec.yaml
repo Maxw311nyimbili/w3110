@@ -81,7 +81,7 @@ dev_dependencies:
 
   # Code Generation
   drift_dev: ^2.24.0
-  build_runner: ^2.7.1
+  build_runner: ^2.11.1
 
   # Linting
   very_good_analysis: ^10.0.0
