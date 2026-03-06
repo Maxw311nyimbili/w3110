@@ -53,6 +53,12 @@ class _ForumListViewState extends State<ForumListView> {
                   ? 'Discussion'
                   : AppLocalizations.of(context).community,
             ),
+            leading: state.view == ForumView.detail
+                ? IconButton(
+                    icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+                    onPressed: () => context.read<ForumCubit>().resetView(),
+                  )
+                : null,
             actions: !isDesktop ? [
               IconButton(
                 icon: const Icon(Icons.refresh_rounded, size: 20),

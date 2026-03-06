@@ -11,6 +11,7 @@ class NavigationState {
     this.isMobileDrawerOpen = false,
     this.title,
     this.actions,
+    this.leading,
   });
 
   final AppTab activeTab;
@@ -24,6 +25,7 @@ class NavigationState {
   /// Optional page-specific top bar overrides
   final Widget? title;
   final List<Widget>? actions;
+  final Widget? leading;
 
   NavigationState copyWith({
     AppTab? activeTab,
@@ -31,8 +33,10 @@ class NavigationState {
     bool? isMobileDrawerOpen,
     Widget? title,
     List<Widget>? actions,
+    Widget? leading,
     bool clearTitle = false,
     bool clearActions = false,
+    bool clearLeading = false,
     bool clearAppBar = false,
   }) {
     return NavigationState(
@@ -42,6 +46,7 @@ class NavigationState {
       isMobileDrawerOpen: isMobileDrawerOpen ?? this.isMobileDrawerOpen,
       title: (clearAppBar || clearTitle) ? null : (title ?? this.title),
       actions: (clearAppBar || clearActions) ? null : (actions ?? this.actions),
+      leading: (clearAppBar || clearLeading) ? null : (leading ?? this.leading),
     );
   }
 }
@@ -68,12 +73,14 @@ class NavigationCubit extends Cubit<NavigationState> {
     emit(state.copyWith(isMobileDrawerOpen: false));
   }
 
-  void updateAppBar({Widget? title, List<Widget>? actions}) {
+  void updateAppBar({Widget? title, List<Widget>? actions, Widget? leading}) {
     emit(state.copyWith(
       title: title,
       actions: actions,
+      leading: leading,
       clearTitle: title == null,
       clearActions: actions == null,
+      clearLeading: leading == null,
     ));
   }
 

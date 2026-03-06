@@ -92,27 +92,7 @@ class _ProfileSetupStepState extends State<ProfileSetupStep> {
 
                   const SizedBox(height: 48),
 
-                  // Staggered Inputs
-                  _buildStaggeredEntrance(
-                    delay: 300,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildLabel('YOUR NAME'),
-                        TextField(
-                          decoration: _buildInputDecoration(
-                            'Enter your name',
-                            errorText: state.showValidationError && (state.userName == null || state.userName!.isEmpty)
-                                ? 'Please enter your name'
-                                : null,
-                          ),
-                          style: AppTextStyles.bodyLarge,
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 12),
 
                   _buildStaggeredEntrance(
                     delay: 400,

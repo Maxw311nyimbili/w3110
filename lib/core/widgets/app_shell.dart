@@ -82,6 +82,10 @@ class _DesktopShell extends StatelessWidget {
                       ),
                     child: Row(
                       children: [
+                        if (navState.leading != null) ...[
+                          navState.leading!,
+                          const SizedBox(width: 8),
+                        ],
                         if (title != null)
                           DefaultTextStyle(
                             style: (theme.textTheme.titleLarge ?? 
@@ -140,6 +144,7 @@ class _MobileShell extends StatelessWidget {
       // Keep state using IndexedStack via _ContentArea
       appBar: AppBar(
         title: title,
+        leading: navState.leading,
         actions: navState.actions,
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,

@@ -307,6 +307,7 @@ class ChatState extends Equatable {
     loadingMessage,
     dynamicGreeting,
     selectedLanguage,
+    isLoadingHistory,
     historySessions,
     isSynthesizingAudio,
     isPlayingAudio,
