@@ -65,28 +65,13 @@ class CommentCard extends StatelessWidget {
 
     return IntrinsicHeight(
       child: Container(
-        decoration: isExpertComment && depth == 0
-            ? BoxDecoration(
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.04),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                  width: 1,
-                ),
-              )
-            : null,
-        margin: isExpertComment && depth == 0
-            ? const EdgeInsets.symmetric(vertical: 8, horizontal: 8)
-            : null,
-        padding: isExpertComment && depth == 0
-            ? const EdgeInsets.all(12)
-            : EdgeInsets.only(
-                left: depth > 0 ? 0 : parentPadding,
-                right: parentPadding,
-                top: 4,
-                bottom: 4,
-              ),
-        child: Row(
+        margin: const EdgeInsets.symmetric(vertical: 2),
+        padding: EdgeInsets.only(
+          left: depth > 0 ? 0 : parentPadding,
+          right: parentPadding,
+          top: 6,
+          bottom: 6,
+        ),
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // Indentation area with Curved Lines

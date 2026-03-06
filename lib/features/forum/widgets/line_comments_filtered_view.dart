@@ -262,9 +262,14 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
       for (int i = 0; i < children.length; i++) {
         final comment = children[i];
         final isLast = i == children.length - 1;
-        final hasReplies = grouped.containsKey(comment.localId);
-        final isExpanded = _expandedCommentIds.contains(comment.localId);
-        final replyCount = grouped[comment.localId]?.length ?? 0;
+        final isExpanded = _expandedCommentIds.contains(comment.localId) || 
+                          (comment.id.isNotEmpty && _expandedCommentIds.contains(comment.id));
+        
+        final hasReplies = grouped.containsKey(comment.localId) || 
+                          (comment.id.isNotEmpty && grouped.containsKey(comment.id));
+        
+        final replyCount = (grouped[comment.localId]?.length ?? 0) + 
+                          (comment.id.isNotEmpty ? (grouped[comment.id]?.length ?? 0) : 0);
 
         items.add(
           Padding(
@@ -322,6 +327,9 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
 
         if (isExpanded) {
           items.addAll(buildTree(comment.localId, depth + 1));
+          if (comment.id.isNotEmpty && comment.id != comment.localId) {
+             items.addAll(buildTree(comment.id, depth + 1));
+          }
 
           // After all children are built, add the "Hide replies" button at the END
           if (hasReplies) {
