@@ -7,7 +7,7 @@ import 'package:cap_project/features/medscanner/cubit/medscanner_state.dart'
 import 'package:cap_project/core/services/audio_recording_service.dart';
 import 'package:record/record.dart';
 import 'package:audioplayers/audioplayers.dart';
-import 'package:chat_repository/chat_repository.dart' as repo;
+import 'package:chat_repository/chat_repository.dart' as repo hide ChatMessage, SourceReference;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
@@ -866,12 +866,20 @@ class ChatCubit extends Cubit<ChatState> {
     final content = m['content'] as String? ?? '';
     final sentencesRaw = m['sentences'];
 
-    List<repo.SourceReference> sources = [];
+    List<SourceReference> sources = [];
     if (sentencesRaw is List) {
       try {
-        sources = sentencesRaw
-            .map<repo.SourceReference>((s) => repo.SourceReference.fromJson(s as Map<String, dynamic>))
-            .toList();
+        sources = sentencesRaw.map<SourceReference>((s) {
+          final map = s as Map<String, dynamic>;
+          final sourceData = map['source'] as Map<String, dynamic>?;
+          return SourceReference(
+            title: (sourceData?['title'] ?? map['title'] ?? 'No title').toString(),
+            url: (sourceData?['url'] ?? map['url'] ?? '').toString(),
+            domain: (sourceData?['domain'] ?? map['domain'] ?? 'Unknown').toString(),
+            authority: (sourceData?['authority'] ?? map['authority'] ?? 'UNKNOWN').toString(),
+            snippet: map['fragment_text'] ?? map['snippet'],
+          );
+        }).toList();
       } catch (e) {
         print('⚠️ Error parsing sources from history: $e');
       }
