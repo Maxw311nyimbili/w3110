@@ -877,7 +877,7 @@ class ChatCubit extends Cubit<ChatState> {
             url: (sourceData?['url'] ?? map['url'] ?? '').toString(),
             domain: (sourceData?['domain'] ?? map['domain'] ?? 'Unknown').toString(),
             authority: (sourceData?['authority'] ?? map['authority'] ?? 'UNKNOWN').toString(),
-            snippet: map['fragment_text'] ?? map['snippet'],
+            snippet: (map['fragment_text'] ?? map['snippet']) as String?,
           );
         }).toList();
       } catch (e) {
