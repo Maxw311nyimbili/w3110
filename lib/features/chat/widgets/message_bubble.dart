@@ -56,6 +56,7 @@ class RefinedMessageBubble extends StatelessWidget {
               ),
               child: Text(
                 message.content,
+                // selectable: false, // Default is false, but being explicit if needed (Text doesn't have it, but SelectionArea handles it)
                 style: AppTextStyles.bodyLarge.copyWith(
                   color: Colors.white,
                   fontWeight: FontWeight.w500,
@@ -180,7 +181,7 @@ class RefinedMessageBubble extends StatelessWidget {
 
                           return MarkdownBody(
                             data: content,
-                            selectable: true,
+                            selectable: false, // Changed to false to let SelectionArea handle it
                             fitContent: false,
                             onTapLink: (text, href, title) {
                               if (href != null) _launchURL(href);
