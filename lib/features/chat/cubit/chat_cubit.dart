@@ -864,15 +864,25 @@ class ChatCubit extends Cubit<ChatState> {
   ChatMessage _mapRepoMessageToModel(Map<String, dynamic> m) {
     final isUser = m['role'] == 'user';
     final content = m['content'] as String? ?? '';
-    
-    // Attempt to extract dual mode data if it exists in the raw content or separate fields
-    // For now, mapping simply
+    final sentencesRaw = m['sentences'];
+
+    List<repo.SourceReference> sources = [];
+    if (sentencesRaw is List) {
+      try {
+        sources = sentencesRaw
+            .map<repo.SourceReference>((s) => repo.SourceReference.fromJson(s as Map<String, dynamic>))
+            .toList();
+      } catch (e) {
+        print('⚠️ Error parsing sources from history: $e');
+      }
+    }
+
     return ChatMessage(
       id: m['id'].toString(),
       content: content,
       isUser: isUser,
       timestamp: DateTime.parse(m['created_at'] as String),
-      // Future: parse sources and dual-mode fields if needed
+      sources: sources,
     );
   }
 
