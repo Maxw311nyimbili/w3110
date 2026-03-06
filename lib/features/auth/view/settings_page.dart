@@ -102,12 +102,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           title: l10n.accountInfo,
                           icon: Icons.person_outline_rounded,
                           showDivider: true,
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const ProfilePage(),
-                            ),
-                          ),
+                          onTap: () => ProfilePage.show(context),
                         ),
                         _buildSettingTile(
                           context,
