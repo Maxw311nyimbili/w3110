@@ -305,7 +305,10 @@ class _GeneralCommentsViewState extends State<GeneralCommentsView> {
         );
 
         if (isExpanded) {
-          final nextAncestorHasNext = List<bool>.from(ancestorHasNext)..add(!isLast);
+          // Top-level comments (depth 0) should not contribute to vertical tracks
+          // because we want top-level threads to be isolated.
+          final bool contribution = (depth == 0) ? false : !isLast;
+          final nextAncestorHasNext = List<bool>.from(ancestorHasNext)..add(contribution);
           items.addAll(buildTree(comment.localId, depth + 1, nextAncestorHasNext));
           
           if (hasReplies) {
