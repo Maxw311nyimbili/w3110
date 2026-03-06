@@ -13,11 +13,11 @@ class AuthenticationStep extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocListener<LandingCubit, LandingState>(
       listener: (context, state) {
-        if (state.authError != null) {
+        if (state.authError != null && state.authError!.isNotEmpty) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.authError!),
-              backgroundColor: AppColors.error,
+              backgroundColor: Theme.of(context).colorScheme.error,
             ),
           );
           context.read<LandingCubit>().clearError();
