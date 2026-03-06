@@ -190,7 +190,7 @@ class _GeneralCommentsViewState extends State<GeneralCommentsView> {
       }
     }
 
-    List<Widget> buildTree(String? parentId, int depth) {
+    List<Widget> buildTree(String? parentId, int depth, List<bool> ancestorHasNext) {
       if (parentId == null.toString()) parentId = null;
       
       final List<ForumComment> children = [];
@@ -267,6 +267,7 @@ class _GeneralCommentsViewState extends State<GeneralCommentsView> {
                   hasReplies: hasReplies,
                   isExpanded: isExpanded,
                   replyCount: replyCount,
+                  ancestorHasNext: ancestorHasNext,
                   onExpand: () => _toggleExpanded(comment.localId),
                   onLike: () {
                     final idToUse = comment.id.isNotEmpty
@@ -299,7 +300,8 @@ class _GeneralCommentsViewState extends State<GeneralCommentsView> {
         );
 
         if (isExpanded) {
-          items.addAll(buildTree(comment.localId, depth + 1));
+          final nextAncestorHasNext = List<bool>.from(ancestorHasNext)..add(!isLast);
+          items.addAll(buildTree(comment.localId, depth + 1, nextAncestorHasNext));
           // Removed redundant recursive call for comment.id that was causing duplication
           // when a comment had both localId and id.
 
@@ -358,7 +360,7 @@ class _GeneralCommentsViewState extends State<GeneralCommentsView> {
       return items;
     }
 
-    return buildTree(null, 0);
+    return buildTree(null, 0, []);
   }
 
   IconData _getRoleIcon(String role) {

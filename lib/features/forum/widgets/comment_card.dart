@@ -29,6 +29,7 @@ class CommentCard extends StatelessWidget {
     this.isExpanded = true,
     this.onExpand,
     this.replyCount = 0,
+    this.ancestorHasNext = const [],
   });
 
   final String authorName;
@@ -54,6 +55,7 @@ class CommentCard extends StatelessWidget {
   final bool isExpanded;
   final VoidCallback? onExpand;
   final int replyCount;
+  final List<bool> ancestorHasNext;
 
   @override
   Widget build(BuildContext context) {
@@ -89,10 +91,13 @@ class CommentCard extends StatelessWidget {
                         width: depth * indentWidth,
                         child: CustomPaint(
                           painter: ThreadLinePainter(
-                            lineColor: Theme.of(context).dividerColor.withOpacity(0.3),
+                            lineColor: Theme.of(context).brightness == Brightness.light
+                                ? Colors.grey[400]!
+                                : Colors.grey[600]!,
                             isLastChild: isLastChild,
                             paddingLeft: 0,
                             depth: depth,
+                            ancestorHasNext: ancestorHasNext,
                           ),
                         ),
                       ),
