@@ -72,6 +72,7 @@ class CommentCard extends StatelessWidget {
           top: 6,
           bottom: 6,
         ),
+        child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // Indentation area with Curved Lines
