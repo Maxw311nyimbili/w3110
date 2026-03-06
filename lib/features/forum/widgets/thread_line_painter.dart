@@ -6,61 +6,69 @@ class ThreadLinePainter extends CustomPainter {
   final bool isLastChild;
   final double paddingLeft;
   final int depth;
+  final List<bool> ancestorHasNext;
 
   ThreadLinePainter({
     required this.lineColor,
     required this.isLastChild,
     required this.paddingLeft,
     required this.depth,
+    required this.ancestorHasNext,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
-    // Nested avatar size is 24, center at 12
-    const double avatarCenterY = 12.0; 
-    const double radius = 10.0;
-    
-    // We assume the track is aligned in the middle of each 24px indent segment
-    // Current segment start is (depth-1)*24.0
-    // Let's place the track at 12px into that segment.
-    final double trackX = (depth - 1) * 24.0 + 12.0;
+    if (depth <= 0) return;
 
+    // Nested avatar size is usually around 28-24, center it.
+    // In CommentCard, depth > 0 size is 28. Center is 14.
+    const double avatarCenterY = 20.0; // Adjusted for top padding of comment 
+    const double radius = 12.0;
+    const double indentWidth = 24.0;
+    
     final paint = Paint()
       ..color = lineColor
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.2 // Thinner for compact look
+      ..strokeWidth = 1.5
       ..strokeCap = StrokeCap.round;
 
     final path = Path();
     
-    // 1. Draw ALL vertical lines for the tracks of intermediate parents
-    // This creates the "Youtube style" continuous vertical lines for parent threads
-    for (int i = 0; i < depth - 1; i++) {
-      final double px = i * 24.0 + 12.0;
-      path.moveTo(px, 0);
-      path.lineTo(px, size.height);
+    // 1. Draw vertical tracks for all ancestors that have more siblings
+    for (int i = 0; i < ancestorHasNext.length; i++) {
+      if (ancestorHasNext[i]) {
+        final double vx = i * indentWidth + indentWidth / 2;
+        path.moveTo(vx, 0);
+        path.lineTo(vx, size.height);
+      }
     }
 
-    // 2. Draw the vertical line and curve for the IMMEDIATE parent
-    path.moveTo(trackX, 0);
+    // 2. Draw the branch for the current comment
+    // The current comment's branch starts at the track of its immediate parent
+    final double currentTrackX = (depth - 1) * indentWidth + indentWidth / 2;
+    
+    path.moveTo(currentTrackX, 0);
     
     if (isLastChild) {
-      // Curve to the right
-      path.lineTo(trackX, avatarCenterY - radius);
+      // Curved "L" shape
+      path.lineTo(currentTrackX, avatarCenterY - radius);
       path.quadraticBezierTo(
-        trackX, avatarCenterY, 
-        trackX + radius, avatarCenterY,
+        currentTrackX, avatarCenterY, 
+        currentTrackX + radius, avatarCenterY,
       );
-      // Extend to the edge (where the avatar starts)
-      path.lineTo(size.width, avatarCenterY);
     } else {
-      // Vertical line all the way down
-      path.lineTo(trackX, size.height);
+      // "T" shape: vertical line continues, horizontal branch goes out
+      path.lineTo(currentTrackX, size.height);
       
-      // Horizontal branch
-      path.moveTo(trackX, avatarCenterY);
-      path.lineTo(size.width, avatarCenterY);
+      path.moveTo(currentTrackX, avatarCenterY);
+      path.lineTo(currentTrackX + radius, avatarCenterY);
     }
+    
+    // Extend the horizontal branch to the end of the indent area
+    // The indent area ends at depth * indentWidth
+    // Wait, the CommentCard Row has an Expanded area starting after depth * indentWidth.
+    // So the painter should draw up to size.width.
+    path.lineTo(size.width, avatarCenterY);
 
     canvas.drawPath(path, paint);
   }
@@ -68,7 +76,8 @@ class ThreadLinePainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant ThreadLinePainter oldDelegate) {
     return oldDelegate.isLastChild != isLastChild || 
-           oldDelegate.paddingLeft != paddingLeft ||
-           oldDelegate.depth != depth;
+           oldDelegate.depth != depth ||
+           oldDelegate.ancestorHasNext != ancestorHasNext ||
+           oldDelegate.lineColor != lineColor;
   }
 }

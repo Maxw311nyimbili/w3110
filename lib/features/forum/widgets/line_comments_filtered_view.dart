@@ -242,7 +242,7 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
       }
     }
 
-    List<Widget> buildTree(String? parentId, int depth) {
+    List<Widget> buildTree(String? parentId, int depth, List<bool> ancestorHasNext) {
       if (parentId == null.toString()) parentId = null;
       
       final List<ForumLineComment> children = [];
@@ -312,6 +312,7 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
                   hasReplies: hasReplies,
                   isExpanded: isExpanded,
                   replyCount: replyCount,
+                  ancestorHasNext: ancestorHasNext,
                   onExpand: () => _toggleExpanded(comment.localId),
                   onLike: () {
                     context.read<ForumCubit>().toggleCommentLike(
@@ -340,7 +341,8 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
         );
 
         if (isExpanded) {
-          items.addAll(buildTree(comment.localId, depth + 1));
+          final nextAncestorHasNext = List<bool>.from(ancestorHasNext)..add(!isLast);
+          items.addAll(buildTree(comment.localId, depth + 1, nextAncestorHasNext));
           // Removed redundant recursive call for comment.id that was causing duplication
           // when a comment had both localId and id.
 
@@ -399,7 +401,7 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
       return items;
     }
 
-    return buildTree(null, 0);
+    return buildTree(null, 0, []);
   }
 
   IconData _getRoleIcon(CommentRole role) {
