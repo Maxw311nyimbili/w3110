@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// Entry point for onboarding flow
-class LandingPage extends StatelessWidget {
+class LandingPage extends StatefulWidget {
   const LandingPage({super.key, this.initialStepOverride});
 
   final OnboardingStep? initialStepOverride;
@@ -19,12 +19,25 @@ class LandingPage extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
-    // Trigger initialization on first build
-    context.read<LandingCubit>().initialize(
-      initialStepOverride: initialStepOverride,
-    );
+  State<LandingPage> createState() => _LandingPageState();
+}
 
+class _LandingPageState extends State<LandingPage> {
+  @override
+  void initState() {
+    super.initState();
+    // Trigger initialization once on entry
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        context.read<LandingCubit>().initialize(
+          initialStepOverride: widget.initialStepOverride,
+        );
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return const LandingView();
   }
 }
@@ -37,7 +50,7 @@ class LandingView extends StatelessWidget {
     return BlocListener<LandingCubit, LandingState>(
       listener: (context, state) {
         // Show error if any
-        if (state.error != null) {
+        if (state.error != null && state.error!.isNotEmpty) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.error!),

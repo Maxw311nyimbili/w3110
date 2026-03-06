@@ -198,6 +198,7 @@ class _FeatureChoicePageState extends State<FeatureChoicePage>
 
   void _navigateToFeature(BuildContext context) {
     if (_selectedFeature == null) return;
+    if (_selectedFeature == null) return;
     switch (_selectedFeature!) {
       case SelectedFeature.chat:
         AppRouter.navigateTo<void>(context, AppRouter.chat);

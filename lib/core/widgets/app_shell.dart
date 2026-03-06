@@ -84,7 +84,9 @@ class _DesktopShell extends StatelessWidget {
                       children: [
                         if (title != null)
                           DefaultTextStyle(
-                            style: theme.textTheme.titleLarge!.copyWith(
+                            style: (theme.textTheme.titleLarge ?? 
+                                   theme.textTheme.headlineSmall ?? 
+                                   const TextStyle()).copyWith(
                               fontWeight: FontWeight.w700,
                               fontSize: 18,
                             ),
