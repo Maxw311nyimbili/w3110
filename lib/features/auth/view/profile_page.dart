@@ -4,6 +4,7 @@ import 'package:cap_project/features/auth/cubit/cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cap_project/core/widgets/entry_animation.dart';
+import 'package:cap_project/l10n/l10n.dart';
 import 'package:landing_repository/landing_repository.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -285,9 +286,8 @@ class _ProfilePageState extends State<ProfilePage> {
                     ],
                   ),
                 ),
-                ),
               ),
-            ),
+            ],
           ),
         ),
       ),
