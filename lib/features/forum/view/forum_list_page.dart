@@ -56,7 +56,7 @@ class _ForumListViewState extends State<ForumListView> {
             leading: state.view == ForumView.detail
                 ? IconButton(
                     icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-                    onPressed: () => context.read<ForumCubit>().resetView(),
+                    onPressed: () => context.read<ForumCubit>().backToList(),
                   )
                 : null,
             actions: !isDesktop ? [
