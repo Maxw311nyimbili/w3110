@@ -99,7 +99,7 @@ class LandingCubit extends Cubit<LandingState> {
             currentStep: currentStep,
             isGuest: false,
             selectedRole: _mapStringToRole(status.userRole),
-            userName: status.userName,
+            userName: status.userName ?? _authCubit.state.user?.displayName,
             accountNickname: status.accountNickname,
             interests: status.interests,
             consentGiven: status.consentGiven,
