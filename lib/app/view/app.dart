@@ -138,6 +138,7 @@ class _AppState extends State<App> {
     // AuthCubit depends on repositories and ThemeCubit
     _authCubit = AuthCubit(
       authRepository: _authRepository,
+      landingRepository: _landingRepository,
       themeCubit: _themeCubit,
     );
 
