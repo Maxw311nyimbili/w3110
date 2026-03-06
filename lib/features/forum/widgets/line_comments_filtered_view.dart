@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../cubit/cubit.dart';
 import 'package:forum_repository/forum_repository.dart';
 import 'comment_card.dart';
+import 'hide_replies_button.dart';
 import 'reply_input_field_for_modal.dart';
 
 class LineCommentsFilteredView extends StatefulWidget {
@@ -275,13 +276,17 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
       final List<Widget> items = [];
       for (int i = 0; i < children.length; i++) {
         final comment = children[i];
-        final isLast = i == children.length - 1;
+        
+        final hasReplies = (grouped.containsKey(comment.localId) || 
+                          (comment.id.isNotEmpty && grouped.containsKey(comment.id)));
         final isExpanded = _expandedCommentIds.contains(comment.localId) || 
                           (comment.id.isNotEmpty && _expandedCommentIds.contains(comment.id));
         
-        final hasReplies = grouped.containsKey(comment.localId) || 
-                          (comment.id.isNotEmpty && grouped.containsKey(comment.id));
-        
+        final isLast = i == children.length - 1;
+        // If it's the last in the list, but will have a "Hide replies" button below its subtree,
+        // it's not the LAST thing in this vertical track at this level.
+        final isVisuallyLast = isLast && !isExpanded;
+
         final replyCount = (grouped[comment.localId]?.length ?? 0) + 
                           (comment.id.isNotEmpty ? (grouped[comment.id]?.length ?? 0) : 0);
 
@@ -308,7 +313,7 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
                   profession: comment.authorProfession,
                   typeLabel: comment.typeLabel,
                   roleIcon: _getRoleIcon(comment.authorRole),
-                  isLastChild: isLast,
+                  isLastChild: isVisuallyLast,
                   hasReplies: hasReplies,
                   isExpanded: isExpanded,
                   replyCount: replyCount,
@@ -340,51 +345,17 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
           ),
         );
 
-        if (isExpanded) {
+        if (isExpanded && hasReplies) {
           final nextAncestorHasNext = List<bool>.from(ancestorHasNext)..add(!isLast);
           items.addAll(buildTree(comment.localId, depth + 1, nextAncestorHasNext));
-          // Removed redundant recursive call for comment.id that was causing duplication
-          // when a comment had both localId and id.
-
-          // After all children are built, add the "Hide replies" button at the END
-          if (hasReplies) {
-            // Match the horizontal alignment of the parent comment's text
-            final double basePadding = 16.0;
-            final double cardPadding = depth > 0 ? 0.0 : 12.0;
-            final double avatarArea = depth > 0 ? 34.0 : 44.0;
-            final double totalIndent = depth * 24.0;
-
-            items.add(
-              Padding(
-                padding: EdgeInsets.only(
-                  left: basePadding + cardPadding + totalIndent + avatarArea,
-                  top: 4,
-                  bottom: 12,
-                ),
-                child: InkWell(
-                  onTap: () => _toggleExpanded(comment.localId),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 18,
-                        height: 1.2,
-                        color: AppColors.borderMedium,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Hide replies',
-                        style: AppTextStyles.labelSmall.copyWith(
-                          color: AppColors.textSecondary,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 11,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          }
+          
+          items.add(
+            HideRepliesButton(
+              depth: depth + 1,
+              ancestorHasNext: nextAncestorHasNext,
+              onTap: () => _toggleExpanded(comment.localId),
+            ),
+          );
         }
 
         if (depth == 0 && !isLast) {
