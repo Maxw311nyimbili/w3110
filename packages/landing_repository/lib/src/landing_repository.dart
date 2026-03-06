@@ -56,6 +56,7 @@ class LandingRepository {
     String? role,
     bool? onboardingCompleted,
     String? themeMode,
+    String? displayName,
   }) async {
     try {
       await _apiClient.put(
@@ -66,6 +67,7 @@ class LandingRepository {
           if (onboardingCompleted != null)
             'onboarding_completed': onboardingCompleted,
           if (themeMode != null) 'theme_mode': themeMode,
+          if (displayName != null) 'display_name': displayName,
         },
       );
       print('✅ Preferences updated on backend');

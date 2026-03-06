@@ -4,6 +4,7 @@ import 'package:auth_repository/auth_repository.dart';
 import 'package:cap_project/core/theme/cubit/theme_cubit.dart';
 import 'package:cap_project/features/auth/cubit/auth_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:landing_repository/landing_repository.dart';
 
 /// Manages authentication state and user sessions
 ///
@@ -17,12 +18,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class AuthCubit extends Cubit<AuthState> {
   AuthCubit({
     required AuthRepository authRepository,
+    required LandingRepository landingRepository,
     required ThemeCubit themeCubit,
   }) : _authRepository = authRepository,
+       _landingRepository = landingRepository,
        _themeCubit = themeCubit,
        super(const AuthState());
 
   final AuthRepository _authRepository;
+  final LandingRepository _landingRepository;
   final ThemeCubit _themeCubit;
 
   /// Initialize auth - check for existing session
@@ -284,6 +288,34 @@ class AuthCubit extends Cubit<AuthState> {
         user: user,
       ),
     );
+  }
+
+  /// Update user display name
+  Future<void> updateDisplayName(String name) async {
+    if (state.user == null) return;
+    
+    try {
+      emit(state.copyWith(status: AuthStatus.loading));
+      
+      // 1. Update on backend
+      await _landingRepository.updatePreferences(displayName: name);
+      
+      // 2. Update local state
+      final updatedUser = state.user!.copyWith(displayName: name);
+      
+      emit(state.copyWith(
+        status: AuthStatus.authenticated,
+        user: updatedUser,
+      ));
+      
+      print('✓ Display name updated to: $name');
+    } catch (e) {
+      print('❌ Failed to update display name: $e');
+      emit(state.copyWith(
+        status: AuthStatus.error,
+        error: 'Failed to update name',
+      ));
+    }
   }
 
   /// Clear error state

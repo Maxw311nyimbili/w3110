@@ -70,6 +70,26 @@ class AuthUser extends Equatable {
   final bool onboardingCompleted;
   final String themeMode;
 
+  AuthUser copyWith({
+    String? id,
+    String? email,
+    String? displayName,
+    String? photoUrl,
+    String? role,
+    bool? onboardingCompleted,
+    String? themeMode,
+  }) {
+    return AuthUser(
+      id: id ?? this.id,
+      email: email ?? this.email,
+      displayName: displayName ?? this.displayName,
+      photoUrl: photoUrl ?? this.photoUrl,
+      role: role ?? this.role,
+      onboardingCompleted: onboardingCompleted ?? this.onboardingCompleted,
+      themeMode: themeMode ?? this.themeMode,
+    );
+  }
+
   @override
   List<Object?> get props => [
     id,
