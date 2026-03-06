@@ -243,17 +243,31 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
     }
 
     List<Widget> buildTree(String? parentId, int depth) {
-      final key = parentId ?? null.toString();
-      final children = grouped[key] ?? [];
+      if (parentId == null.toString()) parentId = null;
       
-      if (children.isEmpty && parentId != null) {
+      final List<ForumLineComment> children = [];
+      final Set<String> seenIds = {};
+
+      void addChildrenForId(String? id) {
+        if (id == null || id.isEmpty) return;
+        final list = grouped[id] ?? [];
+        for (final child in list) {
+          final cid = child.id.isNotEmpty ? child.id : child.localId;
+          if (!seenIds.contains(cid)) {
+            children.add(child);
+            seenIds.add(cid);
+          }
+        }
+      }
+
+      if (parentId == null) {
+        addChildrenForId(null.toString());
+      } else {
+        addChildrenForId(parentId);
         try {
           final parent = allComments.firstWhere((c) => c.id == parentId || c.localId == parentId);
-          final alternativeId = (parent.id == parentId) ? parent.localId : parent.id;
-          if (alternativeId.isNotEmpty) {
-            final altChildren = grouped[alternativeId] ?? [];
-            children.addAll(altChildren);
-          }
+          if (parent.id != parentId) addChildrenForId(parent.id);
+          if (parent.localId != parentId) addChildrenForId(parent.localId);
         } catch (_) {}
       }
       children.sort((a, b) => a.createdAt.compareTo(b.createdAt));
@@ -327,9 +341,6 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
 
         if (isExpanded) {
           items.addAll(buildTree(comment.localId, depth + 1));
-          if (comment.id.isNotEmpty && comment.id != comment.localId) {
-             items.addAll(buildTree(comment.id, depth + 1));
-          }
 
           // After all children are built, add the "Hide replies" button at the END
           if (hasReplies) {
