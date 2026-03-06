@@ -300,6 +300,8 @@ class _GeneralCommentsViewState extends State<GeneralCommentsView> {
 
         if (isExpanded) {
           items.addAll(buildTree(comment.localId, depth + 1));
+          // Removed redundant recursive call for comment.id that was causing duplication
+          // when a comment had both localId and id.
 
           // After all children are built, add the "Hide replies" button at the END
           if (hasReplies) {
