@@ -196,6 +196,24 @@ class LandingRepository {
       return null;
     }
   }
+
+  /// Save current onboarding step
+  Future<void> saveCurrentStep(String stepName) async {
+    try {
+      await _localPreferences.saveCurrentStep(stepName);
+    } catch (e) {
+      print('⚠️ Failed to save current step: $e');
+    }
+  }
+
+  /// Get current onboarding step
+  Future<String?> getCurrentStep() async {
+    try {
+      return await _localPreferences.getCurrentStep();
+    } catch (e) {
+      return null;
+    }
+  }
 }
 
 /// Custom exception for landing repository errors

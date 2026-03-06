@@ -70,9 +70,34 @@ class _RefinedChatInputState extends State<RefinedChatInput>
     if (hasText != _hasText) setState(() => _hasText = hasText);
   }
 
+  String _sanitizeInput(String input) {
+    var sanitized = input.trim();
+    
+    // 1. Enforce character limit (redundant with TextField but safe)
+    if (sanitized.length > 2000) {
+      sanitized = sanitized.substring(0, 2000);
+    }
+    
+    // 2. Simple protection against JSON injection
+    // If we see suspicious bracket usage, escape or strip them
+    if (sanitized.contains('{') || sanitized.contains('[')) {
+      // Re-encode to ensure it's treated as a literal string by any downstream parsers
+      // or simply strip common JSON structural symbols if they look like an object
+      if (sanitized.startsWith('{') && sanitized.endsWith('}')) {
+        sanitized = sanitized.replaceAll('{', '(').replaceAll('}', ')');
+      }
+    }
+    
+    return sanitized;
+  }
+
   void _sendMessage() {
-    if (_controller.text.trim().isEmpty) return;
-    context.read<ChatCubit>().sendMessage(_controller.text.trim());
+    final originalText = _controller.text;
+    final sanitizedText = _sanitizeInput(originalText);
+    
+    if (sanitizedText.isEmpty) return;
+    
+    context.read<ChatCubit>().sendMessage(sanitizedText);
     _controller.clear();
     setState(() => _hasText = false);
   }
@@ -306,6 +331,7 @@ class _RefinedChatInputState extends State<RefinedChatInput>
               hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Theme.of(context).textTheme.labelSmall?.color,
               ),
+              counterText: '', // Hide default counter
               filled: false, // Override global theme
               fillColor: Colors.transparent,
               border: InputBorder.none,
@@ -315,6 +341,8 @@ class _RefinedChatInputState extends State<RefinedChatInput>
               disabledBorder: InputBorder.none,
               contentPadding: const EdgeInsets.symmetric(vertical: 12),
             ),
+            maxLength: 2000,
+            buildCounter: (context, {required currentLength, required isFocused, maxLength}) => null,
           ),
         ),
         Padding(

@@ -77,11 +77,26 @@ class LandingCubit extends Cubit<LandingState> {
         );
       } else if (isAuthenticated) {
         print(
-          'ℹ️ User authenticated but onboarding incomplete. Jumping to role selection.',
+          'ℹ️ User authenticated but onboarding incomplete. Checking for saved step.',
         );
+        
+        final savedStepName = await _landingRepository.getCurrentStep();
+        OnboardingStep currentStep = OnboardingStep.roleSelection; // Default for authenticated
+        
+        if (savedStepName != null) {
+          try {
+            currentStep = OnboardingStep.values.firstWhere(
+              (e) => e.toString() == savedStepName,
+            );
+            print('✅ Recovered saved step: $currentStep');
+          } catch (_) {
+            print('⚠️ Could not parse saved step name: $savedStepName');
+          }
+        }
+
         emit(
           state.copyWith(
-            currentStep: OnboardingStep.roleSelection,
+            currentStep: currentStep,
             isGuest: false,
             selectedRole: _mapStringToRole(status.userRole),
             userName: status.userName,
@@ -115,10 +130,39 @@ class LandingCubit extends Cubit<LandingState> {
 
   /// Move to next onboarding step
   Future<void> nextStep() async {
-    if (!state.canProceed) return;
+    if (!state.canProceed) {
+      emit(state.copyWith(showValidationError: true));
+      return;
+    }
 
     final nextStep = _getNextStep(state.currentStep);
-    emit(state.copyWith(currentStep: nextStep, isGuest: false));
+    emit(state.copyWith(
+      currentStep: nextStep, 
+      isGuest: false,
+      showValidationError: false, // Reset on change
+    ));
+    
+    // Persistence
+    await _landingRepository.saveCurrentStep(nextStep.toString());
+    
+    // Mid-sync: If moving from Profile Setup, sync to backend
+    if (state.currentStep == OnboardingStep.profileSetup) {
+      _syncToBackend();
+    }
+  }
+
+  /// Sync partial profile to backend
+  Future<void> _syncToBackend() async {
+    try {
+      print('🔄 [MID-SYNC] Syncing partial profile to backend...');
+      await _landingRepository.updatePreferences(
+        role: _mapRoleToString(state.selectedRole),
+        // Note: The current API might not have fields for name/nickname yet 
+        // but we sync what we can to trigger the user record creation/update.
+      );
+    } catch (e) {
+      print('⚠️ Mid-sync failed: $e');
+    }
   }
 
   /// Continue as a guest (bypass onboarding for now)
@@ -143,10 +187,14 @@ class LandingCubit extends Cubit<LandingState> {
   }
 
   /// Move to previous onboarding step
-  void previousStep() {
+  Future<void> previousStep() async {
     final previousStep = _getPreviousStep(state.currentStep);
     if (previousStep != null) {
-      emit(state.copyWith(currentStep: previousStep));
+      emit(state.copyWith(
+        currentStep: previousStep,
+        showValidationError: false,
+      ));
+      await _landingRepository.saveCurrentStep(previousStep.toString());
     }
   }
 

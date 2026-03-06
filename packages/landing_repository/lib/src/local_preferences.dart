@@ -14,6 +14,7 @@ class LocalPreferences {
   static const _onboardingKey = 'onboarding_status';
   static const _languageKey = 'app_language';
   static const _splashKey = 'last_splash_seen';
+  static const _currentStepKey = 'current_onboarding_step';
 
   bool get isInitialized => _prefsInitialized;
 
@@ -52,6 +53,19 @@ class LocalPreferences {
   Future<void> clearOnboardingStatus() async {
     _ensureInitialized();
     await _prefs.remove(_onboardingKey);
+    await _prefs.remove(_currentStepKey); // Also clear step
+  }
+
+  /// Save current step
+  Future<void> saveCurrentStep(String step) async {
+    _ensureInitialized();
+    await _prefs.setString(_currentStepKey, step);
+  }
+
+  /// Get current step
+  Future<String?> getCurrentStep() async {
+    _ensureInitialized();
+    return _prefs.getString(_currentStepKey);
   }
 
   /// Clear all app preferences
