@@ -61,9 +61,12 @@ class _ProfilePageState extends State<ProfilePage> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
-        child: EntryAnimation(
-          child: CustomScrollView(
-            physics: const BouncingScrollPhysics(),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 800),
+            child: EntryAnimation(
+              child: CustomScrollView(
+                physics: const BouncingScrollPhysics(),
             slivers: [
               // Custom Header with Back Button and Large Avatar
               SliverToBoxAdapter(
@@ -282,8 +285,9 @@ class _ProfilePageState extends State<ProfilePage> {
                     ],
                   ),
                 ),
+                ),
               ),
-            ],
+            ),
           ),
         ),
       ),
