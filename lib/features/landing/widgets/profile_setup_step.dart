@@ -100,8 +100,12 @@ class _ProfileSetupStepState extends State<ProfileSetupStep> {
                       children: [
                         _buildLabel('YOUR NAME'),
                         TextField(
-                          controller: _nameController,
-                          decoration: _buildInputDecoration('Enter your name'),
+                          decoration: _buildInputDecoration(
+                            'Enter your name',
+                            errorText: state.showValidationError && (state.userName == null || state.userName!.isEmpty)
+                                ? 'Please enter your name'
+                                : null,
+                          ),
                           style: AppTextStyles.bodyLarge,
                         ),
                       ],
@@ -120,6 +124,9 @@ class _ProfileSetupStepState extends State<ProfileSetupStep> {
                           controller: _nicknameController,
                           decoration: _buildInputDecoration(
                             'e.g., Clinical Account, Personal',
+                            errorText: state.showValidationError && (state.accountNickname == null || state.accountNickname!.isEmpty)
+                                ? 'Please enter a nickname'
+                                : null,
                           ),
                           style: AppTextStyles.bodyLarge,
                         ),
@@ -142,9 +149,7 @@ class _ProfileSetupStepState extends State<ProfileSetupStep> {
                     child: Padding(
                       padding: const EdgeInsets.only(bottom: 24),
                       child: PremiumButton(
-                        onPressed: state.canProceed
-                            ? () => context.read<LandingCubit>().nextStep()
-                            : null,
+                        onPressed: () => context.read<LandingCubit>().nextStep(),
                         text: 'Continue',
                       ),
                     ),
@@ -189,9 +194,10 @@ class _ProfileSetupStepState extends State<ProfileSetupStep> {
     );
   }
 
-  InputDecoration _buildInputDecoration(String hint) {
+  InputDecoration _buildInputDecoration(String hint, {String? errorText}) {
     return InputDecoration(
       hintText: hint,
+      errorText: errorText,
       filled: true,
       fillColor: Theme.of(context).colorScheme.surface,
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),

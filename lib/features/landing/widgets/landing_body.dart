@@ -19,6 +19,7 @@ class LandingBody extends StatelessWidget {
       builder: (context, state) {
         if (state.isLoading) {
           return Scaffold(
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             body: Center(
               child: CircularProgressIndicator(
                 color: Theme.of(context).colorScheme.primary,
@@ -28,27 +29,80 @@ class LandingBody extends StatelessWidget {
           );
         }
 
-        return AnimatedSwitcher(
-          duration: const Duration(milliseconds: 600),
-          switchInCurve: Curves.easeInOutCubic,
-          switchOutCurve: Curves.easeInOutCubic,
-          transitionBuilder: (Widget child, Animation<double> animation) {
-            final slideAnimation = Tween<Offset>(
-              begin: const Offset(0.05, 0),
-              end: Offset.zero,
-            ).animate(animation);
+        return Scaffold(
+          body: Column(
+            children: [
+              __buildProgressBar(context, state.currentStep),
+              Expanded(
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 600),
+                  switchInCurve: Curves.easeInOutCubic,
+                  switchOutCurve: Curves.easeInOutCubic,
+                  transitionBuilder: (Widget child, Animation<double> animation) {
+                    final slideAnimation = Tween<Offset>(
+                      begin: const Offset(0.05, 0),
+                      end: Offset.zero,
+                    ).animate(animation);
 
-            return FadeTransition(
-              opacity: animation,
-              child: SlideTransition(
-                position: slideAnimation,
-                child: child,
+                    return FadeTransition(
+                      opacity: animation,
+                      child: SlideTransition(
+                        position: slideAnimation,
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: _buildStep(context, state.currentStep),
+                ),
               ),
-            );
-          },
-          child: _buildStep(context, state.currentStep),
+            ],
+          ),
         );
       },
+    );
+  }
+
+  Widget __buildProgressBar(BuildContext context, OnboardingStep step) {
+    if (step == OnboardingStep.complete) return const SizedBox.shrink();
+
+    final steps = OnboardingStep.values.where((e) => e != OnboardingStep.complete).toList();
+    final index = steps.indexOf(step);
+    final progress = (index + 1) / steps.length;
+
+    return Container(
+      padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+      color: Theme.of(context).scaffoldBackgroundColor,
+      child: Column(
+        children: [
+          LinearProgressIndicator(
+            value: progress,
+            backgroundColor: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+            valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.primary),
+            minHeight: 4,
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Step ${index + 1} of ${steps.length}',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: Theme.of(context).colorScheme.primary.withOpacity(0.8),
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  '${(progress * 100).toInt()}%',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 

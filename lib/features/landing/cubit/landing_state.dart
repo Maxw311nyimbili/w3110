@@ -35,6 +35,7 @@ class LandingState extends Equatable {
     this.verificationStatus = 'none',
     this.isDemoAvailable = false,
     this.isGuest = false,
+    this.showValidationError = false,
   });
 
   final OnboardingStep currentStep;
@@ -52,6 +53,7 @@ class LandingState extends Equatable {
   final String verificationStatus;
   final bool isDemoAvailable;
   final bool isGuest;
+  final bool showValidationError;
 
   bool get isComplete => currentStep == OnboardingStep.complete;
   bool get canProceed {
@@ -90,6 +92,7 @@ class LandingState extends Equatable {
     String? verificationStatus,
     bool? isDemoAvailable,
     bool? isGuest,
+    bool? showValidationError,
   }) {
     return LandingState(
       currentStep: currentStep ?? this.currentStep,
@@ -107,6 +110,7 @@ class LandingState extends Equatable {
       verificationStatus: verificationStatus ?? this.verificationStatus,
       isDemoAvailable: isDemoAvailable ?? this.isDemoAvailable,
       isGuest: isGuest ?? this.isGuest,
+      showValidationError: showValidationError ?? this.showValidationError,
     );
   }
 
@@ -131,5 +135,6 @@ class LandingState extends Equatable {
     verificationStatus,
     isDemoAvailable,
     isGuest,
+    showValidationError,
   ];
 }
