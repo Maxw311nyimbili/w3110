@@ -383,10 +383,19 @@ class ChatCubit extends Cubit<ChatState> {
       emit(state.copyWith(playingLanguage: language));
       print('🔊 [TTS] _playAudio called (${url.length > 60 ? url.substring(0, 60) + '...' : url})');
       
-      // On Web, Safari and other browsers often handle data URIs better via UrlSource
-      // than decoding to bytes and using BytesSource.
       if (url.startsWith('data:')) {
-        await _audioPlayer.play(UrlSource(url));
+        // Explicitly extract MIME type for Data URIs to satisfy Chrome/Safari requirements
+        final commaIdx = url.indexOf(',');
+        String? mimeType;
+        if (commaIdx != -1) {
+          final prefix = url.substring(0, commaIdx);
+          final parts = prefix.split(':');
+          if (parts.length > 1) {
+            mimeType = parts[1].split(';')[0]; // Extract "audio/mpeg" or "audio/wav"
+          }
+        }
+        print('🔊 [TTS]   Playing Data URI with mimeType: $mimeType');
+        await _audioPlayer.play(UrlSource(url, mimeType: mimeType));
       } else {
         await _audioPlayer.play(UrlSource(url));
       }
