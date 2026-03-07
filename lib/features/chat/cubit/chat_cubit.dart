@@ -44,16 +44,16 @@ class ChatCubit extends Cubit<ChatState> {
     // - Mix with other apps if needed
     // - Don't stop on route change unless necessary
     AudioPlayer.global.setAudioContext(
-      const AudioContext(
+      AudioContext(
         iOS: AudioContextIOS(
           category: AVAudioSessionCategory.playback,
-          options: [
+          options: {
             AVAudioSessionOptions.mixWithOthers,
             AVAudioSessionOptions.duckOthers,
             AVAudioSessionOptions.defaultToSpeaker,
-          ],
+          },
         ),
-        android: AudioContextAndroid(
+        android: const AudioContextAndroid(
           isSpeakerphoneOn: true,
           stayAwake: true,
           contentType: AndroidContentType.music,
