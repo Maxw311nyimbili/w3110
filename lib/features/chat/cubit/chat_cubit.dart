@@ -68,16 +68,17 @@ class ChatCubit extends Cubit<ChatState> {
   /// This should be called inside methods triggered by a click/tap.
   Future<void> _primeAudio() async {
     try {
-      // Tiny 1-second silent MP3 to "bless" the context during the user gesture.
-      // Safari requires a real source to be played to unlock subsequent programmatic playback.
-      const silentMp3 = 'data:audio/mpeg;base64,SUQzBAAAAAABAFRYWFgAAAASAAADbWFqb3JfYnJhbmQAZGFzaABUWFhYAAAAEQAAA21pbm9yX3ZlcnNpb24AMABUWFhYAAAAHAAAA2NvbXBhdGlibGVfYnJhbmRzAGlzb21tcDQyAFVTRVIAAAAWAAADY3JlYXRpbmdfbGlicmFyeQBMQVZFAAAA//uQZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAoxAAAo0AAAKMAAAEjGzszMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMTM=';
+      // Small 100ms silent WAV to "bless" the context during the user gesture.
+      // We use WAV as it has better cross-browser compatibility for tiny data URIs.
+      const silentWav = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAgD4AAIA+AAABAAgAZGF0YQAAAAA=';
       await _audioPlayer.setVolume(0.0);
-      await _audioPlayer.play(UrlSource(silentMp3));
+      await _audioPlayer.play(UrlSource(silentWav, mimeType: 'audio/wav'));
       await _audioPlayer.stop();
       await _audioPlayer.setVolume(1.0);
-      print('🔊 [TTS] Audio engine primed with silent source');
+      print('🔊 [TTS] Audio engine primed');
     } catch (e) {
       print('🔊 [TTS] ⚠️ Failed to prime audio: $e');
+      // If priming fails, we still want to continue with the main logic
     }
   }
 
@@ -386,7 +387,18 @@ class ChatCubit extends Cubit<ChatState> {
       // On Web, Safari and other browsers often handle data URIs better via UrlSource
       // than decoding to bytes and using BytesSource.
       if (url.startsWith('data:')) {
-        await _audioPlayer.play(UrlSource(url));
+        // Explicitly extract MIME type for Data URIs to satisfy Chrome/Safari requirements
+        final commaIdx = url.indexOf(',');
+        String? mimeType;
+        if (commaIdx != -1) {
+          final prefix = url.substring(0, commaIdx);
+          final parts = prefix.split(':');
+          if (parts.length > 1) {
+            mimeType = parts[1].split(';')[0]; // Extract "audio/mpeg" or "audio/wav"
+          }
+        }
+        print('🔊 [TTS]   Playing Data URI with mimeType: $mimeType');
+        await _audioPlayer.play(UrlSource(url, mimeType: mimeType));
       } else {
         await _audioPlayer.play(UrlSource(url));
       }
