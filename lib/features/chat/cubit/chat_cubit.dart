@@ -68,12 +68,14 @@ class ChatCubit extends Cubit<ChatState> {
   /// This should be called inside methods triggered by a click/tap.
   Future<void> _primeAudio() async {
     try {
-      // Smallest possible playback to unlock the engine without being audible
+      // Tiny 1-second silent MP3 to "bless" the context during the user gesture.
+      // Safari requires a real source to be played to unlock subsequent programmatic playback.
+      const silentMp3 = 'data:audio/mpeg;base64,SUQzBAAAAAABAFRYWFgAAAASAAADbWFqb3JfYnJhbmQAZGFzaABUWFhYAAAAEQAAA21pbm9yX3ZlcnNpb24AMABUWFhYAAAAHAAAA2NvbXBhdGlibGVfYnJhbmRzAGlzb21tcDQyAFVTRVIAAAAWAAADY3JlYXRpbmdfbGlicmFyeQBMQVZFAAAA//uQZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAoxAAAo0AAAKMAAAEjGzszMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMTM=';
       await _audioPlayer.setVolume(0.0);
-      await _audioPlayer.resume();
-      await _audioPlayer.pause();
+      await _audioPlayer.play(UrlSource(silentMp3));
+      await _audioPlayer.stop();
       await _audioPlayer.setVolume(1.0);
-      print('🔊 [TTS] Audio engine primed');
+      print('🔊 [TTS] Audio engine primed with silent source');
     } catch (e) {
       print('🔊 [TTS] ⚠️ Failed to prime audio: $e');
     }
@@ -380,14 +382,11 @@ class ChatCubit extends Cubit<ChatState> {
     try {
       emit(state.copyWith(playingLanguage: language));
       print('🔊 [TTS] _playAudio called (${url.length > 60 ? url.substring(0, 60) + '...' : url})');
+      
+      // On Web, Safari and other browsers often handle data URIs better via UrlSource
+      // than decoding to bytes and using BytesSource.
       if (url.startsWith('data:')) {
-        // Data URI from gTTS or GhanaNLP — decode base64 to bytes
-        final commaIdx = url.indexOf(',');
-        if (commaIdx == -1) throw Exception('Invalid data URI');
-        final base64Str = url.substring(commaIdx + 1);
-        // ignore: avoid_dynamic_calls
-        final bytes = Uri.parse('data:application/octet-stream;base64,$base64Str').data!.contentAsBytes();
-        await _audioPlayer.play(BytesSource(bytes));
+        await _audioPlayer.play(UrlSource(url));
       } else {
         await _audioPlayer.play(UrlSource(url));
       }
