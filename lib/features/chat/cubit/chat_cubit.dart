@@ -34,6 +34,49 @@ class ChatCubit extends Cubit<ChatState> {
        _interests = interests,
        super(const ChatState()) {
     _initAudioListeners();
+    _configureAudioContext();
+  }
+
+  void _configureAudioContext() {
+    AudioLogger.logLevel = AudioLogLevel.error;
+    // Configure for iOS Safari compatibility:
+    // - Stay playing when silent switch is on
+    // - Mix with other apps if needed
+    // - Don't stop on route change unless necessary
+    AudioPlayer.global.setAudioContext(
+      const AudioContext(
+        iOS: AudioContextIOS(
+          category: AVAudioSessionCategory.playback,
+          options: [
+            AVAudioSessionOptions.mixWithOthers,
+            AVAudioSessionOptions.duckOthers,
+            AVAudioSessionOptions.defaultToSpeaker,
+          ],
+        ),
+        android: AudioContextAndroid(
+          isSpeakerphoneOn: true,
+          stayAwake: true,
+          contentType: AndroidContentType.music,
+          usageType: AndroidUsageType.assistanceSonification,
+          audioFocus: AndroidAudioFocus.gain,
+        ),
+      ),
+    );
+  }
+
+  /// Primes the audio engine during a user gesture to unlock Safari/iOS playback.
+  /// This should be called inside methods triggered by a click/tap.
+  Future<void> _primeAudio() async {
+    try {
+      // Smallest possible playback to unlock the engine without being audible
+      await _audioPlayer.setVolume(0.0);
+      await _audioPlayer.resume();
+      await _audioPlayer.pause();
+      await _audioPlayer.setVolume(1.0);
+      print('🔊 [TTS] Audio engine primed');
+    } catch (e) {
+      print('🔊 [TTS] ⚠️ Failed to prime audio: $e');
+    }
   }
 
   void _initAudioListeners() {
@@ -103,6 +146,7 @@ class ChatCubit extends Cubit<ChatState> {
   Future<void> startRecording() async {
     try {
       print('🎤 [STT] startRecording called');
+      await _primeAudio(); // Prime on mic click
       final hasPermission = await _audioRecordingService.hasPermission();
       print('🎤 [STT]   hasPermission: $hasPermission');
       if (!hasPermission) {
@@ -358,6 +402,7 @@ class ChatCubit extends Cubit<ChatState> {
   Future<void> speakMessage(String messageContent, VoiceLanguage language) async {
     try {
       print('🔊 [TTS] speakMessage called:');
+      await _primeAudio(); // Prime on speak icon click
       print('🔊 [TTS]   content length: ${messageContent.length}');
       print('🔊 [TTS]   language: ${language.code}');
 
@@ -407,6 +452,8 @@ class ChatCubit extends Cubit<ChatState> {
   // Main send message method
   Future<void> sendMessage(String content, {String? imageUrl}) async {
     if (content.trim().isEmpty) return;
+
+    await _primeAudio(); // Prime on send button click
 
     // Generate or reuse the sessionId for the entire conversation.
     // This must be done BEFORE any async call so every message in the same
