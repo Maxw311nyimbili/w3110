@@ -569,10 +569,6 @@ class RefinedMessageBubble extends StatelessWidget {
   ) {
     return Row(
       children: [
-        _buildActionIcon(Icons.thumb_up_alt_outlined, () {}),
-        const SizedBox(width: 8),
-        _buildActionIcon(Icons.thumb_down_alt_outlined, () {}),
-        const SizedBox(width: 8),
         _buildActionIcon(Icons.copy_rounded, () {
           final textToCopy = message.showingDetailedView
               ? (message.detailedAnswer ?? message.content)

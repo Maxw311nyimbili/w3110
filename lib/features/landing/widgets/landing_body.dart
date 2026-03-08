@@ -173,7 +173,7 @@ class _CompleteStep extends StatelessWidget {
               ),
               const SizedBox(height: 64),
               PremiumButton(
-                onPressed: () => AppRouter.replaceTo(context, AppRouter.shell),
+                onPressed: () => Navigator.pushNamedAndRemoveUntil(context, AppRouter.shell, (route) => false),
                 text: 'Start Chatting',
               ),
             ],

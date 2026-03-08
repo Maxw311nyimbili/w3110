@@ -68,11 +68,15 @@ class ChatCubit extends Cubit<ChatState> {
   /// This should be called inside methods triggered by a click/tap.
   Future<void> _primeAudio() async {
     try {
+      // Keep player alive between sessions so Safari doesn't destroy the AudioContext
+      await _audioPlayer.setReleaseMode(ReleaseMode.stop);
       // Small 100ms silent WAV to "bless" the context during the user gesture.
       // We use WAV as it has better cross-browser compatibility for tiny data URIs.
       const silentWav = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAgD4AAIA+AAABAAgAZGF0YQAAAAA=';
       await _audioPlayer.setVolume(0.0);
       await _audioPlayer.play(UrlSource(silentWav, mimeType: 'audio/wav'));
+      // Wait a tiny bit for native side to process playback before stopping
+      await Future.delayed(const Duration(milliseconds: 150));
       await _audioPlayer.stop();
       await _audioPlayer.setVolume(1.0);
       print('🔊 [TTS] Audio engine primed');

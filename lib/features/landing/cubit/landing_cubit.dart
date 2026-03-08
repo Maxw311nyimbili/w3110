@@ -246,19 +246,34 @@ class LandingCubit extends Cubit<LandingState> {
         themeMode: user.themeMode,
       );
 
+      final isBackendOnboarded = user.onboardingCompleted == true || user.role != null;
+
       emit(
         state.copyWith(
           isAuthenticating: false,
           authError: null,
           userName: user.displayName,
+          currentStep: isBackendOnboarded ? OnboardingStep.complete : null,
         ),
       );
 
       // Sync global AuthCubit state immediately
       _authCubit.onUserAuthenticated(authUser);
 
-      // Move to next step (role selection)
-      nextStep();
+      if (isBackendOnboarded) {
+        await _landingRepository.saveOnboardingStatus(
+          OnboardingStatus(
+             isComplete: true,
+             userRole: user.role ?? 'mother',
+             consentGiven: true,
+             consentVersion: '1.0',
+             completedAt: DateTime.now()
+          )
+        );
+      } else {
+        // Move to next step (role selection)
+        nextStep();
+      }
     } on AuthException catch (e) {
       print('❌ Auth error: $e');
       emit(
