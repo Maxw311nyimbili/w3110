@@ -82,7 +82,7 @@ class _ProfileSetupStepState extends State<ProfileSetupStep> {
                   _buildStaggeredEntrance(
                     delay: 200,
                     child: Text(
-                      'This helps Thanzi provide more accurate medical context tailored to you.',
+                      'This helps Naia provide more accurate medical context tailored to you.',
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         color: Theme.of(context).textTheme.bodySmall?.color,
                         fontSize: 17,

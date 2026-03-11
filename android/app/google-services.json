@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:956333738143:android:499e82ea222292d9563aaa",
         "android_client_info": {
-          "package_name": "com.example.verygoodcore.cap_project"
+          "package_name": "com.thanzi.app"
         }
       },
       "oauth_client": [
@@ -17,7 +17,7 @@
           "client_id": "956333738143-unhj12q6ijj5k8687gk64c06daropdc7.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.example.verygoodcore.cap_project",
+            "package_name": "com.thanzi.app",
             "certificate_hash": "7321f45694be79cde8caa70648388fae270d773f"
           }
         },

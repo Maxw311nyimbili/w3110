@@ -119,7 +119,7 @@ class _DesktopShell extends StatelessWidget {
     // However, keeping it in the shell ensures they appear IMMEDIATELY.
     switch (tab) {
       case AppTab.chat:
-        return const Text('Thanzi'); // Or "Chat"
+        return const Text('Naia'); // Or "Chat"
       case AppTab.scanner:
         return const Text('Scanner');
       case AppTab.forum:
@@ -162,7 +162,7 @@ class _MobileShell extends StatelessWidget {
   Widget? _getDefaultTitle(BuildContext context, AppTab tab) {
     switch (tab) {
       case AppTab.chat:
-        return const Text('Thanzi');
+        return const Text('Naia');
       case AppTab.scanner:
         return const Text('Scanner');
       case AppTab.forum:

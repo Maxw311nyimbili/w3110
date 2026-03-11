@@ -54,7 +54,7 @@ class ConsentStep extends StatelessWidget {
                     child: _buildTermItem(
                       context,
                       'AI Assistance',
-                      'Thanzi uses AI. It is not a substitute for professional medical advice.',
+                      'Naia uses AI. It is not a substitute for professional medical advice.',
                     ),
                   ),
                   _buildStaggeredEntrance(

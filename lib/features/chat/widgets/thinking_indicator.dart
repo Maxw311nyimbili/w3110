@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
-/// Animated "thinking" indicator shown while Thanzi AI is generating a response.
+/// Animated "thinking" indicator shown while Naia AI is generating a response.
 ///
 /// Shows:
 ///  - The word "thinking" with a diagonal left-to-right light-shimmer sweep

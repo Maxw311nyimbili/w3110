@@ -17,7 +17,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace = "com.example.verygoodcore.cap_project"
+    namespace = "com.naia.app"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -32,7 +32,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.verygoodcore.cap_project"
+        applicationId = "com.naia.app"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
@@ -62,15 +62,15 @@ android {
     productFlavors {
         create("production") {
             dimension = "default"
-            manifestPlaceholders["appName"] = "Cap Project"
+            manifestPlaceholders["appName"] = "Naia"
         }
         create("staging") {
             dimension = "default"
-            manifestPlaceholders["appName"] = "[STG] Cap Project"
+            manifestPlaceholders["appName"] = "[STG] Naia"
         }
         create("development") {
             dimension = "default"
-            manifestPlaceholders["appName"] = "[DEV] Cap Project"
+            manifestPlaceholders["appName"] = "[DEV] Naia"
         }
     }
 

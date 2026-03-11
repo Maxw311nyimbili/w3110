@@ -12,7 +12,7 @@ import 'package:landing_repository/landing_repository.dart';
 import 'package:cap_project/app/view/app_router.dart';
 import 'dart:math' as math;
 
-/// Thanzi Premium SplashPage
+/// Naia Premium SplashPage
 /// Features: blur-to-sharp logo entry, rotation preserved, teal glow pulse,
 /// typewriter tagline, glass card CTA reveal, status bar sync.
 class SplashPage extends StatefulWidget {
