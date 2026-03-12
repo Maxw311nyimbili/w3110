@@ -1,7 +1,7 @@
 {
     "@@locale": "ar",
     
-    "appName": "ثانزي",
+    "appName": "نايا",
     "settings": "الإعدادات",
     "preferences": "التفضيلات",
     "language": "اللغة",
@@ -16,7 +16,7 @@
     "about": "حول",
     "privacyPolicy": "سياسة الخصوصية",
     "version": "الإصدار",
-    "versionNumber": "1.0.0 (إصدار ثانزي)",
+    "versionNumber": "1.0.0 (إصدار نايا)",
     "selectLanguage": "اختر اللغة",
     "chat": "الدردشة",
     "typeMessage": "اكتب رسالة...",
@@ -48,7 +48,7 @@
     "beTheFirst": "كن أول من يبدأ نقاشاً",
     "image": "صورة",
     "camera": "كاميرا",
-    "chatWelcomeTitle": "كيف يمكن لثانزي\nمساعدتك اليوم؟",
+    "chatWelcomeTitle": "كيف يمكن لنايا\nمساعدتك اليوم؟",
     "chatWelcomeSubtitle": "اسأل عن الأعراض أو الأدوية أو النصائح الصحية.",
     "newDiscussion": "نقاش جديد",
     "discussionTitleHint": "ما الذي يحتاج لنقاش؟",
