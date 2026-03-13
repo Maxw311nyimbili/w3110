@@ -128,135 +128,165 @@ class _RefinedChatInputState extends State<RefinedChatInput>
   }
 
   void _showPlusMenu() {
-    _focusNode.unfocus(); // Ensure keyboard is dismissed when menu opens
-    final chatCubit = context
-        .read<ChatCubit>(); // Capture cubit from valid context
+    final RenderBox button = context.findRenderObject() as RenderBox;
+    final Offset offset = button.localToGlobal(Offset.zero);
 
+    showMenu<String>(
+      context: context,
+      position: RelativeRect.fromLTRB(
+        offset.dx,
+        offset.dy - 320, // Float above the input
+        offset.dx + 250,
+        offset.dy,
+      ),
+      color: const Color(0xFF2F2F2F), // ChatGPT dark grey
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      elevation: 8,
+      items: [
+        _buildTrayItem(
+          value: 'files',
+          icon: Icons.attach_file_rounded,
+          label: 'Add photos & files',
+          shortcut: 'Ctrl + U',
+        ),
+        const PopupMenuDivider(height: 1),
+        _buildTrayItem(
+          value: 'scan',
+          icon: Icons.center_focus_strong_rounded,
+          label: 'Scan Medicine',
+        ),
+        _buildTrayItem(
+          value: 'image',
+          icon: Icons.image_search_rounded,
+          label: 'Create image',
+        ),
+        _buildTrayItem(
+          value: 'thinking',
+          icon: Icons.lightbulb_outline_rounded,
+          label: 'Thinking',
+        ),
+        _buildTrayItem(
+          value: 'deep_research',
+          icon: Icons.travel_explore_rounded,
+          label: 'Deep research',
+        ),
+        _buildTrayItem(
+          value: 'shopping',
+          icon: Icons.shopping_bag_outlined,
+          label: 'Shopping research',
+        ),
+      ],
+    ).then((value) {
+      if (value == null) return;
+      _handleMenuSelection(value);
+    });
+  }
+
+  PopupMenuItem<String> _buildTrayItem({
+    required String value,
+    required IconData icon,
+    required String label,
+    String? shortcut,
+  }) {
+    return PopupMenuItem<String>(
+      value: value,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      height: 48,
+      child: Row(
+        children: [
+          Icon(icon, size: 20, color: Colors.white70),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              label,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+          ),
+          if (shortcut != null)
+            Text(
+              shortcut,
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.3),
+                fontSize: 11,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  void _handleMenuSelection(String value) {
+    final chatCubit = context.read<ChatCubit>();
+    switch (value) {
+      case 'files':
+        _showFilePickerSelection(chatCubit);
+        break;
+      case 'scan':
+        _navigateToScanner(chatCubit);
+        break;
+      case 'image':
+      case 'thinking':
+      case 'deep_research':
+      case 'shopping':
+        _showComingSoon(value);
+        break;
+    }
+  }
+
+  void _showFilePickerSelection(ChatCubit chatCubit) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (modalContext) => GlassCard(
-        padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
-        borderRadius: 28,
-        tintOpacity: 0.96,
-        blur: 16,
+      builder: (context) => GlassCard(
+        padding: const EdgeInsets.all(24),
+        borderRadius: 24,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              width: 36,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Theme.of(context).dividerColor.withOpacity(0.4),
-                borderRadius: BorderRadius.circular(2),
-              ),
+            ListTile(
+              leading: const Icon(Icons.photo_library_outlined, color: Colors.blue),
+              title: const Text('Photos & Videos'),
+              onTap: () {
+                Navigator.pop(context);
+                chatCubit.pickImage();
+              },
             ),
-            const SizedBox(height: 24),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildSquarePickerOption(
-                    icon: Icons.center_focus_strong_rounded,
-                    label: 'Scan Medicine',
-                    color: Theme.of(context).colorScheme.primary,
-                    onTap: () async {
-                      Navigator.pop(modalContext);
-                      _focusNode.unfocus(); // Ensure focus doesn't return
-
-                      // Then navigate to scanner
-                      final result = await AppRouter.navigateTo(
-                        context,
-                        AppRouter.scanner,
-                      );
-
-                      // Handle result if we are still mounted
-                      if (context.mounted && result is scanner.ScanResult) {
-                        chatCubit.addMedicineResult(result);
-                      }
-                    },
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _buildSquarePickerOption(
-                    icon: Icons.description_outlined,
-                    label: 'Document',
-                    color: AppColors.accentSecondary,
-                    onTap: () {
-                      Navigator.pop(modalContext);
-                      _focusNode.unfocus(); // Ensure focus doesn't return
-                      // Use a slight delay to ensure the bottom sheet is closed before picking
-                      // which sometimes helps with overlay issues
-                      Future.delayed(const Duration(milliseconds: 200), () {
-                        if (context.mounted) {
-                          chatCubit.pickDocument();
-                        }
-                      });
-                    },
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _buildSquarePickerOption(
-                    icon: Icons.photo_library_outlined,
-                    label: 'Gallery',
-                    color: Theme.of(context).colorScheme.secondary,
-                    onTap: () {
-                      Navigator.pop(modalContext);
-                      _focusNode.unfocus(); // Ensure focus doesn't return
-                      Future.delayed(const Duration(milliseconds: 200), () {
-                        if (context.mounted) {
-                          chatCubit.pickImage();
-                        }
-                      });
-                    },
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 32),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSquarePickerOption({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-    Color? color,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 18),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-          border: Border.all(
-            color: Theme.of(context).dividerColor.withOpacity(0.1),
-            width: 1,
-          ),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, color: color ?? AppColors.brandDarkTeal, size: 26),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: Theme.of(context).textTheme.bodyLarge?.color,
-              ),
+            ListTile(
+              leading: const Icon(Icons.description_outlined, color: Colors.orange),
+              title: const Text('Documents'),
+              onTap: () {
+                Navigator.pop(context);
+                chatCubit.pickDocument();
+              },
             ),
           ],
         ),
       ),
     );
   }
+
+  void _navigateToScanner(ChatCubit chatCubit) async {
+    final result = await AppRouter.navigateTo(context, AppRouter.scanner);
+    if (context.mounted && result is scanner.ScanResult) {
+      chatCubit.addMedicineResult(result);
+    }
+  }
+
+  void _showComingSoon(String feature) {
+    final name = feature.replaceAll('_', ' ');
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('"${name.toUpperCase()}" is coming soon!'),
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
 
   @override
   Widget build(BuildContext context) {
