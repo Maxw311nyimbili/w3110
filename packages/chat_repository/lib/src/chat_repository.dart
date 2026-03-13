@@ -197,6 +197,16 @@ class ChatRepository {
       throw ChatException('Failed to fetch sessions: ${e.toString()}');
     }
   }
+
+  /// Delete a chat session and all its messages.
+  /// Backend endpoint: DELETE /chat/history/{session_id}
+  Future<void> deleteSession(String sessionId) async {
+    try {
+      await _apiClient.delete('/chat/history/$sessionId');
+    } catch (e) {
+      throw ChatException('Failed to delete session: ${e.toString()}');
+    }
+  }
 }
 
 /// Custom exception for chat repository errors

@@ -595,8 +595,79 @@ class _SessionTile extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
+            PopupMenuButton<String>(
+              icon: Icon(
+                Icons.more_horiz_rounded,
+                size: 14,
+                color: Theme.of(context)
+                    .textTheme
+                    .bodySmall
+                    ?.color
+                    ?.withOpacity(0.3),
+              ),
+              padding: EdgeInsets.zero,
+              splashRadius: 16,
+              onSelected: (value) {
+                if (value == 'delete') {
+                  _showDeleteConfirmation(context);
+                }
+              },
+              itemBuilder: (context) => [
+                PopupMenuItem(
+                  value: 'delete',
+                  height: 32,
+                  child: Row(
+                    children: [
+                      Icon(Icons.delete_outline_rounded,
+                          size: 16, color: Colors.redAccent),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Delete',
+                        style: TextStyle(fontSize: 12, color: Colors.redAccent),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showDeleteConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Delete Conversation?'),
+        content: const Text(
+            'This will permanently delete this conversation and its history. This action cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(
+              'Cancel',
+              style: TextStyle(
+                color: Theme.of(context)
+                    .textTheme
+                    .bodyMedium
+                    ?.color
+                    ?.withOpacity(0.6),
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(dialogContext);
+              context.read<ChatCubit>().deleteSession(session.sessionId);
+            },
+            child: const Text(
+              'Delete',
+              style: TextStyle(color: Colors.redAccent),
+            ),
+          ),
+        ],
       ),
     );
   }

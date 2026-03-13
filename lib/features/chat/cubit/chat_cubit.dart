@@ -910,6 +910,31 @@ class ChatCubit extends Cubit<ChatState> {
     }
   }
 
+  Future<void> deleteSession(String sessionId) async {
+    try {
+      await _chatRepository.deleteSession(sessionId);
+      
+      // Update history list
+      final updatedHistory = state.historySessions
+          .where((s) => s.sessionId != sessionId)
+          .toList();
+          
+      // If we deleted the current session, clear messages
+      if (state.sessionId == sessionId) {
+        emit(state.copyWith(
+          messages: [],
+          sessionId: null,
+          historySessions: updatedHistory,
+        ));
+      } else {
+        emit(state.copyWith(historySessions: updatedHistory));
+      }
+    } catch (e) {
+      print('❌ Failed to delete session: $e');
+      emit(state.copyWith(error: 'Failed to delete conversation: $e'));
+    }
+  }
+
   ChatMessage _mapRepoMessageToModel(Map<String, dynamic> m) {
     final isUser = m['role'] == 'user';
     final content = m['content'] as String? ?? '';
