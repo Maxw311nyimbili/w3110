@@ -1,6 +1,6 @@
 name: cap_project
-description: Naia - AI Medical Assistant platform.
-version: 1.0.0+1
+description: Naiia - AI Medical Assistant platform.
+version: 1.0.0+3
 publish_to: none
 
 environment:

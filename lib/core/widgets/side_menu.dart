@@ -142,7 +142,7 @@ class _SideMenuState extends State<SideMenu> {
           ),
           const SizedBox(width: 10),
           Text(
-            'Naia',
+            'Naiia',
             style: AppTextStyles.headlineMedium.copyWith(
               fontWeight: FontWeight.w700,
               color: Theme.of(context).textTheme.bodyLarge?.color,

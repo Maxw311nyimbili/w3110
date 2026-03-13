@@ -91,7 +91,7 @@ class WelcomeDrawer extends StatelessWidget {
                       const BrandLogo(size: 100),
                       const SizedBox(height: 32),
                       Text(
-                        'Welcome to Naia',
+                        'Welcome to Naiia',
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.displaySmall?.copyWith(
                               fontSize: 32,

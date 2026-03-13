@@ -1,7 +1,7 @@
 {
     "@@locale": "fr",
     
-    "appName": "Naia",
+    "appName": "Naiia",
     "settings": "Paramètres",
     "preferences": "PRÉFÉRENCES",
     "language": "Langue",
@@ -16,7 +16,7 @@
     "about": "À PROPOS",
     "privacyPolicy": "Politique de Confidentialité",
     "version": "Version",
-    "versionNumber": "1.0.0 (Version Naia)",
+    "versionNumber": "1.0.0 (Version Naiia)",
     "selectLanguage": "Sélectionner la Langue",
     "chat": "Discussion",
     "typeMessage": "Tapez un message...",
@@ -48,7 +48,7 @@
     "beTheFirst": "Soyez le premier à lancer une discussion",
     "image": "Image",
     "camera": "Caméra",
-    "chatWelcomeTitle": "Comment Naia peut-il\nvous aider aujourd'hui ?",
+    "chatWelcomeTitle": "Comment Naiia peut-il\nvous aider aujourd'hui ?",
     "chatWelcomeSubtitle": "Posez des questions sur les symptômes, les médicaments ou les conseils de santé.",
     "newDiscussion": "Nouvelle Discussion",
     "discussionTitleHint": "De quoi faut-il discuter ?",

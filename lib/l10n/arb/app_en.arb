@@ -1,7 +1,7 @@
 {
     "@@locale": "en",
     
-    "appName": "Naia",
+    "appName": "Naiia",
     "@appName": {
         "description": "Application name"
     },
@@ -76,7 +76,7 @@
         "description": "Version label"
     },
 
-    "versionNumber": "1.0.0 (Naia Build)",
+    "versionNumber": "1.0.0 (Naiia Build)",
     "@versionNumber": {
         "description": "Current version number"
     },
@@ -236,7 +236,7 @@
         "description": "Camera picker option"
     },
 
-    "chatWelcomeTitle": "How can Naia\nhelp you today?",
+    "chatWelcomeTitle": "How can Naiia\nhelp you today?",
     "@chatWelcomeTitle": {
         "description": "Welcome title on empty chat screen"
     },

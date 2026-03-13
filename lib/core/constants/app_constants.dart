@@ -5,7 +5,7 @@ class AppConstants {
   AppConstants._();
 
   // App info
-  static const String appName = 'Naia';
+  static const String appName = 'Naiia';
   static const String appVersion = '1.0.0';
 
   // User roles

@@ -60,7 +60,7 @@ class AuthenticationStep extends StatelessWidget {
                           const BrandLogo(size: 140),
                           const SizedBox(height: 32),
                           Text(
-                            'Welcome to Naia',
+                            'Welcome to Naiia',
                             textAlign: TextAlign.center,
                             style: Theme.of(context).textTheme.displaySmall?.copyWith(
                               color: Theme.of(context).textTheme.displayLarge?.color,

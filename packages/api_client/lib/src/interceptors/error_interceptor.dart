@@ -18,7 +18,9 @@ class ErrorInterceptor extends Interceptor {
         break;
 
       case DioExceptionType.connectionError:
-        exception = NoInternetException();
+        exception = NoInternetException(
+          baseUrl: '${err.requestOptions.baseUrl}${err.requestOptions.path}',
+        );
         break;
 
       case DioExceptionType.badResponse:

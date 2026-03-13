@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 
 import 'package:cap_project/features/chat/cubit/chat_state.dart';
 import 'package:cap_project/features/medscanner/cubit/medscanner_state.dart'
@@ -65,29 +66,30 @@ class ChatCubit extends Cubit<ChatState> {
   }
 
   /// Primes the audio engine during a user gesture to unlock Safari/iOS playback.
-  /// This should be called inside methods triggered by a click/tap.
+  /// This is ONLY needed on web (Safari requires a user-gesture to unlock AudioContext).
+  /// On Android/iOS, data URIs via UrlSource are not supported and cause SocketExceptions.
   Future<void> _primeAudio() async {
+    if (!kIsWeb) return; // Native platforms do not need priming
     try {
-      // Keep player alive between sessions so Safari doesn't destroy the AudioContext
+      _isPriming = true;
       await _audioPlayer.setReleaseMode(ReleaseMode.stop);
-      // Small 100ms silent WAV to "bless" the context during the user gesture.
-      // We use WAV as it has better cross-browser compatibility for tiny data URIs.
       const silentWav = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAgD4AAIA+AAABAAgAZGF0YQAAAAA=';
       await _audioPlayer.setVolume(0.0);
       await _audioPlayer.play(UrlSource(silentWav, mimeType: 'audio/wav'));
-      // Wait a tiny bit for native side to process playback before stopping
       await Future.delayed(const Duration(milliseconds: 150));
       await _audioPlayer.stop();
       await _audioPlayer.setVolume(1.0);
-      print('🔊 [TTS] Audio engine primed');
+      print('🔊 [TTS] Audio engine primed (web)');
     } catch (e) {
       print('🔊 [TTS] ⚠️ Failed to prime audio: $e');
-      // If priming fails, we still want to continue with the main logic
+    } finally {
+      _isPriming = false;
     }
   }
 
   void _initAudioListeners() {
     _audioPlayer.onPlayerStateChanged.listen((state) {
+      if (_isPriming) return; // Ignore all events during audio priming
       if (state == PlayerState.playing) {
         emit(this.state.copyWith(isPlayingAudio: true));
       } else if (state == PlayerState.completed ||
@@ -108,6 +110,7 @@ class ChatCubit extends Cubit<ChatState> {
   List<String>? _interests;
   StreamSubscription<Amplitude>? _amplitudeSubscription;
   Timer? _loadingTimer;
+  bool _isPriming = false;
 
   /// Update the locale for API requests
   void setLocale(String locale) {

@@ -1,11 +1,11 @@
-# Naia
+# Naiia
 
-Naia is a modern AI medical assistant platform designed to provide accurate medical context, drug analysis, and community support.
+Naiia is a modern AI medical assistant platform designed to provide accurate medical context, drug analysis, and community support.
 
 ---
 
 ## Technical Overview
-Naia is built using Flutter and follows clean architecture principles with BLoC state management.
+Naiia is built using Flutter and follows clean architecture principles with BLoC state management.
 
 ---
 

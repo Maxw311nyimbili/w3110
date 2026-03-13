@@ -160,7 +160,7 @@ class _ChatViewState extends State<ChatView> {
       context.read<NavigationCubit>().updateAppBar(
         title: !_isAudioMode
             ? Text(
-                'Naia',
+                'Naiia',
                 style: AppTextStyles.headlineSmall.copyWith(
                   fontWeight: FontWeight.w800,
                   letterSpacing: -0.5,

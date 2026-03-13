@@ -62,15 +62,15 @@ android {
     productFlavors {
         create("production") {
             dimension = "default"
-            manifestPlaceholders["appName"] = "Naia"
+            manifestPlaceholders["appName"] = "Naiia"
         }
         create("staging") {
             dimension = "default"
-            manifestPlaceholders["appName"] = "[STG] Naia"
+            manifestPlaceholders["appName"] = "[STG] Naiia"
         }
         create("development") {
             dimension = "default"
-            manifestPlaceholders["appName"] = "[DEV] Naia"
+            manifestPlaceholders["appName"] = "[DEV] Naiia"
         }
     }
 
@@ -94,5 +94,5 @@ flutter {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:2.2.10")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.22")
 }

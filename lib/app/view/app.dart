@@ -194,7 +194,7 @@ class _AppState extends State<App> {
             return BlocBuilder<LocaleCubit, LocaleState>(
               builder: (context, localeState) {
                 return MaterialApp(
-                  title: 'Naia',
+                  title: 'Naiia',
                   debugShowCheckedModeBanner: false,
                   theme: AppTheme.lightTheme,
                   darkTheme: AppTheme.darkTheme,

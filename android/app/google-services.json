@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:956333738143:android:499e82ea222292d9563aaa",
         "android_client_info": {
-          "package_name": "com.thanzi.app"
+          "package_name": "com.example.verygoodcore.cap_project"
         }
       },
       "oauth_client": [
@@ -17,7 +17,59 @@
           "client_id": "956333738143-unhj12q6ijj5k8687gk64c06daropdc7.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.thanzi.app",
+            "package_name": "com.example.verygoodcore.cap_project",
+            "certificate_hash": "7321f45694be79cde8caa70648388fae270d773f"
+          }
+        },
+        {
+          "client_id": "956333738143-2sr0rd0qfguchkrbbe9jg5bp9se565pq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAj7GMKIh6FbbYCbNaPeZJO6OcU2kIPD2Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "956333738143-2sr0rd0qfguchkrbbe9jg5bp9se565pq.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "956333738143-7c8e4fcj26784mumbk1jovima9q1qu3d.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.myApp"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:956333738143:android:736525234dc06adf563aaa",
+        "android_client_info": {
+          "package_name": "com.naia.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "956333738143-unhj12q6ijj5k8687gk64c06daropdc7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.naia.app",
+            "certificate_hash": "2e60b967ab3215092e6c85ae44ff0b0d4334584f"
+          }
+        },
+        {
+          "client_id": "956333738143-unhj12q6ijj5k8687gk64c06daropdc7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.naia.app",
             "certificate_hash": "7321f45694be79cde8caa70648388fae270d773f"
           }
         },

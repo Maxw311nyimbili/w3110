@@ -52,7 +52,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyAj7GMKIh6FbbYCbNaPeZJO6OcU2kIPD2Q',
-    appId: '1:956333738143:android:499e82ea222292d9563aaa',
+    appId: '1:956333738143:android:736525234dc06adf563aaa',
     messagingSenderId: '956333738143',
     projectId: 'medlink-app-4f92a',
     storageBucket: 'medlink-app-4f92a.firebasestorage.app',
