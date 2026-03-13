@@ -19,6 +19,7 @@ class AuthRepository {
        _secureStorage = secureStorage,
        _firebaseAuth = firebase_auth.FirebaseAuth.instance,
        _googleSignIn = GoogleSignIn(
+         serverClientId: '956333738143-2sr0rd0qfguchkrbbe9jg5bp9se565pq.apps.googleusercontent.com',
          clientId: kIsWeb ? '956333738143-2sr0rd0qfguchkrbbe9jg5bp9se565pq.apps.googleusercontent.com' : null,
          scopes: ['email', 'profile'],
        );
