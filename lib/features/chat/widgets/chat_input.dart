@@ -135,12 +135,19 @@ class _RefinedChatInputState extends State<RefinedChatInput>
       context: context,
       position: RelativeRect.fromLTRB(
         offset.dx,
-        offset.dy - 320, // Float above the input
+        offset.dy - 120, // Adjusted for fewer items
         offset.dx + 250,
         offset.dy,
       ),
-      color: const Color(0xFF2F2F2F), // ChatGPT dark grey
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      color: Theme.of(context).colorScheme.surface,
+      surfaceTintColor: Theme.of(context).colorScheme.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: Theme.of(context).dividerColor.withOpacity(0.1),
+          width: 1,
+        ),
+      ),
       elevation: 8,
       items: [
         _buildTrayItem(
@@ -155,26 +162,6 @@ class _RefinedChatInputState extends State<RefinedChatInput>
           icon: Icons.center_focus_strong_rounded,
           label: 'Scan Medicine',
         ),
-        _buildTrayItem(
-          value: 'image',
-          icon: Icons.image_search_rounded,
-          label: 'Create image',
-        ),
-        _buildTrayItem(
-          value: 'thinking',
-          icon: Icons.lightbulb_outline_rounded,
-          label: 'Thinking',
-        ),
-        _buildTrayItem(
-          value: 'deep_research',
-          icon: Icons.travel_explore_rounded,
-          label: 'Deep research',
-        ),
-        _buildTrayItem(
-          value: 'shopping',
-          icon: Icons.shopping_bag_outlined,
-          label: 'Shopping research',
-        ),
       ],
     ).then((value) {
       if (value == null) return;
@@ -188,19 +175,20 @@ class _RefinedChatInputState extends State<RefinedChatInput>
     required String label,
     String? shortcut,
   }) {
+    final color = Theme.of(context).textTheme.bodyLarge?.color;
     return PopupMenuItem<String>(
       value: value,
       padding: const EdgeInsets.symmetric(horizontal: 16),
       height: 48,
       child: Row(
         children: [
-          Icon(icon, size: 20, color: Colors.white70),
+          Icon(icon, size: 20, color: color?.withOpacity(0.7)),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               label,
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: color,
                 fontSize: 14,
                 fontWeight: FontWeight.w400,
               ),
@@ -210,7 +198,7 @@ class _RefinedChatInputState extends State<RefinedChatInput>
             Text(
               shortcut,
               style: TextStyle(
-                color: Colors.white.withOpacity(0.3),
+                color: color?.withOpacity(0.3),
                 fontSize: 11,
               ),
             ),
@@ -227,12 +215,6 @@ class _RefinedChatInputState extends State<RefinedChatInput>
         break;
       case 'scan':
         _navigateToScanner(chatCubit);
-        break;
-      case 'image':
-      case 'thinking':
-      case 'deep_research':
-      case 'shopping':
-        _showComingSoon(value);
         break;
     }
   }
@@ -276,16 +258,6 @@ class _RefinedChatInputState extends State<RefinedChatInput>
     }
   }
 
-  void _showComingSoon(String feature) {
-    final name = feature.replaceAll('_', ' ');
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('"${name.toUpperCase()}" is coming soon!'),
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 2),
-      ),
-    );
-  }
 
 
   @override
