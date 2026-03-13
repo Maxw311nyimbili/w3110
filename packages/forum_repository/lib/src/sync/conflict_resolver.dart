@@ -89,6 +89,13 @@ class ConflictResolver {
         syncStatus: const Value('synced'),
       ),
     );
+    
+    // Explicitly refresh author info to ensure authoritative name is used
+    await _database.updatePostAuthorInfo(
+      localId: localId,
+      authorId: post.authorId,
+      authorName: post.authorName,
+    );
   }
 
   /// Merge server comments for a post
@@ -178,6 +185,13 @@ class ConflictResolver {
     await _database.updateCommentContent(
       localId: localId,
       content: comment.content,
+    );
+
+    // Refresh author identity from server authoritative state
+    await _database.updateCommentAuthorInfo(
+      localId: localId,
+      authorId: comment.authorId,
+      authorName: comment.authorName,
     );
   }
 

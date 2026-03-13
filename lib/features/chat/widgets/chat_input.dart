@@ -8,6 +8,9 @@ import 'package:cap_project/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../cubit/cubit.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import '../../../core/util/responsive_utils.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
@@ -40,6 +43,28 @@ class _RefinedChatInputState extends State<RefinedChatInput>
   void initState() {
     super.initState();
     _controller.addListener(_onTextChanged);
+    _focusNode.onKeyEvent = (node, event) {
+      // Enter-to-send logic for larger screens (Web/Tablet/Desktop)
+      final isLargeScreen = ResponsiveUtils.isDesktop(context) || ResponsiveUtils.isTablet(context);
+      
+      if (isLargeScreen && 
+          event is KeyDownEvent && 
+          event.logicalKey == LogicalKeyboardKey.enter) {
+        
+        // If Shift is pressed, allow default behavior (newline)
+        if (HardwareKeyboard.instance.isShiftPressed) {
+          return KeyEventResult.ignored;
+        }
+        
+        // Otherwise, send message and prevent newline
+        if (_controller.text.trim().isNotEmpty) {
+          _sendMessage();
+        }
+        return KeyEventResult.handled;
+      }
+      return KeyEventResult.ignored;
+    };
+    
     _pulseController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),

@@ -116,6 +116,22 @@ class ForumDatabase extends _$ForumDatabase {
     );
   }
 
+  /// Update post author info from server authoritative state
+  Future<int> updatePostAuthorInfo({
+    required String localId,
+    required String authorId,
+    required String authorName,
+  }) async {
+    return (update(
+      forumPosts,
+    )..where((post) => post.localId.equals(localId))).write(
+      ForumPostsCompanion(
+        authorId: Value(authorId),
+        authorName: Value(authorName),
+      ),
+    );
+  }
+
   /// Update post content locally
   Future<int> updatePostContent({
     required String localId,
@@ -215,6 +231,22 @@ class ForumDatabase extends _$ForumDatabase {
         syncStatus: Value(syncStatus),
         serverId: serverId != null ? Value(serverId) : const Value.absent(),
         lastSyncAttempt: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  /// Update comment author info from server authoritative state
+  Future<int> updateCommentAuthorInfo({
+    required String localId,
+    required String authorId,
+    required String authorName,
+  }) async {
+    return (update(
+      forumComments,
+    )..where((comment) => comment.localId.equals(localId))).write(
+      ForumCommentsCompanion(
+        authorId: Value(authorId),
+        authorName: Value(authorName),
       ),
     );
   }
@@ -435,6 +467,22 @@ class ForumDatabase extends _$ForumDatabase {
       ForumLineCommentsCompanion(
         syncStatus: Value(syncStatus),
         serverId: serverId != null ? Value(serverId) : const Value.absent(),
+      ),
+    );
+  }
+
+  /// Update line comment author info from server authoritative state
+  Future<int> updateLineCommentAuthorInfo({
+    required String localId,
+    required String authorId,
+    required String authorName,
+  }) async {
+    return (update(
+      forumLineComments,
+    )..where((c) => c.localId.equals(localId))).write(
+      ForumLineCommentsCompanion(
+        authorId: Value(authorId),
+        authorName: Value(authorName),
       ),
     );
   }

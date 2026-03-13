@@ -162,17 +162,39 @@ class ChatRepository {
 
   /// Fetch chat history from the backend.
   /// Backend endpoint: GET /chat/history
-  Future<List<Map<String, dynamic>>> fetchHistory({int limit = 50}) async {
+  Future<List<Map<String, dynamic>>> fetchHistory({
+    String? sessionId,
+    int limit = 50,
+  }) async {
     try {
       final response = await _apiClient.get(
         '/chat/history',
-        queryParameters: {'limit': limit},
+        queryParameters: {
+          'limit': limit,
+          if (sessionId != null) 'session_id': sessionId,
+        },
       );
       final data = response.data as Map<String, dynamic>;
       final messages = data['messages'] as List<dynamic>? ?? [];
       return messages.cast<Map<String, dynamic>>();
     } catch (e) {
       throw ChatException('Failed to fetch history: ${e.toString()}');
+    }
+  }
+
+  /// Fetch unique chat sessions for the current user.
+  /// Backend endpoint: GET /chat/sessions
+  Future<List<Map<String, dynamic>>> fetchSessions({int limit = 50}) async {
+    try {
+      final response = await _apiClient.get(
+        '/chat/sessions',
+        queryParameters: {'limit': limit},
+      );
+      final data = response.data as Map<String, dynamic>;
+      final sessions = data['sessions'] as List<dynamic>? ?? [];
+      return sessions.cast<Map<String, dynamic>>();
+    } catch (e) {
+      throw ChatException('Failed to fetch sessions: ${e.toString()}');
     }
   }
 }

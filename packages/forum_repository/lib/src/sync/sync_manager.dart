@@ -204,6 +204,7 @@ class SyncManager {
           'text': comment.content,
           'comment_type': comment.commentType,
           'parent_comment_id': comment.parentCommentId,
+          'client_id': comment.localId,
         },
       );
 

@@ -868,31 +868,15 @@ class ChatCubit extends Cubit<ChatState> {
   Future<void> loadHistory() async {
     try {
       emit(state.copyWith(isLoadingHistory: true));
-      final historyData = await _chatRepository.fetchHistory(limit: 100);
+      final sessionData = await _chatRepository.fetchSessions(limit: 50);
 
-      // Group by sessionId and create HistorySession objects
-      final sessions = <String, List<Map<String, dynamic>>>{};
-      for (final msg in historyData) {
-        final sid = msg['session_id'] as String? ?? 'unknown';
-        sessions.putIfAbsent(sid, () => []).add(msg);
-      }
-
-      final List<HistorySession> historySessions = sessions.entries.map<HistorySession>((entry) {
-        final msgs = entry.value;
-        // Search for the first user message in this session to use as title
-        final Map<String, dynamic> firstUserMsg = msgs.firstWhere(
-          (m) => m['role'] == 'user',
-          orElse: () => msgs.first,
-        );
+      final List<HistorySession> historySessions = sessionData.map<HistorySession>((s) {
         return HistorySession(
-          sessionId: entry.key,
-          firstMessage: firstUserMsg['content'] as String? ?? 'New Chat',
-          timestamp: DateTime.parse(msgs.first['created_at'] as String),
+          sessionId: s['session_id'] as String? ?? 'unknown',
+          firstMessage: s['first_message'] as String? ?? 'New Chat',
+          timestamp: DateTime.parse(s['created_at'] as String),
         );
       }).toList();
-
-      // Sort by timestamp descending
-      historySessions.sort((a, b) => b.timestamp.compareTo(a.timestamp));
 
       emit(state.copyWith(
         isLoadingHistory: false,
@@ -907,12 +891,12 @@ class ChatCubit extends Cubit<ChatState> {
   Future<void> loadSession(String sessionId) async {
     try {
       emit(state.copyWith(status: ChatStatus.loading, isTyping: true));
-      final historyData = await _chatRepository.fetchHistory(limit: 50);
+      final historyData = await _chatRepository.fetchHistory(
+        sessionId: sessionId,
+        limit: 50,
+      );
       
-      // Filter for this session
-      final List<Map<String, dynamic>> sessionMsgs = historyData.where((m) => m['session_id'] == sessionId).toList();
-      
-      final List<ChatMessage> messages = sessionMsgs.map<ChatMessage>((m) => _mapRepoMessageToModel(m)).toList();
+      final List<ChatMessage> messages = historyData.map<ChatMessage>((m) => _mapRepoMessageToModel(m)).toList();
 
       emit(state.copyWith(
         status: ChatStatus.success,
