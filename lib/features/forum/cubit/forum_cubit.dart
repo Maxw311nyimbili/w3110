@@ -555,7 +555,9 @@ class ForumCubit extends Cubit<ForumState> {
           ));
           
           // Proactive: re-fetch comments once confirmed to ensure tree is correct
-          _loadCommentsForPost(postId);
+          if (state.selectedPost != null) {
+            selectPost(state.selectedPost!);
+          }
         } catch (apiError) {
           // Remove optimistic comment on failure
           emit(
