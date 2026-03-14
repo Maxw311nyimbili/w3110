@@ -264,7 +264,9 @@ class ForumCubit extends Cubit<ForumState> {
           status: ForumStatus.success,
           currentAnswerId: postId,
           answerLines: lines,
-          lineComments: const [],
+          // NOTE: Do NOT clear lineComments here — same reason as comments above.
+          // Inline comments are always re-fetched when the user selects a line.
+          // Clearing prematurely causes them to flicker/disappear on re-open.
         ),
       );
 
