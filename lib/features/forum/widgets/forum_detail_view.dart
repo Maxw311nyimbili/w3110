@@ -336,8 +336,13 @@ class ForumDetailView extends StatelessWidget {
         final hasExpertActivity = line.commentCount > 0;
 
         return GestureDetector(
-          onTap: () =>
-              context.read<ForumCubit>().toggleLineSelection(line.lineId),
+          // Only toggle selection when this line is NOT already selected.
+          // When it IS selected, the inner InkWell handles the tap to open
+          // the modal — firing toggleLineSelection here too would re-fetch
+          // lineComments and wipe any just-posted optimistic comment.
+          onTap: isSelected
+              ? null
+              : () => context.read<ForumCubit>().toggleLineSelection(line.lineId),
           child: Padding(
             padding: const EdgeInsets.only(bottom: 8),
             child: isSelected
@@ -557,16 +562,8 @@ class ForumDetailView extends StatelessWidget {
       ),
     );
 
-    // Refresh lines after modal closes to update comment counts from backend
-    if (context.mounted) {
-      final cubit = context.read<ForumCubit>();
-      final serverPostId = int.tryParse(post.id);
-
-      if (post.id.isNotEmpty) {
-        // Refresh lines non-destructively to update counts
-        await cubit.refreshAnswerLines(post.id);
-      }
-    }
+    // Modal closed. The comment count was already updated optimistically
+    // inside postLineComment, so no extra server round-trip needed here.
   }
 
   void _showGeneralCommentsModal(BuildContext context) {
