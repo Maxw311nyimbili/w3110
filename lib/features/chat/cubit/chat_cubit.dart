@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:flutter/foundation.dart';
 
 import 'package:cap_project/features/chat/cubit/chat_state.dart';
@@ -746,16 +745,10 @@ class ChatCubit extends Cubit<ChatState> {
 
   Future<void> pickImage() async {
     try {
-      if (Platform.isAndroid || Platform.isIOS) {
+      if (!kIsWeb) {
         var status = await Permission.photos.status;
         if (status.isDenied) {
           status = await Permission.photos.request();
-        }
-
-        // On Android 13+, READ_MEDIA_IMAGES might be checking instead
-        if (Platform.isAndroid && await Permission.photos.isDenied) {
-          // Fallback or specific Android 13 check if needed,
-          // but often image_picker handles this internal intent.
         }
 
         if (status.isPermanentlyDenied) {
@@ -773,11 +766,12 @@ class ChatCubit extends Cubit<ChatState> {
       final image = await picker.pickImage(source: ImageSource.gallery);
 
       if (image != null) {
+        final fileSize = kIsWeb ? 0 : await image.length();
         final attachment = PendingAttachment(
           path: image.path,
           name: image.name,
           type: AttachmentType.image,
-          size: await image.length(),
+          size: fileSize,
         );
         emit(
           state.copyWith(

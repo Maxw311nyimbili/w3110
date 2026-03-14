@@ -1,5 +1,6 @@
 // packages/media_repository/lib/src/utils/file_utils_io.dart
 import 'dart:io' as io;
+import 'dart:typed_data';
 import 'file_utils_stub.dart';
 
 class File implements FileInterface {
@@ -13,7 +14,7 @@ class File implements FileInterface {
   Future<bool> exists() => _file.exists();
 
   @override
-  Future<List<int>> readAsBytes() => _file.readAsBytes();
+  Future<Uint8List> readAsBytes() => _file.readAsBytes();
 
   @override
   Future<int> length() => _file.length();

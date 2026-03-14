@@ -1,7 +1,9 @@
 // packages/media_repository/lib/src/utils/file_utils_stub.dart
+import 'dart:typed_data';
+
 abstract class FileInterface {
   Future<bool> exists();
-  Future<List<int>> readAsBytes();
+  Future<Uint8List> readAsBytes();
   Future<int> length();
   Future<void> writeAsBytes(List<int> bytes);
   String get path;
@@ -13,7 +15,7 @@ class File implements FileInterface {
   @override
   Future<bool> exists() => throw UnimplementedError();
   @override
-  Future<List<int>> readAsBytes() => throw UnimplementedError();
+  Future<Uint8List> readAsBytes() => throw UnimplementedError();
   @override
   Future<int> length() => throw UnimplementedError();
   @override

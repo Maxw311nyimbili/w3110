@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:io' as io;
 import 'package:cap_project/app/view/app_router.dart';
 import 'package:cap_project/core/widgets/glass_card.dart';
 import 'package:cap_project/features/medscanner/cubit/medscanner_state.dart'
@@ -611,14 +611,23 @@ class _RefinedChatInputState extends State<RefinedChatInput>
                         child: attachment.type == AttachmentType.image
                             ? ClipRRect(
                                 borderRadius: BorderRadius.circular(12),
-                                child: Image.file(
-                                  File(attachment.path),
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (_, __, ___) => const Icon(
-                                    Icons.broken_image_outlined,
-                                    size: 20,
-                                  ),
-                                ),
+                                child: kIsWeb || attachment.path.startsWith('blob:')
+                                    ? Image.network(
+                                        attachment.path,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (_, __, ___) => const Icon(
+                                          Icons.broken_image_outlined,
+                                          size: 20,
+                                        ),
+                                      )
+                                    : Image.file(
+                                        io.File(attachment.path),
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (_, __, ___) => const Icon(
+                                          Icons.broken_image_outlined,
+                                          size: 20,
+                                        ),
+                                      ),
                               )
                             : Column(
                                 mainAxisAlignment: MainAxisAlignment.center,

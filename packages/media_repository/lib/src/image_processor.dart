@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:image/image.dart' as img;
 import 'utils/barcode_scanner_stub.dart'
@@ -32,7 +33,7 @@ class ImageProcessor {
       }
 
       // Read image bytes
-      final imageBytes = await imageFile.readAsBytes();
+      final Uint8List imageBytes = await imageFile.readAsBytes();
 
       // Decode image
       final image = img.decodeImage(imageBytes);
@@ -134,7 +135,7 @@ class ImageProcessor {
 
       // Try to decode to verify it's a valid image
       try {
-        final bytes = await imageFile.readAsBytes();
+        final Uint8List bytes = await imageFile.readAsBytes();
         final image = img.decodeImage(bytes);
         return image != null;
       } catch (e) {
