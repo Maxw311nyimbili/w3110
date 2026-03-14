@@ -1021,8 +1021,9 @@ class ForumCubit extends Cubit<ForumState> {
     if (effectiveLineId == null) return;
 
     final clientId = _uuid.v4();
-    final authorId = _authRepository.currentUser.id;
-    final authorName = _authRepository.currentUser.name ?? 'User';
+    final user = await _authRepository.getCurrentUser();
+    final authorId = user?.id ?? '';
+    final authorName = user?.displayName ?? 'User';
 
     // 1. Optimistic Update
     final optimisticComment = ForumLineComment(
