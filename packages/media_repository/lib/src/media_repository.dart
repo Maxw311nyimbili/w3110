@@ -190,7 +190,7 @@ class MediaRepository {
         final bytes = response.data!;
         
         formData.files.add(MapEntry(
-          'image',
+          'file', // Changed from 'image' to 'file'
           MultipartFile.fromBytes(
             bytes,
             filename: 'scan_${DateTime.now().millisecondsSinceEpoch}.jpg',
@@ -198,13 +198,16 @@ class MediaRepository {
         ));
       } else {
         formData.files.add(MapEntry(
-          'image',
+          'file', // Changed from 'image' to 'file'
           await MultipartFile.fromFile(
             request.imagePath,
             filename: 'scan_${DateTime.now().millisecondsSinceEpoch}.jpg',
           ),
         ));
       }
+
+      // Backend requires scan_type
+      formData.fields.add(MapEntry('scan_type', request.scanType));
 
       if (request.barcode != null) {
         formData.fields.add(MapEntry('barcode', request.barcode!));

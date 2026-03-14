@@ -92,13 +92,17 @@ class ApiClient {
     CancelToken? cancelToken,
     Duration? receiveTimeout,
   }) async {
-    try {
+      final isFormData = data is FormData;
+
       return await _dio.post<T>(
         path,
         data: data,
         queryParameters: queryParameters,
         options: Options(
-          headers: headers,
+          headers: {
+            if (headers != null) ...headers,
+            if (isFormData) 'Content-Type': 'multipart/form-data',
+          },
           receiveTimeout: receiveTimeout,
         ),
         cancelToken: cancelToken,

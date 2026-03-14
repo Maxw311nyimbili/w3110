@@ -115,6 +115,7 @@ class MedScannerCubit extends Cubit<MedScannerState> {
       final uploadResponse = await _mediaRepository.uploadImage(
         UploadRequest(
           imagePath: compressedPath,
+          scanType: barcode != null ? 'barcode' : 'text_ocr',
           barcode: barcode,
         ),
       );
@@ -187,7 +188,11 @@ class MedScannerCubit extends Cubit<MedScannerState> {
 
       print('📤 Uploading to backend...');
       final uploadResponse = await _mediaRepository.uploadImage(
-        UploadRequest(imagePath: compressedPath, barcode: barcode),
+        UploadRequest(
+          imagePath: compressedPath,
+          scanType: barcode != null ? 'barcode' : 'text_ocr',
+          barcode: barcode,
+        ),
       );
 
       print('🔬 Analyzing medication...');
