@@ -58,19 +58,27 @@
       },
       "oauth_client": [
         {
-          "client_id": "956333738143-unhj12q6ijj5k8687gk64c06daropdc7.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.naia.app",
-            "certificate_hash": "2e60b967ab3215092e6c85ae44ff0b0d4334584f"
-          }
-        },
-        {
-          "client_id": "956333738143-unhj12q6ijj5k8687gk64c06daropdc7.apps.googleusercontent.com",
+          "client_id": "956333738143-2qt019t0nuo77th693tq6fmiofn5790i.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.naia.app",
             "certificate_hash": "7321f45694be79cde8caa70648388fae270d773f"
+          }
+        },
+        {
+          "client_id": "956333738143-estebj3aa7290p0if3ce86hb7499s6ln.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.naia.app",
+            "certificate_hash": "9f92cc5eadd3c11f60a8107b5059d4a36b42fdb9"
+          }
+        },
+        {
+          "client_id": "956333738143-pkqbsksgi66bi9h7tk3uk7k5npihven4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.naia.app",
+            "certificate_hash": "2e60b967ab3215092e6c85ae44ff0b0d4334584f"
           }
         },
         {
