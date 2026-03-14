@@ -187,7 +187,8 @@ class ForumCubit extends Cubit<ForumState> {
             view: ForumView.detail,
             selectedPost: currentPost,
             status: ForumStatus.loading,
-            comments: const [], // Clear comments ONLY if it's a new post
+            // NOTE: Do NOT clear comments here. Keep any cached/optimistic comments
+            // visible while the server fetch completes. The merge below handles dedup.
           ),
         );
       } else {
@@ -558,15 +559,18 @@ class ForumCubit extends Cubit<ForumState> {
       // 2. If local path failed, call server directly (web path)
       if (!savedLocally) {
         try {
-          final serverComment = await _forumRepository.addPostComment(
+          await _forumRepository.addPostComment(
             postId: postId,
             content: content,
             clientId: localId,
             parentCommentId: effectiveParentId,
           );
 
-          // Robustly merge server results using standardized helper
-          final merged = _mergeComments(state.comments, [serverComment]);
+          // Re-fetch the full comment list from server so we always show the
+          // authoritative state (avoids race conditions with concurrent selectPost calls).
+          final serverComments =
+              await _forumRepository.fetchPostCommentsFromServer(postId);
+          final merged = _mergeComments(state.comments, serverComments);
           emit(state.copyWith(comments: merged, hasPendingSync: false, status: ForumStatus.success));
         } catch (apiError) {
           // Remove optimistic comment on failure

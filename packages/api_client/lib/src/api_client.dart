@@ -92,6 +92,7 @@ class ApiClient {
     CancelToken? cancelToken,
     Duration? receiveTimeout,
   }) async {
+    try {
       final isFormData = data is FormData;
 
       return await _dio.post<T>(
