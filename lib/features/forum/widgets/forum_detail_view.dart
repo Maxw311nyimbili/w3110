@@ -562,9 +562,9 @@ class ForumDetailView extends StatelessWidget {
       final cubit = context.read<ForumCubit>();
       final serverPostId = int.tryParse(post.id);
 
-      if (serverPostId != null) {
-        // Re-select the post to refresh lines with updated counts
-        await cubit.selectPost(post);
+      if (post.id.isNotEmpty) {
+        // Refresh lines non-destructively to update counts
+        await cubit.refreshAnswerLines(post.id);
       }
     }
   }

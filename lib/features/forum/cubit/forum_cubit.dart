@@ -542,17 +542,22 @@ class ForumCubit extends Cubit<ForumState> {
             clientId: localId,
             parentCommentId: effectiveParentId,
           );
-          // Replace optimistic comment with server-confirmed version
-          final updatedComments = state.comments.map((c) {
-            if (c.localId == localId) return serverComment;
-            return c;
-          }).toList();
-          emit(state.copyWith(
-            comments: updatedComments, 
-            hasPendingSync: false,
-            // Force a slight state change to ensure UI triggers forthreaded view
-            status: ForumStatus.success, 
-          ));
+
+          // Robustly merge server results
+          final currentComments = List<ForumComment>.from(state.comments);
+          final index = currentComments.indexWhere((c) => c.localId == localId);
+
+          if (index != -1) {
+            currentComments[index] = serverComment;
+            emit(state.copyWith(comments: currentComments));
+          } else {
+            // Deduplicate: append if not already there via sync/refresh
+            if (!currentComments.any((c) => c.id == serverComment.id)) {
+              emit(state.copyWith(comments: [...currentComments, serverComment]));
+            }
+          }
+          
+          emit(state.copyWith(hasPendingSync: false, status: ForumStatus.success));
           
           // Proactive: re-fetch comments once confirmed to ensure tree is correct
           // FIXED: Removed selectPost call which was causing UI to reset to empty on Web
@@ -1013,42 +1018,93 @@ class ForumCubit extends Cubit<ForumState> {
     String? parentCommentId,
   }) async {
     final effectiveLineId = lineId ?? state.selectedLineId;
-    final effectiveParentId =
-        parentCommentId ??
-        (state.replyingToComment?.isLineComment == true
-            ? state.replyingToComment?.localId
-            : null);
     if (effectiveLineId == null) return;
+
+    final clientId = _uuid.v4();
+    final authorId = _authRepository.currentUser.id;
+    final authorName = _authRepository.currentUser.name ?? 'User';
+
+    // 1. Optimistic Update
+    final optimisticComment = ForumLineComment(
+      id: clientId, // Use clientId as temp serverId
+      localId: clientId,
+      lineId: effectiveLineId,
+      authorId: authorId,
+      authorName: authorName,
+      authorRole: CommentRole.community, // Default for now
+      commentType: _parseCommentType(commentType),
+      text: text,
+      createdAt: DateTime.now(),
+      parentCommentId: parentCommentId,
+      syncStatus: SyncStatus.pending,
+    );
+
+    final updatedLineComments = List<ForumLineComment>.from(
+      state.lineComments,
+    )..add(optimisticComment);
+
+    final updatedLines = state.answerLines.map((line) {
+      if (line.lineId == effectiveLineId) {
+        return line.copyWith(commentCount: line.commentCount + 1);
+      }
+      return line;
+    }).toList();
+
+    emit(
+      state.copyWithNullableLineId(
+        lineComments: updatedLineComments,
+        answerLines: updatedLines,
+        clearReplyingTo: true,
+      ),
+    );
 
     try {
       final newComment = await _forumRepository.postLineComment(
         lineId: effectiveLineId,
         text: text,
         commentType: commentType,
-        parentCommentId: effectiveParentId,
+        parentCommentId: parentCommentId,
       );
 
-      final updatedLineComments = List<ForumLineComment>.from(
-        state.lineComments,
-      )..add(newComment);
+      // 2. Replace with server version
+      final currentLineComments = List<ForumLineComment>.from(state.lineComments);
+      final index = currentLineComments.indexWhere((c) => c.localId == clientId);
 
-      // Also update line comment count locally in the answerLines list
-      final updatedLines = state.answerLines.map((line) {
+      if (index != -1) {
+        currentLineComments[index] = newComment;
+        emit(state.copyWith(lineComments: currentLineComments));
+      }
+    } catch (e) {
+      // Revert optimism
+      final revertedLineComments = state.lineComments
+          .where((c) => c.localId != clientId)
+          .toList();
+      
+      final revertedLines = state.answerLines.map((line) {
         if (line.lineId == effectiveLineId) {
-          return line.copyWith(commentCount: line.commentCount + 1);
+          return line.copyWith(commentCount: (line.commentCount - 1).clamp(0, 999));
         }
         return line;
       }).toList();
 
       emit(
-        state.copyWithNullableLineId(
-          lineComments: updatedLineComments,
-          answerLines: updatedLines,
-          clearReplyingTo: true,
+        state.copyWith(
+          lineComments: revertedLineComments,
+          answerLines: revertedLines,
+          error: 'Failed to post comment: ${e.toString()}',
         ),
       );
+    }
+  }
+
+  /// Refresh discussion lines without clearing everything (non-destructive)
+  Future<void> refreshAnswerLines(String postId) async {
+    try {
+      final lines = await _forumRepository.getLinesForPost(postId);
+      emit(state.copyWith(answerLines: lines));
     } catch (e) {
-      emit(state.copyWith(error: 'Failed to post comment: ${e.toString()}'));
+      // Silent fail for background refresh
+      print('DEBUG: refreshAnswerLines failed: $e');
     }
   }
 
