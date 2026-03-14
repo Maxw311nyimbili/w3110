@@ -671,32 +671,30 @@ class ForumRepository {
         response.data as Map<String, dynamic>,
       );
 
-      // Save locally as well
-      await _database.insertLineComment(
-        ForumLineCommentsCompanion.insert(
-          localId: comment.id,
-          serverId: Value(comment.id),
-          lineId: comment.lineId,
-          authorId: comment.authorId,
-          authorName: comment.authorName,
-          authorRole: comment.authorRole.name,
-          commentType: comment.commentType.name,
-          content: comment.text,
-          parentCommentId: Value(comment.parentCommentId),
-          createdAt: comment.createdAt,
-          syncStatus: const Value('synced'),
-        ),
-      );
-
-      // Update the comment count in the local database
-      await _database.incrementLineCommentCount(comment.lineId);
+      // Try to cache locally — silently ignored on web where DB is unavailable.
+      try {
+        await _database.insertLineComment(
+          ForumLineCommentsCompanion.insert(
+            localId: comment.id,
+            serverId: Value(comment.id),
+            lineId: comment.lineId,
+            authorId: comment.authorId,
+            authorName: comment.authorName,
+            authorRole: comment.authorRole.name,
+            commentType: comment.commentType.name,
+            content: comment.text,
+            parentCommentId: Value(comment.parentCommentId),
+            createdAt: comment.createdAt,
+            syncStatus: const Value('synced'),
+          ),
+        );
+        await _database.incrementLineCommentCount(comment.lineId);
+      } catch (_) {
+        // DB unavailable (web) — the API succeeded, so we return normally.
+      }
 
       return comment;
     } catch (e) {
-      // Fallback: Save as pending for sync
-      final localId = 'pending_${DateTime.now().millisecondsSinceEpoch}';
-      // I need user info here... assuming we have a way to get it or wait for login status
-      // For now, rethrow as we don't have a background sync for line comments yet
       throw ForumException('Failed to post comment: ${e.toString()}');
     }
   }
@@ -752,20 +750,24 @@ class ForumRepository {
         response.data as Map<String, dynamic>,
       );
 
-      // Save locally
-      await _database.insertComment(
-        ForumCommentsCompanion.insert(
-          localId: comment.localId,
-          serverId: Value(comment.id),
-          postId: postId,
-          authorId: comment.authorId,
-          authorName: comment.authorName,
-          content: comment.content,
-          parentCommentId: Value(comment.parentCommentId),
-          createdAt: comment.createdAt,
-          syncStatus: const Value('synced'),
-        ),
-      );
+      // Try to cache locally — silently ignored on web where DB is unavailable.
+      try {
+        await _database.insertComment(
+          ForumCommentsCompanion.insert(
+            localId: comment.localId,
+            serverId: Value(comment.id),
+            postId: postId,
+            authorId: comment.authorId,
+            authorName: comment.authorName,
+            content: comment.content,
+            parentCommentId: Value(comment.parentCommentId),
+            createdAt: comment.createdAt,
+            syncStatus: const Value('synced'),
+          ),
+        );
+      } catch (_) {
+        // DB unavailable (web) — the API succeeded, so we return normally.
+      }
 
       return comment;
     } catch (e) {

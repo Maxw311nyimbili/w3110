@@ -226,9 +226,8 @@ class MediaRepository {
 
       return uploadResponse;
     } catch (e) {
-      if (e is MediaException) {
-        rethrow;
-      }
+      if (e is MediaException) rethrow;
+      if (e is MediaUploadRejectedException) rethrow;
       throw MediaException('Image upload failed: ${e.toString()}');
     }
   }
