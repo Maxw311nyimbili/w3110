@@ -27,7 +27,12 @@ class _SideMenuState extends State<SideMenu> {
     super.initState();
     // Load real conversation history as soon as the sidebar is mounted
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) context.read<ChatCubit>().loadHistory();
+      if (mounted) {
+        final authState = context.read<AuthCubit>().state;
+        if (authState.status == AuthStatus.authenticated) {
+          context.read<ChatCubit>().loadHistory();
+        }
+      }
     });
   }
 
