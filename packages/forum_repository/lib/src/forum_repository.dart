@@ -636,6 +636,7 @@ class ForumRepository {
     required String lineId,
     required String text,
     required String commentType,
+    String? clientId,
     String? parentCommentId,
   }) async {
     if (_useMock) {
@@ -662,6 +663,7 @@ class ForumRepository {
         data: {
           'text': text,
           'comment_type': commentType,
+          if (clientId != null) 'client_id': clientId,
           if (parentCommentId != null) 'parent_comment_id': parentCommentId,
         },
       );

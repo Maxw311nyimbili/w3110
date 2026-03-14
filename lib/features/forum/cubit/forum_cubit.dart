@@ -1064,6 +1064,7 @@ class ForumCubit extends Cubit<ForumState> {
         lineId: effectiveLineId,
         text: text,
         commentType: commentType,
+        clientId: clientId,
         parentCommentId: parentCommentId,
       );
 

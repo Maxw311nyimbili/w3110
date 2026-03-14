@@ -95,10 +95,8 @@ class ForumLineComment extends Equatable {
 
   factory ForumLineComment.fromJson(Map<String, dynamic> json) {
     return ForumLineComment(
-      id: json['comment_id']?.toString() ?? '',
-      localId:
-          json['local_id']?.toString() ??
-          (json['comment_id']?.toString() ?? ''),
+      id: (json['id'] ?? json['comment_id'] ?? '').toString(),
+      localId: (json['client_id'] ?? json['local_id'] ?? json['id'] ?? json['comment_id'] ?? '').toString(),
       lineId: (json['line_id'] ?? '').toString(),
       authorId: (json['author_id'] ?? '').toString(),
       authorName: json['author_name']?.toString() ?? 'Unknown',
