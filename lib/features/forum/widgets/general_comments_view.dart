@@ -181,63 +181,36 @@ class _GeneralCommentsViewState extends State<GeneralCommentsView> {
     BuildContext context,
     List<ForumComment> allComments,
   ) {
+    // 1. Create a canonical ID map to resolve both server IDs and local UUIDs to a shared identity
+    final Map<String, String> canonicalIds = {};
+    for (final c in allComments) {
+      if (c.id.isNotEmpty) canonicalIds[c.id] = c.localId;
+      canonicalIds[c.localId] = c.localId;
+    }
+
+    // 2. Group comments by their canonical parent ID
     final Map<String, List<ForumComment>> grouped = {};
     for (final comment in allComments) {
       final pid = comment.parentCommentId;
-      if (pid == null || pid.isEmpty) {
-        grouped.putIfAbsent(null.toString(), () => []).add(comment);
-      } else {
-        grouped.putIfAbsent(pid, () => []).add(comment);
-      }
+      final canonicalPid = (pid == null || pid.isEmpty) ? 'ROOT' : (canonicalIds[pid] ?? pid);
+      grouped.putIfAbsent(canonicalPid, () => []).add(comment);
     }
 
-    List<Widget> buildTree(String? parentId, int depth, List<bool> ancestorHasNext) {
-      if (parentId == null.toString()) parentId = null;
-      
-      final List<ForumComment> children = [];
-      final Set<String> seenIds = {};
-
-      void addChildrenForId(String? id) {
-        if (id == null || id.isEmpty) return;
-        final list = grouped[id] ?? [];
-        for (final child in list) {
-          final cid = child.id.isNotEmpty ? child.id : child.localId;
-          if (!seenIds.contains(cid)) {
-            children.add(child);
-            seenIds.add(cid);
-          }
-        }
-      }
-
-      if (parentId == null) {
-        addChildrenForId(null.toString());
-      } else {
-        // Try to find the parent object to get all its possible IDs
-        addChildrenForId(parentId);
-        try {
-          final parent = allComments.firstWhere((c) => c.id == parentId || c.localId == parentId);
-          if (parent.id != parentId) addChildrenForId(parent.id);
-          if (parent.localId != parentId) addChildrenForId(parent.localId);
-        } catch (_) {}
-      }
+    List<Widget> buildTree(String parentCanonicalId, int depth, List<bool> ancestorHasNext) {
+      final List<ForumComment> children = List<ForumComment>.from(grouped[parentCanonicalId] ?? []);
       children.sort((a, b) => a.createdAt.compareTo(b.createdAt));
 
       final List<Widget> items = [];
       for (int i = 0; i < children.length; i++) {
         final comment = children[i];
         
-        final hasReplies = (grouped.containsKey(comment.localId) || 
-                          (comment.id.isNotEmpty && grouped.containsKey(comment.id)));
-        final isExpanded = _expandedCommentIds.contains(comment.localId) || 
-                          (comment.id.isNotEmpty && _expandedCommentIds.contains(comment.id));
+        final hasReplies = grouped.containsKey(comment.localId);
+        final isExpanded = _expandedCommentIds.contains(comment.localId);
         
         final isLast = i == children.length - 1;
-        // If it's the last in the list, but will have a "Hide replies" button below its subtree,
-        // it's not the LAST thing in this vertical track at this level.
         final isVisuallyLast = isLast && !isExpanded;
 
-        final replyCount = (grouped[comment.localId]?.length ?? 0) + 
-                          (comment.id.isNotEmpty ? (grouped[comment.id]?.length ?? 0) : 0);
+        final replyCount = grouped[comment.localId]?.length ?? 0;
 
         items.add(
           Padding(
@@ -336,7 +309,7 @@ class _GeneralCommentsViewState extends State<GeneralCommentsView> {
       return items;
     }
 
-    return buildTree(null, 0, []);
+    return buildTree('ROOT', 0, []);
   }
 
   IconData _getRoleIcon(String role) {

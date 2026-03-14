@@ -176,42 +176,64 @@ class ForumCubit extends Cubit<ForumState> {
         orElse: () => post,
       );
 
-      emit(
-        state.copyWith(
-          view: ForumView.detail,
-          selectedPost: currentPost,
-          status: ForumStatus.loading,
-        ),
-      );
+      final isSamePost = state.selectedPost != null &&
+          (state.selectedPost!.localId == post.localId ||
+              (state.selectedPost!.id.isNotEmpty &&
+                  state.selectedPost!.id == post.id));
+
+      if (!isSamePost) {
+        emit(
+          state.copyWith(
+            view: ForumView.detail,
+            selectedPost: currentPost,
+            status: ForumStatus.loading,
+            comments: const [], // Clear comments ONLY if it's a new post
+          ),
+        );
+      } else {
+        // Just update the post metadata without clearing comments or showing loading
+        emit(
+          state.copyWith(
+            view: ForumView.detail,
+            selectedPost: currentPost,
+          ),
+        );
+      }
 
       // Use server ID when available, fallback to localId
       final postId = post.id.isEmpty ? post.localId : post.id;
 
       // 1. Try to get comments from local DB first (fast on mobile)
-      List<ForumComment> comments = [];
+      List<ForumComment> localComments = [];
       try {
-        comments = await _forumRepository.getLocalComments(postId);
+        localComments = await _forumRepository.getLocalComments(postId);
       } catch (_) {
-        // Local DB unavailable (web) - that's fine, we'll fetch from server
+        // Local DB unavailable (web)
       }
+
+      // Merge local with current state to preserve optimistic UI
+      final mergedLocal = _mergeComments(state.comments, localComments);
 
       // Emit immediately with whatever we have so the detail view appears
       emit(
         state.copyWith(
           status: ForumStatus.success,
-          comments: comments,
+          comments: mergedLocal,
           currentAnswerId: postId,
         ),
       );
 
       // 2. Always fetch comments from server (updates UI with latest data)
-      // This is awaited so web always gets comments, even without local DB
       try {
         final serverComments =
             await _forumRepository.fetchPostCommentsFromServer(postId);
+
+        // Robust merge: Preserve unsynced personal comments
+        final fullyMerged = _mergeComments(state.comments, serverComments);
+
         emit(
           state.copyWith(
-            comments: serverComments,
+            comments: fullyMerged,
           ),
         );
       } catch (e) {
@@ -543,28 +565,9 @@ class ForumCubit extends Cubit<ForumState> {
             parentCommentId: effectiveParentId,
           );
 
-          // Robustly merge server results
-          final currentComments = List<ForumComment>.from(state.comments);
-          final index = currentComments.indexWhere((c) => c.localId == localId);
-
-          if (index != -1) {
-            currentComments[index] = serverComment;
-            emit(state.copyWith(comments: currentComments));
-          } else {
-            // Deduplicate: append if not already there via sync/refresh
-            if (!currentComments.any((c) => c.id == serverComment.id)) {
-              emit(state.copyWith(comments: [...currentComments, serverComment]));
-            }
-          }
-          
-          emit(state.copyWith(hasPendingSync: false, status: ForumStatus.success));
-          
-          // Proactive: re-fetch comments once confirmed to ensure tree is correct
-          // FIXED: Removed selectPost call which was causing UI to reset to empty on Web
-          // The state is already updated with serverComment above.
-          // if (state.selectedPost != null) {
-          //   selectPost(state.selectedPost!);
-          // }
+          // Robustly merge server results using standardized helper
+          final merged = _mergeComments(state.comments, [serverComment]);
+          emit(state.copyWith(comments: merged, hasPendingSync: false, status: ForumStatus.success));
         } catch (apiError) {
           // Remove optimistic comment on failure
           emit(
@@ -1068,14 +1071,9 @@ class ForumCubit extends Cubit<ForumState> {
         parentCommentId: parentCommentId,
       );
 
-      // 2. Replace with server version
-      final currentLineComments = List<ForumLineComment>.from(state.lineComments);
-      final index = currentLineComments.indexWhere((c) => c.localId == clientId);
-
-      if (index != -1) {
-        currentLineComments[index] = newComment;
-        emit(state.copyWith(lineComments: currentLineComments));
-      }
+      // 2. Replace with server version using standardized helper
+      final merged = _mergeLineComments(state.lineComments, [newComment]);
+      emit(state.copyWith(lineComments: merged));
     } catch (e) {
       // Revert optimism
       final revertedLineComments = state.lineComments
@@ -1232,6 +1230,60 @@ class ForumCubit extends Cubit<ForumState> {
         commentCount: 0,
       );
     }).toList();
+  }
+
+  /// Merges server comments with local/optimistic comments robustly
+  List<ForumComment> _mergeComments(
+    List<ForumComment> current,
+    List<ForumComment> incoming,
+  ) {
+    final Map<String, ForumComment> merged = {};
+
+    // 1. Add current comments (some might be optimistic/unsynced)
+    for (final c in current) {
+      merged[c.localId] = c;
+    }
+
+    // 2. Overwrite/Add with incoming data (authoritative)
+    for (final c in incoming) {
+      // If we find a match by client_id (localId), the server has confirmed our optimistic add.
+      // We use the server's version as it has internal IDs and final timestamps.
+      merged[c.localId] = c;
+
+      // Also ensure it's accessible by server ID if it has one
+      if (c.id.isNotEmpty) {
+        merged[c.id] = c;
+      }
+    }
+
+    // Convert back to list and deduplicate by memory address/unique identity 
+    // to avoid double-counting if we have both localId and id versions.
+    final result = merged.values.toSet().toList();
+    result.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+    return result;
+  }
+
+  /// Merges server line comments with local/optimistic comments robustly
+  List<ForumLineComment> _mergeLineComments(
+    List<ForumLineComment> current,
+    List<ForumLineComment> incoming,
+  ) {
+    final Map<String, ForumLineComment> merged = {};
+
+    for (final c in current) {
+      merged[c.localId] = c;
+    }
+
+    for (final c in incoming) {
+      merged[c.localId] = c;
+      if (c.id.isNotEmpty) {
+        merged[c.id] = c;
+      }
+    }
+
+    final result = merged.values.toSet().toList();
+    result.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+    return result;
   }
 
   @override
