@@ -1,12 +1,10 @@
-// packages/media_repository/lib/src/image_processor.dart
-// PRODUCTION IMPLEMENTATION - Real compression and barcode detection
-
-import 'dart:io' if (dart.library.html) 'dart:html';
 import 'package:flutter/foundation.dart';
 import 'package:image/image.dart' as img;
-import 'package:google_mlkit_barcode_scanning/google_mlkit_barcode_scanning.dart' if (dart.library.html) 'package:google_mlkit_barcode_scanning/google_mlkit_barcode_scanning.dart'; // Still need import for types, but won't use code
-import 'package:google_mlkit_commons/google_mlkit_commons.dart' if (dart.library.html) 'package:google_mlkit_commons/google_mlkit_commons.dart';
+import 'utils/barcode_scanner_stub.dart'
+    if (dart.library.io) 'package:media_repository/src/utils/barcode_scanner_io.dart'
+    if (dart.library.html) 'package:media_repository/src/utils/barcode_scanner_web.dart';
 import 'exceptions/media_exception.dart';
+import 'utils/file_utils.dart';
 
 /// Production image processor - compression, barcode detection
 class ImageProcessor {
@@ -86,28 +84,11 @@ class ImageProcessor {
       return null;
     }
     
-    BarcodeScanner? barcodeScanner;
+    BarcodeScannerInterface? barcodeScanner;
     try {
-      final imageFile = File(imagePath);
-      if (!await imageFile.exists()) {
-        return null; // File not found, return null (optional)
-      }
-
-      // Initialize barcode scanner
-      barcodeScanner = BarcodeScanner();
-
-      // Create input image
-      final inputImage = InputImage.fromFilePath(imagePath);
-
-      // Process image
-      final barcodes = await barcodeScanner.processImage(inputImage);
-
-      if (barcodes.isEmpty) {
-        return null; // No barcode detected
-      }
-
-      // Return first barcode found
-      final barcode = barcodes.first.rawValue;
+      barcodeScanner = getBarcodeScanner();
+      final barcode = await barcodeScanner.processImage(imagePath);
+      
       if (barcode != null && barcode.isNotEmpty) {
         print('✅ Barcode detected: $barcode');
         return barcode;
@@ -168,7 +149,7 @@ class ImageProcessor {
   String _generateCompressedFileName(String originalPath) {
     if (kIsWeb) return originalPath;
     final file = File(originalPath);
-    final dir = file.parent.path;
+    final dir = file.parentPath;
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     return '$dir/compressed_$timestamp.jpg';
   }
