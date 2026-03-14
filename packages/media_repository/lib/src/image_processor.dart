@@ -1,9 +1,7 @@
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:image/image.dart' as img;
-import 'utils/barcode_scanner_stub.dart'
-    if (dart.library.io) 'package:media_repository/src/utils/barcode_scanner_io.dart'
-    if (dart.library.html) 'package:media_repository/src/utils/barcode_scanner_web.dart';
+import 'utils/barcode_scanner.dart';
 import 'exceptions/media_exception.dart';
 import 'utils/file_utils.dart';
 
