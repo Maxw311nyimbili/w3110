@@ -3,6 +3,7 @@
 import 'dart:io';
 import 'package:google_mlkit_barcode_scanning/google_mlkit_barcode_scanning.dart';
 import 'barcode_scanner_stub.dart';
+export 'barcode_scanner_stub.dart';
 
 class BarcodeScannerIO implements BarcodeScannerInterface {
   final BarcodeScanner _scanner = BarcodeScanner();

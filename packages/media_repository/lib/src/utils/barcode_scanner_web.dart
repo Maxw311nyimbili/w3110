@@ -1,6 +1,7 @@
 // packages/media_repository/lib/src/utils/barcode_scanner_web.dart
 
 import 'barcode_scanner_stub.dart';
+export 'barcode_scanner_stub.dart';
 
 class BarcodeScannerWeb implements BarcodeScannerInterface {
   @override

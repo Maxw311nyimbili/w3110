@@ -1,6 +1,7 @@
 // packages/media_repository/lib/src/utils/file_utils_web.dart
 import 'dart:typed_data';
 import 'file_utils_stub.dart';
+export 'file_utils_stub.dart';
 
 class File implements FileInterface {
   File(this.path);

@@ -2,6 +2,7 @@
 import 'dart:io' as io;
 import 'dart:typed_data';
 import 'file_utils_stub.dart';
+export 'file_utils_stub.dart';
 
 class File implements FileInterface {
   File(this.path) : _file = io.File(path);
