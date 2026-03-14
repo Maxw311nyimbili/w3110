@@ -555,9 +555,11 @@ class ForumCubit extends Cubit<ForumState> {
           ));
           
           // Proactive: re-fetch comments once confirmed to ensure tree is correct
-          if (state.selectedPost != null) {
-            selectPost(state.selectedPost!);
-          }
+          // FIXED: Removed selectPost call which was causing UI to reset to empty on Web
+          // The state is already updated with serverComment above.
+          // if (state.selectedPost != null) {
+          //   selectPost(state.selectedPost!);
+          // }
         } catch (apiError) {
           // Remove optimistic comment on failure
           emit(
