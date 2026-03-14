@@ -245,6 +245,15 @@ class ForumRepository {
     }
   }
 
+  /// Delete a post directly on server (web path)
+  Future<void> deletePostOnServer(String serverId) async {
+    try {
+      await _apiClient.delete('/api/v1/forum/posts/$serverId');
+    } catch (e) {
+      throw ForumException('Failed to delete post on server: ${e.toString()}');
+    }
+  }
+
   /// Fetch comments for a post directly from server WITHOUT requiring local DB.
   /// DB caching is attempted but failures are silently ignored (web-resilient).
   Future<List<ForumComment>> fetchPostCommentsFromServer(String postId) async {

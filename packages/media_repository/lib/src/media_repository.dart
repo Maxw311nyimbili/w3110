@@ -181,14 +181,30 @@ class MediaRepository {
       // Create multipart form data
       final formData = FormData();
       
-      // Dio handles XFile/blob path on web automatically with MultipartFile.fromFile
-      formData.files.add(MapEntry(
-        'image',
-        await MultipartFile.fromFile(
+      if (kIsWeb) {
+        // On Web, imagePath is a blob URL. We need to fetch it as bytes.
+        final response = await Dio().get<List<int>>(
           request.imagePath,
-          filename: 'scan_${DateTime.now().millisecondsSinceEpoch}.jpg',
-        ),
-      ));
+          options: Options(responseType: ResponseType.bytes),
+        );
+        final bytes = response.data!;
+        
+        formData.files.add(MapEntry(
+          'image',
+          MultipartFile.fromBytes(
+            bytes,
+            filename: 'scan_${DateTime.now().millisecondsSinceEpoch}.jpg',
+          ),
+        ));
+      } else {
+        formData.files.add(MapEntry(
+          'image',
+          await MultipartFile.fromFile(
+            request.imagePath,
+            filename: 'scan_${DateTime.now().millisecondsSinceEpoch}.jpg',
+          ),
+        ));
+      }
 
       if (request.barcode != null) {
         formData.fields.add(MapEntry('barcode', request.barcode!));

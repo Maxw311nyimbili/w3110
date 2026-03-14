@@ -379,15 +379,38 @@ class ForumCubit extends Cubit<ForumState> {
   /// Delete a post (local and from server if synced)
   Future<void> deletePost(String localId) async {
     try {
-      // Remove from local database
-      await _forumRepository.deletePost(localId);
+      final postToDelete = state.posts.firstWhere((p) => p.localId == localId);
+      final serverId = postToDelete.id;
 
-      // Update UI immediately
+      // Update UI immediately (optimistic)
       emit(
         state.copyWith(
           posts: state.posts.where((p) => p.localId != localId).toList(),
+          selectedPost: state.selectedPost?.localId == localId ? null : state.selectedPost,
         ),
       );
+
+      // 1. Try local delete (mobile)
+      bool deletedLocally = false;
+      try {
+        await _forumRepository.deletePost(localId);
+        deletedLocally = true;
+      } catch (_) {
+        // Local DB unavailable (web)
+      }
+
+      // 2. Direct API call if local failed or if it's already synced (web path)
+      if (!deletedLocally || (serverId != null && serverId.isNotEmpty)) {
+        try {
+          if (serverId != null && serverId.isNotEmpty) {
+            await _forumRepository.deletePostOnServer(serverId);
+          }
+        } catch (e) {
+          print('DEBUG: deletePost - server-side delete failed: $e');
+          // We don't necessarily revert the UI if the user expects it gone, 
+          // but we should log/alert.
+        }
+      }
     } catch (e) {
       emit(
         state.copyWith(
@@ -524,7 +547,15 @@ class ForumCubit extends Cubit<ForumState> {
             if (c.localId == localId) return serverComment;
             return c;
           }).toList();
-          emit(state.copyWith(comments: updatedComments, hasPendingSync: false));
+          emit(state.copyWith(
+            comments: updatedComments, 
+            hasPendingSync: false,
+            // Force a slight state change to ensure UI triggers forthreaded view
+            status: ForumStatus.success, 
+          ));
+          
+          // Proactive: re-fetch comments once confirmed to ensure tree is correct
+          _loadCommentsForPost(postId);
         } catch (apiError) {
           // Remove optimistic comment on failure
           emit(
