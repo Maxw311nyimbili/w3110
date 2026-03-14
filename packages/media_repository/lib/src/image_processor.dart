@@ -1,10 +1,11 @@
 // packages/media_repository/lib/src/image_processor.dart
 // PRODUCTION IMPLEMENTATION - Real compression and barcode detection
 
-import 'dart:io';
+import 'dart:io' if (dart.library.html) 'dart:html';
+import 'package:flutter/foundation.dart';
 import 'package:image/image.dart' as img;
-import 'package:google_mlkit_barcode_scanning/google_mlkit_barcode_scanning.dart';
-import 'package:google_mlkit_commons/google_mlkit_commons.dart';
+import 'package:google_mlkit_barcode_scanning/google_mlkit_barcode_scanning.dart' if (dart.library.html) 'package:google_mlkit_barcode_scanning/google_mlkit_barcode_scanning.dart'; // Still need import for types, but won't use code
+import 'package:google_mlkit_commons/google_mlkit_commons.dart' if (dart.library.html) 'package:google_mlkit_commons/google_mlkit_commons.dart';
 import 'exceptions/media_exception.dart';
 
 /// Production image processor - compression, barcode detection
@@ -20,6 +21,11 @@ class ImageProcessor {
   /// Target: < 5MB, quality 85%, max 1920x1920
   Future<String> compressImage(String imagePath) async {
     try {
+      if (kIsWeb) {
+        print('🌐 [Web] Skipping compression for blob: $imagePath');
+        return imagePath;
+      }
+      
       final imageFile = File(imagePath);
 
       // Check if file exists
@@ -75,6 +81,11 @@ class ImageProcessor {
   /// Detect barcode in image
   /// Supports: EAN, UPC, Code128, Code39, QR, etc.
   Future<String?> detectBarcode(String imagePath) async {
+    if (kIsWeb) {
+      print('🌐 [Web] Skipping native barcode detection');
+      return null;
+    }
+    
     BarcodeScanner? barcodeScanner;
     try {
       final imageFile = File(imagePath);
@@ -117,6 +128,10 @@ class ImageProcessor {
   /// Checks: file exists, format is jpg/png, size < 10MB
   Future<bool> validateImage(String imagePath) async {
     try {
+      if (kIsWeb) {
+        return imagePath.startsWith('blob:') || imagePath.startsWith('http');
+      }
+      
       final imageFile = File(imagePath);
 
       // Check file exists
@@ -151,6 +166,7 @@ class ImageProcessor {
 
   /// Generate filename for compressed image
   String _generateCompressedFileName(String originalPath) {
+    if (kIsWeb) return originalPath;
     final file = File(originalPath);
     final dir = file.parent.path;
     final timestamp = DateTime.now().millisecondsSinceEpoch;
@@ -160,6 +176,10 @@ class ImageProcessor {
   /// Get image dimensions
   Future<({int width, int height})> getImageDimensions(String imagePath) async {
     try {
+      if (kIsWeb) {
+        // Fallback for web until we add web-specific size logic if needed
+        return (width: 0, height: 0);
+      }
       final imageFile = File(imagePath);
       final bytes = await imageFile.readAsBytes();
       final image = img.decodeImage(bytes);
@@ -177,6 +197,7 @@ class ImageProcessor {
   /// Get file size in MB
   static Future<double> getFileSizeInMB(String filePath) async {
     try {
+      if (kIsWeb) return 0;
       final file = File(filePath);
       final bytes = await file.length();
       return bytes / (1024 * 1024);
