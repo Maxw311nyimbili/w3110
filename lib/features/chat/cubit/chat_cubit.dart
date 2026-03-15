@@ -371,7 +371,10 @@ class ChatCubit extends Cubit<ChatState> {
         messages: [...state.messages, aiMessage],
         status: ChatStatus.success,
         isTyping: false,
-        sessionId: state.sessionId ?? responseData['session_id'] as String?,
+        // Sync sessionId from backend, but fallback to state if missing
+        sessionId: (responseData['session_id'] as String?)?.isNotEmpty == true 
+            ? responseData['session_id'] as String 
+            : state.sessionId,
       ),
     );
   }
@@ -627,16 +630,24 @@ class ChatCubit extends Cubit<ChatState> {
           messages: [...state.messages, aiMessage],
           status: ChatStatus.success,
           isTyping: false,
-          // sessionId was pinned into state before the request was sent.
-          sessionId: sessionId,
+          // Always prefer the backend returned sessionId for context continuity
+          sessionId: response.sessionId.isNotEmpty 
+              ? response.sessionId 
+              : sessionId,
         ),
       );
     } catch (e) {
+      print('❌ [CHAT] sendMessage ERROR: $e');
       _loadingTimer?.cancel();
       emit(state.resetLoadingMessage());
+      
+      final errorMessageStr = e.toString().contains('ApiException') 
+          ? 'Network issue. Please try again.' 
+          : 'Something went wrong. Please try again.';
+
       final errorMessage = ChatMessage(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
-        content: 'Error: ${e.toString()}',
+        content: 'Error: $errorMessageStr',
         isUser: false,
         timestamp: DateTime.now(),
         isRefusal: true,
