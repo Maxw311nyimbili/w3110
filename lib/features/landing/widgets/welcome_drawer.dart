@@ -148,26 +148,6 @@ class WelcomeDrawer extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                              if (state.isDemoAvailable) ...[
-                                const SizedBox(height: 48),
-                                TextButton(
-                                  onPressed: () => context
-                                      .read<LandingCubit>()
-                                      .authenticateAsDemo(),
-                                  child: Text(
-                                    'Demo Login (Developer Bypass)',
-                                    style: TextStyle(
-                                      color: Theme.of(context)
-                                          .textTheme
-                                          .bodySmall
-                                          ?.color
-                                          ?.withOpacity(0.4),
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ),
-                              ],
                             ],
                           );
                         },

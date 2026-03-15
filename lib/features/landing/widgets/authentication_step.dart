@@ -148,27 +148,6 @@ class AuthenticationStep extends StatelessWidget {
 
                     const Spacer(),
 
-                    if (state.isDemoAvailable)
-                      _buildStaggeredEntrance(
-                        delay: 700,
-                        child: Center(
-                          child: TextButton(
-                            onPressed: state.isAuthenticating
-                                ? null
-                                : () => context
-                                      .read<LandingCubit>()
-                                      .authenticateAsDemo(),
-                            child: Text(
-                              'Demo Login (Developer Bypass)',
-                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                color: Theme.of(context).textTheme.bodySmall?.color,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 0.5,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
                     const SizedBox(height: 24),
                   ],
                 ),
