@@ -24,7 +24,7 @@ class MedScannerBody extends StatelessWidget {
           final l10n = AppLocalizations.of(context);
           String message;
 
-          // Map error key to localized string
+          // Map error key to localized string, or use the raw string if it's descriptive
           switch (state.error) {
             case 'cameraPermissionDenied':
               message = l10n.cameraPermissionDenied;
@@ -41,8 +41,12 @@ class MedScannerBody extends StatelessWidget {
             case 'fileTooLarge':
               message = l10n.fileTooLarge;
               break;
-            default:
+            case 'genericError':
               message = l10n.genericError;
+              break;
+            default:
+              // For descriptive reasons (e.g. from backend AI), use the raw string
+              message = state.error ?? l10n.genericError;
           }
 
           ScaffoldMessenger.of(context).showSnackBar(

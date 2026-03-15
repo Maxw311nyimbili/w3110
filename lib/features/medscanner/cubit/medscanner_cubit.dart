@@ -268,6 +268,7 @@ class MedScannerCubit extends Cubit<MedScannerState> {
     } else if (error.contains('too large')) {
       return 'fileTooLarge';
     }
-    return 'genericError';
+    // Return original error so it can be displayed if it's a descriptive rejection reason
+    return error;
   }
 }
