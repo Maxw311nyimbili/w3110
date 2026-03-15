@@ -99,14 +99,9 @@ class AuthInterceptor extends Interceptor {
     const publicPaths = [
       '/auth/exchange',
       '/auth/refresh',
-      '/consent/',
-      '/announcements',
       '/health',
-      '/chat/query',
-      '/chat/validate',
-      '/chat/sessions',
-      '/chat/history',
-      '/landing/greeting',
+      '/announcements',
+      '/consent/',
     ];
 
     return publicPaths.any((p) => path.contains(p));

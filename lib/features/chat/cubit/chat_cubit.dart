@@ -155,7 +155,7 @@ class ChatCubit extends Cubit<ChatState> {
   Future<void> startRecording() async {
     try {
       print('🎤 [STT] startRecording called');
-      await _primeAudio(); // Prime on mic click
+      unawaited(_primeAudio()); // Prime on mic click
       final hasPermission = await _audioRecordingService.hasPermission();
       print('🎤 [STT]   hasPermission: $hasPermission');
       if (!hasPermission) {
@@ -366,6 +366,8 @@ class ChatCubit extends Cubit<ChatState> {
       print('🔊 [TTS] ⚠️ No audio_url in response - TTS will NOT play');
     }
 
+    final isNewSession = state.sessionId == null || state.historySessions.isEmpty;
+    
     emit(
       state.copyWith(
         messages: [...state.messages, aiMessage],
@@ -377,6 +379,11 @@ class ChatCubit extends Cubit<ChatState> {
             : state.sessionId,
       ),
     );
+
+    // Refresh history list if this was the start of a new conversation
+    if (isNewSession) {
+      loadHistory();
+    }
   }
 
   Future<void> stopAudio() async {
@@ -422,7 +429,7 @@ class ChatCubit extends Cubit<ChatState> {
   Future<void> speakMessage(String messageContent, VoiceLanguage language) async {
     try {
       print('🔊 [TTS] speakMessage called:');
-      await _primeAudio(); // Prime on speak icon click
+      unawaited(_primeAudio()); // Prime on speak icon click
       print('🔊 [TTS]   content length: ${messageContent.length}');
       print('🔊 [TTS]   language: ${language.code}');
 
@@ -473,7 +480,7 @@ class ChatCubit extends Cubit<ChatState> {
   Future<void> sendMessage(String content, {String? imageUrl}) async {
     if (content.trim().isEmpty) return;
 
-    await _primeAudio(); // Prime on send button click
+    unawaited(_primeAudio()); // Prime on send button click
 
     // Generate or reuse the sessionId for the entire conversation.
     // This must be done BEFORE any async call so every message in the same
@@ -625,6 +632,8 @@ class ChatCubit extends Cubit<ChatState> {
         latencyMs: response.processingTimeMs,
       );
 
+      final isNewSession = state.sessionId == null || state.historySessions.isEmpty;
+
       emit(
         state.copyWith(
           messages: [...state.messages, aiMessage],
@@ -636,6 +645,10 @@ class ChatCubit extends Cubit<ChatState> {
               : sessionId,
         ),
       );
+
+      if (isNewSession) {
+        loadHistory();
+      }
     } catch (e) {
       print('❌ [CHAT] sendMessage ERROR: $e');
       _loadingTimer?.cancel();

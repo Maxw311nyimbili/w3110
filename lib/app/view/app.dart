@@ -85,18 +85,19 @@ class _AppState extends State<App> {
       connectTimeout: widget.config.apiTimeout,
       receiveTimeout: widget.config.apiTimeout,
       getAccessToken: () async {
-        // 1. Try to get real token from secure storage (Google or Demo login)
-        final savedToken = await _secureStorage.getAccessToken();
-        if (savedToken != null && savedToken.isNotEmpty) {
-          return savedToken;
+        try {
+          // Add timeout to prevent hangs on mobile Safari (IndexedDB issues)
+          return await _secureStorage.getAccessToken().timeout(
+            const Duration(milliseconds: 500),
+            onTimeout: () {
+              print('⚠️ Token retrieval timed out - proceeding as guest');
+              return null;
+            },
+          );
+        } catch (e) {
+          print('❌ Token retrieval error: $e');
+          return null;
         }
-
-        /* 
-        // 2. Fallback to hardcoded demo token if nothing is saved
-        // STASHED: Uncomment for stakeholder demos if needed
-        return "test-token-day2";
-        */
-        return null;
       },
       refreshToken: () async {
         // Use the repository to refresh the token
