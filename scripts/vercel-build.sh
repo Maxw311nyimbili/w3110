@@ -37,6 +37,14 @@ echo "Fetching dependencies..."
 flutter pub get
 
 echo "Generating environment variables..."
+if [ ! -f .env ]; then
+  echo "No .env file found. Creating one from environment variables..."
+  touch .env
+  echo "API_URL_DEV=$API_URL_DEV" >> .env
+  echo "API_URL_STAGING=$API_URL_STAGING" >> .env
+  echo "API_URL_PROD=$API_URL_PROD" >> .env
+fi
+
 dart run build_runner build --delete-conflicting-outputs
 
 echo "Building Web App (Release mode)..."
