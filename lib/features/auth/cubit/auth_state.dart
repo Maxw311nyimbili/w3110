@@ -59,6 +59,7 @@ class AuthUser extends Equatable {
     this.photoUrl,
     this.role,
     this.onboardingCompleted = false,
+    this.isAdmin = false,
     this.themeMode = 'light',
   });
 
@@ -68,6 +69,7 @@ class AuthUser extends Equatable {
   final String? photoUrl;
   final String? role;
   final bool onboardingCompleted;
+  final bool isAdmin;
   final String themeMode;
 
   AuthUser copyWith({
@@ -77,6 +79,7 @@ class AuthUser extends Equatable {
     String? photoUrl,
     String? role,
     bool? onboardingCompleted,
+    bool? isAdmin,
     String? themeMode,
   }) {
     return AuthUser(
@@ -86,6 +89,7 @@ class AuthUser extends Equatable {
       photoUrl: photoUrl ?? this.photoUrl,
       role: role ?? this.role,
       onboardingCompleted: onboardingCompleted ?? this.onboardingCompleted,
+      isAdmin: isAdmin ?? this.isAdmin,
       themeMode: themeMode ?? this.themeMode,
     );
   }
@@ -98,6 +102,7 @@ class AuthUser extends Equatable {
     photoUrl,
     role,
     onboardingCompleted,
+    isAdmin,
     themeMode,
   ];
 }

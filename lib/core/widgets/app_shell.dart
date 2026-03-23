@@ -102,9 +102,10 @@ class _DesktopShell extends StatelessWidget {
                     ),
                   ),
 
-                // Content body with transitions
                 Expanded(
-                  child: _ContentArea(activeTab: navState.activeTab),
+                  child: SelectionArea(
+                    child: _ContentArea(activeTab: navState.activeTab),
+                  ),
                 ),
               ],
             ),
@@ -155,7 +156,9 @@ class _MobileShell extends StatelessWidget {
         width: 280,
         child: SideMenu(),
       ),
-      body: _ContentArea(activeTab: navState.activeTab),
+      body: SelectionArea(
+        child: _ContentArea(activeTab: navState.activeTab),
+      ),
     );
   }
 

@@ -1,11 +1,11 @@
 {
-    "name": "Cap Project",
-    "short_name": "Cap Project",
+    "name": "Naiia",
+    "short_name": "Naiia",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#F8FAFA",
     "theme_color": "#0C7E8A",
-    "description": "A Very Good Project created by Very Good CLI.",
+    "description": "Naiia - Your AI-powered maternal health companion.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

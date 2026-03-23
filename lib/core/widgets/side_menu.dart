@@ -607,34 +607,34 @@ class _SessionTile extends StatelessWidget {
                 color: Theme.of(context)
                     .textTheme
                     .bodySmall
-                    ?.color
+                    .color
                     ?.withOpacity(0.3),
               ),
-              padding: EdgeInsets.zero,
-              splashRadius: 16,
-              onSelected: (value) {
-                if (value == 'delete') {
-                  _showDeleteConfirmation(context);
-                }
-              },
-              itemBuilder: (context) => [
-                PopupMenuItem(
-                  value: 'delete',
-                  height: 32,
-                  child: Row(
-                    children: [
-                      Icon(Icons.delete_outline_rounded,
-                          size: 16, color: Colors.redAccent),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Delete',
-                        style: TextStyle(fontSize: 12, color: Colors.redAccent),
-                      ),
-                    ],
+                padding: EdgeInsets.zero,
+                splashRadius: 16,
+                onSelected: (value) {
+                  if (value == 'delete') {
+                    _showDeleteConfirmation(context);
+                  }
+                },
+                itemBuilder: (context) => [
+                  PopupMenuItem(
+                    value: 'delete',
+                    height: 32,
+                    child: Row(
+                      children: [
+                        Icon(Icons.delete_outline_rounded,
+                            size: 16, color: Colors.redAccent),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Delete',
+                          style: TextStyle(fontSize: 12, color: Colors.redAccent),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
           ],
         ),
       ),

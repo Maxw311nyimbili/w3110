@@ -1,7 +1,7 @@
-// lib/features/forum/widgets/comment_card.dart
-
 import 'package:cap_project/features/forum/widgets/thread_line_painter.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:cap_project/features/auth/cubit/auth_cubit.dart';
 
 class CommentCard extends StatelessWidget {
   const CommentCard({

@@ -32,7 +32,7 @@ class RefinedMessageBubble extends StatelessWidget {
   Widget _buildUserMessage(BuildContext context) {
     return EntryAnimation(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(48, 8, 16, 8),
+        padding: const EdgeInsets.fromLTRB(48, 4, 16, 4),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
@@ -113,7 +113,7 @@ class RefinedMessageBubble extends StatelessWidget {
 
     return EntryAnimation(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

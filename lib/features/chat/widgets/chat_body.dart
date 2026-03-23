@@ -368,26 +368,24 @@ class _ChatBodyState extends State<ChatBody>
   }
 
   Widget _buildMessageList(BuildContext context, ChatState state) {
-    return SelectionArea(
-      child: ListView.builder(
-        controller: _scrollController,
-        padding: const EdgeInsets.only(
-          left: 8,
-          right: 8,
-          top: 12,
-          bottom: 24,
-        ),
-        reverse: true,
-        itemCount: state.messages.length,
-        itemBuilder: (context, index) {
-          final reversedIndex = state.messages.length - 1 - index;
-          final message = state.messages[reversedIndex];
-          return RefinedMessageBubble(
-            message: message,
-            key: ValueKey(message.id),
-          );
-        },
+    return ListView.builder(
+      controller: _scrollController,
+      padding: const EdgeInsets.only(
+        left: 8,
+        right: 8,
+        top: 4,
+        bottom: 24,
       ),
+      reverse: true,
+      itemCount: state.messages.length,
+      itemBuilder: (context, index) {
+        final reversedIndex = state.messages.length - 1 - index;
+        final message = state.messages[reversedIndex];
+        return RefinedMessageBubble(
+          message: message,
+          key: ValueKey(message.id),
+        );
+      },
     );
   }
 

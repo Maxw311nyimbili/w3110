@@ -18,9 +18,16 @@ class AppTheme {
       useMaterial3: true,
       brightness: Brightness.light,
       platform: TargetPlatform.iOS,
+      visualDensity: VisualDensity.adaptivePlatformDensity,
       fontFamily: GoogleFonts.dmSans().fontFamily,
 
-
+      scrollbarTheme: ScrollbarThemeData(
+        thumbColor: WidgetStateProperty.all(AppColors.accentPrimary.withOpacity(0.3)),
+        trackColor: WidgetStateProperty.all(Colors.transparent),
+        thickness: WidgetStateProperty.all(6),
+        radius: const Radius.circular(3),
+        interactive: true,
+      ),
       textSelectionTheme: const TextSelectionThemeData(
         selectionColor: AppColors.accentLight,
         selectionHandleColor: AppColors.accentPrimary,
@@ -251,9 +258,16 @@ class AppTheme {
       useMaterial3: true,
       brightness: Brightness.dark,
       platform: TargetPlatform.iOS,
+      visualDensity: VisualDensity.adaptivePlatformDensity,
       fontFamily: GoogleFonts.dmSans().fontFamily,
 
-
+      scrollbarTheme: ScrollbarThemeData(
+        thumbColor: WidgetStateProperty.all(AppColors.accentPrimary.withOpacity(0.4)),
+        trackColor: WidgetStateProperty.all(Colors.transparent),
+        thickness: WidgetStateProperty.all(6),
+        radius: const Radius.circular(3),
+        interactive: true,
+      ),
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: {
           TargetPlatform.android: CupertinoPageTransitionsBuilder(),

@@ -33,6 +33,8 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final authState = context.watch<AuthCubit>().state;
+    final isAdmin = authState.user?.isAdmin ?? false;
 
     return Scaffold(
       body: Center(
@@ -120,15 +122,16 @@ class _SettingsPageState extends State<SettingsPage> {
                           showDivider: true,
                           onTap: () => _handleLogout(context, l10n),
                         ),
-                        _buildSettingTile(
-                          context,
-                          title: 'Reset App Data',
-                          subtitle: 'Wipes all local state (Dev Only)',
-                          icon: Icons.delete_forever_rounded,
-                          textColor: Theme.of(context).colorScheme.error,
-                          isDestructive: true,
-                          onTap: () => _handleDeepReset(context),
-                        ),
+                        if (isAdmin)
+                          _buildSettingTile(
+                            context,
+                            title: 'Reset App Data',
+                            subtitle: 'Wipes all local state (Dev Only)',
+                            icon: Icons.delete_forever_rounded,
+                            textColor: Theme.of(context).colorScheme.error,
+                            isDestructive: true,
+                            onTap: () => _handleDeepReset(context),
+                          ),
                       ]),
                       const SizedBox(height: 32),
 

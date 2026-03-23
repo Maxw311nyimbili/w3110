@@ -12,6 +12,7 @@ class User extends Equatable {
     this.role,
     this.interests = const [],
     this.onboardingCompleted = false,
+    this.isAdmin = false,
     this.themeMode = 'light',
   });
 
@@ -22,6 +23,7 @@ class User extends Equatable {
   final String? role;
   final List<String> interests;
   final bool onboardingCompleted;
+  final bool isAdmin;
   final String themeMode;
 
   /// Create user from JSON
@@ -38,6 +40,7 @@ class User extends Equatable {
               .toList() ??
           const [],
       onboardingCompleted: json['onboarding_completed'] as bool? ?? false,
+      isAdmin: json['is_admin'] as bool? ?? false,
       themeMode: json['theme_mode'] as String? ?? 'light',
     );
   }
@@ -52,6 +55,7 @@ class User extends Equatable {
       'role': role,
       'interests': interests,
       'onboarding_completed': onboardingCompleted,
+      'is_admin': isAdmin,
       'theme_mode': themeMode,
     };
   }
@@ -65,6 +69,7 @@ class User extends Equatable {
     role,
     interests,
     onboardingCompleted,
+    isAdmin,
     themeMode,
   ];
 }

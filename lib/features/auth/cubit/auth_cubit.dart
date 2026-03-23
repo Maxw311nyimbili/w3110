@@ -334,6 +334,7 @@ class AuthCubit extends Cubit<AuthState> {
       photoUrl: user.photoUrl,
       role: user.role,
       onboardingCompleted: user.onboardingCompleted,
+      isAdmin: user.isAdmin,
     );
   }
 }
