@@ -607,7 +607,7 @@ class _SessionTile extends StatelessWidget {
                 color: Theme.of(context)
                     .textTheme
                     .bodySmall
-                    .color
+                    ?.color
                     ?.withOpacity(0.3),
               ),
                 padding: EdgeInsets.zero,
