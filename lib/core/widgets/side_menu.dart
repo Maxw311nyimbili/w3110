@@ -576,7 +576,7 @@ class _SessionTile extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(6),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+        padding: const EdgeInsets.symmetric(vertical: 3, horizontal: 8),
         child: Row(
           children: [
             Icon(
@@ -610,8 +610,9 @@ class _SessionTile extends StatelessWidget {
                     ?.color
                     ?.withOpacity(0.3),
               ),
-                padding: EdgeInsets.zero,
-                splashRadius: 16,
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+              splashRadius: 16,
                 onSelected: (value) {
                   if (value == 'delete') {
                     _showDeleteConfirmation(context);
