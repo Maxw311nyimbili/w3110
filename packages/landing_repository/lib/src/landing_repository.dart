@@ -216,6 +216,112 @@ class LandingRepository {
       return null;
     }
   }
+
+  // ── Rating prompt methods ────────────────────────────────────────────────
+
+  /// Call once per app session launch to track usage frequency.
+  /// Also records the timestamp of the very first session.
+  Future<void> incrementSessionCount() async {
+    try {
+      // Record first session timestamp on very first launch
+      final firstMs = await _localPreferences.getRatingFirstSessionMs();
+      if (firstMs == null) {
+        await _localPreferences.setRatingFirstSessionMs(
+          DateTime.now().millisecondsSinceEpoch,
+        );
+      }
+      await _localPreferences.incrementRatingSessionCount();
+    } catch (e) {
+      print('⚠️ Failed to increment session count: $e');
+    }
+  }
+
+  /// Evaluate all trigger conditions and decide whether to show the rating
+  /// prompt. Returns true only when ALL conditions are satisfied.
+  ///
+  /// Trigger rules (industry-standard):
+  ///   1. User has NOT already rated.
+  ///   2. At least [minSessions] sessions have occurred (default 3).
+  ///   3. At least [minDaysSinceInstall] days since first session (default 14).
+  ///   4. At least [minDaysBetweenPrompts] days since last prompt (default 60).
+  Future<bool> checkShouldShowRating({
+    int minSessions = 3,
+    int minDaysSinceInstall = 14,
+    int minDaysBetweenPrompts = 60,
+  }) async {
+    try {
+      // 1. Already rated — never show again
+      final hasRated = await _localPreferences.getRatingHasRated();
+      if (hasRated) return false;
+
+      // 2. Not enough sessions yet
+      final sessions = await _localPreferences.getRatingSessionCount();
+      if (sessions < minSessions) return false;
+
+      final now = DateTime.now();
+
+      // 3. Not enough time since install
+      final firstMs = await _localPreferences.getRatingFirstSessionMs();
+      if (firstMs != null) {
+        final firstSession = DateTime.fromMillisecondsSinceEpoch(firstMs);
+        final daysSinceInstall = now.difference(firstSession).inDays;
+        if (daysSinceInstall < minDaysSinceInstall) return false;
+      }
+
+      // 4. Too soon since last prompt (re-prompt after "Maybe Later")
+      final lastPromptedMs = await _localPreferences.getRatingLastPromptedMs();
+      if (lastPromptedMs != null) {
+        final lastPrompted = DateTime.fromMillisecondsSinceEpoch(lastPromptedMs);
+        final daysSincePrompt = now.difference(lastPrompted).inDays;
+        if (daysSincePrompt < minDaysBetweenPrompts) return false;
+      }
+
+      return true;
+    } catch (e) {
+      print('⚠️ Failed to check rating trigger: $e');
+      return false;
+    }
+  }
+
+  /// Submit a star rating to the backend and mark as rated locally.
+  ///
+  /// Backend endpoint: POST /ratings/
+  /// Request body: { "stars": N, "comment": "...", "platform": "...", "app_version": "..." }
+  Future<void> submitRating(
+    int stars, {
+    String? comment,
+    String? platform,
+    String? appVersion,
+  }) async {
+    try {
+      await _apiClient.post(
+        '/ratings/',
+        data: {
+          'stars': stars,
+          if (comment != null && comment.isNotEmpty) 'comment': comment,
+          if (platform != null) 'platform': platform,
+          if (appVersion != null) 'app_version': appVersion,
+        },
+      );
+      // Mark locally so we never prompt again
+      await _localPreferences.setRatingHasRated(value: true);
+      print('✅ Rating submitted: $stars stars');
+    } catch (e) {
+      throw LandingException('Failed to submit rating: ${e.toString()}');
+    }
+  }
+
+  /// Record that the prompt was shown (updates cooldown timer).
+  /// Call this whether the user rates or dismisses with "Maybe Later".
+  Future<void> markRatingPromptShown() async {
+    try {
+      await _localPreferences.setRatingLastPromptedMs(
+        DateTime.now().millisecondsSinceEpoch,
+      );
+    } catch (e) {
+      print('⚠️ Failed to mark rating prompt shown: $e');
+    }
+  }
 }
 
 /// Custom exception for landing repository errors

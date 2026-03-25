@@ -16,6 +16,12 @@ class LocalPreferences {
   static const _splashKey = 'last_splash_seen';
   static const _currentStepKey = 'current_onboarding_step';
 
+  // ── Rating prompt keys ────────────────────────────────────────────────────
+  static const _ratingHasRatedKey = 'rating_has_rated';
+  static const _ratingLastPromptedMsKey = 'rating_last_prompted_ms';
+  static const _ratingSessionCountKey = 'rating_session_count';
+  static const _ratingFirstSessionMsKey = 'rating_first_session_ms';
+
   bool get isInitialized => _prefsInitialized;
 
   /// Initialize preferences
@@ -100,5 +106,48 @@ class LocalPreferences {
       return DateTime.fromMillisecondsSinceEpoch(timestamp);
     }
     return null;
+  }
+
+  // ── Rating prompt helpers ─────────────────────────────────────────────────
+
+  Future<bool> getRatingHasRated() async {
+    _ensureInitialized();
+    return _prefs.getBool(_ratingHasRatedKey) ?? false;
+  }
+
+  Future<void> setRatingHasRated({required bool value}) async {
+    _ensureInitialized();
+    await _prefs.setBool(_ratingHasRatedKey, value);
+  }
+
+  Future<int?> getRatingLastPromptedMs() async {
+    _ensureInitialized();
+    return _prefs.getInt(_ratingLastPromptedMsKey);
+  }
+
+  Future<void> setRatingLastPromptedMs(int ms) async {
+    _ensureInitialized();
+    await _prefs.setInt(_ratingLastPromptedMsKey, ms);
+  }
+
+  Future<int> getRatingSessionCount() async {
+    _ensureInitialized();
+    return _prefs.getInt(_ratingSessionCountKey) ?? 0;
+  }
+
+  Future<void> incrementRatingSessionCount() async {
+    _ensureInitialized();
+    final current = _prefs.getInt(_ratingSessionCountKey) ?? 0;
+    await _prefs.setInt(_ratingSessionCountKey, current + 1);
+  }
+
+  Future<int?> getRatingFirstSessionMs() async {
+    _ensureInitialized();
+    return _prefs.getInt(_ratingFirstSessionMsKey);
+  }
+
+  Future<void> setRatingFirstSessionMs(int ms) async {
+    _ensureInitialized();
+    await _prefs.setInt(_ratingFirstSessionMsKey, ms);
   }
 }

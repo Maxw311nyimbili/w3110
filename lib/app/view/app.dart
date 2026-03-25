@@ -13,6 +13,7 @@ import 'package:cap_project/core/theme/cubit/theme_state.dart';
 import 'package:cap_project/features/auth/cubit/auth_cubit.dart';
 import 'package:cap_project/features/chat/cubit/chat_cubit.dart';
 import 'package:cap_project/features/landing/cubit/landing_cubit.dart';
+import 'package:cap_project/features/rating/rating.dart';
 import 'package:cap_project/app/cubit/navigation_cubit.dart';
 import 'package:cap_project/l10n/l10n.dart';
 import 'package:chat_repository/chat_repository.dart';
@@ -53,6 +54,7 @@ class _AppState extends State<App> {
   late final LocaleCubit _localeCubit;
   late final ThemeCubit _themeCubit;
   late final NavigationCubit _navigationCubit;
+  late final RatingCubit _ratingCubit;
 
   @override
   void initState() {
@@ -162,6 +164,11 @@ class _AppState extends State<App> {
       landingRepository: _landingRepository,
       audioRecordingService: AudioRecordingService(),
     );
+
+    _ratingCubit = RatingCubit(landingRepository: _landingRepository);
+    // Kick off session counter + trigger check after a short delay
+    // (delay lets the UI settle before the dialog can appear)
+    Future.delayed(const Duration(seconds: 2), _ratingCubit.onAppStarted);
   }
 
   void _setupLocaleListener() {
@@ -189,6 +196,7 @@ class _AppState extends State<App> {
           BlocProvider.value(value: _localeCubit),
           BlocProvider.value(value: _themeCubit),
           BlocProvider.value(value: _navigationCubit),
+          BlocProvider.value(value: _ratingCubit),
         ],
         child: BlocBuilder<ThemeCubit, ThemeState>(
           builder: (context, themeState) {
@@ -235,6 +243,7 @@ class _AppState extends State<App> {
     _localeCubit.close();
     _themeCubit.close();
     _navigationCubit.close();
+    _ratingCubit.close();
     super.dispose();
   }
 }

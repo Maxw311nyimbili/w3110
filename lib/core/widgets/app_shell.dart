@@ -11,6 +11,7 @@ import 'package:cap_project/features/auth/view/settings_page.dart';
 import 'package:cap_project/features/chat/chat.dart';
 import 'package:cap_project/features/forum/forum.dart';
 import 'package:cap_project/features/medscanner/medscanner.dart';
+import 'package:cap_project/features/rating/rating.dart';
 import 'package:cap_project/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -22,13 +23,21 @@ class AppShell extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDesktop = ResponsiveUtils.isDesktop(context);
 
-    return BlocBuilder<NavigationCubit, NavigationState>(
-      builder: (context, navState) {
-        if (isDesktop) {
-          return _DesktopShell(navState: navState);
-        }
-        return _MobileShell(navState: navState);
+    return BlocListener<RatingCubit, RatingState>(
+      listenWhen: (prev, curr) =>
+          curr.status == RatingStatus.showing &&
+          prev.status != RatingStatus.showing,
+      listener: (context, state) {
+        showRatingDialog(context);
       },
+      child: BlocBuilder<NavigationCubit, NavigationState>(
+        builder: (context, navState) {
+          if (isDesktop) {
+            return _DesktopShell(navState: navState);
+          }
+          return _MobileShell(navState: navState);
+        },
+      ),
     );
   }
 }
