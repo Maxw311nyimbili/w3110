@@ -80,7 +80,7 @@ dev_dependencies:
   mocktail: ^1.0.4
 
   # Code Generation
-  drift_dev: ^2.24.0
+  drift_dev: ^2.32.1
   build_runner: ^2.7.1
 
   # Linting
