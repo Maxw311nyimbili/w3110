@@ -64,7 +64,7 @@ class WelcomeDrawer extends StatelessWidget {
                       context.read<LandingCubit>().clearError();
                     }
 
-                    if (state.userName != null && !state.isGuest) {
+                    if (state.userName != null && (!state.isGuest || state.isComplete)) {
                       Navigator.of(context).pop(); // Close drawer
 
                       // If onboarding is already marked complete in the state,

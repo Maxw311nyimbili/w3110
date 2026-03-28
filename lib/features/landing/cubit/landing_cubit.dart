@@ -253,6 +253,7 @@ class LandingCubit extends Cubit<LandingState> {
           isAuthenticating: false,
           authError: null,
           userName: user.displayName,
+          isGuest: false,
           currentStep: isBackendOnboarded ? OnboardingStep.complete : null,
         ),
       );
@@ -312,6 +313,7 @@ class LandingCubit extends Cubit<LandingState> {
           isAuthenticating: false,
           authError: null,
           userName: user.displayName,
+          isGuest: false,
         ),
       );
 

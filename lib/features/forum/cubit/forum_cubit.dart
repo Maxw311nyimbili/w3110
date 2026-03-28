@@ -808,7 +808,9 @@ class ForumCubit extends Cubit<ForumState> {
         state.copyWith(
           posts: updatedPosts ?? state.posts,
           searchResults: updatedSearchResults ?? state.searchResults,
-          selectedPost: state.selectedPost?.localId == postId
+          selectedPost: state.selectedPost != null &&
+                  (state.selectedPost!.localId == postId ||
+                      state.selectedPost!.id == postId)
               ? targetPost
               : state.selectedPost,
         ),

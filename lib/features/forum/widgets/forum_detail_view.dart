@@ -303,10 +303,22 @@ class ForumDetailView extends StatelessWidget {
                       ),
                     ],
                   ),
-                  _buildAction(
-                    context,
-                    Icons.visibility_outlined,
-                    '${post.viewCount} views',
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.visibility_outlined,
+                        size: 22,
+                        color: AppColors.textTertiary,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        '${post.viewCount} views',
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                          color: Theme.of(context).textTheme.bodySmall?.color,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
