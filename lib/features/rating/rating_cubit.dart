@@ -1,7 +1,7 @@
 // lib/features/rating/rating_cubit.dart
 
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:landing_repository/landing_repository.dart';
 
 part 'rating_state.dart';
@@ -13,7 +13,8 @@ class RatingCubit extends Cubit<RatingState> {
 
   final LandingRepository _repo;
 
-  /// Called once on app startup to count sessions and check if prompt should show.
+  /// Called once on app startup to count sessions
+  /// and check if prompt should show.
   Future<void> onAppStarted() async {
     await _repo.incrementSessionCount();
     final should = await _repo.checkShouldShowRating();
@@ -50,7 +51,7 @@ class RatingCubit extends Cubit<RatingState> {
         appVersion: appVersion,
       );
       emit(state.copyWith(status: RatingStatus.submitted));
-    } catch (e) {
+    } on Exception catch (e) {
       emit(
         state.copyWith(
           status: RatingStatus.error,

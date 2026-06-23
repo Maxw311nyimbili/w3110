@@ -1,13 +1,13 @@
 // lib/features/medscanner/widgets/scan_result_widget.dart
 
-import 'package:cap_project/l10n/l10n.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import '../cubit/cubit.dart';
-import '../../../core/theme/app_spacing.dart';
-import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_text_styles.dart';
-import '../../../app/view/app_router.dart';
+
+import 'package:cap_project/app/view/app_router.dart';
+import 'package:cap_project/core/theme/app_colors.dart';
+import 'package:cap_project/core/theme/app_spacing.dart';
+import 'package:cap_project/core/theme/app_text_styles.dart';
+import 'package:cap_project/features/medscanner/cubit/cubit.dart';
+import 'package:cap_project/l10n/l10n.dart';
 
 /// Scan result display - shows medication information after scanning
 class ScanResultWidget extends StatelessWidget {
@@ -31,7 +31,7 @@ class ScanResultWidget extends StatelessWidget {
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: AppColors.success.withOpacity(0.1),
+                color: AppColors.success.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -102,20 +102,22 @@ class ScanResultWidget extends StatelessWidget {
 
           // Send to chat button (primary action)
           ElevatedButton.icon(
-            onPressed: () {
+            onPressed: () async {
               // Smooth transition to Chat with the scan result context
-              AppRouter.replaceTo<void>(
+              await AppRouter.replaceTo<void>(
                 context,
                 AppRouter.chat,
                 arguments: result,
               );
 
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(AppLocalizations.of(context).openingChat),
-                  duration: const Duration(seconds: 2),
-                ),
-              );
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(AppLocalizations.of(context).openingChat),
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
+              }
             },
             icon: const Icon(Icons.chat_bubble_outline),
             label: Text(AppLocalizations.of(context).discussWithAi),
@@ -138,16 +140,16 @@ class ScanResultWidget extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(AppSpacing.lg),
             decoration: BoxDecoration(
-              color: AppColors.warning.withOpacity(0.1),
+              color: AppColors.warning.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: AppColors.warning.withOpacity(0.3),
+                color: AppColors.warning.withValues(alpha: 0.3),
               ),
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(
+                const Icon(
                   Icons.warning_amber_outlined,
                   color: AppColors.warning,
                   size: 20,
@@ -189,7 +191,7 @@ class ScanResultWidget extends StatelessWidget {
             ),
             const SizedBox(width: AppSpacing.sm),
             Text(
-              '${percentage}% ${AppLocalizations.of(context).matchConfidence}',
+              '$percentage% ${AppLocalizations.of(context).matchConfidence}',
               style: AppTextStyles.labelMedium.copyWith(
                 color: color,
                 fontWeight: FontWeight.w600,
@@ -260,16 +262,16 @@ class ScanResultWidget extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: AppColors.error.withOpacity(0.05),
+        color: AppColors.error.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.error.withOpacity(0.2)),
+        border: Border.all(color: AppColors.error.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.warning_amber,
                 size: 24,
                 color: AppColors.error,

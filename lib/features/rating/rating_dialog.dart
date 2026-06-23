@@ -2,9 +2,13 @@
 //
 // Premium 5-star rating dialog — light & dark mode aware.
 
+import 'dart:async' show unawaited;
 import 'dart:io' show Platform;
+
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'package:cap_project/core/theme/app_colors.dart';
 import 'package:cap_project/core/theme/app_spacing.dart';
 import 'package:cap_project/features/rating/rating_cubit.dart';
@@ -47,7 +51,7 @@ class _RatingSheetState extends State<_RatingSheet>
       parent: _controller,
       curve: Curves.easeOutBack,
     );
-    _controller.forward();
+    unawaited(_controller.forward());
   }
 
   @override
@@ -72,7 +76,7 @@ class _RatingSheetState extends State<_RatingSheet>
         ? AppColors.darkTextSecondary
         : AppColors.textSecondary;
     final borderColor = isDark
-        ? AppColors.darkBorder.withOpacity(0.3)
+        ? AppColors.darkBorder.withValues(alpha: 0.3)
         : AppColors.borderLight;
 
     return ScaleTransition(
@@ -86,8 +90,8 @@ class _RatingSheetState extends State<_RatingSheet>
           boxShadow: [
             BoxShadow(
               color: isDark
-                  ? Colors.black.withOpacity(0.4)
-                  : AppColors.slateBlue.withOpacity(0.10),
+                  ? Colors.black.withValues(alpha: 0.4)
+                  : AppColors.slateBlue.withValues(alpha: 0.10),
               blurRadius: 32,
               offset: const Offset(0, 8),
             ),
@@ -125,15 +129,16 @@ class _RatingSheetState extends State<_RatingSheet>
   }
 
   String _platformString() {
+    if (kIsWeb) return 'web';
     try {
       if (Platform.isAndroid) return 'android';
       if (Platform.isIOS) return 'ios';
-    } catch (_) {}
+    } on Object catch (_) {}
     return 'web';
   }
 }
 
-// ── Rating form ───────────────────────────────────────────────────────────────
+// ── Rating form ──────────────────────────────────────────────────────────
 
 class _RatingFormView extends StatelessWidget {
   const _RatingFormView({
@@ -178,8 +183,8 @@ class _RatingFormView extends StatelessWidget {
             height: 4,
             decoration: BoxDecoration(
               color: isDark
-                  ? Colors.white.withOpacity(0.15)
-                  : Colors.grey.withOpacity(0.3),
+                  ? Colors.white.withValues(alpha: 0.15)
+                  : Colors.grey.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -252,8 +257,8 @@ class _RatingFormView extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
                 ),
-                disabledBackgroundColor: AppColors.accentPrimary.withOpacity(
-                  0.4,
+                disabledBackgroundColor: AppColors.accentPrimary.withValues(
+                  alpha: 0.4,
                 ),
               ),
               child: isSubmitting
@@ -290,7 +295,7 @@ class _RatingFormView extends StatelessWidget {
   }
 }
 
-// ── Star row ──────────────────────────────────────────────────────────────────
+// ── Star row ─────────────────────────────────────────────────────────────
 
 class _StarRow extends StatefulWidget {
   const _StarRow({required this.selected, required this.onTap});
@@ -320,7 +325,7 @@ class _StarRowState extends State<_StarRow> {
             final box = context.findRenderObject()! as RenderBox;
             final x = d.localPosition.dx;
             final w = box.size.width / 5;
-            final star = ((x / w).ceil()).clamp(1, 5);
+            final star = (x / w).ceil().clamp(1, 5);
             setState(() => _hover = star);
           },
           onPanEnd: (_) {
@@ -341,7 +346,7 @@ class _StarRowState extends State<_StarRow> {
                   size: 44,
                   color: filled
                       ? const Color(0xFFFFC107) // Amber star
-                      : Colors.grey.withOpacity(0.4),
+                      : Colors.grey.withValues(alpha: 0.4),
                 ),
               ),
             ),
@@ -352,7 +357,7 @@ class _StarRowState extends State<_StarRow> {
   }
 }
 
-// ── Thank-you view ────────────────────────────────────────────────────────────
+// ── Thank-you view ───────────────────────────────────────────────────────
 
 class _ThankYouView extends StatelessWidget {
   const _ThankYouView({required this.isDark, required this.textPrimary});
@@ -388,7 +393,8 @@ class _ThankYouView extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Your rating means a lot to us and helps us make Naiia better for everyone.',
+            'Your rating means a lot to us and helps us make '
+            'Naiia better for everyone.',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 14,
