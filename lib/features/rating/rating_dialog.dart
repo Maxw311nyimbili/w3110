@@ -12,7 +12,6 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-
 /// Shows the rating bottom-sheet. Call this from AppShell when
 /// [RatingStatus.showing] is emitted.
 Future<void> showRatingDialog(BuildContext context) {
