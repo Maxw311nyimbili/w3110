@@ -1,6 +1,5 @@
 // lib/core/widgets/side_menu.dart
-// Persistent sidebar — uses NavigationCubit.setTab() for navigation.
-// No Navigator.push → no page transitions.
+// Naiia Premium Sidebar — refined visual hierarchy, animated selection.
 
 import 'package:cap_project/app/cubit/navigation_cubit.dart';
 import 'package:cap_project/app/view/app_router.dart';
@@ -11,8 +10,11 @@ import 'package:cap_project/features/auth/cubit/cubit.dart';
 import 'package:cap_project/features/chat/cubit/chat_cubit.dart';
 import 'package:cap_project/features/chat/cubit/chat_state.dart';
 import 'package:cap_project/features/landing/widgets/welcome_drawer.dart';
+import 'package:cap_project/core/widgets/brand_logo.dart';
+import 'package:cap_project/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class SideMenu extends StatefulWidget {
   const SideMenu({super.key});
@@ -25,7 +27,6 @@ class _SideMenuState extends State<SideMenu> {
   @override
   void initState() {
     super.initState();
-    // Load real conversation history as soon as the sidebar is mounted
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         final authState = context.read<AuthCubit>().state;
@@ -68,9 +69,14 @@ class _SideMenuState extends State<SideMenu> {
 
           final theme = Theme.of(context);
           final isDark = theme.brightness == Brightness.dark;
+
+          // Sidebar = backgroundPanel — one step lighter than canvas,
+          // same step relationship as darkElevated on darkCanvas.
+          // (Dark: #192638 on #0D1520 | Light: #ECE7DB on #E4DDD0)
+          // All warm ivory family → monochromatic, no colour clash.
           final sidebarBg = isDark
-              ? AppColors.darkBackgroundPrimary.withOpacity(0.95)
-              : AppColors.backgroundElevated;
+              ? AppColors.darkElevated
+              : AppColors.backgroundPanel;
 
           return Container(
             width: double.infinity,
@@ -80,9 +86,9 @@ class _SideMenuState extends State<SideMenu> {
               border: Border(
                 right: BorderSide(
                   color: isDark
-                      ? Colors.white.withOpacity(0.08)
-                      : AppColors.borderLight.withOpacity(0.8),
-                  width: 1,
+                      ? Colors.white.withOpacity(0.06)
+                      : AppColors.borderLight.withOpacity(0.9),
+                  width: isDark ? 1 : 1.2,
                 ),
               ),
             ),
@@ -90,16 +96,17 @@ class _SideMenuState extends State<SideMenu> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  _buildHeader(context, isCollapsed, isDesktop),
+                  _buildHeader(context, isCollapsed, isDesktop, isDark),
                   Expanded(
                     child: _buildNavList(
                       context,
                       isCollapsed,
                       activeTab,
                       isAuthenticated,
+                      isDark,
                     ),
                   ),
-                  _buildFooter(context, isCollapsed, authState),
+                  _buildFooter(context, isCollapsed, authState, isDark),
                 ],
               ),
             ),
@@ -109,49 +116,41 @@ class _SideMenuState extends State<SideMenu> {
     );
   }
 
-  // ── Header ────────────────────────────────────────────────────────────────
+  // ── Header ─────────────────────────────────────────────────────────────────
   Widget _buildHeader(
     BuildContext context,
     bool isCollapsed,
     bool isDesktop,
+    bool isDark,
   ) {
-    final toggleColor = Theme.of(context)
-            .textTheme
-            .bodySmall
-            ?.color
-            ?.withOpacity(0.55) ??
-        Colors.black54;
+    final labelColor = isDark
+        ? AppColors.darkTextPrimary
+        : AppColors.ink;
+    final toggleColor = (isDark
+            ? AppColors.darkTextSecondary
+            : AppColors.textSecondary)
+        .withOpacity(0.6);
 
     if (isCollapsed) {
       return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        child: Center(
-          child: _ToggleButton(color: toggleColor),
-        ),
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        child: Center(child: _ToggleButton(color: toggleColor)),
       );
     }
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 10, 4, 8),
+      padding: const EdgeInsets.fromLTRB(14, 12, 8, 10),
       child: Row(
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Image.asset(
-              'assets/images/logo.png',
-              width: 52,
-              height: 52,
-              fit: BoxFit.contain,
-              filterQuality: FilterQuality.high,
-            ),
-          ),
+          const BrandLogo(size: 36, isBreathing: false),
           const SizedBox(width: 10),
           Text(
-            'Naiia',
-            style: AppTextStyles.headlineMedium.copyWith(
-              fontWeight: FontWeight.w700,
-              color: Theme.of(context).textTheme.bodyLarge?.color,
-              letterSpacing: -0.4,
+            'NAIIA',
+            style: GoogleFonts.cormorantGaramond(
+              fontSize: 22,
+              fontWeight: FontWeight.w300,
+              color: AppColors.slateBlue,
+              letterSpacing: 4,
             ),
           ),
           const Spacer(),
@@ -161,75 +160,90 @@ class _SideMenuState extends State<SideMenu> {
     );
   }
 
-  // ── Nav list ──────────────────────────────────────────────────────────────
+  // ── Nav list ───────────────────────────────────────────────────────────────
   Widget _buildNavList(
     BuildContext context,
     bool isCollapsed,
     AppTab activeTab,
     bool isAuthenticated,
+    bool isDark,
   ) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: EdgeInsets.symmetric(
+        horizontal: isCollapsed ? 10 : 8,
+        vertical: 8,
+      ),
       child: Column(
         crossAxisAlignment:
             isCollapsed ? CrossAxisAlignment.center : CrossAxisAlignment.start,
         children: [
-          // New thread
-          if (!isCollapsed) _SectionLabel('Library'),
+          // New Thread — always first, prominent
           _NavItem(
             icon: Icons.add_rounded,
-            label: 'New Thread',
+            label: AppLocalizations.of(context).newThread,
             isPrimary: true,
             isCollapsed: isCollapsed,
             isActive: false,
+            isDark: isDark,
             onTap: () {
               context.read<NavigationCubit>().setTab(AppTab.chat);
-              // Clear the chat so a new session starts
               context.read<ChatCubit>().startNewSession();
             },
           ),
-          const SizedBox(height: 8),
 
-          // Main navigation
-          if (!isCollapsed) _SectionLabel('Discover'),
+          const SizedBox(height: 6),
+          if (!isCollapsed) _Divider(),
+          const SizedBox(height: 6),
+
+          // Navigation
+          if (!isCollapsed)
+            _SectionLabel(AppLocalizations.of(context).navigate, isDark: isDark),
+          _NavItem(
+            icon: Icons.chat_bubble_outline_rounded,
+            label: AppLocalizations.of(context).askNaiia,
+            isCollapsed: isCollapsed,
+            isActive: activeTab == AppTab.chat,
+            isDark: isDark,
+            onTap: () => context.read<NavigationCubit>().setTab(AppTab.chat),
+          ),
           _NavItem(
             icon: Icons.document_scanner_outlined,
-            label: 'Med Scanner',
+            label: AppLocalizations.of(context).medScanner,
             isCollapsed: isCollapsed,
             isActive: activeTab == AppTab.scanner,
-            onTap: () {
-              context.read<NavigationCubit>().setTab(AppTab.scanner);
-            },
+            isDark: isDark,
+            onTap: () =>
+                context.read<NavigationCubit>().setTab(AppTab.scanner),
           ),
           _NavItem(
-            icon: Icons.forum_outlined,
-            label: 'Community',
+            icon: Icons.people_outline_rounded,
+            label: AppLocalizations.of(context).community,
             isCollapsed: isCollapsed,
             isActive: activeTab == AppTab.forum,
-            onTap: () {
-              context.read<NavigationCubit>().setTab(AppTab.forum);
-            },
+            isDark: isDark,
+            onTap: () => context.read<NavigationCubit>().setTab(AppTab.forum),
           ),
 
-          // Conversations / History
-          const SizedBox(height: 8),
+          // Conversation history
           if (!isCollapsed && isAuthenticated) ...[
-            _SectionLabel('Conversations'),
-            _ConversationsSection(isCollapsed: isCollapsed),
+            const SizedBox(height: 6),
+            _Divider(),
+            const SizedBox(height: 6),
+            _SectionLabel(AppLocalizations.of(context).historyLabel, isDark: isDark),
+            _ConversationsSection(isCollapsed: isCollapsed, isDark: isDark),
           ],
         ],
       ),
     );
   }
 
-  // ── Footer ────────────────────────────────────────────────────────────────
+  // ── Footer ─────────────────────────────────────────────────────────────────
   Widget _buildFooter(
     BuildContext context,
     bool isCollapsed,
     AuthState authState,
+    bool isDark,
   ) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final user = authState.user;
     final isAuthenticated = authState.status == AuthStatus.authenticated;
 
     if (isCollapsed) {
@@ -237,35 +251,42 @@ class _SideMenuState extends State<SideMenu> {
         padding: const EdgeInsets.all(12),
         child: Center(
           child: isAuthenticated
-              ? _RailAvatar(user: user)
+              ? _RailAvatar(user: authState.user, isDark: isDark)
               : IconButton(
-                  icon: const Icon(Icons.login_rounded, size: 20),
-                  color: AppColors.brandDarkTeal,
+                  icon: Icon(
+                    Icons.login_rounded,
+                    size: 20,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
                   onPressed: () => WelcomeDrawer.show(context),
-                  tooltip: 'Sign In',
+                  tooltip: AppLocalizations.of(context).signIn,
                 ),
         ),
       );
     }
 
     return Container(
-      margin: const EdgeInsets.all(8),
+      margin: const EdgeInsets.fromLTRB(8, 4, 8, 12),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface.withOpacity(isDark ? 0.05 : 0.4),
-        borderRadius: BorderRadius.circular(12),
+        color: isDark
+            ? Colors.white.withOpacity(0.04)
+            : AppColors.borderLight.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: isDark ? Colors.white.withOpacity(0.05) : AppColors.borderLight,
-          width: 0.5,
+          color: isDark
+              ? Colors.white.withOpacity(0.06)
+              : AppColors.borderLight,
+          width: 0.75,
         ),
       ),
       child: isAuthenticated
-          ? _AuthFooter(user: user)
-          : const _GuestFooter(),
+          ? _AuthFooter(user: authState.user, isDark: isDark)
+          : _GuestFooter(isDark: isDark),
     );
   }
 }
 
-// ─── Toggle button ────────────────────────────────────────────────────────────
+// ─── Toggle button ─────────────────────────────────────────────────────────────
 
 class _ToggleButton extends StatelessWidget {
   const _ToggleButton({required this.color});
@@ -277,17 +298,13 @@ class _ToggleButton extends StatelessWidget {
       width: 32,
       height: 32,
       child: InkWell(
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(7),
         onTap: () => context.read<NavigationCubit>().toggleDesktopSidebar(),
-        child: Center(
-          child: _SidebarIcon(color: color),
-        ),
+        child: Center(child: _SidebarIcon(color: color)),
       ),
     );
   }
 }
-
-// ─── Sidebar Icon (Custom to match ChatGPT style) ──────────────────────────────
 
 class _SidebarIcon extends StatelessWidget {
   const _SidebarIcon({required this.color});
@@ -297,10 +314,10 @@ class _SidebarIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: 19,
-      height: 17,
+      height: 15,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: color, width: 1.6),
+        borderRadius: BorderRadius.circular(3),
+        border: Border.all(color: color, width: 1.5),
       ),
       child: Row(
         children: [
@@ -308,7 +325,7 @@ class _SidebarIcon extends StatelessWidget {
             width: 5,
             decoration: BoxDecoration(
               border: Border(
-                right: BorderSide(color: color, width: 1.6),
+                right: BorderSide(color: color, width: 1.5),
               ),
             ),
           ),
@@ -318,37 +335,57 @@ class _SidebarIcon extends StatelessWidget {
   }
 }
 
-// ─── Section label ────────────────────────────────────────────────────────────
+// ─── Section label ─────────────────────────────────────────────────────────────
 
 class _SectionLabel extends StatelessWidget {
-  const _SectionLabel(this.label);
+  const _SectionLabel(this.label, {required this.isDark});
   final String label;
+  final bool isDark;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 10, 12, 4),
+      padding: const EdgeInsets.fromLTRB(12, 4, 12, 6),
       child: Text(
         label.toUpperCase(),
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.8),
-              fontWeight: FontWeight.w800,
-              letterSpacing: 1.2,
-              fontSize: 11,
-            ),
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 1.4,
+          color: (isDark
+              ? AppColors.darkTextTertiary
+              : AppColors.textTertiary),
+        ),
       ),
     );
   }
 }
 
-// ─── Nav item ─────────────────────────────────────────────────────────────────
+// ─── Subtle divider ────────────────────────────────────────────────────────────
 
-class _NavItem extends StatelessWidget {
+class _Divider extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      height: 0.5,
+      margin: const EdgeInsets.symmetric(horizontal: 12),
+      color: isDark
+          ? Colors.white.withOpacity(0.06)
+          : AppColors.borderLight,
+    );
+  }
+}
+
+// ─── Nav item — with animated active indicator ─────────────────────────────────
+
+class _NavItem extends StatefulWidget {
   const _NavItem({
     required this.icon,
     required this.label,
     required this.isCollapsed,
     required this.isActive,
+    required this.isDark,
     required this.onTap,
     this.isPrimary = false,
     this.trailing,
@@ -358,127 +395,197 @@ class _NavItem extends StatelessWidget {
   final String label;
   final bool isCollapsed;
   final bool isActive;
+  final bool isDark;
   final VoidCallback onTap;
   final bool isPrimary;
   final Widget? trailing;
 
   @override
+  State<_NavItem> createState() => _NavItemState();
+}
+
+class _NavItemState extends State<_NavItem>
+    with SingleTickerProviderStateMixin {
+  bool _hovered = false;
+
+  @override
   Widget build(BuildContext context) {
-    final textColor = Theme.of(context).textTheme.bodyLarge?.color;
-    final mutedColor =
-        Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.75);
-    final primaryColor = Theme.of(context).colorScheme.primary;
+    final primary = Theme.of(context).colorScheme.primary;
 
     final Color iconColor;
     final Color labelColor;
     final FontWeight labelWeight;
 
-    if (isPrimary) {
-      iconColor = primaryColor;
-      labelColor = primaryColor;
-      labelWeight = FontWeight.w800;
-    } else if (isActive) {
-      iconColor = Theme.of(context).textTheme.bodyLarge?.color ?? AppColors.textPrimary;
-      labelColor = Theme.of(context).textTheme.bodyLarge?.color ?? AppColors.textPrimary;
+    if (widget.isPrimary) {
+      iconColor = primary;
+      labelColor = primary;
       labelWeight = FontWeight.w700;
-    } else {
-      iconColor = (Theme.of(context).textTheme.bodyLarge?.color ?? AppColors.textPrimary).withOpacity(0.7);
-      labelColor = (Theme.of(context).textTheme.bodyLarge?.color ?? AppColors.textPrimary).withOpacity(0.7);
+    } else if (widget.isActive) {
+      iconColor = primary;
+      labelColor = widget.isDark
+          ? AppColors.darkTextPrimary
+          : AppColors.ink;
       labelWeight = FontWeight.w600;
+    } else {
+      final base = widget.isDark
+          ? AppColors.darkTextSecondary
+          : AppColors.textSecondary;
+      iconColor = _hovered ? primary.withOpacity(0.8) : base;
+      labelColor = _hovered ? primary.withOpacity(0.8) : base;
+      labelWeight = FontWeight.w500;
     }
 
-    if (isCollapsed) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 2),
-        child: Tooltip(
-          message: label,
-          preferBelow: false,
-          child: InkWell(
-            onTap: onTap,
-            borderRadius: BorderRadius.circular(10),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 150),
-              width: 48,
-              height: 44,
-              decoration: BoxDecoration(
-                color: isActive
-                    ? AppColors.brandDarkTeal.withOpacity(0.12)
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Center(child: Icon(icon, size: 20, color: iconColor)),
-            ),
-          ),
-        ),
-      );
-    }
+    // LayoutBuilder drives show/hide label based on the ACTUAL rendered width,
+    // not just the isCollapsed flag.  The flag flips instantly while the sidebar
+    // AnimatedContainer takes 320 ms to reach its target — that race caused the
+    // overflow.  By watching real constraints we react smoothly on both expand
+    // and collapse without any timing dependency on the flag.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Show the label only when there is genuinely enough room for it.
+        // 88 px gives ~56 px of text space after icon + spacer + padding.
+        final showLabel =
+            !widget.isCollapsed && constraints.maxWidth >= 88;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-          decoration: BoxDecoration(
-            color: isActive
-                ? AppColors.brandDarkTeal.withOpacity(0.1)
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Row(
-            children: [
-              Icon(icon, size: 18, color: iconColor),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  label,
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: labelColor,
-                    fontWeight: labelWeight,
-                    fontSize: 14,
+        if (!showLabel) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 2),
+            child: Tooltip(
+              message: widget.label,
+              preferBelow: false,
+              child: MouseRegion(
+                onEnter: (_) => setState(() => _hovered = true),
+                onExit: (_) => setState(() => _hovered = false),
+                child: GestureDetector(
+                  onTap: widget.onTap,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
+                    curve: Curves.easeOutCubic,
+                    width: 48,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: widget.isPrimary
+                          ? primary.withOpacity(widget.isDark ? 0.14 : 0.09)
+                          : widget.isActive
+                              ? primary.withOpacity(0.12)
+                              : _hovered
+                                  ? primary.withOpacity(0.07)
+                                  : Colors.transparent,
+                      borderRadius: BorderRadius.circular(11),
+                    ),
+                    child: Center(
+                      child: Icon(widget.icon, size: 20, color: iconColor),
+                    ),
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-              if (trailing != null) ...[
-                const SizedBox(width: 8),
-                trailing!,
-              ],
-            ],
+            ),
+          );
+        }
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 1),
+          child: MouseRegion(
+            onEnter: (_) => setState(() => _hovered = true),
+            onExit: (_) => setState(() => _hovered = false),
+            child: GestureDetector(
+              onTap: widget.onTap,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                curve: Curves.easeOutCubic,
+                clipBehavior: Clip.hardEdge,
+                margin: const EdgeInsets.symmetric(horizontal: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+                decoration: BoxDecoration(
+                  color: widget.isPrimary
+                      ? primary.withOpacity(widget.isDark ? 0.14 : 0.09)
+                      : widget.isActive
+                          ? primary.withOpacity(0.10)
+                          : _hovered
+                              ? primary.withOpacity(0.05)
+                              : Colors.transparent,
+                  borderRadius: BorderRadius.circular(10),
+                  border: widget.isPrimary
+                      ? Border.all(
+                          color: primary.withOpacity(widget.isDark ? 0.22 : 0.18),
+                          width: 0.75,
+                        )
+                      : widget.isActive
+                          ? Border.all(
+                              color: primary.withOpacity(0.18),
+                              width: 0.75,
+                            )
+                          : null,
+                ),
+                child: Row(
+                  children: [
+                    AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 180),
+                      child: Icon(
+                        widget.icon,
+                        key: ValueKey(iconColor),
+                        size: 18,
+                        color: iconColor,
+                      ),
+                    ),
+                    const SizedBox(width: 11),
+                    Expanded(
+                      child: AnimatedDefaultTextStyle(
+                        duration: const Duration(milliseconds: 180),
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: labelColor,
+                          fontWeight: labelWeight,
+                          fontSize: 13.5,
+                        ),
+                        child: Text(
+                          widget.label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                    if (widget.trailing != null) ...[
+                      const SizedBox(width: 6),
+                      widget.trailing!,
+                    ],
+                  ],
+                ),
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
 
-// ─── Conversations section (real history from ChatCubit) ──────────────────────
+// ─── Conversations section ─────────────────────────────────────────────────────
 
 class _ConversationsSection extends StatefulWidget {
-  const _ConversationsSection({required this.isCollapsed});
+  const _ConversationsSection({
+    required this.isCollapsed,
+    required this.isDark,
+  });
   final bool isCollapsed;
+  final bool isDark;
 
   @override
   State<_ConversationsSection> createState() => _ConversationsSectionState();
 }
 
 class _ConversationsSectionState extends State<_ConversationsSection> {
-  bool _isExpanded = true; // auto-expanded so conversations are visible
+  bool _isExpanded = true;
 
   @override
   Widget build(BuildContext context) {
     if (widget.isCollapsed) {
       return _NavItem(
         icon: Icons.history_rounded,
-        label: 'Conversations',
+        label: AppLocalizations.of(context).conversationsLabel,
         isCollapsed: true,
         isActive: false,
-        onTap: () {
-          context.read<NavigationCubit>().setTab(AppTab.chat);
-        },
+        isDark: widget.isDark,
+        onTap: () => context.read<NavigationCubit>().setTab(AppTab.chat),
       );
     }
 
@@ -494,70 +601,80 @@ class _ConversationsSectionState extends State<_ConversationsSection> {
           children: [
             _NavItem(
               icon: Icons.history_rounded,
-              label: 'Conversations',
+              label: AppLocalizations.of(context).recentLabel,
               isCollapsed: false,
               isActive: false,
+              isDark: widget.isDark,
               onTap: () => setState(() => _isExpanded = !_isExpanded),
               trailing: Icon(
                 _isExpanded
-                    ? Icons.expand_less_rounded
-                    : Icons.expand_more_rounded,
-                size: 16,
-                color: Theme.of(context)
-                    .textTheme
-                    .bodySmall
-                    ?.color
-                    ?.withOpacity(0.5),
+                    ? Icons.keyboard_arrow_up_rounded
+                    : Icons.keyboard_arrow_down_rounded,
+                size: 15,
+                color: widget.isDark
+                    ? AppColors.darkTextTertiary
+                    : AppColors.textTertiary,
               ),
             ),
-            if (_isExpanded)
-              Padding(
-                padding:
-                    const EdgeInsets.only(left: 20, right: 8, top: 4, bottom: 8),
-                child: chatState.isLoadingHistory
-                    ? const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 8),
-                        child: Center(
-                          child: SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          ),
-                        ),
-                      )
-                    : sessions.isEmpty
-                        ? Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8),
-                            child: Text(
-                              'No conversations yet',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
-                                  ?.copyWith(
+            AnimatedSize(
+              duration: const Duration(milliseconds: 220),
+              curve: Curves.easeOutCubic,
+              child: _isExpanded
+                  ? Padding(
+                      padding: const EdgeInsets.only(
+                          left: 16, right: 4, top: 2, bottom: 6),
+                      child: chatState.isLoadingHistory
+                          ? Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              child: Center(
+                                child: SizedBox(
+                                  width: 14,
+                                  height: 14,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 1.5,
                                     color: Theme.of(context)
-                                        .textTheme
-                                        .bodySmall
-                                        ?.color
-                                        ?.withOpacity(0.5),
+                                        .colorScheme
+                                        .primary
+                                        .withOpacity(0.5),
                                   ),
-                            ),
-                          )
-                        : Column(
-                            children: sessions.take(8).map<Widget>((HistorySession session) {
-                              return _SessionTile(
-                                session: session,
-                                onTap: () {
-                                  context
-                                      .read<NavigationCubit>()
-                                      .setTab(AppTab.chat);
-                                  context
-                                      .read<ChatCubit>()
-                                      .loadSession(session.sessionId);
-                                },
-                              );
-                            }).toList(),
-                          ),
-              ),
+                                ),
+                              ),
+                            )
+                          : sessions.isEmpty
+                              ? Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 8),
+                                  child: Text(
+                                    AppLocalizations.of(context).noConversationsYet,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: widget.isDark
+                                          ? AppColors.darkTextTertiary
+                                          : AppColors.textTertiary,
+                                    ),
+                                  ),
+                                )
+                              : Column(
+                                  children: sessions
+                                      .take(8)
+                                      .map<Widget>((session) => _SessionTile(
+                                            session: session,
+                                            isDark: widget.isDark,
+                                            onTap: () {
+                                              context
+                                                  .read<NavigationCubit>()
+                                                  .setTab(AppTab.chat);
+                                              context
+                                                  .read<ChatCubit>()
+                                                  .loadSession(
+                                                      session.sessionId);
+                                            },
+                                          ))
+                                      .toList(),
+                                ),
+                    )
+                  : const SizedBox.shrink(),
+            ),
           ],
         );
       },
@@ -565,78 +682,76 @@ class _ConversationsSectionState extends State<_ConversationsSection> {
   }
 }
 
-class _SessionTile extends StatelessWidget {
-  const _SessionTile({required this.session, required this.onTap});
+class _SessionTile extends StatefulWidget {
+  const _SessionTile({
+    required this.session,
+    required this.isDark,
+    required this.onTap,
+  });
   final HistorySession session;
+  final bool isDark;
   final VoidCallback onTap;
 
   @override
+  State<_SessionTile> createState() => _SessionTileState();
+}
+
+class _SessionTileState extends State<_SessionTile> {
+  bool _hovered = false;
+
+  @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(6),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 3, horizontal: 8),
-        child: Row(
-          children: [
-            Icon(
-              Icons.chat_bubble_outline_rounded,
-              size: 13,
-              color: Theme.of(context)
-                  .textTheme
-                  .bodySmall
-                  ?.color
-                  ?.withOpacity(0.5),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                session.firstMessage,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      fontSize: 13,
-                      color: Theme.of(context).textTheme.bodyMedium?.color,
-                    ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+    final textColor = widget.isDark
+        ? AppColors.darkTextSecondary
+        : AppColors.textSecondary;
+    final hoverBg = widget.isDark
+        ? Colors.white.withOpacity(0.05)
+        : AppColors.slateBlue.withOpacity(0.05);
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 140),
+          clipBehavior: Clip.hardEdge,
+          padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 8),
+          decoration: BoxDecoration(
+            color: _hovered ? hoverBg : Colors.transparent,
+            borderRadius: BorderRadius.circular(7),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                Icons.chat_bubble_outline_rounded,
+                size: 12,
+                color: textColor.withOpacity(0.5),
               ),
-            ),
-            PopupMenuButton<String>(
-              icon: Icon(
-                Icons.more_horiz_rounded,
-                size: 14,
-                color: Theme.of(context)
-                    .textTheme
-                    .bodySmall
-                    ?.color
-                    ?.withOpacity(0.3),
-              ),
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(),
-              splashRadius: 16,
-                onSelected: (value) {
-                  if (value == 'delete') {
-                    _showDeleteConfirmation(context);
-                  }
-                },
-                itemBuilder: (context) => [
-                  PopupMenuItem(
-                    value: 'delete',
-                    height: 32,
-                    child: Row(
-                      children: [
-                        Icon(Icons.delete_outline_rounded,
-                            size: 16, color: Colors.redAccent),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Delete',
-                          style: TextStyle(fontSize: 12, color: Colors.redAccent),
-                        ),
-                      ],
-                    ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  widget.session.firstMessage,
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    color: textColor,
+                    fontWeight: FontWeight.w400,
                   ),
-                ],
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
-          ],
+              if (_hovered)
+                GestureDetector(
+                  onTap: () => _showDeleteConfirmation(context),
+                  child: Icon(
+                    Icons.close_rounded,
+                    size: 13,
+                    color: textColor.withOpacity(0.5),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -646,32 +761,20 @@ class _SessionTile extends StatelessWidget {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Delete Conversation?'),
-        content: const Text(
-            'This will permanently delete this conversation and its history. This action cannot be undone.'),
+        title: Text(AppLocalizations.of(context).deleteConversationTitle),
+        content: Text(AppLocalizations.of(context).deleteConversationBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: Text(
-              'Cancel',
-              style: TextStyle(
-                color: Theme.of(context)
-                    .textTheme
-                    .bodyMedium
-                    ?.color
-                    ?.withOpacity(0.6),
-              ),
-            ),
+            child: Text(AppLocalizations.of(context).cancel),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(dialogContext);
-              context.read<ChatCubit>().deleteSession(session.sessionId);
+              context.read<ChatCubit>().deleteSession(widget.session.sessionId);
             },
-            child: const Text(
-              'Delete',
-              style: TextStyle(color: Colors.redAccent),
-            ),
+            child: Text(AppLocalizations.of(context).delete,
+                style: const TextStyle(color: Colors.redAccent)),
           ),
         ],
       ),
@@ -679,11 +782,12 @@ class _SessionTile extends StatelessWidget {
   }
 }
 
-// ─── Authenticated footer ─────────────────────────────────────────────────────
+// ─── Authenticated footer ──────────────────────────────────────────────────────
 
 class _AuthFooter extends StatelessWidget {
-  const _AuthFooter({required this.user});
+  const _AuthFooter({required this.user, required this.isDark});
   final dynamic user;
+  final bool isDark;
 
   @override
   Widget build(BuildContext context) {
@@ -694,30 +798,41 @@ class _AuthFooter extends StatelessWidget {
         .take(2)
         .map<String>((p) => p.isEmpty ? '' : p[0].toUpperCase())
         .join();
+    final primary = Theme.of(context).colorScheme.primary;
 
     return InkWell(
       onTap: () => context.read<NavigationCubit>().setTab(AppTab.settings),
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(14),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
         child: Row(
           children: [
+            // Avatar
             Container(
-              width: 34,
-              height: 34,
+              width: 32,
+              height: 32,
               decoration: BoxDecoration(
-                color: AppColors.brandDarkTeal.withOpacity(0.15),
+                gradient: LinearGradient(
+                  colors: [
+                    primary.withOpacity(0.22),
+                    primary.withOpacity(0.10),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: AppColors.brandDarkTeal.withOpacity(0.3),
+                  color: primary.withOpacity(0.25),
+                  width: 1.0,
                 ),
               ),
               child: Center(
                 child: Text(
                   initials.isEmpty ? 'U' : initials,
-                  style: AppTextStyles.labelMedium.copyWith(
-                    color: AppColors.brandDarkTeal,
+                  style: TextStyle(
+                    fontSize: 12,
                     fontWeight: FontWeight.w700,
+                    color: primary,
                   ),
                 ),
               ),
@@ -726,38 +841,39 @@ class _AuthFooter extends StatelessWidget {
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     name,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 13,
-                        ),
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: isDark
+                          ? AppColors.darkTextPrimary
+                          : AppColors.ink,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   Text(
-                    'Profile & Settings',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          fontSize: 11,
-                          color: Theme.of(context)
-                              .textTheme
-                              .bodySmall
-                              ?.color
-                              ?.withOpacity(0.55),
-                        ),
+                    AppLocalizations.of(context).settings,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: isDark
+                          ? AppColors.darkTextTertiary
+                          : AppColors.textTertiary,
+                    ),
                   ),
                 ],
               ),
             ),
             Icon(
               Icons.settings_outlined,
-              size: 16,
-              color: Theme.of(context)
-                  .textTheme
-                  .bodySmall
-                  ?.color
-                  ?.withOpacity(0.4),
+              size: 15,
+              color: (isDark
+                      ? AppColors.darkTextTertiary
+                      : AppColors.textTertiary)
+                  .withOpacity(0.6),
             ),
           ],
         ),
@@ -766,32 +882,34 @@ class _AuthFooter extends StatelessWidget {
   }
 }
 
-// ─── Guest footer ─────────────────────────────────────────────────────────────
+// ─── Guest footer ──────────────────────────────────────────────────────────────
 
 class _GuestFooter extends StatelessWidget {
-  const _GuestFooter();
+  const _GuestFooter({required this.isDark});
+  final bool isDark;
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () => WelcomeDrawer.show(context),
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(14),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         child: Row(
           children: [
             Icon(
               Icons.login_rounded,
-              size: 20,
-              color: AppColors.brandDarkTeal,
+              size: 18,
+              color: Theme.of(context).colorScheme.primary,
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 10),
             Text(
               'Sign In',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.brandDarkTeal,
-                  ),
+              style: TextStyle(
+                fontSize: 13.5,
+                fontWeight: FontWeight.w600,
+                color: Theme.of(context).colorScheme.primary,
+              ),
             ),
           ],
         ),
@@ -800,11 +918,12 @@ class _GuestFooter extends StatelessWidget {
   }
 }
 
-// ─── Rail avatar (collapsed footer) ──────────────────────────────────────────
+// ─── Rail avatar (collapsed footer) ───────────────────────────────────────────
 
 class _RailAvatar extends StatelessWidget {
-  const _RailAvatar({required this.user});
+  const _RailAvatar({required this.user, required this.isDark});
   final dynamic user;
+  final bool isDark;
 
   @override
   Widget build(BuildContext context) {
@@ -815,6 +934,7 @@ class _RailAvatar extends StatelessWidget {
         .take(2)
         .map<String>((p) => p.isEmpty ? '' : p[0].toUpperCase())
         .join();
+    final primary = Theme.of(context).colorScheme.primary;
 
     return Tooltip(
       message: name,
@@ -825,16 +945,27 @@ class _RailAvatar extends StatelessWidget {
           width: 36,
           height: 36,
           decoration: BoxDecoration(
-            color: AppColors.brandDarkTeal.withOpacity(0.15),
+            gradient: LinearGradient(
+              colors: [
+                primary.withOpacity(0.22),
+                primary.withOpacity(0.10),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
             shape: BoxShape.circle,
-            border: Border.all(color: AppColors.brandDarkTeal.withOpacity(0.3)),
+            border: Border.all(
+              color: primary.withOpacity(0.25),
+              width: 1.0,
+            ),
           ),
           child: Center(
             child: Text(
               initials.isEmpty ? 'U' : initials,
-              style: AppTextStyles.labelMedium.copyWith(
-                color: AppColors.brandDarkTeal,
+              style: TextStyle(
+                fontSize: 13,
                 fontWeight: FontWeight.w700,
+                color: primary,
               ),
             ),
           ),

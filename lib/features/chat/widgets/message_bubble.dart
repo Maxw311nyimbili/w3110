@@ -14,6 +14,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/entry_animation.dart';
+import '../../../core/widgets/brand_logo.dart';
 
 class RefinedMessageBubble extends StatelessWidget {
   const RefinedMessageBubble({required this.message, super.key});
@@ -36,33 +37,44 @@ class RefinedMessageBubble extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-              decoration: BoxDecoration(
-                color: AppColors.brandDarkTeal,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(24),
-                  topRight: Radius.circular(4),
-                  bottomLeft: Radius.circular(24),
-                  bottomRight: Radius.circular(24),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.brandDarkTeal.withOpacity(0.18),
-                    blurRadius: 10,
-                    offset: const Offset(0, 3),
+            Builder(
+              builder: (context) {
+                final primary = Theme.of(context).colorScheme.primary;
+                final onPrimary = Theme.of(context).colorScheme.onPrimary;
+                return Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 13),
+                  decoration: BoxDecoration(
+                    color: primary,
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(22),
+                      topRight: Radius.circular(6),
+                      bottomLeft: Radius.circular(22),
+                      bottomRight: Radius.circular(22),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: primary.withOpacity(0.28),
+                        blurRadius: 18,
+                        spreadRadius: -4,
+                        offset: const Offset(0, 8),
+                      ),
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.06),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              child: Text(
-                message.content,
-                // selectable: false, // Default is false, but being explicit if needed (Text doesn't have it, but SelectionArea handles it)
-                style: AppTextStyles.bodyLarge.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w500,
-                  height: 1.5,
-                ),
-              ),
+                  child: Text(
+                    message.content,
+                    style: AppTextStyles.bodyLarge.copyWith(
+                      color: onPrimary,
+                      fontWeight: FontWeight.w500,
+                      height: 1.5,
+                    ),
+                  ),
+                );
+              },
             ),
           ],
         ),
@@ -117,17 +129,13 @@ class RefinedMessageBubble extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header Row: logo only + optional mode toggle
+            // Header Row: logo + optional mode toggle
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Image.asset(
-                    'assets/images/logo.png',
-                    height: 44,
-                    fit: BoxFit.contain,
-                  ),
+                  _NaiiaAvatarMark(size: 36),
                   const Spacer(),
                   if (message.isDualMode) _buildModeToggle(context, isDetailed),
                 ],
@@ -152,12 +160,12 @@ class RefinedMessageBubble extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Minimal left teal accent bar (optional, can be removed if strictly no background means no bar)
+                  // Minimal left accent bar
                   Container(
-                    width: 2,
-                    height: 40, // Just a small accent
+                    width: 1.5,
+                    height: 36,
                     decoration: BoxDecoration(
-                      color: AppColors.brandDarkTeal.withOpacity(0.4),
+                      color: Theme.of(context).colorScheme.primary.withOpacity(0.35),
                       borderRadius: BorderRadius.circular(1),
                     ),
                   ),
@@ -212,7 +220,7 @@ class RefinedMessageBubble extends StatelessWidget {
                               ),
                               h1Padding: const EdgeInsets.only(top: 16, bottom: 8),
                               h2: AppTextStyles.headlineLarge.copyWith(
-                                color: AppColors.brandDarkTeal,
+                                color: Theme.of(context).colorScheme.primary,
                                 fontWeight: FontWeight.w700,
                               ),
                               h2Padding: const EdgeInsets.only(top: 14, bottom: 6),
@@ -227,7 +235,7 @@ class RefinedMessageBubble extends StatelessWidget {
                               ),
                               h4Padding: const EdgeInsets.only(top: 8, bottom: 2),
                               listBullet: AppTextStyles.bodyMedium.copyWith(
-                                color: AppColors.brandDarkTeal,
+                                color: Theme.of(context).colorScheme.primary,
                                 fontSize: 15,
                               ),
                               listBulletPadding: const EdgeInsets.only(right: 8),
@@ -241,11 +249,11 @@ class RefinedMessageBubble extends StatelessWidget {
                               blockquoteDecoration: BoxDecoration(
                                 border: Border(
                                   left: BorderSide(
-                                    color: AppColors.brandDarkTeal.withOpacity(0.6),
+                                    color: AppColors.warmTaupe.withOpacity(0.8),
                                     width: 3,
                                   ),
                                 ),
-                                color: AppColors.brandDarkTeal.withOpacity(0.04),
+                                color: AppColors.warmTaupe.withOpacity(0.06),
                               ),
                               blockquotePadding: const EdgeInsets.symmetric(
                                 horizontal: 16,
@@ -255,7 +263,7 @@ class RefinedMessageBubble extends StatelessWidget {
                                 backgroundColor: Theme.of(context).colorScheme.surface,
                                 fontFamily: 'monospace',
                                 fontSize: 13,
-                                color: AppColors.brandDarkTeal,
+                                color: Theme.of(context).colorScheme.primary,
                               ),
                               codeblockDecoration: BoxDecoration(
                                 color: Theme.of(context).colorScheme.surface,
@@ -303,12 +311,11 @@ class RefinedMessageBubble extends StatelessWidget {
               child: _buildFooter(context, displaySources),
             ),
 
-            // Teal-tinted separator
             const SizedBox(height: 16),
             Container(
               height: 1,
               decoration: BoxDecoration(
-                color: AppColors.brandDarkTeal.withOpacity(0.07),
+                color: AppColors.borderLight,
                 borderRadius: BorderRadius.circular(1),
               ),
             ),
@@ -456,10 +463,10 @@ class RefinedMessageBubble extends StatelessWidget {
                             ),
                             child: Text(
                               '${index + 1}',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 10,
                                 fontWeight: FontWeight.bold,
-                                color: AppColors.brandDarkTeal,
+                                color: Theme.of(context).colorScheme.primary,
                               ),
                             ),
                           ),
@@ -540,12 +547,14 @@ class RefinedMessageBubble extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14),
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: active ? AppColors.brandDarkTeal : Colors.transparent,
+          color: active
+              ? Theme.of(context).colorScheme.primary
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(16),
           boxShadow: active
               ? [
                   BoxShadow(
-                    color: AppColors.brandDarkTeal.withOpacity(0.18),
+                    color: Theme.of(context).colorScheme.primary.withOpacity(0.18),
                     blurRadius: 4,
                     offset: const Offset(0, 1),
                   ),
@@ -675,7 +684,7 @@ class RefinedMessageBubble extends StatelessWidget {
               return ListTile(
                 leading: Icon(
                   Icons.play_circle_outline_rounded,
-                  color: AppColors.brandDarkTeal,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
                 title: Text('Listen in ${lang.label}'),
                 onTap: () {
@@ -749,5 +758,20 @@ class RefinedMessageBubble extends StatelessWidget {
         SnackBar(content: Text('Error preparing share: $e')),
       );
     }
+  }
+}
+
+/// Small non-breathing Naiia mark used as the AI avatar in chat bubbles.
+/// Re-uses BrandLogo with breathing disabled for a clean static icon.
+class _NaiiaAvatarMark extends StatelessWidget {
+  const _NaiiaAvatarMark({required this.size});
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return BrandLogo(
+      size: size,
+      isBreathing: false,
+    );
   }
 }

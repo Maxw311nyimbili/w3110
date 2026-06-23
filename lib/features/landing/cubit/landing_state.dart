@@ -6,6 +6,7 @@ enum OnboardingStep {
   profileSetup,
   contextGathering,
   consent,
+  themeSelection, // first-time only — shown once, between consent and complete
   complete,
 }
 
@@ -71,6 +72,8 @@ class LandingState extends Equatable {
         return true;
       case OnboardingStep.consent:
         return consentGiven;
+      case OnboardingStep.themeSelection:
+        return true; // always OK — user can accept any default
       case OnboardingStep.complete:
         return true;
     }

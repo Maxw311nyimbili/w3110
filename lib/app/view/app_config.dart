@@ -20,7 +20,12 @@ class AppConfig extends Equatable {
   /// Development configuration
   factory AppConfig.development() {
     return AppConfig(
-      apiBaseUrl: Env.apiUrlDev,
+      // LOCAL DEV: hardcoded to bypass envied/build_runner.
+      // Android emulator → http://10.0.2.2:8000
+      // iOS simulator / Windows / Web → http://localhost:8000
+      // Restore `Env.apiUrlDev` after running:
+      //   del lib\app\env.g.dart && dart run build_runner build --delete-conflicting-outputs
+      apiBaseUrl: 'http://localhost:8000',
       environment: Environment.development,
       enableLogging: true,
       apiTimeout: const Duration(seconds: 60),

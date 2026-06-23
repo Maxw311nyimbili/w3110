@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../l10n/l10n.dart';
 import '../cubit/cubit.dart';
 import 'package:cap_project/core/widgets/premium_button.dart';
 
@@ -66,7 +67,7 @@ class _ProfileSetupStepState extends State<ProfileSetupStep> {
                   _buildStaggeredEntrance(
                     delay: 100,
                     child: Text(
-                      'Personalize your care',
+                      AppLocalizations.of(context).personalizeYourCare,
                       style: Theme.of(context).textTheme.displaySmall?.copyWith(
                         color: Theme.of(context).textTheme.displayLarge?.color,
                         letterSpacing: -1.0,
@@ -105,14 +106,14 @@ class _ProfileSetupStepState extends State<ProfileSetupStep> {
                           decoration: _buildInputDecoration(
                             'e.g., Clinical Account, Personal',
                             errorText: state.showValidationError && (state.accountNickname == null || state.accountNickname!.isEmpty)
-                                ? 'Please enter a nickname'
+                                ? AppLocalizations.of(context).pleaseEnterNickname
                                 : null,
                           ),
                           style: AppTextStyles.bodyLarge,
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Use this to distinguish this account from others.',
+                          AppLocalizations.of(context).useToDistinguish,
                           style: Theme.of(context).textTheme.labelSmall?.copyWith(
                             color: Theme.of(context).textTheme.bodySmall?.color,
                             fontSize: 13,
@@ -130,7 +131,7 @@ class _ProfileSetupStepState extends State<ProfileSetupStep> {
                       padding: const EdgeInsets.only(bottom: 24),
                       child: PremiumButton(
                         onPressed: () => context.read<LandingCubit>().nextStep(),
-                        text: 'Continue',
+                        text: AppLocalizations.of(context).continueButton,
                       ),
                     ),
                   ),

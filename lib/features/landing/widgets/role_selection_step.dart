@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../l10n/l10n.dart';
 import '../cubit/cubit.dart';
 import 'package:cap_project/core/widgets/premium_button.dart';
 import 'package:cap_project/core/widgets/glass_card.dart';
@@ -40,7 +41,7 @@ class RoleSelectionStep extends StatelessWidget {
                       child: Transform.translate(
                         offset: Offset(0, 20 * (1 - value)),
                         child: Text(
-                          'Select your role',
+                          AppLocalizations.of(context).selectYourRole,
                           style: Theme.of(context).textTheme.displaySmall?.copyWith(
                             color: Theme.of(context).textTheme.displayLarge?.color,
                             letterSpacing: -1.0,
@@ -57,7 +58,7 @@ class RoleSelectionStep extends StatelessWidget {
                       children: [
                         _buildRoleItem(
                           context,
-                          'Mother',
+                          AppLocalizations.of(context).roleMother,
                           UserRole.mother,
                           state,
                           'I am expecting or have children',
@@ -65,7 +66,7 @@ class RoleSelectionStep extends StatelessWidget {
                         ),
                         _buildRoleItem(
                           context,
-                          'Support Partner',
+                          AppLocalizations.of(context).roleSupportPartner,
                           UserRole.supportPartner,
                           state,
                           'I am supporting a mother',
@@ -77,28 +78,28 @@ class RoleSelectionStep extends StatelessWidget {
                         ),
                         _buildRoleItem(
                           context,
-                          'Doctor',
+                          AppLocalizations.of(context).roleDoctor,
                           UserRole.doctor,
                           state,
-                          'Verified medical professional',
+                          AppLocalizations.of(context).roleDoctorSubtitle,
                           isProfessional: true,
                           index: 2,
                         ),
                         _buildRoleItem(
                           context,
-                          'Midwife',
+                          AppLocalizations.of(context).roleMidwife,
                           UserRole.midwife,
                           state,
-                          'Verified birth professional',
+                          AppLocalizations.of(context).roleMidwifeSubtitle,
                           isProfessional: true,
                           index: 3,
                         ),
                         _buildRoleItem(
                           context,
-                          'Clinician',
+                          AppLocalizations.of(context).roleClinician,
                           UserRole.clinician,
                           state,
-                          'Healthcare facility staff',
+                          AppLocalizations.of(context).roleClinicianSubtitle,
                           isProfessional: true,
                           index: 4,
                         ),
@@ -111,7 +112,7 @@ class RoleSelectionStep extends StatelessWidget {
                       onPressed: state.canProceed
                           ? () => context.read<LandingCubit>().nextStep()
                           : null,
-                      text: 'Continue',
+                      text: AppLocalizations.of(context).continueButton,
                     ),
                   ),
                 ],

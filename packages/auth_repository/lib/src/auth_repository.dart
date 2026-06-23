@@ -19,7 +19,8 @@ class AuthRepository {
        _secureStorage = secureStorage,
        _firebaseAuth = firebase_auth.FirebaseAuth.instance,
        _googleSignIn = GoogleSignIn(
-         serverClientId: '956333738143-2sr0rd0qfguchkrbbe9jg5bp9se565pq.apps.googleusercontent.com',
+         // serverClientId is not supported on web — pass it only on mobile/desktop.
+         serverClientId: kIsWeb ? null : '956333738143-2sr0rd0qfguchkrbbe9jg5bp9se565pq.apps.googleusercontent.com',
          clientId: kIsWeb ? '956333738143-2sr0rd0qfguchkrbbe9jg5bp9se565pq.apps.googleusercontent.com' : null,
          scopes: ['email', 'profile'],
        );
@@ -31,90 +32,86 @@ class AuthRepository {
 
   // ============ Firebase Sign-In ============
 
-  /// Sign in with Google using Firebase Auth
+  /// Sign in with Google using Firebase Auth.
   ///
-  /// Flow:
-  /// 1. Trigger Google Sign-In UI
-  /// 2. User selects Google account
-  /// 3. Google returns authentication tokens
-  /// 4. Create Firebase credential
-  /// 5. Sign in to Firebase
-  /// 6. Get Firebase ID token
-  /// 7. Return ID token to caller
+  /// On **web**: uses Firebase's native `signInWithPopup` — the `google_sign_in`
+  /// package's `signIn()` is deprecated on web and will close the popup immediately.
   ///
-  /// Returns:
-  ///   - String: Firebase ID token (use this to exchange with backend)
-  ///   - null: If user cancelled or error occurred
+  /// On **mobile**: uses the `google_sign_in` package flow (unchanged).
+  ///
+  /// Returns the Firebase ID token, or null if the user cancelled.
   Future<String?> signInWithGoogle() async {
     try {
       print('Starting Google Sign-In flow...');
 
-      // Step 0: Try to sign in silently first (best for web)
-      GoogleSignInAccount? googleUser = await _googleSignIn.signInSilently();
+      firebase_auth.UserCredential userCredential;
 
-      // Step 1: Trigger Google Sign-In UI if silent sign-in failed
-      googleUser ??= await _googleSignIn.signIn();
+      if (kIsWeb) {
+        // ── Web path: Firebase signInWithPopup ──────────────────────────────
+        // google_sign_in's signIn() is deprecated on web and uses a broken popup.
+        // Firebase's signInWithPopup handles the full OAuth dance natively.
+        final googleProvider = firebase_auth.GoogleAuthProvider()
+          ..addScope('email')
+          ..addScope('profile');
 
-      if (googleUser == null) {
-        print('Google Sign-In was cancelled by user');
-        return null;
+        userCredential = await _firebaseAuth.signInWithPopup(googleProvider);
+        print('✓ Signed in via Firebase popup: ${userCredential.user?.email}');
+      } else {
+        // ── Mobile path: google_sign_in package ─────────────────────────────
+        GoogleSignInAccount? googleUser = await _googleSignIn.signInSilently();
+        googleUser ??= await _googleSignIn.signIn();
+
+        if (googleUser == null) {
+          print('Google Sign-In was cancelled by user');
+          return null;
+        }
+
+        print('✓ Google account selected: ${googleUser.email}');
+
+        final GoogleSignInAuthentication googleAuth =
+            await googleUser.authentication;
+
+        final credential = firebase_auth.GoogleAuthProvider.credential(
+          accessToken: googleAuth.accessToken,
+          idToken: googleAuth.idToken,
+        );
+
+        userCredential = await _firebaseAuth.signInWithCredential(credential);
+        print('✓ Signed in to Firebase: ${userCredential.user?.email}');
       }
 
-      print('✓ Google account selected: ${googleUser.email}');
-
-      // Step 2: Get authentication details
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-
-      print('✓ Got Google authentication tokens');
-
-      // Step 3: Create Firebase credential from Google tokens
-      final credential = firebase_auth.GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      print('✓ Firebase credential created');
-
-      // Step 4: Sign in to Firebase
-      final userCredential = await _firebaseAuth.signInWithCredential(
-        credential,
-      );
-
-      print('✓ Signed in to Firebase: ${userCredential.user?.email}');
-
-      // Step 5: Get Firebase ID token
       final idToken = await userCredential.user?.getIdToken();
-
-      if (idToken == null) {
-        throw Exception('Failed to get Firebase ID token');
-      }
+      if (idToken == null) throw Exception('Failed to get Firebase ID token');
 
       print('✓ Firebase ID token obtained');
-
-      // Step 6: Save ID token temporarily
       await _secureStorage.saveFirebaseIdToken(idToken);
-
       return idToken;
     } on firebase_auth.FirebaseAuthException catch (e) {
       print('❌ Firebase Auth error: [${e.code}] ${e.message}');
-      print('   - Full error: $e');
+      // User closed the popup — treat as cancellation, not hard error.
+      if (e.code == 'popup-closed-by-user' ||
+          e.code == 'cancelled-popup-request') {
+        return null;
+      }
       throw AuthException('Firebase authentication failed: ${e.message}');
     } catch (e, stackTrace) {
       print('❌ Unexpected Google Sign-In error: $e');
       print(stackTrace);
 
-      String message = e.toString();
-      if (message.contains('7:')) {
-        message = 'Network error (7). Please check your internet connection.';
-      } else if (message.contains('10:')) {
-        message =
-            'Developer error (10). This usually means the SHA-1 fingerprint or package name is incorrect in the Google Cloud Console.';
-      } else if (message.contains('12500')) {
-        message =
-            'Sign-in failed (12500). Please ensure Google Play Services is updated.';
-      } else if (message.contains('12501')) {
-        message = 'Sign-in cancelled by user (12501).';
+      final msg = e.toString();
+      if (msg.contains('popup_closed') || msg.contains('popup-closed')) {
+        return null; // user closed popup — not an error
+      }
+
+      String message = msg;
+      if (msg.contains('7:')) {
+        message = 'Network error. Please check your internet connection.';
+      } else if (msg.contains('10:')) {
+        message = 'Developer error (10). Check SHA-1 / package name in GCP.';
+      } else if (msg.contains('12500')) {
+        message = 'Sign-in failed (12500). Ensure Google Play Services is updated.';
+      } else if (msg.contains('12501')) {
+        message = 'Sign-in cancelled.';
       }
 
       throw AuthException('Google Sign-In failed: $message');
@@ -312,10 +309,12 @@ class AuthRepository {
       await _firebaseAuth.signOut();
       print('✓ Signed out from Firebase');
 
-      // Sign out from Google and clear account caching
-      await _googleSignIn.signOut();
-      await _googleSignIn.disconnect();
-      print('✓ Signed out and disconnected from Google');
+      // Sign out from Google (mobile only — google_sign_in not used on web)
+      if (!kIsWeb) {
+        await _googleSignIn.signOut();
+        await _googleSignIn.disconnect();
+      }
+      print('✓ Signed out from Google');
 
       // Clear stored tokens and user data
       await _secureStorage.clearAll();

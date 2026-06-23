@@ -39,19 +39,33 @@ class MedScannerView extends StatefulWidget {
 }
 
 class _MedScannerViewState extends State<MedScannerView> {
+  bool _initialized = false;
+  // Cache cubit ref so dispose() can call it safely without touching context.
+  MedScannerCubit? _cubit;
+
   @override
   void initState() {
     super.initState();
-    // Initial update if active
+    // Cannot use inherited widgets (MediaQuery, providers) here —
+    // deferred to didChangeDependencies.
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _cubit = context.read<MedScannerCubit>();
+    // Guard: only run initial setup once.
+    if (_initialized) return;
+    _initialized = true;
     _handleTabChange(context.read<NavigationCubit>().state.activeTab);
   }
 
   void _handleTabChange(AppTab activeTab) {
     if (activeTab == AppTab.scanner) {
-      context.read<MedScannerCubit>().initialize();
+      _cubit?.initialize();
       _updateAppBar();
     } else {
-      context.read<MedScannerCubit>().stopCamera();
+      _cubit?.stopCamera();
     }
   }
 
@@ -72,8 +86,8 @@ class _MedScannerViewState extends State<MedScannerView> {
 
   @override
   void dispose() {
-    // Safety check - stop camera on disposal
-    context.read<MedScannerCubit>().stopCamera();
+    // Use the cached ref — context is deactivated by the time dispose() runs.
+    _cubit?.stopCamera();
     super.dispose();
   }
 
@@ -107,9 +121,9 @@ class _MedScannerViewState extends State<MedScannerView> {
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (context) => Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         ),
         padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
         child: Column(
@@ -122,7 +136,7 @@ class _MedScannerViewState extends State<MedScannerView> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey[300],
+                  color: AppColors.borderLight,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),

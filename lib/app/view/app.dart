@@ -17,6 +17,7 @@ import 'package:cap_project/features/rating/rating.dart';
 import 'package:cap_project/app/cubit/navigation_cubit.dart';
 import 'package:cap_project/l10n/l10n.dart';
 import 'package:chat_repository/chat_repository.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -210,7 +211,15 @@ class _AppState extends State<App> {
                   themeMode: themeState.flutterThemeMode,
                   locale: localeState.locale,
                   supportedLocales: AppLocalizations.supportedLocales,
-                  localizationsDelegates: AppLocalizations.localizationsDelegates,
+                  localizationsDelegates: const [
+                    AppLocalizations.delegate,
+                    // Must come BEFORE GlobalMaterialLocalizations so Flutter
+                    // finds it first for locales not in flutter_localizations (tw).
+                    _FlutterLocalizationsFallbackDelegate(),
+                    GlobalMaterialLocalizations.delegate,
+                    GlobalCupertinoLocalizations.delegate,
+                    GlobalWidgetsLocalizations.delegate,
+                  ],
                   localeResolutionCallback: (locale, supportedLocales) {
                     if (locale == null) return supportedLocales.first;
                     for (final supportedLocale in supportedLocales) {
@@ -246,6 +255,32 @@ class _AppState extends State<App> {
     _ratingCubit.close();
     super.dispose();
   }
+}
+
+// ── Fallback localizations for locales not in flutter_localizations ───────────
+//
+// `tw` (Twi/Akan) is not in GlobalMaterialLocalizations or
+// GlobalCupertinoLocalizations. Without a fallback, Flutter throws
+// "No MaterialLocalizations found" when that locale is active.
+// This delegate intercepts `tw` and serves English material strings instead.
+class _FlutterLocalizationsFallbackDelegate
+    extends LocalizationsDelegate<MaterialLocalizations> {
+  const _FlutterLocalizationsFallbackDelegate();
+
+  // Locales we handle because flutter_localizations doesn't support them.
+  static const _unsupported = {'tw'};
+
+  @override
+  bool isSupported(Locale locale) =>
+      _unsupported.contains(locale.languageCode);
+
+  @override
+  Future<MaterialLocalizations> load(Locale locale) =>
+      // Serve English material strings for unsupported locales.
+      GlobalMaterialLocalizations.delegate.load(const Locale('en'));
+
+  @override
+  bool shouldReload(_FlutterLocalizationsFallbackDelegate old) => false;
 }
 
 /// Banner to display current environment overlay

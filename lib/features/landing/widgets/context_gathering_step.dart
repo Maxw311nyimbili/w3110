@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../l10n/l10n.dart';
 import '../cubit/cubit.dart';
 
 class ContextGatheringStep extends StatelessWidget {
@@ -25,7 +26,7 @@ class ContextGatheringStep extends StatelessWidget {
               TextButton(
                 onPressed: () => context.read<LandingCubit>().skipStep(),
                 child: Text(
-                  'Skip',
+                  AppLocalizations.of(context).skip,
                   style: Theme.of(context).textTheme.labelMedium?.copyWith(
                     color: Theme.of(context).textTheme.bodySmall?.color,
                   ),
@@ -41,7 +42,7 @@ class ContextGatheringStep extends StatelessWidget {
                 children: [
                   const SizedBox(height: 16),
                   Text(
-                    'Topics of interest',
+                    AppLocalizations.of(context).topicsOfInterest,
                     style: Theme.of(context).textTheme.displaySmall?.copyWith(
                       color: Theme.of(context).textTheme.displayLarge?.color,
                       letterSpacing: -0.5,
@@ -49,7 +50,7 @@ class ContextGatheringStep extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'Select a few to help us get started.',
+                    AppLocalizations.of(context).selectAFew,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       color: Theme.of(context).textTheme.bodySmall?.color,
                     ),
@@ -59,16 +60,19 @@ class ContextGatheringStep extends StatelessWidget {
                     spacing: 12,
                     runSpacing: 12,
                     children:
-                        [
-                              'Pregnancy',
-                              'Medications',
-                              'Nutrition',
-                              'Child Health',
-                              'Mental Health',
-                              'Immunizations',
-                              'Postpartum',
-                              'General Health',
-                            ]
+                        () {
+                              final l10n = AppLocalizations.of(context);
+                              return [
+                                l10n.topicPregnancy,
+                                l10n.topicMedications,
+                                l10n.topicNutrition,
+                                l10n.topicChildHealth,
+                                l10n.topicMentalHealth,
+                                l10n.topicImmunizations,
+                                l10n.topicPostpartum,
+                                l10n.topicGeneralHealth,
+                              ];
+                            }()
                             .map((label) => _buildChip(context, label, state))
                             .toList(),
                   ),
@@ -86,7 +90,7 @@ class ContextGatheringStep extends StatelessWidget {
                           borderRadius: BorderRadius.circular(30),
                         ),
                       ),
-                      child: const Text('Continue'),
+                      child: Text(AppLocalizations.of(context).continueButton),
                     ),
                   ),
                   const SizedBox(height: 24),

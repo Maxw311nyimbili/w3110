@@ -1,5 +1,6 @@
 import 'package:cap_project/core/widgets/brand_logo.dart';
 import 'package:cap_project/core/widgets/premium_button.dart';
+import 'package:cap_project/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../app/view/app_router.dart';
@@ -9,6 +10,7 @@ import 'role_selection_step.dart';
 import 'profile_setup_step.dart';
 import 'context_gathering_step.dart';
 import 'consent_step.dart';
+import 'theme_selection_step.dart';
 
 class LandingBody extends StatelessWidget {
   const LandingBody({super.key});
@@ -65,40 +67,58 @@ class LandingBody extends StatelessWidget {
   Widget __buildProgressBar(BuildContext context, OnboardingStep step) {
     if (step == OnboardingStep.complete) return const SizedBox.shrink();
 
-    final steps = OnboardingStep.values.where((e) => e != OnboardingStep.complete).toList();
+    final steps = OnboardingStep.values
+        .where((e) => e != OnboardingStep.complete)
+        .toList();
     final index = steps.indexOf(step);
-    final progress = (index + 1) / steps.length;
+    final totalSteps = steps.length;
+    final primary = Theme.of(context).colorScheme.primary;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
-      padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+      padding: EdgeInsets.only(
+        top: MediaQuery.of(context).padding.top + 14,
+        bottom: 16,
+        left: 24,
+        right: 24,
+      ),
       color: Theme.of(context).scaffoldBackgroundColor,
-      child: Column(
+      child: Row(
         children: [
-          LinearProgressIndicator(
-            value: progress,
-            backgroundColor: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
-            valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.primary),
-            minHeight: 4,
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Step ${index + 1} of ${steps.length}',
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: Theme.of(context).colorScheme.primary.withOpacity(0.8),
-                    fontWeight: FontWeight.bold,
+          // Step dots
+          ...List.generate(totalSteps, (i) {
+            final isPast = i < index;
+            final isCurrent = i == index;
+            return Expanded(
+              child: Padding(
+                padding: EdgeInsets.only(right: i < totalSteps - 1 ? 4 : 0),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 350),
+                  curve: Curves.easeOutCubic,
+                  height: 3,
+                  decoration: BoxDecoration(
+                    color: isCurrent
+                        ? primary
+                        : isPast
+                            ? primary.withOpacity(0.35)
+                            : (isDark
+                                ? Colors.white.withOpacity(0.10)
+                                : Colors.black.withOpacity(0.08)),
+                    borderRadius: BorderRadius.circular(2),
                   ),
                 ),
-                Text(
-                  '${(progress * 100).toInt()}%',
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: Theme.of(context).colorScheme.outline,
-                  ),
-                ),
-              ],
+              ),
+            );
+          }),
+          const SizedBox(width: 12),
+          // Step counter
+          Text(
+            '${index + 1}/$totalSteps',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.5,
+              color: primary.withOpacity(0.65),
             ),
           ),
         ],
@@ -116,6 +136,8 @@ class LandingBody extends StatelessWidget {
         return const ContextGatheringStep(key: ValueKey('context'));
       case OnboardingStep.consent:
         return const ConsentStep(key: ValueKey('consent'));
+      case OnboardingStep.themeSelection:
+        return const ThemeSelectionStep(key: ValueKey('theme'));
       case OnboardingStep.complete:
         return const _CompleteStep(key: ValueKey('complete'));
       case OnboardingStep.authentication:
@@ -150,7 +172,7 @@ class _CompleteStep extends StatelessWidget {
                     child: Column(
                       children: [
                         Text(
-                          'You\'re all set!',
+                          AppLocalizations.of(context).youreAllSet,
                           style: Theme.of(context).textTheme.displaySmall?.copyWith(
                             color: Theme.of(context).textTheme.displayLarge?.color,
                             fontWeight: FontWeight.w800,
@@ -159,7 +181,7 @@ class _CompleteStep extends StatelessWidget {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'Personalizing your health guide based on your role and preferences...',
+                          AppLocalizations.of(context).personalizingGuide,
                           textAlign: TextAlign.center,
                           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                             color: Theme.of(context).textTheme.bodySmall?.color,

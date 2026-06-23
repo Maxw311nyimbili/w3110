@@ -1,62 +1,107 @@
 // lib/core/theme/app_shadows.dart
-// Hope UI Inspired — Teal-tinted, warm shadow system
+// Naiia — Warm Slate-Blue shadow system
+//
+// Two-color layering principle:
+//   1. A slate-blue ambient lift (gives brand-tinted depth)
+//   2. A warm-black gravity shadow (grounds the element)
+//
+// Use sparingly — only on elements that need to visually separate from their bg.
 
 import 'package:flutter/material.dart';
 
-/// Surgical shadow system — color-tinted, never generic grey.
-/// Use sparingly: only on elements that need to visually lift off the page.
 class AppShadows {
   AppShadows._();
 
-  /// Subtle ambient shadow for cards resting on the background
+  // ── Card: resting on background ─────────────────────────────────────────────
   static const List<BoxShadow> card = [
     BoxShadow(
-      color: Color(0x1A0C7E8A), // teal-tinted, 10% opacity
-      blurRadius: 24,
+      color: Color(0x0E7B91AD), // slate-blue, ~5% opacity
+      blurRadius: 20,
       spreadRadius: -2,
-      offset: Offset(0, 8),
+      offset: Offset(0, 6),
     ),
     BoxShadow(
-      color: Color(0x0F1C1917), // warm-black ambient, 6% opacity
-      blurRadius: 12,
+      color: Color(0x0A1C1917), // warm-black ambient, 4% opacity
+      blurRadius: 8,
       spreadRadius: 0,
       offset: Offset(0, 2),
     ),
   ];
 
-  /// Stronger shadow for modals, bottom sheets, and floating elements
+  // ── Float: modals, sheets, and elevated surfaces ────────────────────────────
   static const List<BoxShadow> float = [
     BoxShadow(
-      color: Color(0x200C7E8A), // teal, 12% opacity
-      blurRadius: 32,
-      spreadRadius: 0,
-      offset: Offset(0, 12),
+      color: Color(0x167B91AD), // slate-blue, ~9% opacity
+      blurRadius: 40,
+      spreadRadius: -4,
+      offset: Offset(0, 16),
     ),
     BoxShadow(
-      color: Color(0x141C1917), // warm-black, 8% opacity
-      blurRadius: 16,
+      color: Color(0x121C1917), // warm-black, ~7% opacity
+      blurRadius: 20,
       spreadRadius: 0,
-      offset: Offset(0, 4),
+      offset: Offset(0, 6),
+    ),
+    BoxShadow(
+      color: Color(0x061C1917), // hair-thin contact shadow
+      blurRadius: 4,
+      spreadRadius: 0,
+      offset: Offset(0, 1),
     ),
   ];
 
-  /// Very light shadow for inputs, chips, and inline elements
+  // ── Subtle: inputs, chips, inline elements ──────────────────────────────────
   static const List<BoxShadow> subtle = [
     BoxShadow(
-      color: Color(0x0A1C1917), // warm-black, 4% opacity
+      color: Color(0x081C1917), // warm-black, 3% opacity
       blurRadius: 6,
       spreadRadius: 0,
       offset: Offset(0, 2),
     ),
   ];
 
-  /// Teal glow effect for active/focused interactive elements
-  static const List<BoxShadow> tealGlow = [
+  // ── Primary glow: focused inputs, active CTAs ───────────────────────────────
+  static const List<BoxShadow> primaryGlow = [
     BoxShadow(
-      color: Color(0x330C7E8A), // teal, 20% opacity
-      blurRadius: 20,
+      color: Color(0x267B91AD), // slate-blue glow, ~15% opacity
+      blurRadius: 24,
       spreadRadius: -2,
-      offset: Offset(0, 6),
+      offset: Offset(0, 8),
     ),
   ];
+
+  // ── Button shadow ────────────────────────────────────────────────────────────
+  static const List<BoxShadow> button = [
+    BoxShadow(
+      color: Color(0x307B91AD), // slate-blue, ~19% opacity
+      blurRadius: 16,
+      spreadRadius: -4,
+      offset: Offset(0, 6),
+    ),
+    BoxShadow(
+      color: Color(0x141C1917), // warm-black, 8% opacity
+      blurRadius: 6,
+      spreadRadius: 0,
+      offset: Offset(0, 2),
+    ),
+  ];
+
+  // ── Dark-mode card ───────────────────────────────────────────────────────────
+  static const List<BoxShadow> cardDark = [
+    BoxShadow(
+      color: Color(0x40000000), // pure-black, 25% opacity
+      blurRadius: 24,
+      spreadRadius: -4,
+      offset: Offset(0, 10),
+    ),
+    BoxShadow(
+      color: Color(0x20000000), // pure-black, 12% opacity
+      blurRadius: 8,
+      spreadRadius: 0,
+      offset: Offset(0, 2),
+    ),
+  ];
+
+  // Keep legacy alias so old references compile
+  static const List<BoxShadow> tealGlow = primaryGlow;
 }

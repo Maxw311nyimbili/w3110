@@ -2,6 +2,7 @@ import 'package:cap_project/core/locale/cubit/locale_cubit.dart';
 import 'package:cap_project/core/locale/cubit/locale_state.dart';
 import 'package:cap_project/core/theme/app_colors.dart';
 import 'package:cap_project/core/theme/app_text_styles.dart';
+import 'package:cap_project/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -45,7 +46,7 @@ class LanguageSelectorBottomSheet extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
               child: Text(
-                'Select Language',
+                AppLocalizations.of(context).selectLanguage,
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
@@ -136,7 +137,7 @@ class _LanguageListContentState extends State<_LanguageListContent> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          _showOthers ? 'Show Less' : 'More Options',
+                          _showOthers ? AppLocalizations.of(context).showLess : AppLocalizations.of(context).moreOptions,
                           style: TextStyle(
                             color: Theme.of(context).colorScheme.primary,
                             fontSize: 12,

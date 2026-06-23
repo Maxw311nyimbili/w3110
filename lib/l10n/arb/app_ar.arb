@@ -1,6 +1,5 @@
 {
     "@@locale": "ar",
-    
     "appName": "نايا",
     "settings": "الإعدادات",
     "preferences": "التفضيلات",
@@ -83,5 +82,261 @@
     "medicalDisclaimer": "هذه المعلومات للمرجع فقط. استشر مقدم الرعاية الصحية الخاص بك دائماً قبل تناول أي دواء.",
     "matchConfidence": "ثقة المطابقة",
     "importantWarnings": "تحذيرات هامة",
-    "openingChat": "جاري فتح المحادثة مع نتائج المسح..."
+    "openingChat": "جاري فتح المحادثة مع نتائج المسح...",
+    "goodMorning": "صباح الخير",
+    "@goodMorning": {
+        "description": "goodMorning"
+    },
+    "goodAfternoon": "مساء الخير",
+    "@goodAfternoon": {
+        "description": "goodAfternoon"
+    },
+    "goodEvening": "مساء النور",
+    "@goodEvening": {
+        "description": "goodEvening"
+    },
+    "dailyInsight": "معلومة اليوم",
+    "@dailyInsight": {
+        "description": "dailyInsight"
+    },
+    "chatSupportQuestion": "كيف يمكنني دعمك اليوم؟",
+    "@chatSupportQuestion": {
+        "description": "chatSupportQuestion"
+    },
+    "dismiss": "رفض",
+    "@dismiss": {
+        "description": "dismiss"
+    },
+    "promptVitamins": "ما الفيتامينات التي يجب أن أتناولها؟",
+    "@promptVitamins": {
+        "description": "promptVitamins"
+    },
+    "promptPreeclampsia": "علامات تسمم الحمل",
+    "@promptPreeclampsia": {
+        "description": "promptPreeclampsia"
+    },
+    "promptExercise": "تمارين آمنة أثناء الحمل",
+    "@promptExercise": {
+        "description": "promptExercise"
+    },
+    "promptBabyMovement": "أنماط حركة الطفل",
+    "@promptBabyMovement": {
+        "description": "promptBabyMovement"
+    },
+    "insightFolicAcid": "تناولي 400 ميكروغرام من حمض الفوليك يومياً.",
+    "@insightFolicAcid": {
+        "description": "insightFolicAcid"
+    },
+    "insightGinger": "الزنجبيل فعّال لعلاج غثيان الصباح.",
+    "@insightGinger": {
+        "description": "insightGinger"
+    },
+    "insightBloodVolume": "يزداد حجم الدم بنسبة 50% خلال الحمل.",
+    "@insightBloodVolume": {
+        "description": "insightBloodVolume"
+    },
+    "insightHydration": "شرب الماء الكافي يساعد في تكوين السائل الأمنيوسي.",
+    "@insightHydration": {
+        "description": "insightHydration"
+    },
+    "insightIron": "تتضاعف حاجة الجسم للحديد خلال الحمل.",
+    "@insightIron": {
+        "description": "insightIron"
+    },
+    "insightWalking": "المشي آمن طوال فترة الحمل.",
+    "@insightWalking": {
+        "description": "insightWalking"
+    },
+    "insightHearing": "يسمع الأطفال الأصوات حول الأسبوع 24.",
+    "@insightHearing": {
+        "description": "insightHearing"
+    },
+    "insightCalcium": "الكالسيوم ضروري لعظام الطفل.",
+    "@insightCalcium": {
+        "description": "insightCalcium"
+    },
+    "insightBananas": "الموز يساعد في منع تشنجات الساق.",
+    "@insightBananas": {
+        "description": "insightBananas"
+    },
+    "insightStress": "التوتر يؤثر على نمو الطفل.",
+    "@insightStress": {
+        "description": "insightStress"
+    },
+    "newThread": "محادثة جديدة",
+    "@newThread": {
+        "description": "newThread"
+    },
+    "navigate": "تصفح",
+    "@navigate": {
+        "description": "navigate"
+    },
+    "askNaiia": "اسأل نايا",
+    "@askNaiia": {
+        "description": "askNaiia"
+    },
+    "historyLabel": "التاريخ",
+    "@historyLabel": {
+        "description": "historyLabel"
+    },
+    "conversationsLabel": "المحادثات",
+    "@conversationsLabel": {
+        "description": "conversationsLabel"
+    },
+    "recentLabel": "الأخيرة",
+    "@recentLabel": {
+        "description": "recentLabel"
+    },
+    "noConversationsYet": "لا توجد محادثات بعد",
+    "@noConversationsYet": {
+        "description": "noConversationsYet"
+    },
+    "deleteConversationTitle": "حذف المحادثة؟",
+    "@deleteConversationTitle": {
+        "description": "deleteConversationTitle"
+    },
+    "deleteConversationBody": "سيؤدي هذا إلى حذف هذه المحادثة نهائياً. لا يمكن التراجع عن هذا الإجراء.",
+    "@deleteConversationBody": {
+        "description": "deleteConversationBody"
+    },
+    "showLess": "عرض أقل",
+    "@showLess": {
+        "description": "showLess"
+    },
+    "moreOptions": "المزيد من الخيارات",
+    "@moreOptions": {
+        "description": "moreOptions"
+    },
+    "languageTwi": "Twi",
+    "@languageTwi": {
+        "description": "languageTwi"
+    },
+    "themeLight": "فاتح",
+    "@themeLight": {
+        "description": "themeLight"
+    },
+    "themeDark": "داكن",
+    "@themeDark": {
+        "description": "themeDark"
+    },
+    "authSubtitle": "احفظي تاريخك الطبي وخصصي رفيقك الصحي من خلال تسجيل الدخول.",
+    "@authSubtitle": {
+        "description": "authSubtitle"
+    },
+    "continueAsGuest": "المتابعة كضيف",
+    "@continueAsGuest": {
+        "description": "continueAsGuest"
+    },
+    "skip": "تخطي",
+    "@skip": {
+        "description": "skip"
+    },
+    "topicsOfInterest": "مواضيع الاهتمام",
+    "@topicsOfInterest": {
+        "description": "topicsOfInterest"
+    },
+    "selectAFew": "اختاري بعضها لنساعدك على البدء.",
+    "@selectAFew": {
+        "description": "selectAFew"
+    },
+    "topicPregnancy": "الحمل",
+    "@topicPregnancy": {
+        "description": "topicPregnancy"
+    },
+    "topicMedications": "الأدوية",
+    "@topicMedications": {
+        "description": "topicMedications"
+    },
+    "topicNutrition": "التغذية",
+    "@topicNutrition": {
+        "description": "topicNutrition"
+    },
+    "topicChildHealth": "صحة الطفل",
+    "@topicChildHealth": {
+        "description": "topicChildHealth"
+    },
+    "topicMentalHealth": "الصحة النفسية",
+    "@topicMentalHealth": {
+        "description": "topicMentalHealth"
+    },
+    "topicImmunizations": "التطعيمات",
+    "@topicImmunizations": {
+        "description": "topicImmunizations"
+    },
+    "topicPostpartum": "ما بعد الولادة",
+    "@topicPostpartum": {
+        "description": "topicPostpartum"
+    },
+    "topicGeneralHealth": "الصحة العامة",
+    "@topicGeneralHealth": {
+        "description": "topicGeneralHealth"
+    },
+    "continueButton": "متابعة",
+    "@continueButton": {
+        "description": "continueButton"
+    },
+    "youreAllSet": "أنت مستعدة!",
+    "@youreAllSet": {
+        "description": "youreAllSet"
+    },
+    "personalizingGuide": "جارٍ تخصيص دليلك الصحي بناءً على دورك وتفضيلاتك...",
+    "@personalizingGuide": {
+        "description": "personalizingGuide"
+    },
+    "personalizeYourCare": "خصصي رعايتك",
+    "@personalizeYourCare": {
+        "description": "personalizeYourCare"
+    },
+    "pleaseEnterNickname": "يرجى إدخال لقب",
+    "@pleaseEnterNickname": {
+        "description": "pleaseEnterNickname"
+    },
+    "useToDistinguish": "استخدمي هذا لتمييز هذا الحساب عن الآخرين.",
+    "@useToDistinguish": {
+        "description": "useToDistinguish"
+    },
+    "selectYourRole": "اختاري دورك",
+    "@selectYourRole": {
+        "description": "selectYourRole"
+    },
+    "roleMother": "أم",
+    "@roleMother": {
+        "description": "roleMother"
+    },
+    "roleSupportPartner": "شريك الدعم",
+    "@roleSupportPartner": {
+        "description": "roleSupportPartner"
+    },
+    "roleDoctor": "طبيب",
+    "@roleDoctor": {
+        "description": "roleDoctor"
+    },
+    "roleDoctorSubtitle": "متخصص طبي معتمد",
+    "@roleDoctorSubtitle": {
+        "description": "roleDoctorSubtitle"
+    },
+    "roleMidwife": "قابلة",
+    "@roleMidwife": {
+        "description": "roleMidwife"
+    },
+    "roleMidwifeSubtitle": "متخصصة ولادة معتمدة",
+    "@roleMidwifeSubtitle": {
+        "description": "roleMidwifeSubtitle"
+    },
+    "roleClinician": "طبيب سريري",
+    "@roleClinician": {
+        "description": "roleClinician"
+    },
+    "roleClinicianSubtitle": "موظف منشأة رعاية صحية",
+    "@roleClinicianSubtitle": {
+        "description": "roleClinicianSubtitle"
+    },
+    "makeItYours": "اجعليه خاصاً بك",
+    "@makeItYours": {
+        "description": "makeItYours"
+    },
+    "startUsingNaiia": "ابدئي استخدام نايا",
+    "@startUsingNaiia": {
+        "description": "startUsingNaiia"
+    }
 }

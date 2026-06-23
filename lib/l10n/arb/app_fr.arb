@@ -1,6 +1,5 @@
 {
     "@@locale": "fr",
-    
     "appName": "Naiia",
     "settings": "Paramètres",
     "preferences": "PRÉFÉRENCES",
@@ -83,5 +82,261 @@
     "medicalDisclaimer": "Ces informations sont fournies à titre indicatif uniquement. Consultez toujours votre professionnel de la santé avant de prendre tout médicament.",
     "matchConfidence": "Confiance du résultat",
     "importantWarnings": "Avertissements importants",
-    "openingChat": "Ouverture de la discussion avec les résultats du scan..."
+    "openingChat": "Ouverture de la discussion avec les résultats du scan...",
+    "goodMorning": "Bonjour",
+    "@goodMorning": {
+        "description": "goodMorning"
+    },
+    "goodAfternoon": "Bon après-midi",
+    "@goodAfternoon": {
+        "description": "goodAfternoon"
+    },
+    "goodEvening": "Bonsoir",
+    "@goodEvening": {
+        "description": "goodEvening"
+    },
+    "dailyInsight": "Info du jour",
+    "@dailyInsight": {
+        "description": "dailyInsight"
+    },
+    "chatSupportQuestion": "Comment puis-je vous aider aujourd'hui ?",
+    "@chatSupportQuestion": {
+        "description": "chatSupportQuestion"
+    },
+    "dismiss": "Ignorer",
+    "@dismiss": {
+        "description": "dismiss"
+    },
+    "promptVitamins": "Quels vitamines devrais-je prendre ?",
+    "@promptVitamins": {
+        "description": "promptVitamins"
+    },
+    "promptPreeclampsia": "Signes de prééclampsie",
+    "@promptPreeclampsia": {
+        "description": "promptPreeclampsia"
+    },
+    "promptExercise": "Exercices sûrs pendant la grossesse",
+    "@promptExercise": {
+        "description": "promptExercise"
+    },
+    "promptBabyMovement": "Mouvements du bébé",
+    "@promptBabyMovement": {
+        "description": "promptBabyMovement"
+    },
+    "insightFolicAcid": "Prenez 400mcg d'acide folique par jour.",
+    "@insightFolicAcid": {
+        "description": "insightFolicAcid"
+    },
+    "insightGinger": "Le gingembre est efficace contre les nausées.",
+    "@insightGinger": {
+        "description": "insightGinger"
+    },
+    "insightBloodVolume": "Le volume sanguin augmente de 50% pendant la grossesse.",
+    "@insightBloodVolume": {
+        "description": "insightBloodVolume"
+    },
+    "insightHydration": "Rester hydratée aide à former le liquide amniotique.",
+    "@insightHydration": {
+        "description": "insightHydration"
+    },
+    "insightIron": "Les besoins en fer doublent pendant la grossesse.",
+    "@insightIron": {
+        "description": "insightIron"
+    },
+    "insightWalking": "La marche est sûre tout au long de la grossesse.",
+    "@insightWalking": {
+        "description": "insightWalking"
+    },
+    "insightHearing": "Les bébés entendent les sons vers 24 semaines.",
+    "@insightHearing": {
+        "description": "insightHearing"
+    },
+    "insightCalcium": "Le calcium est crucial pour les os du bébé.",
+    "@insightCalcium": {
+        "description": "insightCalcium"
+    },
+    "insightBananas": "Les bananes aident à prévenir les crampes.",
+    "@insightBananas": {
+        "description": "insightBananas"
+    },
+    "insightStress": "Le stress affecte le développement du bébé.",
+    "@insightStress": {
+        "description": "insightStress"
+    },
+    "newThread": "Nouvelle discussion",
+    "@newThread": {
+        "description": "newThread"
+    },
+    "navigate": "Navigation",
+    "@navigate": {
+        "description": "navigate"
+    },
+    "askNaiia": "Demander à Naiia",
+    "@askNaiia": {
+        "description": "askNaiia"
+    },
+    "historyLabel": "Historique",
+    "@historyLabel": {
+        "description": "historyLabel"
+    },
+    "conversationsLabel": "Conversations",
+    "@conversationsLabel": {
+        "description": "conversationsLabel"
+    },
+    "recentLabel": "Récent",
+    "@recentLabel": {
+        "description": "recentLabel"
+    },
+    "noConversationsYet": "Pas encore de conversations",
+    "@noConversationsYet": {
+        "description": "noConversationsYet"
+    },
+    "deleteConversationTitle": "Supprimer la conversation ?",
+    "@deleteConversationTitle": {
+        "description": "deleteConversationTitle"
+    },
+    "deleteConversationBody": "Cela supprimera définitivement cette conversation. Cette action est irréversible.",
+    "@deleteConversationBody": {
+        "description": "deleteConversationBody"
+    },
+    "showLess": "Afficher moins",
+    "@showLess": {
+        "description": "showLess"
+    },
+    "moreOptions": "Plus d'options",
+    "@moreOptions": {
+        "description": "moreOptions"
+    },
+    "languageTwi": "Twi",
+    "@languageTwi": {
+        "description": "languageTwi"
+    },
+    "themeLight": "Clair",
+    "@themeLight": {
+        "description": "themeLight"
+    },
+    "themeDark": "Sombre",
+    "@themeDark": {
+        "description": "themeDark"
+    },
+    "authSubtitle": "Sécurisez vos antécédents médicaux et personnalisez votre compagnon santé en vous connectant.",
+    "@authSubtitle": {
+        "description": "authSubtitle"
+    },
+    "continueAsGuest": "Continuer en tant qu'invité",
+    "@continueAsGuest": {
+        "description": "continueAsGuest"
+    },
+    "skip": "Passer",
+    "@skip": {
+        "description": "skip"
+    },
+    "topicsOfInterest": "Sujets d'intérêt",
+    "@topicsOfInterest": {
+        "description": "topicsOfInterest"
+    },
+    "selectAFew": "Sélectionnez-en quelques-uns pour nous aider à commencer.",
+    "@selectAFew": {
+        "description": "selectAFew"
+    },
+    "topicPregnancy": "Grossesse",
+    "@topicPregnancy": {
+        "description": "topicPregnancy"
+    },
+    "topicMedications": "Médicaments",
+    "@topicMedications": {
+        "description": "topicMedications"
+    },
+    "topicNutrition": "Nutrition",
+    "@topicNutrition": {
+        "description": "topicNutrition"
+    },
+    "topicChildHealth": "Santé de l'enfant",
+    "@topicChildHealth": {
+        "description": "topicChildHealth"
+    },
+    "topicMentalHealth": "Santé mentale",
+    "@topicMentalHealth": {
+        "description": "topicMentalHealth"
+    },
+    "topicImmunizations": "Vaccinations",
+    "@topicImmunizations": {
+        "description": "topicImmunizations"
+    },
+    "topicPostpartum": "Post-partum",
+    "@topicPostpartum": {
+        "description": "topicPostpartum"
+    },
+    "topicGeneralHealth": "Santé générale",
+    "@topicGeneralHealth": {
+        "description": "topicGeneralHealth"
+    },
+    "continueButton": "Continuer",
+    "@continueButton": {
+        "description": "continueButton"
+    },
+    "youreAllSet": "Vous êtes prêt !",
+    "@youreAllSet": {
+        "description": "youreAllSet"
+    },
+    "personalizingGuide": "Personnalisation de votre guide de santé en fonction de votre rôle et préférences...",
+    "@personalizingGuide": {
+        "description": "personalizingGuide"
+    },
+    "personalizeYourCare": "Personnalisez vos soins",
+    "@personalizeYourCare": {
+        "description": "personalizeYourCare"
+    },
+    "pleaseEnterNickname": "Veuillez entrer un surnom",
+    "@pleaseEnterNickname": {
+        "description": "pleaseEnterNickname"
+    },
+    "useToDistinguish": "Utilisez ceci pour distinguer ce compte des autres.",
+    "@useToDistinguish": {
+        "description": "useToDistinguish"
+    },
+    "selectYourRole": "Sélectionnez votre rôle",
+    "@selectYourRole": {
+        "description": "selectYourRole"
+    },
+    "roleMother": "Mère",
+    "@roleMother": {
+        "description": "roleMother"
+    },
+    "roleSupportPartner": "Partenaire de soutien",
+    "@roleSupportPartner": {
+        "description": "roleSupportPartner"
+    },
+    "roleDoctor": "Médecin",
+    "@roleDoctor": {
+        "description": "roleDoctor"
+    },
+    "roleDoctorSubtitle": "Professionnel médical vérifié",
+    "@roleDoctorSubtitle": {
+        "description": "roleDoctorSubtitle"
+    },
+    "roleMidwife": "Sage-femme",
+    "@roleMidwife": {
+        "description": "roleMidwife"
+    },
+    "roleMidwifeSubtitle": "Professionnel de naissance vérifié",
+    "@roleMidwifeSubtitle": {
+        "description": "roleMidwifeSubtitle"
+    },
+    "roleClinician": "Clinicien",
+    "@roleClinician": {
+        "description": "roleClinician"
+    },
+    "roleClinicianSubtitle": "Personnel d'établissement de soins",
+    "@roleClinicianSubtitle": {
+        "description": "roleClinicianSubtitle"
+    },
+    "makeItYours": "Faites-en le vôtre",
+    "@makeItYours": {
+        "description": "makeItYours"
+    },
+    "startUsingNaiia": "Commencer à utiliser Naiia",
+    "@startUsingNaiia": {
+        "description": "startUsingNaiia"
+    }
 }

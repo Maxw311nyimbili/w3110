@@ -21,6 +21,7 @@ dependencies:
   # Added for typography
   google_fonts: ^6.2.1
   lottie: ^3.1.2
+  flutter_svg: ^2.0.0
 
   # HTTP & Networking
   http: ^1.2.2
@@ -103,6 +104,12 @@ flutter_native_splash:
     color: "#ffffff"
   web: false
 
+# Pin analyzer to last version compatible with source_gen 4.0.0.
+# source_gen 4.0.0 calls DartObjectImpl.getInvocation() which was removed in analyzer 8.4.x.
+# Remove this override once source_gen publishes a fix.
+dependency_overrides:
+  analyzer: ">=8.0.0 <8.4.0"
+
 flutter:
   generate: true
   uses-material-design: true
@@ -111,3 +118,4 @@ flutter:
     # Your other assets...
     - assets/animations/
     - assets/images/
+    - assets/svgs/

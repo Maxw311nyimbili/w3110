@@ -222,18 +222,18 @@ class ForumBody extends StatelessWidget {
               borderRadius: BorderRadius.circular(28),
               borderSide: BorderSide(
                 color: Theme.of(context).brightness == Brightness.light
-                    ? AppColors.accentLight
-                    : AppColors.borderDark,
-                width: 1.5,
+                    ? AppColors.borderLight
+                    : AppColors.darkBorder,
+                width: 1.0,
               ),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(28),
               borderSide: BorderSide(
                 color: Theme.of(context).brightness == Brightness.light
-                    ? AppColors.accentLight
-                    : AppColors.borderDark,
-                width: 1.5,
+                    ? AppColors.borderLight
+                    : AppColors.darkBorder,
+                width: 1.0,
               ),
             ),
             focusedBorder: OutlineInputBorder(

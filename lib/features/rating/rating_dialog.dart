@@ -87,7 +87,7 @@ class _RatingSheetState extends State<_RatingSheet>
             BoxShadow(
               color: isDark
                   ? Colors.black.withOpacity(0.4)
-                  : AppColors.shadowTeal.withOpacity(0.12),
+                  : AppColors.slateBlue.withOpacity(0.10),
               blurRadius: 32,
               offset: const Offset(0, 8),
             ),

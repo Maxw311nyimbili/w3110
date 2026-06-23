@@ -15,6 +15,7 @@ import 'package:cap_project/features/rating/rating.dart';
 import 'package:cap_project/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AppShell extends StatelessWidget {
   const AppShell({super.key});
@@ -64,9 +65,11 @@ class _DesktopShell extends StatelessWidget {
         children: [
           // ── Sidebar (Persistent) ──
           AnimatedContainer(
-            duration: const Duration(milliseconds: 250),
-            curve: Curves.easeOutCubic,
+            duration: const Duration(milliseconds: 320),
+            curve: Curves.easeInOutCubic,
             width: isCollapsed ? 72 : 260,
+            clipBehavior: Clip.hardEdge,
+            decoration: const BoxDecoration(),
             child: const SideMenu(),
           ),
 
@@ -125,11 +128,11 @@ class _DesktopShell extends StatelessWidget {
   }
 
   Widget? _getDefaultTitle(BuildContext context, AppTab tab) {
-    // We use a simple switch here. For production, these would be in l10n.
-    // However, keeping it in the shell ensures they appear IMMEDIATELY.
     switch (tab) {
       case AppTab.chat:
-        return const Text('Naiia'); // Or "Chat"
+        // Desktop sidebar already shows the NAIIA logo + wordmark —
+        // returning null suppresses the header bar entirely on chat.
+        return null;
       case AppTab.scanner:
         return const Text('Scanner');
       case AppTab.forum:
@@ -174,7 +177,7 @@ class _MobileShell extends StatelessWidget {
   Widget? _getDefaultTitle(BuildContext context, AppTab tab) {
     switch (tab) {
       case AppTab.chat:
-        return const Text('Naiia');
+        return null; // sidebar drawer already has NAIIA logo + wordmark
       case AppTab.scanner:
         return const Text('Scanner');
       case AppTab.forum:

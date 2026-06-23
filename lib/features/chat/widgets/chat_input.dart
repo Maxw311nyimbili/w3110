@@ -304,7 +304,7 @@ class _RefinedChatInputState extends State<RefinedChatInput>
             border: Border.all(
               color: Theme.of(context).brightness == Brightness.dark
                   ? Theme.of(context).dividerColor.withOpacity(0.08)
-                  : AppColors.accentLight.withOpacity(0.7),
+                  : AppColors.borderLight,
               width: 1.0,
             ),
             boxShadow: widget.isLandingMode
@@ -413,9 +413,14 @@ class _RefinedChatInputState extends State<RefinedChatInput>
                           boxShadow: canSend
                               ? [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.1),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 2),
+                                    color: AppColors.slateBlue.withOpacity(0.32),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.08),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 1),
                                   ),
                                 ]
                               : null,

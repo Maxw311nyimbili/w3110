@@ -203,7 +203,7 @@ class ScanResultWidget extends StatelessWidget {
           child: LinearProgressIndicator(
             value: result.confidence,
             minHeight: 8,
-            backgroundColor: AppColors.gray200,
+            backgroundColor: AppColors.borderLight,
             valueColor: AlwaysStoppedAnimation<Color>(color),
           ),
         ),
@@ -222,7 +222,7 @@ class ScanResultWidget extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.backgroundSurface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.gray200),
+        border: Border.all(color: AppColors.borderLight),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,

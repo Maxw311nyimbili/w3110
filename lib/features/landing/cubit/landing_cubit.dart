@@ -459,6 +459,8 @@ class LandingCubit extends Cubit<LandingState> {
       case OnboardingStep.contextGathering:
         return OnboardingStep.consent;
       case OnboardingStep.consent:
+        return OnboardingStep.themeSelection; // → theme picker before complete
+      case OnboardingStep.themeSelection:
         return OnboardingStep.complete;
       case OnboardingStep.complete:
         return OnboardingStep.complete;
@@ -477,6 +479,8 @@ class LandingCubit extends Cubit<LandingState> {
         return OnboardingStep.profileSetup;
       case OnboardingStep.consent:
         return OnboardingStep.contextGathering;
+      case OnboardingStep.themeSelection:
+        return OnboardingStep.consent;
       case OnboardingStep.complete:
         return null;
     }

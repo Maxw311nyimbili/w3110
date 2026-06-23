@@ -50,7 +50,7 @@ class ChatCubit extends Cubit<ChatState> {
           options: {
             AVAudioSessionOptions.mixWithOthers,
             AVAudioSessionOptions.duckOthers,
-            AVAudioSessionOptions.defaultToSpeaker,
+            // defaultToSpeaker is only valid with playAndRecord category — omitted
           },
         ),
         android: const AudioContextAndroid(

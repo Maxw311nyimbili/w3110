@@ -41,8 +41,8 @@ class PostCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
             color: Theme.of(context).brightness == Brightness.light
-                ? AppColors.accentLight
-                : AppColors.borderDark,
+                ? AppColors.borderLight
+                : AppColors.darkBorder,
             width: Theme.of(context).brightness == Brightness.light ? 1.0 : 0.5,
           ),
           boxShadow: AppShadows.card,

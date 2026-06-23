@@ -123,7 +123,7 @@ class _AudioWaveformState extends State<AudioWaveform>
               height: h,
               margin: const EdgeInsets.symmetric(horizontal: _barGap / 2),
               decoration: BoxDecoration(
-                color: AppColors.brandDarkTeal.withOpacity(0.35),
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.35),
                 borderRadius: BorderRadius.circular(2),
               ),
             );
@@ -135,6 +135,7 @@ class _AudioWaveformState extends State<AudioWaveform>
 
   /// Live: 40-bar scrolling history, newest bars on the right.
   Widget _buildLiveWaveform() {
+    final primary = Theme.of(context).colorScheme.primary;
     return Row(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
@@ -154,7 +155,7 @@ class _AudioWaveformState extends State<AudioWaveform>
           height: barH,
           margin: const EdgeInsets.symmetric(horizontal: _barGap / 2),
           decoration: BoxDecoration(
-            color: AppColors.brandDarkTeal.withOpacity(opacity),
+            color: primary.withOpacity(opacity),
             borderRadius: BorderRadius.circular(2),
           ),
         );

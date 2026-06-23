@@ -1,18 +1,18 @@
 {
-    "@@locale": "en",
+    "@@locale": "tw",
     "appName": "Naiia",
     "@appName": {
         "description": "Application name"
     },
-    "settings": "Settings",
+    "settings": "Nhyehyɛeɛ",
     "@settings": {
         "description": "Settings page title"
     },
-    "preferences": "PREFERENCES",
+    "preferences": "NHYEHYƐEƐ",
     "@preferences": {
         "description": "Preferences section header"
     },
-    "language": "Language",
+    "language": "Kasa",
     "@language": {
         "description": "Language setting label"
     },
@@ -20,43 +20,43 @@
     "@languageEnglish": {
         "description": "English language name"
     },
-    "languageArabic": "العربية",
+    "languageArabic": "Arabiki",
     "@languageArabic": {
-        "description": "Arabic language name in Arabic"
+        "description": "Arabic language name"
     },
-    "languageFrench": "Français",
+    "languageFrench": "Frɛnkye",
     "@languageFrench": {
-        "description": "French language name in French"
+        "description": "French language name"
     },
-    "darkMode": "Appearance",
+    "darkMode": "Nhwɛso",
     "@darkMode": {
         "description": "Theme appearance setting label"
     },
-    "systemDefault": "System Default",
+    "systemDefault": "Sistim Ahyɛde",
     "@systemDefault": {
         "description": "System default theme option"
     },
-    "profile": "PROFILE",
+    "profile": "HO NSƐM",
     "@profile": {
         "description": "Profile section header"
     },
-    "accountInfo": "Account Info",
+    "accountInfo": "Akaunti Nsɛm",
     "@accountInfo": {
         "description": "Account info menu item"
     },
-    "signOut": "Sign Out",
+    "signOut": "Pue",
     "@signOut": {
         "description": "Sign out button"
     },
-    "about": "ABOUT",
+    "about": "FA HO",
     "@about": {
         "description": "About section header"
     },
-    "privacyPolicy": "Privacy Policy",
+    "privacyPolicy": "Gyinadie Ho Mmara",
     "@privacyPolicy": {
         "description": "Privacy policy menu item"
     },
-    "version": "Version",
+    "version": "Nyinaasoɛ",
     "@version": {
         "description": "Version label"
     },
@@ -64,235 +64,235 @@
     "@versionNumber": {
         "description": "Current version number"
     },
-    "selectLanguage": "Select Language",
+    "selectLanguage": "Yi Kasa",
     "@selectLanguage": {
         "description": "Language selector title"
     },
-    "chat": "Chat",
+    "chat": "Nkɔmmɔ",
     "@chat": {
         "description": "Chat page title"
     },
-    "typeMessage": "Type a message...",
+    "typeMessage": "Kyerɛw nsɛm...",
     "@typeMessage": {
         "description": "Chat input placeholder"
     },
-    "send": "Send",
+    "send": "Fa Kɔ",
     "@send": {
         "description": "Send button"
     },
-    "thinking": "Thinking...",
+    "thinking": "Adwen mu...",
     "@thinking": {
         "description": "AI thinking indicator"
     },
-    "forum": "Forum",
+    "forum": "Kɔtam",
     "@forum": {
         "description": "Forum page title"
     },
-    "medScanner": "Med Scanner",
+    "medScanner": "Nnuro Hwɛ",
     "@medScanner": {
         "description": "Med scanner page title"
     },
-    "scanMedicine": "Scan Medicine",
+    "scanMedicine": "Hwɛ Nnuro",
     "@scanMedicine": {
         "description": "Scan medicine button"
     },
-    "welcome": "Welcome",
+    "welcome": "Akwaaba",
     "@welcome": {
         "description": "Welcome message"
     },
-    "getStarted": "Get Started",
+    "getStarted": "Fi Ase",
     "@getStarted": {
         "description": "Get started button"
     },
-    "signIn": "Sign In",
+    "signIn": "Wo Kɔ Mu",
     "@signIn": {
         "description": "Sign in button"
     },
-    "signUp": "Sign Up",
+    "signUp": "Kyerɛw Wo Din",
     "@signUp": {
         "description": "Sign up button"
     },
-    "email": "Email",
+    "email": "Imeyel",
     "@email": {
         "description": "Email field label"
     },
-    "password": "Password",
+    "password": "Gyinadie Nkontompo",
     "@password": {
         "description": "Password field label"
     },
-    "forgotPassword": "Forgot Password?",
+    "forgotPassword": "Wo Werɛ Fii Wo Gyinadie Nkontompo?",
     "@forgotPassword": {
         "description": "Forgot password link"
     },
-    "cancel": "Cancel",
+    "cancel": "Gyae",
     "@cancel": {
         "description": "Cancel button"
     },
-    "save": "Save",
+    "save": "Sie",
     "@save": {
         "description": "Save button"
     },
-    "delete": "Delete",
+    "delete": "Yi Firi Hɔ",
     "@delete": {
         "description": "Delete button"
     },
-    "edit": "Edit",
+    "edit": "Sesa",
     "@edit": {
         "description": "Edit button"
     },
-    "error": "Error",
+    "error": "Mfomso",
     "@error": {
         "description": "Generic error message"
     },
-    "retry": "Retry",
+    "retry": "Sɔ Bio",
     "@retry": {
         "description": "Retry button"
     },
-    "loading": "Loading...",
+    "loading": "Kɔ So...",
     "@loading": {
         "description": "Loading indicator"
     },
-    "askAnything": "Ask anything...",
+    "askAnything": "Bisabisa biribiara...",
     "@askAnything": {
         "description": "Chat input placeholder"
     },
-    "community": "Community",
+    "community": "Okuafo",
     "@community": {
         "description": "Community/Forum page title"
     },
-    "newPost": "New Post",
+    "newPost": "Nsɛm Foforo",
     "@newPost": {
         "description": "New post button label"
     },
-    "somethingWentWrong": "Something went wrong",
+    "somethingWentWrong": "Biribi kɔ fã",
     "@somethingWentWrong": {
         "description": "Generic error message"
     },
-    "tryAgain": "Try Again",
+    "tryAgain": "Sɔ Bio",
     "@tryAgain": {
         "description": "Try again button"
     },
-    "noPostsYet": "No posts yet",
+    "noPostsYet": "Nsɛm nni hɔ bio",
     "@noPostsYet": {
         "description": "Empty state message for forum"
     },
-    "beTheFirst": "Be the first to start a discussion",
+    "beTheFirst": "Wo na di kan hyɛ nkɔmmɔ ase",
     "@beTheFirst": {
         "description": "Empty state subtitle for forum"
     },
-    "image": "Image",
+    "image": "Mfoni",
     "@image": {
         "description": "Image picker option"
     },
-    "camera": "Camera",
+    "camera": "Kamera",
     "@camera": {
         "description": "Camera picker option"
     },
-    "chatWelcomeTitle": "How can Naiia\nhelp you today?",
+    "chatWelcomeTitle": "Akwaaba, Maame",
     "@chatWelcomeTitle": {
         "description": "Welcome title on empty chat screen"
     },
-    "chatWelcomeSubtitle": "Ask about symptoms, medications, or health tips.",
+    "chatWelcomeSubtitle": "Bisabisa fa yareɛ nsɛm, nnuro anaasɛ ahoɔden nsɛm ho.",
     "@chatWelcomeSubtitle": {
         "description": "Welcome subtitle on empty chat screen"
     },
-    "newDiscussion": "New Discussion",
+    "newDiscussion": "Nkɔmmɔ Foforo",
     "@newDiscussion": {
         "description": "Title for new post sheet"
     },
-    "discussionTitleHint": "What needs discussing?",
+    "discussionTitleHint": "Dɛn na ɛsɛ sɛ wɔkasa ho?",
     "@discussionTitleHint": {
         "description": "Hint for discussion title field"
     },
-    "discussionTitleError": "Please enter a title",
+    "discussionTitleError": "Mesrɛ wo, hyɛ ɛdin bi",
     "@discussionTitleError": {
         "description": "Error for empty discussion title"
     },
-    "discussionContentHint": "Share your thoughts...",
+    "discussionContentHint": "Kyerɛ wo adwene...",
     "@discussionContentHint": {
         "description": "Hint for discussion content field"
     },
-    "post": "Post",
+    "post": "De Fa",
     "@post": {
         "description": "Post button label"
     },
-    "howToUse": "How to use",
+    "howToUse": "Sɛdeɛ Wɔde Fa",
     "@howToUse": {
         "description": "Tooltip for scanner info"
     },
-    "scannerGuide": "Scanner Guide",
+    "scannerGuide": "Hwɛ Nkuran",
     "@scannerGuide": {
         "description": "Title for scanner info modal"
     },
-    "scannerStep1Title": "Position package",
+    "scannerStep1Title": "De Package Bɛ Baabi",
     "@scannerStep1Title": {
         "description": "Title for scanner step 1"
     },
-    "scannerStep1Desc": "Place the medication box or bottle on a flat surface with good lighting.",
+    "scannerStep1Desc": "De nnuro adaka anaasɛ botiri to tum mu pɛ sraafra so a nneyɛm ho yɛ papa.",
     "@scannerStep1Desc": {
         "description": "Description for scanner step 1"
     },
-    "scannerStep2Title": "Align in frame",
+    "scannerStep2Title": "Hyɛ Frame Mu",
     "@scannerStep2Title": {
         "description": "Title for scanner step 2"
     },
-    "scannerStep2Desc": "Center the text or label within the scanning box relative to the camera.",
+    "scannerStep2Desc": "De nsɛm anaasɛ label hyɛ scan box mu.",
     "@scannerStep2Desc": {
         "description": "Description for scanner step 2"
     },
-    "scannerStep3Title": "Tap capture",
+    "scannerStep3Title": "Keka Gyina Hɔ",
     "@scannerStep3Title": {
         "description": "Title for scanner step 3"
     },
-    "scannerStep3Desc": "Press the button or upload purely clear photo from gallery.",
+    "scannerStep3Desc": "Popa tompon anaasɛ yi mfoni a ɛyɛ efie firi gallery mu.",
     "@scannerStep3Desc": {
         "description": "Description for scanner step 3"
     },
-    "startScanning": "Start Scanning",
+    "startScanning": "Fi Ase Hwɛ",
     "@startScanning": {
         "description": "Button to close info modal"
     },
-    "scanInstructions": "Point at medicine label or barcode",
+    "scanInstructions": "Kyerɛ nnuro label anaasɛ barcode",
     "@scanInstructions": {
         "description": "Instruction text on scanner"
     },
-    "scanTips": "Ensure good lighting and hold steady",
+    "scanTips": "Hwɛ sɛ nneyɛm ho yɛ papa na wo nsam nni dede",
     "@scanTips": {
         "description": "Scanning tips text"
     },
-    "initializingCamera": "Initializing camera...",
+    "initializingCamera": "Kamera retow ase...",
     "@initializingCamera": {
         "description": "Camera loading text"
     },
-    "gallery": "Gallery",
+    "gallery": "Mfoni Dan",
     "@gallery": {
         "description": "Gallery button label"
     },
-    "alignLabelWithinFrame": "Align label within the frame",
+    "alignLabelWithinFrame": "Hyɛ label no frame mu",
     "@alignLabelWithinFrame": {
         "description": "Camera overlay instruction"
     },
-    "cameraPermissionDenied": "Camera permission denied. Enable it in app settings.",
+    "cameraPermissionDenied": "Wɔampene sɛ wo de kamera. Habilita no wo app nhyehyɛeɛ mu.",
     "@cameraPermissionDenied": {
         "description": "Error message for camera permission"
     },
-    "noCameraFound": "No camera found on this device.",
+    "noCameraFound": "Wɔannye kamera wɔ saa nimdeɛ yi mu.",
     "@noCameraFound": {
         "description": "Error message when no camera is available"
     },
-    "uploadFailed": "Failed to upload image. Check your internet connection.",
+    "uploadFailed": "Wɔantumi amfa mfoni no kɔ. Hwɛ wo internet kɔnecshen.",
     "@uploadFailed": {
         "description": "Error message for image upload failure"
     },
-    "analysisFailed": "Could not analyze medication. Try again.",
+    "analysisFailed": "Wɔantumi nhwɛ nnuro no. Sɔ bio.",
     "@analysisFailed": {
         "description": "Error message for medication analysis failure"
     },
-    "fileTooLarge": "Image file is too large. Please select a smaller image.",
+    "fileTooLarge": "Mfoni fael no so yɛ dɛɛ. Yiyi mfoni ketewa bi.",
     "@fileTooLarge": {
         "description": "Error message for large image files"
     },
-    "genericError": "An error occurred",
+    "genericError": "Mfomso bi baa",
     "@genericError": {
         "description": "Generic error fallback"
     },
@@ -300,159 +300,159 @@
     "@barcode": {
         "description": "Label for barcode"
     },
-    "activeIngredients": "Active Ingredients",
+    "activeIngredients": "Ingredients a Ɛyɛ Adwuma",
     "@activeIngredients": {
         "description": "Label for active ingredients"
     },
-    "dosage": "Dosage",
+    "dosage": "Nnuro Dos",
     "@dosage": {
         "description": "Label for dosage"
     },
-    "discussWithAi": "Discuss with AI",
+    "discussWithAi": "Kasa Ne AI",
     "@discussWithAi": {
         "description": "Button to discuss scan results with AI"
     },
-    "scanAnother": "Scan Another",
+    "scanAnother": "Hwɛ Foforɔ Bi",
     "@scanAnother": {
         "description": "Button to scan another medicine"
     },
-    "medicalDisclaimer": "This information is for reference only. Always consult your healthcare provider before taking any medication.",
+    "medicalDisclaimer": "Saa nsɛm yi yɛ ma sɛnkyerɛdeɛ nko. Sɛ worebɛfa nnuro biara a, mesrɛ wo kɔkɔ na wo onyakopon dɔkita ho.",
     "@medicalDisclaimer": {
         "description": "Medical disclaimer text"
     },
-    "matchConfidence": "Match Confidence",
+    "matchConfidence": "Hyia Gyinadie",
     "@matchConfidence": {
         "description": "Label for match confidence percentage"
     },
-    "importantWarnings": "Important Warnings",
+    "importantWarnings": "Nsɛmpaapaamu a Ɛho Hia",
     "@importantWarnings": {
         "description": "Title for warnings section"
     },
-    "openingChat": "Opening chat with scan results...",
+    "openingChat": "Reyii nkɔmmɔ ne scan results...",
     "@openingChat": {
         "description": "SnackBar message when opening chat"
     },
-    "goodMorning": "Good Morning",
+    "goodMorning": "Maakye",
     "@goodMorning": {
         "description": "goodMorning"
     },
-    "goodAfternoon": "Good Afternoon",
+    "goodAfternoon": "Maaha",
     "@goodAfternoon": {
         "description": "goodAfternoon"
     },
-    "goodEvening": "Good Evening",
+    "goodEvening": "Maadwo",
     "@goodEvening": {
         "description": "goodEvening"
     },
-    "dailyInsight": "Daily Insight",
+    "dailyInsight": "Ɛda Biara Nsɛm",
     "@dailyInsight": {
         "description": "dailyInsight"
     },
-    "chatSupportQuestion": "How can I support you today?",
+    "chatSupportQuestion": "Sɛdeɛ mɛtumi aboa wo ɛnnɛ?",
     "@chatSupportQuestion": {
         "description": "chatSupportQuestion"
     },
-    "dismiss": "Dismiss",
+    "dismiss": "Yi Firi Hɔ",
     "@dismiss": {
         "description": "dismiss"
     },
-    "promptVitamins": "What vitamins should I take?",
+    "promptVitamins": "Vitamins bɛn na mɛfa?",
     "@promptVitamins": {
         "description": "promptVitamins"
     },
-    "promptPreeclampsia": "Signs of preeclampsia",
+    "promptPreeclampsia": "Preeclampsia nsɛm",
     "@promptPreeclampsia": {
         "description": "promptPreeclampsia"
     },
-    "promptExercise": "Safe exercises in pregnancy",
+    "promptExercise": "Nhwɛso a ɛho tew wɔ nyinsɛn mu",
     "@promptExercise": {
         "description": "promptExercise"
     },
-    "promptBabyMovement": "Baby movement patterns",
+    "promptBabyMovement": "Abɔfra gyina nsɛm",
     "@promptBabyMovement": {
         "description": "promptBabyMovement"
     },
-    "insightFolicAcid": "Take 400mcg of Folic Acid daily.",
+    "insightFolicAcid": "Fa Folic Acid 400mcg da biara.",
     "@insightFolicAcid": {
         "description": "insightFolicAcid"
     },
-    "insightGinger": "Ginger is effective for morning sickness.",
+    "insightGinger": "Akekaduro yɛ aduru a ɛtua afe anansie yareɛ ho.",
     "@insightGinger": {
         "description": "insightGinger"
     },
-    "insightBloodVolume": "Blood volume increases 50% during pregnancy.",
+    "insightBloodVolume": "Mogya dɔɔso paapaa 50% wɔ nyinsɛn mu.",
     "@insightBloodVolume": {
         "description": "insightBloodVolume"
     },
-    "insightHydration": "Staying hydrated forms the amniotic sac.",
+    "insightHydration": "Nsuo nom yie yɛ amniotic sac.",
     "@insightHydration": {
         "description": "insightHydration"
     },
-    "insightIron": "Iron needs double during pregnancy.",
+    "insightIron": "Iron hia paa dua nyinaa wɔ nyinsɛn mu.",
     "@insightIron": {
         "description": "insightIron"
     },
-    "insightWalking": "Walking is safe throughout pregnancy.",
+    "insightWalking": "Ɛkoraa nyinaa wɔ nyinsɛn mu.",
     "@insightWalking": {
         "description": "insightWalking"
     },
-    "insightHearing": "Babies hear sounds around 24 weeks.",
+    "insightHearing": "Mmɔfra tietie nsɛm wɔ bɔn 24 mu.",
     "@insightHearing": {
         "description": "insightHearing"
     },
-    "insightCalcium": "Calcium is crucial for baby's bones.",
+    "insightCalcium": "Calcium ho hia ma abɔfra krakye.",
     "@insightCalcium": {
         "description": "insightCalcium"
     },
-    "insightBananas": "Bananas help prevent leg cramps.",
+    "insightBananas": "Bɔrɔdeɛ boa sɛ nan mmirika nni.",
     "@insightBananas": {
         "description": "insightBananas"
     },
-    "insightStress": "Stress affects baby's development.",
+    "insightStress": "Ahooyaw ka abɔfra honam ho.",
     "@insightStress": {
         "description": "insightStress"
     },
-    "newThread": "New Thread",
+    "newThread": "Nkɔmmɔ Foforo",
     "@newThread": {
         "description": "newThread"
     },
-    "navigate": "Navigate",
+    "navigate": "Kwan Mu",
     "@navigate": {
         "description": "navigate"
     },
-    "askNaiia": "Ask Naiia",
+    "askNaiia": "Bisabisa Naiia",
     "@askNaiia": {
         "description": "askNaiia"
     },
-    "historyLabel": "History",
+    "historyLabel": "Abakɔsɛm",
     "@historyLabel": {
         "description": "historyLabel"
     },
-    "conversationsLabel": "Conversations",
+    "conversationsLabel": "Nkɔmmɔ",
     "@conversationsLabel": {
         "description": "conversationsLabel"
     },
-    "recentLabel": "Recent",
+    "recentLabel": "Nkɔmmɔ a Ɛtwam Ase",
     "@recentLabel": {
         "description": "recentLabel"
     },
-    "noConversationsYet": "No conversations yet",
+    "noConversationsYet": "Nkɔmmɔ nni hɔ bio",
     "@noConversationsYet": {
         "description": "noConversationsYet"
     },
-    "deleteConversationTitle": "Delete conversation?",
+    "deleteConversationTitle": "Yi nkɔmmɔ no firi hɔ?",
     "@deleteConversationTitle": {
         "description": "deleteConversationTitle"
     },
-    "deleteConversationBody": "This will permanently delete this conversation. This cannot be undone.",
+    "deleteConversationBody": "Saa biribi yi bɛyi nkɔmmɔ no firi hɔ ɔkra bio. Wontumi ntwe san.",
     "@deleteConversationBody": {
         "description": "deleteConversationBody"
     },
-    "showLess": "Show Less",
+    "showLess": "Kyerɛ Ketewa",
     "@showLess": {
         "description": "showLess"
     },
-    "moreOptions": "More Options",
+    "moreOptions": "Ahorow Pii",
     "@moreOptions": {
         "description": "moreOptions"
     },
@@ -460,131 +460,131 @@
     "@languageTwi": {
         "description": "languageTwi"
     },
-    "themeLight": "Light",
+    "themeLight": "Hann",
     "@themeLight": {
         "description": "themeLight"
     },
-    "themeDark": "Dark",
+    "themeDark": "Sum",
     "@themeDark": {
         "description": "themeDark"
     },
-    "authSubtitle": "Secure your medical history and personalize your health companion by signing in.",
+    "authSubtitle": "Hyɛ wo yareɛ abakɔsɛm sie na kɔ personalise wo ahoɔden kaakyire no mu sɛ wo kɔ mu.",
     "@authSubtitle": {
         "description": "authSubtitle"
     },
-    "continueAsGuest": "Continue as Guest",
+    "continueAsGuest": "Kɔ So Sɛ Ahɔhɔ",
     "@continueAsGuest": {
         "description": "continueAsGuest"
     },
-    "skip": "Skip",
+    "skip": "Twa Mu",
     "@skip": {
         "description": "skip"
     },
-    "topicsOfInterest": "Topics of interest",
+    "topicsOfInterest": "Nsɛm a Ɛhia Wo",
     "@topicsOfInterest": {
         "description": "topicsOfInterest"
     },
-    "selectAFew": "Select a few to help us get started.",
+    "selectAFew": "Yi bi a ɛboa yɛn fi ase.",
     "@selectAFew": {
         "description": "selectAFew"
     },
-    "topicPregnancy": "Pregnancy",
+    "topicPregnancy": "Nyinsɛn",
     "@topicPregnancy": {
         "description": "topicPregnancy"
     },
-    "topicMedications": "Medications",
+    "topicMedications": "Nnuro",
     "@topicMedications": {
         "description": "topicMedications"
     },
-    "topicNutrition": "Nutrition",
+    "topicNutrition": "Aduane",
     "@topicNutrition": {
         "description": "topicNutrition"
     },
-    "topicChildHealth": "Child Health",
+    "topicChildHealth": "Abɔfra Ahoɔden",
     "@topicChildHealth": {
         "description": "topicChildHealth"
     },
-    "topicMentalHealth": "Mental Health",
+    "topicMentalHealth": "Adwen Ahoɔden",
     "@topicMentalHealth": {
         "description": "topicMentalHealth"
     },
-    "topicImmunizations": "Immunizations",
+    "topicImmunizations": "Yareɛ Tua",
     "@topicImmunizations": {
         "description": "topicImmunizations"
     },
-    "topicPostpartum": "Postpartum",
+    "topicPostpartum": "Awoo Akyi",
     "@topicPostpartum": {
         "description": "topicPostpartum"
     },
-    "topicGeneralHealth": "General Health",
+    "topicGeneralHealth": "Ahoɔden Nyinaasoɛ",
     "@topicGeneralHealth": {
         "description": "topicGeneralHealth"
     },
-    "continueButton": "Continue",
+    "continueButton": "Kɔ So",
     "@continueButton": {
         "description": "continueButton"
     },
-    "youreAllSet": "You're all set!",
+    "youreAllSet": "Wo Ho Aduru!",
     "@youreAllSet": {
         "description": "youreAllSet"
     },
-    "personalizingGuide": "Personalizing your health guide based on your role and preferences...",
+    "personalizingGuide": "Reyɛ wo ahoɔden nkuran ho nhyehyɛeɛ wɔ wo adwuma ne wo pɛ nsɛm so...",
     "@personalizingGuide": {
         "description": "personalizingGuide"
     },
-    "personalizeYourCare": "Personalize your care",
+    "personalizeYourCare": "Hyɛ Wo Hwɛ So",
     "@personalizeYourCare": {
         "description": "personalizeYourCare"
     },
-    "pleaseEnterNickname": "Please enter a nickname",
+    "pleaseEnterNickname": "Mesrɛ wo, hyɛ wo din bi",
     "@pleaseEnterNickname": {
         "description": "pleaseEnterNickname"
     },
-    "useToDistinguish": "Use this to distinguish this account from others.",
+    "useToDistinguish": "De saa din yi atua akaunti a atwa hɔ fi afoforo mu.",
     "@useToDistinguish": {
         "description": "useToDistinguish"
     },
-    "selectYourRole": "Select your role",
+    "selectYourRole": "Yi Wo Adwuma",
     "@selectYourRole": {
         "description": "selectYourRole"
     },
-    "roleMother": "Mother",
+    "roleMother": "Maame",
     "@roleMother": {
         "description": "roleMother"
     },
-    "roleSupportPartner": "Support Partner",
+    "roleSupportPartner": "Boafo",
     "@roleSupportPartner": {
         "description": "roleSupportPartner"
     },
-    "roleDoctor": "Doctor",
+    "roleDoctor": "Dɔkita",
     "@roleDoctor": {
         "description": "roleDoctor"
     },
-    "roleDoctorSubtitle": "Verified medical professional",
+    "roleDoctorSubtitle": "Onyakopon dɔkita a wɔakyerɛ no",
     "@roleDoctorSubtitle": {
         "description": "roleDoctorSubtitle"
     },
-    "roleMidwife": "Midwife",
+    "roleMidwife": "Obaatan Pa",
     "@roleMidwife": {
         "description": "roleMidwife"
     },
-    "roleMidwifeSubtitle": "Verified birth professional",
+    "roleMidwifeSubtitle": "Awoo dɔkita a wɔakyerɛ no",
     "@roleMidwifeSubtitle": {
         "description": "roleMidwifeSubtitle"
     },
-    "roleClinician": "Clinician",
+    "roleClinician": "Onyakopon Dɔkita",
     "@roleClinician": {
         "description": "roleClinician"
     },
-    "roleClinicianSubtitle": "Healthcare facility staff",
+    "roleClinicianSubtitle": "Yare dan adwumayɛni",
     "@roleClinicianSubtitle": {
         "description": "roleClinicianSubtitle"
     },
-    "makeItYours": "Make it yours",
+    "makeItYours": "Ma Ɛyɛ Wo Dea",
     "@makeItYours": {
         "description": "makeItYours"
     },
-    "startUsingNaiia": "Start using Naiia",
+    "startUsingNaiia": "Fi Ase De Naiia",
     "@startUsingNaiia": {
         "description": "startUsingNaiia"
     }

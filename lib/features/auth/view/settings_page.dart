@@ -1,5 +1,7 @@
 import 'package:cap_project/app/cubit/navigation_cubit.dart';
 import 'package:cap_project/app/view/app_router.dart';
+import 'package:cap_project/core/legal/legal_content.dart';
+import 'package:cap_project/core/legal/policy_viewer_page.dart';
 import 'package:cap_project/core/locale/cubit/locale_cubit.dart';
 import 'package:cap_project/core/locale/cubit/locale_state.dart';
 import 'package:cap_project/core/locale/widgets/language_selector_bottom_sheet.dart';
@@ -72,10 +74,10 @@ class _SettingsPageState extends State<SettingsPage> {
                             String subtitle;
                             switch (state.themeMode) {
                               case AppThemeMode.light:
-                                subtitle = 'Light';
+                                subtitle = l10n.themeLight;
                                 break;
                               case AppThemeMode.dark:
-                                subtitle = 'Dark';
+                                subtitle = l10n.themeDark;
                                 break;
                               case AppThemeMode.system:
                                 subtitle = l10n.systemDefault;
@@ -143,14 +145,37 @@ class _SettingsPageState extends State<SettingsPage> {
                           title: l10n.privacyPolicy,
                           icon: Icons.privacy_tip_outlined,
                           showDivider: true,
-                          onTap: () {},
+                          onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => const PolicyViewerPage(
+                                title: kPrivacyPolicyTitle,
+                                effectiveDate: kPrivacyPolicyDate,
+                                sections: kPrivacySections,
+                              ),
+                            ),
+                          ),
+                        ),
+                        _buildSettingTile(
+                          context,
+                          title: 'Terms of Service',
+                          icon: Icons.gavel_rounded,
+                          showDivider: true,
+                          onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => const PolicyViewerPage(
+                                title: kTermsTitle,
+                                effectiveDate: kTermsDate,
+                                sections: kTermsSections,
+                              ),
+                            ),
+                          ),
                         ),
                         _buildSettingTile(
                           context,
                           title: l10n.version,
                           subtitle: l10n.versionNumber,
                           icon: Icons.info_outline_rounded,
-                          onTap: null, // Just display
+                          onTap: null,
                         ),
                       ]),
                       const SizedBox(height: 48),
@@ -286,7 +311,7 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
             _buildThemeOption(
               context,
-              title: 'Light',
+              title: l10n.themeLight,
               icon: Icons.light_mode_outlined,
               isSelected: cubit.state.themeMode == AppThemeMode.light,
               onTap: () {
@@ -296,7 +321,7 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
             _buildThemeOption(
               context,
-              title: 'Dark',
+              title: l10n.themeDark,
               icon: Icons.dark_mode_outlined,
               isSelected: cubit.state.themeMode == AppThemeMode.dark,
               onTap: () {

@@ -6,6 +6,7 @@ import 'package:cap_project/core/widgets/brand_logo.dart';
 import 'package:cap_project/features/auth/widgets/google_sign_in_button.dart';
 import 'package:cap_project/features/landing/cubit/cubit.dart';
 import 'package:cap_project/features/landing/cubit/landing_state.dart';
+import 'package:cap_project/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -103,7 +104,7 @@ class WelcomeDrawer extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 24),
                         child: Text(
-                          'Secure your medical history and personalize your health companion by signing in.',
+                          AppLocalizations.of(context).authSubtitle,
                           textAlign: TextAlign.center,
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                 color: Theme.of(context)
@@ -136,7 +137,7 @@ class WelcomeDrawer extends StatelessWidget {
                                   Navigator.pop(context);
                                 },
                                 child: Text(
-                                  'Continue as Guest',
+                                  AppLocalizations.of(context).continueAsGuest,
                                   style: TextStyle(
                                     color: Theme.of(context)
                                         .textTheme

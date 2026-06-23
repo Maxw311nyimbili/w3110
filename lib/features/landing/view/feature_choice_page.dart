@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cap_project/core/theme/app_colors.dart';
+import 'package:cap_project/core/theme/app_shadows.dart';
 import 'package:cap_project/core/theme/app_text_styles.dart';
 import 'package:cap_project/core/theme/app_spacing.dart';
 import 'package:cap_project/app/view/app_router.dart';
@@ -8,7 +9,7 @@ import 'package:cap_project/core/widgets/widgets.dart';
 enum SelectedFeature { chat, forum, scanner }
 
 // Brand color shared with splash page for full consistency
-const _kBrand = AppColors.brandDarkTeal; // #0C4B4F
+const _kBrand = AppColors.slateBlue;
 
 class FeatureChoicePage extends StatefulWidget {
   const FeatureChoicePage({super.key});
@@ -259,18 +260,13 @@ class _FeatureCard extends StatelessWidget {
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: _kBrand.withOpacity(0.12),
-                    blurRadius: 20,
-                    offset: const Offset(0, 6),
+                    color: _kBrand.withOpacity(0.18),
+                    blurRadius: 24,
+                    spreadRadius: -4,
+                    offset: const Offset(0, 8),
                   ),
                 ]
-              : [
-                  BoxShadow(
-                    color: AppColors.shadowWarm,
-                    blurRadius: 10,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
+              : AppShadows.card,
         ),
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
         child: Row(

@@ -5,6 +5,7 @@ import 'package:cap_project/core/theme/app_text_styles.dart';
 import 'package:cap_project/core/widgets/brand_logo.dart';
 import 'package:cap_project/features/landing/cubit/cubit.dart';
 import 'package:cap_project/features/auth/widgets/google_sign_in_button.dart';
+import 'package:cap_project/l10n/l10n.dart';
 
 class AuthenticationStep extends StatelessWidget {
   const AuthenticationStep({super.key});
@@ -79,7 +80,7 @@ class AuthenticationStep extends StatelessWidget {
                     _buildStaggeredEntrance(
                       delay: 300,
                       child: Text(
-                        'Secure your medical history and personalize your health companion by signing in.',
+                        AppLocalizations.of(context).authSubtitle,
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                           color: Theme.of(context).textTheme.bodySmall?.color,
@@ -137,7 +138,7 @@ class AuthenticationStep extends StatelessWidget {
                                   .read<LandingCubit>()
                                   .continueAsGuest(),
                         child: Text(
-                          'Continue as Guest',
+                          AppLocalizations.of(context).continueAsGuest,
                           style: Theme.of(context).textTheme.labelLarge?.copyWith(
                             color: Theme.of(context).textTheme.bodySmall?.color,
                             fontWeight: FontWeight.w700,
