@@ -5,13 +5,13 @@
 import 'dart:async' show unawaited;
 import 'dart:io' show Platform;
 
+import 'package:cap_project/core/theme/app_colors.dart';
+import 'package:cap_project/core/theme/app_spacing.dart';
+import 'package:cap_project/features/rating/rating_cubit.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:cap_project/core/theme/app_colors.dart';
-import 'package:cap_project/core/theme/app_spacing.dart';
-import 'package:cap_project/features/rating/rating_cubit.dart';
 
 /// Shows the rating bottom-sheet. Call this from AppShell when
 /// [RatingStatus.showing] is emitted.

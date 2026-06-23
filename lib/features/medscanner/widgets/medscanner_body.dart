@@ -1,15 +1,13 @@
 // lib/features/medscanner/widgets/medscanner_body.dart
 
-import 'package:cap_project/features/medscanner/widgets/widgets.dart';
+import 'package:cap_project/core/theme/app_colors.dart';
+import 'package:cap_project/core/theme/app_spacing.dart';
+import 'package:cap_project/core/theme/app_text_styles.dart';
+import 'package:cap_project/features/medscanner/cubit/cubit.dart';
+import 'package:cap_project/features/medscanner/widgets/camera_preview_widget.dart';
+import 'package:cap_project/features/medscanner/widgets/scan_result_widget.dart';
 import 'package:cap_project/l10n/l10n.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import '../cubit/cubit.dart';
-import '../../../core/theme/app_spacing.dart';
-import '../../../core/theme/app_text_styles.dart';
-import '../../../core/theme/app_colors.dart';
-import 'camera_preview_widget.dart';
-import 'scan_result_widget.dart';
 
 /// Main scanner body - camera preview or scan results
 class MedScannerBody extends StatelessWidget {
@@ -24,28 +22,24 @@ class MedScannerBody extends StatelessWidget {
           final l10n = AppLocalizations.of(context);
           String message;
 
-          // Map error key to localized string, or use the raw string if it's descriptive
+          // Map error key to localized string, or use the
+          // raw string if it's descriptive
           switch (state.error) {
             case 'cameraPermissionDenied':
               message = l10n.cameraPermissionDenied;
-              break;
             case 'noCameraFound':
               message = l10n.noCameraFound;
-              break;
             case 'uploadFailed':
               message = l10n.uploadFailed;
-              break;
             case 'analysisFailed':
               message = l10n.analysisFailed;
-              break;
             case 'fileTooLarge':
               message = l10n.fileTooLarge;
-              break;
             case 'genericError':
               message = l10n.genericError;
-              break;
             default:
-              // For descriptive reasons (e.g. from backend AI), use the raw string
+              // For descriptive reasons (e.g. from backend AI),
+              // use the raw string
               message = state.error ?? l10n.genericError;
           }
 
