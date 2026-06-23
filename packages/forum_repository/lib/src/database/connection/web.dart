@@ -13,11 +13,13 @@ QueryExecutor openConnectionImpl() {
       );
       return result.resolvedExecutor;
     } catch (e) {
-      print('❌ DRIFT WEB ERROR: Failed to open WasmDatabase. '
-          'This is expected if sqlite3.wasm and drift_worker.js are missing from the web/ directory. '
-          'The forum will operate in online-only mode for now. Error: $e');
-      
-      // We rethrow so that the first query fails, but ForumCubit 
+      print(
+        '❌ DRIFT WEB ERROR: Failed to open WasmDatabase. '
+        'This is expected if sqlite3.wasm and drift_worker.js are missing from the web/ directory. '
+        'The forum will operate in online-only mode for now. Error: $e',
+      );
+
+      // We rethrow so that the first query fails, but ForumCubit
       // is now updated to catch these and show the UI anyway.
       rethrow;
     }

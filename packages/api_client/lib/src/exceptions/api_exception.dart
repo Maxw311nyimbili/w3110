@@ -36,7 +36,8 @@ class NoInternetException extends ApiException {
   NoInternetException({String? baseUrl})
     : super(
         error: ApiError(
-          message: 'No internet connection - please check your network'
+          message:
+              'No internet connection - please check your network'
               '${baseUrl != null ? ' (tried connecting to $baseUrl)' : ''}',
           code: 'NO_INTERNET',
         ),

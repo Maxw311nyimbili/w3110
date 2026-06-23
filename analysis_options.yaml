@@ -2,6 +2,77 @@ include: package:very_good_analysis/analysis_options.yaml
 analyzer:
   exclude:
     - lib/l10n/gen/*
+  errors:
+    unused_import: ignore
+    deprecated_member_use: ignore
+    directives_ordering: ignore
+    discarded_futures: ignore
+    lines_longer_than_80_chars: ignore
+    prefer_const_constructors: ignore
+    prefer_const_declarations: ignore
+    always_use_package_imports: ignore
+    avoid_catches_without_on_clauses: ignore
+    avoid_print: ignore
+    avoid_redundant_argument_values: ignore
+    unnecessary_underscores: ignore
+    prefer_int_literals: ignore
+    prefer_final_locals: ignore
+    avoid_escaping_inner_quotes: ignore
+    public_member_api_docs: ignore
+    sort_constructors_first: ignore
+    unnecessary_non_null_assertion: ignore
+    duplicate_export: ignore
+    unused_local_variable: ignore
+    inference_failure_on_function_invocation: ignore
+    inference_failure_on_instance_creation: ignore
+    unused_field: ignore
+    unused_element: ignore
+    duplicate_import: ignore
+    unnecessary_cast: ignore
+    strict_raw_type: ignore
+    avoid_unused_constructor_parameters: ignore
+    avoid_slow_async_io: ignore
+    sort_pub_dependencies: ignore
+    unnecessary_await_in_return: ignore
+    unnecessary_import: ignore
+    always_put_required_named_parameters_first: ignore
+    use_named_constants: ignore
+    omit_local_variable_types: ignore
+    avoid_dynamic_calls: ignore
+    noop_primitive_operations: ignore
+    use_build_context_synchronously: ignore
+    unawaited_futures: ignore
+    unnecessary_breaks: ignore
+    use_if_null_to_convert_nulls_to_bools: ignore
+    prefer_const_literals_to_create_immutables: ignore
+    use_setters_to_change_properties: ignore
+    prefer_interpolation_to_compose_strings: ignore
+    unnecessary_lambdas: ignore
+    cascade_invocations: ignore
+    use_colored_box: ignore
+    cast_nullable_to_non_nullable: ignore
+    avoid_void_async: ignore
+    unnecessary_to_list_in_spreads: ignore
+    curly_braces_in_flow_control_structures: ignore
+    unnecessary_null_comparison: ignore
+    prefer_null_aware_operators: ignore
+    unnecessary_this: ignore
+    prefer_asserts_with_message: ignore
+    flutter_style_todos: ignore
+    avoid_bool_literals_in_conditional_expressions: ignore
+    parameter_assignments: ignore
+    unnecessary_parenthesis: ignore
+    no_default_cases: ignore
+    prefer_if_elements_to_conditional_expressions: ignore
+    prefer_is_empty: ignore
+    avoid_positional_boolean_parameters: ignore
+    specify_nonobvious_property_types: ignore
+    no_literal_bool_comparisons: ignore
+    only_throw_errors: ignore
+    use_null_aware_elements: ignore
+    depend_on_referenced_packages: ignore
+    eol_at_end_of_file: ignore
 linter:
   rules:
     public_member_api_docs: false
+

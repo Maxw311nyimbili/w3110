@@ -271,7 +271,9 @@ class LandingRepository {
       // 4. Too soon since last prompt (re-prompt after "Maybe Later")
       final lastPromptedMs = await _localPreferences.getRatingLastPromptedMs();
       if (lastPromptedMs != null) {
-        final lastPrompted = DateTime.fromMillisecondsSinceEpoch(lastPromptedMs);
+        final lastPrompted = DateTime.fromMillisecondsSinceEpoch(
+          lastPromptedMs,
+        );
         final daysSincePrompt = now.difference(lastPrompted).inDays;
         if (daysSincePrompt < minDaysBetweenPrompts) return false;
       }

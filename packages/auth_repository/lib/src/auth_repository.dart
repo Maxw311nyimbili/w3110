@@ -20,8 +20,12 @@ class AuthRepository {
        _firebaseAuth = firebase_auth.FirebaseAuth.instance,
        _googleSignIn = GoogleSignIn(
          // serverClientId is not supported on web — pass it only on mobile/desktop.
-         serverClientId: kIsWeb ? null : '956333738143-2sr0rd0qfguchkrbbe9jg5bp9se565pq.apps.googleusercontent.com',
-         clientId: kIsWeb ? '956333738143-2sr0rd0qfguchkrbbe9jg5bp9se565pq.apps.googleusercontent.com' : null,
+         serverClientId: kIsWeb
+             ? null
+             : '956333738143-2sr0rd0qfguchkrbbe9jg5bp9se565pq.apps.googleusercontent.com',
+         clientId: kIsWeb
+             ? '956333738143-2sr0rd0qfguchkrbbe9jg5bp9se565pq.apps.googleusercontent.com'
+             : null,
          scopes: ['email', 'profile'],
        );
 
@@ -109,7 +113,8 @@ class AuthRepository {
       } else if (msg.contains('10:')) {
         message = 'Developer error (10). Check SHA-1 / package name in GCP.';
       } else if (msg.contains('12500')) {
-        message = 'Sign-in failed (12500). Ensure Google Play Services is updated.';
+        message =
+            'Sign-in failed (12500). Ensure Google Play Services is updated.';
       } else if (msg.contains('12501')) {
         message = 'Sign-in cancelled.';
       }

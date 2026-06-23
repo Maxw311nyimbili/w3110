@@ -9,7 +9,7 @@ class UploadResponse extends Equatable {
     required this.scanId,
   });
 
-  final String url;    // Uploaded image file path / URL
+  final String url; // Uploaded image file path / URL
   final String scanId; // ID for referencing the scan (backend `id` field)
 
   /// Parse from backend JSON.
@@ -34,7 +34,8 @@ class UploadResponse extends Equatable {
     if (extractedData != null) {
       final status = extractedData['status'] as String? ?? '';
       if (status == 'rejected') {
-        final reason = extractedData['reason'] as String? ??
+        final reason =
+            extractedData['reason'] as String? ??
             'Image could not be processed. Please try again with a clearer photo.';
         throw MediaUploadRejectedException(reason);
       }

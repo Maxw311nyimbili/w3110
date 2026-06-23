@@ -89,7 +89,7 @@ class ConflictResolver {
         syncStatus: const Value('synced'),
       ),
     );
-    
+
     // Explicitly refresh author info to ensure authoritative name is used
     await _database.updatePostAuthorInfo(
       localId: localId,

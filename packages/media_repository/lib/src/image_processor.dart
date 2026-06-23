@@ -22,7 +22,7 @@ class ImageProcessor {
         print('🌐 [Web] Skipping compression for blob: $imagePath');
         return imagePath;
       }
-      
+
       final imageFile = File(imagePath);
 
       // Check if file exists
@@ -82,12 +82,12 @@ class ImageProcessor {
       print('🌐 [Web] Skipping native barcode detection');
       return null;
     }
-    
+
     BarcodeScannerInterface? barcodeScanner;
     try {
       barcodeScanner = getBarcodeScanner();
       final barcode = await barcodeScanner.processImage(imagePath);
-      
+
       if (barcode != null && barcode.isNotEmpty) {
         print('✅ Barcode detected: $barcode');
         return barcode;
@@ -111,7 +111,7 @@ class ImageProcessor {
       if (kIsWeb) {
         return imagePath.startsWith('blob:') || imagePath.startsWith('http');
       }
-      
+
       final imageFile = File(imagePath);
 
       // Check file exists

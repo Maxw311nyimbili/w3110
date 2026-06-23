@@ -12,7 +12,7 @@ class BarcodeScannerIO implements BarcodeScannerInterface {
   Future<String?> processImage(String imagePath) async {
     final inputImage = InputImage.fromFilePath(imagePath);
     final barcodes = await _scanner.processImage(inputImage);
-    
+
     if (barcodes.isEmpty) return null;
     return barcodes.first.rawValue;
   }

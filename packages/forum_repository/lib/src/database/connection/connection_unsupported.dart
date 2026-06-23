@@ -3,5 +3,7 @@
 import 'package:drift/drift.dart';
 
 QueryExecutor openConnectionImpl() {
-  throw UnsupportedError('Opening a database on this platform is not supported.');
+  throw UnsupportedError(
+    'Opening a database on this platform is not supported.',
+  );
 }

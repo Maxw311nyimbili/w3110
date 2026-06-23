@@ -235,8 +235,7 @@ class ForumRepository {
           'content': content,
           'client_id': localId,
           'sources': sources.map((e) => e.toJson()).toList(),
-          if (originalAnswerId != null)
-            'original_answer_id': originalAnswerId,
+          if (originalAnswerId != null) 'original_answer_id': originalAnswerId,
         },
       );
       return ForumPost.fromJson(response.data as Map<String, dynamic>);
@@ -496,7 +495,9 @@ class ForumRepository {
 
       return lines;
     } catch (e) {
-      print('DEBUG: getLinesForPost - server failed, falling back to local: $e');
+      print(
+        'DEBUG: getLinesForPost - server failed, falling back to local: $e',
+      );
       // 3. Fallback to local cache (only on mobile where DB is available)
       try {
         final intId = int.tryParse(postId);
@@ -614,17 +615,23 @@ class ForumRepository {
               .toList(),
         );
       } catch (dbError) {
-        print('⚠️ getCommentsForLine: local cache write failed (web?): $dbError');
+        print(
+          '⚠️ getCommentsForLine: local cache write failed (web?): $dbError',
+        );
       }
 
       return comments;
     } catch (e) {
-      print('DEBUG: getCommentsForLine - server failed, falling back to local: $e');
+      print(
+        'DEBUG: getCommentsForLine - server failed, falling back to local: $e',
+      );
       // 3. Fallback to local cache (only works on mobile)
       try {
         final localComments = await _database.getCommentsForLine(lineId);
         if (localComments.isNotEmpty) {
-          return localComments.map((c) => ForumLineComment.fromDatabase(c)).toList();
+          return localComments
+              .map((c) => ForumLineComment.fromDatabase(c))
+              .toList();
         }
       } catch (_) {}
       rethrow;

@@ -180,7 +180,7 @@ class MediaRepository {
 
       // Create multipart form data
       final formData = FormData();
-      
+
       if (kIsWeb) {
         // On Web, imagePath is a blob URL. We need to fetch it as bytes.
         final response = await Dio().get<List<int>>(
@@ -188,22 +188,26 @@ class MediaRepository {
           options: Options(responseType: ResponseType.bytes),
         );
         final bytes = response.data!;
-        
-        formData.files.add(MapEntry(
-          'file', // Changed from 'image' to 'file'
-          MultipartFile.fromBytes(
-            bytes,
-            filename: 'scan_${DateTime.now().millisecondsSinceEpoch}.jpg',
+
+        formData.files.add(
+          MapEntry(
+            'file', // Changed from 'image' to 'file'
+            MultipartFile.fromBytes(
+              bytes,
+              filename: 'scan_${DateTime.now().millisecondsSinceEpoch}.jpg',
+            ),
           ),
-        ));
+        );
       } else {
-        formData.files.add(MapEntry(
-          'file', // Changed from 'image' to 'file'
-          await MultipartFile.fromFile(
-            request.imagePath,
-            filename: 'scan_${DateTime.now().millisecondsSinceEpoch}.jpg',
+        formData.files.add(
+          MapEntry(
+            'file', // Changed from 'image' to 'file'
+            await MultipartFile.fromFile(
+              request.imagePath,
+              filename: 'scan_${DateTime.now().millisecondsSinceEpoch}.jpg',
+            ),
           ),
-        ));
+        );
       }
 
       // Backend requires scan_type

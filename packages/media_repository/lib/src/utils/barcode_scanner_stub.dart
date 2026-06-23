@@ -7,4 +7,5 @@ abstract class BarcodeScannerInterface {
 }
 
 /// Factory to get the platform-specific implementation
-BarcodeScannerInterface getBarcodeScanner() => throw UnsupportedError('Cannot create a barcode scanner');
+BarcodeScannerInterface getBarcodeScanner() =>
+    throw UnsupportedError('Cannot create a barcode scanner');

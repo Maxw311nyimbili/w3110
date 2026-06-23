@@ -533,4 +533,3 @@ class ForumDatabase extends _$ForumDatabase {
     );
   }
 }
-

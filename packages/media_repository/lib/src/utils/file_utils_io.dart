@@ -7,7 +7,7 @@ export 'file_utils_stub.dart';
 class File implements FileInterface {
   File(this.path) : _file = io.File(path);
   final io.File _file;
-  
+
   @override
   final String path;
 
