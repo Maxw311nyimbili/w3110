@@ -245,7 +245,12 @@ class MedScannerCubit extends Cubit<MedScannerState> {
   /// Stop camera resources without closing the cubit
   Future<void> stopCamera() async {
     await _mediaRepository.dispose();
-    emit(state.copyWith(status: MedScannerStatus.initial, isCameraInitialized: false));
+    emit(
+      state.copyWith(
+        status: MedScannerStatus.initial,
+        isCameraInitialized: false,
+      ),
+    );
   }
 
   /// Dispose camera resources

@@ -22,7 +22,10 @@ class _FadeSlidePageTransitionsBuilder extends PageTransitionsBuilder {
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    final fadeIn = CurvedAnimation(parent: animation, curve: Curves.easeOutCubic);
+    final fadeIn = CurvedAnimation(
+      parent: animation,
+      curve: Curves.easeOutCubic,
+    );
     final slideIn = Tween<Offset>(
       begin: const Offset(0, 0.04),
       end: Offset.zero,
@@ -90,7 +93,7 @@ class AppTheme {
         onTertiary: AppColors.ink,
         error: AppColors.error,
         onError: Colors.white,
-        surface: AppColors.backgroundSurface,    // warm cream — cards, sheets
+        surface: AppColors.backgroundSurface, // warm cream — cards, sheets
         onSurface: AppColors.ink,
         outline: AppColors.borderLight,
         outlineVariant: AppColors.backgroundPanel,
@@ -132,7 +135,7 @@ class AppTheme {
           borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
           side: const BorderSide(color: AppColors.borderLight, width: 0.75),
         ),
-        color: AppColors.backgroundSurface,   // warm cream card bg
+        color: AppColors.backgroundSurface, // warm cream card bg
         margin: EdgeInsets.zero,
         shadowColor: Colors.transparent,
       ),
@@ -140,7 +143,7 @@ class AppTheme {
       // ─── Inputs ───────────────────────────────────────────────────────────
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.backgroundElevated,  // slightly lighter warm cream
+        fillColor: AppColors.backgroundElevated, // slightly lighter warm cream
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 20,
           vertical: 16,
@@ -290,18 +293,32 @@ class AppTheme {
 
       // ─── Text theme ───────────────────────────────────────────────────────
       textTheme: TextTheme(
-        displayLarge:  AppTextStyles.displayLarge.copyWith(color: AppColors.ink),
-        displayMedium: AppTextStyles.displayMedium.copyWith(color: AppColors.ink),
-        displaySmall:  AppTextStyles.displaySmall.copyWith(color: AppColors.ink),
-        headlineLarge: AppTextStyles.headlineLarge.copyWith(color: AppColors.ink),
-        headlineMedium: AppTextStyles.headlineMedium.copyWith(color: AppColors.ink),
-        headlineSmall: AppTextStyles.headlineSmall.copyWith(color: AppColors.ink),
-        bodyLarge:   AppTextStyles.bodyLarge.copyWith(color: AppColors.ink),
-        bodyMedium:  AppTextStyles.bodyMedium.copyWith(color: AppColors.ink),
-        bodySmall:   AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary),
-        labelLarge:  AppTextStyles.labelLarge.copyWith(color: AppColors.ink),
-        labelMedium: AppTextStyles.labelMedium.copyWith(color: AppColors.textSecondary),
-        labelSmall:  AppTextStyles.labelSmall.copyWith(color: AppColors.textTertiary),
+        displayLarge: AppTextStyles.displayLarge.copyWith(color: AppColors.ink),
+        displayMedium: AppTextStyles.displayMedium.copyWith(
+          color: AppColors.ink,
+        ),
+        displaySmall: AppTextStyles.displaySmall.copyWith(color: AppColors.ink),
+        headlineLarge: AppTextStyles.headlineLarge.copyWith(
+          color: AppColors.ink,
+        ),
+        headlineMedium: AppTextStyles.headlineMedium.copyWith(
+          color: AppColors.ink,
+        ),
+        headlineSmall: AppTextStyles.headlineSmall.copyWith(
+          color: AppColors.ink,
+        ),
+        bodyLarge: AppTextStyles.bodyLarge.copyWith(color: AppColors.ink),
+        bodyMedium: AppTextStyles.bodyMedium.copyWith(color: AppColors.ink),
+        bodySmall: AppTextStyles.bodySmall.copyWith(
+          color: AppColors.textSecondary,
+        ),
+        labelLarge: AppTextStyles.labelLarge.copyWith(color: AppColors.ink),
+        labelMedium: AppTextStyles.labelMedium.copyWith(
+          color: AppColors.textSecondary,
+        ),
+        labelSmall: AppTextStyles.labelSmall.copyWith(
+          color: AppColors.textTertiary,
+        ),
       ),
     );
   }
@@ -341,19 +358,19 @@ class AppTheme {
       pageTransitionsTheme: _pageTransition,
 
       colorScheme: const ColorScheme.dark(
-        primary: AppColors.darkPrimary,           // #BACADC — luminous slate blue
-        onPrimary: AppColors.darkOnPrimary,        // #1A2430 — deep ink on primary
+        primary: AppColors.darkPrimary, // #BACADC — luminous slate blue
+        onPrimary: AppColors.darkOnPrimary, // #1A2430 — deep ink on primary
         primaryContainer: AppColors.darkPrimaryContainer, // #2A3D52
         onPrimaryContainer: AppColors.darkPrimary,
-        secondary: AppColors.darkTaupe,            // #D6CABF — warm taupe accent
-        onSecondary: AppColors.darkCanvas,         // deep ink on taupe
-        tertiary: AppColors.darkTextSecondary,     // warm mid-grey as tertiary
+        secondary: AppColors.darkTaupe, // #D6CABF — warm taupe accent
+        onSecondary: AppColors.darkCanvas, // deep ink on taupe
+        tertiary: AppColors.darkTextSecondary, // warm mid-grey as tertiary
         onTertiary: AppColors.darkCanvas,
         error: AppColors.error,
         onError: Colors.white,
-        surface: AppColors.darkSurface,            // #201D16 — card bg
-        onSurface: AppColors.darkTextPrimary,      // #F0EBE2
-        outline: AppColors.darkBorder,             // taupe at 27%
+        surface: AppColors.darkSurface, // #201D16 — card bg
+        onSurface: AppColors.darkTextPrimary, // #F0EBE2
+        outline: AppColors.darkBorder, // taupe at 27%
         outlineVariant: AppColors.darkBorderSubtle, // taupe at 12%
       ),
 
@@ -423,7 +440,10 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-          borderSide: const BorderSide(color: AppColors.darkPrimary, width: 1.5),
+          borderSide: const BorderSide(
+            color: AppColors.darkPrimary,
+            width: 1.5,
+          ),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
@@ -451,7 +471,9 @@ class AppTheme {
             return AppColors.darkPrimary;
           }),
           foregroundColor: WidgetStateProperty.all(AppColors.darkOnPrimary),
-          overlayColor: WidgetStateProperty.all(AppColors.darkOnPrimary.withOpacity(0.10)),
+          overlayColor: WidgetStateProperty.all(
+            AppColors.darkOnPrimary.withOpacity(0.10),
+          ),
           elevation: WidgetStateProperty.all(0),
           shadowColor: WidgetStateProperty.all(Colors.transparent),
           padding: WidgetStateProperty.all(
@@ -537,18 +559,42 @@ class AppTheme {
 
       // ─── Text theme ────────────────────────────────────────────────────────
       textTheme: TextTheme(
-        displayLarge:   AppTextStyles.displayLarge.copyWith(color: AppColors.darkTextPrimary),
-        displayMedium:  AppTextStyles.displayMedium.copyWith(color: AppColors.darkTextPrimary),
-        displaySmall:   AppTextStyles.displaySmall.copyWith(color: AppColors.darkTextPrimary),
-        headlineLarge:  AppTextStyles.headlineLarge.copyWith(color: AppColors.darkTextPrimary),
-        headlineMedium: AppTextStyles.headlineMedium.copyWith(color: AppColors.darkTextPrimary),
-        headlineSmall:  AppTextStyles.headlineSmall.copyWith(color: AppColors.darkTextPrimary),
-        bodyLarge:      AppTextStyles.bodyLarge.copyWith(color: AppColors.darkTextPrimary),
-        bodyMedium:     AppTextStyles.bodyMedium.copyWith(color: AppColors.darkTextPrimary),
-        bodySmall:      AppTextStyles.bodySmall.copyWith(color: AppColors.darkTextSecondary),
-        labelLarge:     AppTextStyles.labelLarge.copyWith(color: AppColors.darkTextPrimary),
-        labelMedium:    AppTextStyles.labelMedium.copyWith(color: AppColors.darkTextSecondary),
-        labelSmall:     AppTextStyles.labelSmall.copyWith(color: AppColors.darkTextTertiary),
+        displayLarge: AppTextStyles.displayLarge.copyWith(
+          color: AppColors.darkTextPrimary,
+        ),
+        displayMedium: AppTextStyles.displayMedium.copyWith(
+          color: AppColors.darkTextPrimary,
+        ),
+        displaySmall: AppTextStyles.displaySmall.copyWith(
+          color: AppColors.darkTextPrimary,
+        ),
+        headlineLarge: AppTextStyles.headlineLarge.copyWith(
+          color: AppColors.darkTextPrimary,
+        ),
+        headlineMedium: AppTextStyles.headlineMedium.copyWith(
+          color: AppColors.darkTextPrimary,
+        ),
+        headlineSmall: AppTextStyles.headlineSmall.copyWith(
+          color: AppColors.darkTextPrimary,
+        ),
+        bodyLarge: AppTextStyles.bodyLarge.copyWith(
+          color: AppColors.darkTextPrimary,
+        ),
+        bodyMedium: AppTextStyles.bodyMedium.copyWith(
+          color: AppColors.darkTextPrimary,
+        ),
+        bodySmall: AppTextStyles.bodySmall.copyWith(
+          color: AppColors.darkTextSecondary,
+        ),
+        labelLarge: AppTextStyles.labelLarge.copyWith(
+          color: AppColors.darkTextPrimary,
+        ),
+        labelMedium: AppTextStyles.labelMedium.copyWith(
+          color: AppColors.darkTextSecondary,
+        ),
+        labelSmall: AppTextStyles.labelSmall.copyWith(
+          color: AppColors.darkTextTertiary,
+        ),
       ),
     );
   }

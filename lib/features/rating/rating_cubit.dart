@@ -8,8 +8,8 @@ part 'rating_state.dart';
 
 class RatingCubit extends Cubit<RatingState> {
   RatingCubit({required LandingRepository landingRepository})
-      : _repo = landingRepository,
-        super(const RatingState());
+    : _repo = landingRepository,
+      super(const RatingState());
 
   final LandingRepository _repo;
 

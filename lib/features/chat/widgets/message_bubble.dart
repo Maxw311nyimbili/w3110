@@ -42,7 +42,10 @@ class RefinedMessageBubble extends StatelessWidget {
                 final primary = Theme.of(context).colorScheme.primary;
                 final onPrimary = Theme.of(context).colorScheme.onPrimary;
                 return Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 13),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 13,
+                  ),
                   decoration: BoxDecoration(
                     color: primary,
                     borderRadius: const BorderRadius.only(
@@ -165,7 +168,9 @@ class RefinedMessageBubble extends StatelessWidget {
                     width: 1.5,
                     height: 36,
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primary.withOpacity(0.35),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withOpacity(0.35),
                       borderRadius: BorderRadius.circular(1),
                     ),
                   ),
@@ -189,113 +194,167 @@ class RefinedMessageBubble extends StatelessWidget {
 
                           return MarkdownBody(
                             data: content,
-                            selectable: false, // Changed to false to let SelectionArea handle it
+                            selectable:
+                                false, // Changed to false to let SelectionArea handle it
                             fitContent: false,
                             onTapLink: (text, href, title) {
                               if (href != null) _launchURL(href);
                             },
-                            styleSheet: MarkdownStyleSheet.fromTheme(
-                              Theme.of(context),
-                            ).copyWith(
-                              p: AppTextStyles.bodyMedium.copyWith(
-                                color: Theme.of(context).textTheme.bodyLarge?.color,
-                                height: 1.7,
-                                fontSize: 15,
-                              ),
-                              pPadding: const EdgeInsets.only(bottom: 8),
-                              strong: AppTextStyles.bodyMedium.copyWith(
-                                color: Theme.of(context).textTheme.bodyLarge?.color,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 15,
-                              ),
-                              em: AppTextStyles.bodyMedium.copyWith(
-                                color: Theme.of(context).textTheme.bodyMedium?.color,
-                                fontStyle: FontStyle.italic,
-                                fontSize: 15,
-                              ),
-                              h1: AppTextStyles.displaySmall.copyWith(
-                                color: Theme.of(context).textTheme.headlineLarge?.color,
-                                fontWeight: FontWeight.w700,
-                                height: 1.3,
-                              ),
-                              h1Padding: const EdgeInsets.only(top: 16, bottom: 8),
-                              h2: AppTextStyles.headlineLarge.copyWith(
-                                color: Theme.of(context).colorScheme.primary,
-                                fontWeight: FontWeight.w700,
-                              ),
-                              h2Padding: const EdgeInsets.only(top: 14, bottom: 6),
-                              h3: AppTextStyles.headlineMedium.copyWith(
-                                color: Theme.of(context).textTheme.headlineMedium?.color,
-                                fontWeight: FontWeight.w600,
-                              ),
-                              h3Padding: const EdgeInsets.only(top: 10, bottom: 4),
-                              h4: AppTextStyles.headlineSmall.copyWith(
-                                color: Theme.of(context).textTheme.bodyLarge?.color,
-                                fontWeight: FontWeight.w600,
-                              ),
-                              h4Padding: const EdgeInsets.only(top: 8, bottom: 2),
-                              listBullet: AppTextStyles.bodyMedium.copyWith(
-                                color: Theme.of(context).colorScheme.primary,
-                                fontSize: 15,
-                              ),
-                              listBulletPadding: const EdgeInsets.only(right: 8),
-                              listIndent: 20,
-                              blockSpacing: 12,
-                              blockquote: AppTextStyles.bodyMedium.copyWith(
-                                color: Theme.of(context).textTheme.bodyMedium?.color,
-                                fontStyle: FontStyle.italic,
-                                fontSize: 15,
-                              ),
-                              blockquoteDecoration: BoxDecoration(
-                                border: Border(
-                                  left: BorderSide(
-                                    color: AppColors.warmTaupe.withOpacity(0.8),
-                                    width: 3,
+                            styleSheet:
+                                MarkdownStyleSheet.fromTheme(
+                                  Theme.of(context),
+                                ).copyWith(
+                                  p: AppTextStyles.bodyMedium.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).textTheme.bodyLarge?.color,
+                                    height: 1.7,
+                                    fontSize: 15,
+                                  ),
+                                  pPadding: const EdgeInsets.only(bottom: 8),
+                                  strong: AppTextStyles.bodyMedium.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).textTheme.bodyLarge?.color,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 15,
+                                  ),
+                                  em: AppTextStyles.bodyMedium.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).textTheme.bodyMedium?.color,
+                                    fontStyle: FontStyle.italic,
+                                    fontSize: 15,
+                                  ),
+                                  h1: AppTextStyles.displaySmall.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).textTheme.headlineLarge?.color,
+                                    fontWeight: FontWeight.w700,
+                                    height: 1.3,
+                                  ),
+                                  h1Padding: const EdgeInsets.only(
+                                    top: 16,
+                                    bottom: 8,
+                                  ),
+                                  h2: AppTextStyles.headlineLarge.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                  h2Padding: const EdgeInsets.only(
+                                    top: 14,
+                                    bottom: 6,
+                                  ),
+                                  h3: AppTextStyles.headlineMedium.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).textTheme.headlineMedium?.color,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  h3Padding: const EdgeInsets.only(
+                                    top: 10,
+                                    bottom: 4,
+                                  ),
+                                  h4: AppTextStyles.headlineSmall.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).textTheme.bodyLarge?.color,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  h4Padding: const EdgeInsets.only(
+                                    top: 8,
+                                    bottom: 2,
+                                  ),
+                                  listBullet: AppTextStyles.bodyMedium.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
+                                    fontSize: 15,
+                                  ),
+                                  listBulletPadding: const EdgeInsets.only(
+                                    right: 8,
+                                  ),
+                                  listIndent: 20,
+                                  blockSpacing: 12,
+                                  blockquote: AppTextStyles.bodyMedium.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).textTheme.bodyMedium?.color,
+                                    fontStyle: FontStyle.italic,
+                                    fontSize: 15,
+                                  ),
+                                  blockquoteDecoration: BoxDecoration(
+                                    border: Border(
+                                      left: BorderSide(
+                                        color: AppColors.warmTaupe.withOpacity(
+                                          0.8,
+                                        ),
+                                        width: 3,
+                                      ),
+                                    ),
+                                    color: AppColors.warmTaupe.withOpacity(
+                                      0.06,
+                                    ),
+                                  ),
+                                  blockquotePadding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 8,
+                                  ),
+                                  code: TextStyle(
+                                    backgroundColor: Theme.of(
+                                      context,
+                                    ).colorScheme.surface,
+                                    fontFamily: 'monospace',
+                                    fontSize: 13,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
+                                  ),
+                                  codeblockDecoration: BoxDecoration(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.surface,
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: Theme.of(
+                                        context,
+                                      ).dividerColor.withOpacity(0.3),
+                                    ),
+                                  ),
+                                  codeblockPadding: const EdgeInsets.all(12),
+                                  tableHead: AppTextStyles.labelSmall.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                    color: Theme.of(
+                                      context,
+                                    ).textTheme.bodyLarge?.color,
+                                  ),
+                                  tableBody: AppTextStyles.bodySmall.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).textTheme.bodyMedium?.color,
+                                  ),
+                                  tableBorder: TableBorder.all(
+                                    color: Theme.of(
+                                      context,
+                                    ).dividerColor.withOpacity(0.3),
+                                    width: 1,
+                                  ),
+                                  tableCellsPadding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 6,
+                                  ),
+                                  horizontalRuleDecoration: BoxDecoration(
+                                    border: Border(
+                                      top: BorderSide(
+                                        color: Theme.of(
+                                          context,
+                                        ).dividerColor.withOpacity(0.3),
+                                      ),
+                                    ),
                                   ),
                                 ),
-                                color: AppColors.warmTaupe.withOpacity(0.06),
-                              ),
-                              blockquotePadding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 8,
-                              ),
-                              code: TextStyle(
-                                backgroundColor: Theme.of(context).colorScheme.surface,
-                                fontFamily: 'monospace',
-                                fontSize: 13,
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
-                              codeblockDecoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.surface,
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
-                                  color: Theme.of(context).dividerColor.withOpacity(0.3),
-                                ),
-                              ),
-                              codeblockPadding: const EdgeInsets.all(12),
-                              tableHead: AppTextStyles.labelSmall.copyWith(
-                                fontWeight: FontWeight.w700,
-                                color: Theme.of(context).textTheme.bodyLarge?.color,
-                              ),
-                              tableBody: AppTextStyles.bodySmall.copyWith(
-                                color: Theme.of(context).textTheme.bodyMedium?.color,
-                              ),
-                              tableBorder: TableBorder.all(
-                                color: Theme.of(context).dividerColor.withOpacity(0.3),
-                                width: 1,
-                              ),
-                              tableCellsPadding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 6,
-                              ),
-                              horizontalRuleDecoration: BoxDecoration(
-                                border: Border(
-                                  top: BorderSide(
-                                    color: Theme.of(context).dividerColor.withOpacity(0.3),
-                                  ),
-                                ),
-                              ),
-                            ),
                           );
                         },
                       ),
@@ -554,7 +613,9 @@ class RefinedMessageBubble extends StatelessWidget {
           boxShadow: active
               ? [
                   BoxShadow(
-                    color: Theme.of(context).colorScheme.primary.withOpacity(0.18),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withOpacity(0.18),
                     blurRadius: 4,
                     offset: const Offset(0, 1),
                   ),
@@ -677,7 +738,9 @@ class RefinedMessageBubble extends StatelessWidget {
             const SizedBox(height: 24),
             Text(
               'Listen to Medical Response',
-              style: AppTextStyles.labelLarge.copyWith(fontWeight: FontWeight.bold),
+              style: AppTextStyles.labelLarge.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 16),
             ...models.VoiceLanguage.values.map<Widget>((lang) {

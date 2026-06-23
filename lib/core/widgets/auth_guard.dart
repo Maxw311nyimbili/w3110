@@ -94,8 +94,9 @@ class AuthGuard extends StatelessWidget {
                         ),
                         const SizedBox(height: 16),
                         TextButton(
-                          onPressed: () =>
-                              context.read<NavigationCubit>().setTab(AppTab.chat),
+                          onPressed: () => context
+                              .read<NavigationCubit>()
+                              .setTab(AppTab.chat),
                           child: Text(
                             'Maybe Later',
                             style: AppTextStyles.labelLarge.copyWith(

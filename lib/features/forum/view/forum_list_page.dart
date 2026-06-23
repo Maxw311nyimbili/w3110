@@ -48,33 +48,36 @@ class _ForumListViewState extends State<ForumListView> {
       final isDesktop = ResponsiveUtils.isDesktop(context);
 
       context.read<NavigationCubit>().updateAppBar(
-            title: Text(
-              state.view == ForumView.detail
-                  ? 'Discussion'
-                  : AppLocalizations.of(context).community,
-            ),
-            leading: state.view == ForumView.detail
-                ? IconButton(
-                    icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-                    onPressed: () => context.read<ForumCubit>().backToList(),
-                  )
-                : null,
-            actions: !isDesktop ? [
-              IconButton(
-                icon: const Icon(Icons.refresh_rounded, size: 20),
-                onPressed: () => context.read<ForumCubit>().resetAndReload(),
-                tooltip: 'Reset Forum Data',
-              ),
-              if (state.hasPendingSync)
+        title: Text(
+          state.view == ForumView.detail
+              ? 'Discussion'
+              : AppLocalizations.of(context).community,
+        ),
+        leading: state.view == ForumView.detail
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+                onPressed: () => context.read<ForumCubit>().backToList(),
+              )
+            : null,
+        actions: !isDesktop
+            ? [
                 IconButton(
-                  icon: const Icon(
-                    Icons.cloud_upload_outlined,
-                    color: AppColors.warning,
-                  ),
-                  onPressed: () => context.read<ForumCubit>().syncWithBackend(),
+                  icon: const Icon(Icons.refresh_rounded, size: 20),
+                  onPressed: () => context.read<ForumCubit>().resetAndReload(),
+                  tooltip: 'Reset Forum Data',
                 ),
-            ] : null,
-          );
+                if (state.hasPendingSync)
+                  IconButton(
+                    icon: const Icon(
+                      Icons.cloud_upload_outlined,
+                      color: AppColors.warning,
+                    ),
+                    onPressed: () =>
+                        context.read<ForumCubit>().syncWithBackend(),
+                  ),
+              ]
+            : null,
+      );
     });
   }
 

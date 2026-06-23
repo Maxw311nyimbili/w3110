@@ -107,8 +107,8 @@ class _NewPostSheetState extends State<NewPostSheet> {
                   child: Text(
                     AppLocalizations.of(context).cancel,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).textTheme.bodySmall?.color,
-                        ),
+                      color: Theme.of(context).textTheme.bodySmall?.color,
+                    ),
                   ),
                 ),
                 GestureDetector(
@@ -135,7 +135,10 @@ class _NewPostSheetState extends State<NewPostSheet> {
             ),
           ),
 
-          Divider(height: 1, color: Theme.of(context).dividerColor.withOpacity(0.1)),
+          Divider(
+            height: 1,
+            color: Theme.of(context).dividerColor.withOpacity(0.1),
+          ),
 
           Flexible(
             child: SingleChildScrollView(
@@ -148,9 +151,10 @@ class _NewPostSheetState extends State<NewPostSheet> {
                     TextFormField(
                       controller: _titleController,
                       autofocus: true,
-                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.w800,
-                      ),
+                      style: Theme.of(context).textTheme.headlineMedium
+                          ?.copyWith(
+                            fontWeight: FontWeight.w800,
+                          ),
                       decoration: InputDecoration(
                         hintText: 'Title',
                         hintStyle: TextStyle(

@@ -111,7 +111,8 @@ class _RatingSheetState extends State<_RatingSheet>
               textSecondary: textSecondary,
               commentController: _commentController,
               onStarTap: (s) => context.read<RatingCubit>().selectStars(s),
-              onCommentChanged: (v) => context.read<RatingCubit>().updateComment(v),
+              onCommentChanged: (v) =>
+                  context.read<RatingCubit>().updateComment(v),
               onSubmit: () => context.read<RatingCubit>().submit(
                 platform: _platformString(),
               ),
@@ -251,7 +252,9 @@ class _RatingFormView extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
                 ),
-                disabledBackgroundColor: AppColors.accentPrimary.withOpacity(0.4),
+                disabledBackgroundColor: AppColors.accentPrimary.withOpacity(
+                  0.4,
+                ),
               ),
               child: isSubmitting
                   ? const SizedBox(

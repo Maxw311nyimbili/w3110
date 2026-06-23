@@ -18,7 +18,7 @@ class AudioRecordingService {
     try {
       if (await _record.hasPermission()) {
         String? path;
-        
+
         if (!kIsWeb) {
           final dir = await getTemporaryDirectory();
           path = p.join(

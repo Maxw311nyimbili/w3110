@@ -80,11 +80,14 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
                           children: [
                             Text(
                               'Discussion',
-                              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                color: Theme.of(context).textTheme.headlineMedium?.color,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: -0.5,
-                              ),
+                              style: Theme.of(context).textTheme.headlineMedium
+                                  ?.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).textTheme.headlineMedium?.color,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: -0.5,
+                                  ),
                             ),
                           ],
                         ),
@@ -106,7 +109,10 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
                     ],
                   ),
                 ),
-                Divider(height: 1, color: Theme.of(context).dividerColor.withOpacity(0.1)),
+                Divider(
+                  height: 1,
+                  color: Theme.of(context).dividerColor.withOpacity(0.1),
+                ),
 
                 // ========== SCROLLABLE CONTENT ==========
                 Expanded(
@@ -128,9 +134,15 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
                             margin: const EdgeInsets.fromLTRB(20, 8, 20, 16),
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.surfaceVariant,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.surfaceVariant,
                               borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
+                              border: Border.all(
+                                color: Theme.of(
+                                  context,
+                                ).dividerColor.withOpacity(0.1),
+                              ),
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -140,28 +152,39 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
                                     Icon(
                                       Icons.format_quote_rounded,
                                       size: 18,
-                                      color: Theme.of(context).colorScheme.primary,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
                                     ),
                                     const SizedBox(width: 8),
                                     Text(
                                       'Line ${widget.lineNumber}',
-                                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                        color: Theme.of(context).textTheme.bodySmall?.color,
-                                        fontWeight: FontWeight.w800,
-                                        letterSpacing: 0.5,
-                                      ).copyWith(fontSize: 10),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelSmall
+                                          ?.copyWith(
+                                            color: Theme.of(
+                                              context,
+                                            ).textTheme.bodySmall?.color,
+                                            fontWeight: FontWeight.w800,
+                                            letterSpacing: 0.5,
+                                          )
+                                          .copyWith(fontSize: 10),
                                     ),
                                   ],
                                 ),
                                 const SizedBox(height: 10),
                                 Text(
                                   lineText,
-                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: Theme.of(context).textTheme.bodyLarge?.color,
-                                    height: 1.5,
-                                    fontSize: 14,
-                                    fontStyle: FontStyle.italic,
-                                  ),
+                                  style: Theme.of(context).textTheme.bodyMedium
+                                      ?.copyWith(
+                                        color: Theme.of(
+                                          context,
+                                        ).textTheme.bodyLarge?.color,
+                                        height: 1.5,
+                                        fontSize: 14,
+                                        fontStyle: FontStyle.italic,
+                                      ),
                                 ),
                               ],
                             ),
@@ -169,27 +192,36 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
 
                           Divider(
                             height: 1,
-                            color: Theme.of(context).dividerColor.withOpacity(0.1),
+                            color: Theme.of(
+                              context,
+                            ).dividerColor.withOpacity(0.1),
                           ),
 
                           // 3. Comments List
                           if (comments.isEmpty)
                             Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 40),
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 40,
+                                horizontal: 40,
+                              ),
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Container(
                                     padding: const EdgeInsets.all(24),
                                     decoration: BoxDecoration(
-                                    color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Icon(
-                                    Icons.chat_bubble_outline_rounded,
-                                    size: 40,
-                                    color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
-                                  ),
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.primary.withOpacity(0.1),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      Icons.chat_bubble_outline_rounded,
+                                      size: 40,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.primary.withOpacity(0.5),
+                                    ),
                                   ),
                                   const SizedBox(height: 24),
                                   Text(
@@ -219,7 +251,10 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
                 ),
 
                 // ========== FIXED REPLY INPUT ==========
-                Divider(height: 1, color: Theme.of(context).dividerColor.withOpacity(0.1)),
+                Divider(
+                  height: 1,
+                  color: Theme.of(context).dividerColor.withOpacity(0.1),
+                ),
                 ReplyInputFieldForModal(lineId: widget.lineId),
               ],
             ),
@@ -243,9 +278,13 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
       }
     }
 
-    List<Widget> buildTree(String? parentId, int depth, List<bool> ancestorHasNext) {
+    List<Widget> buildTree(
+      String? parentId,
+      int depth,
+      List<bool> ancestorHasNext,
+    ) {
       if (parentId == null.toString()) parentId = null;
-      
+
       final List<ForumLineComment> children = [];
       final Set<String> seenIds = {};
 
@@ -266,7 +305,9 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
       } else {
         addChildrenForId(parentId);
         try {
-          final parent = allComments.firstWhere((c) => c.id == parentId || c.localId == parentId);
+          final parent = allComments.firstWhere(
+            (c) => c.id == parentId || c.localId == parentId,
+          );
           if (parent.id != parentId) addChildrenForId(parent.id);
           if (parent.localId != parentId) addChildrenForId(parent.localId);
         } catch (_) {}
@@ -276,19 +317,22 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
       final List<Widget> items = [];
       for (int i = 0; i < children.length; i++) {
         final comment = children[i];
-        
-        final hasReplies = (grouped.containsKey(comment.localId) || 
-                          (comment.id.isNotEmpty && grouped.containsKey(comment.id)));
-        final isExpanded = _expandedCommentIds.contains(comment.localId) || 
-                          (comment.id.isNotEmpty && _expandedCommentIds.contains(comment.id));
-        
+
+        final hasReplies =
+            (grouped.containsKey(comment.localId) ||
+            (comment.id.isNotEmpty && grouped.containsKey(comment.id)));
+        final isExpanded =
+            _expandedCommentIds.contains(comment.localId) ||
+            (comment.id.isNotEmpty && _expandedCommentIds.contains(comment.id));
+
         final isLast = i == children.length - 1;
         // If it's the last in the list, but will have a "Hide replies" button below its subtree,
         // it's not the LAST thing in this vertical track at this level.
         final isVisuallyLast = isLast && !isExpanded;
 
-        final replyCount = (grouped[comment.localId]?.length ?? 0) + 
-                          (comment.id.isNotEmpty ? (grouped[comment.id]?.length ?? 0) : 0);
+        final replyCount =
+            (grouped[comment.localId]?.length ?? 0) +
+            (comment.id.isNotEmpty ? (grouped[comment.id]?.length ?? 0) : 0);
 
         items.add(
           Padding(
@@ -349,9 +393,12 @@ class _LineCommentsFilteredViewState extends State<LineCommentsFilteredView> {
           // Top-level comments (depth 0) should not contribute to vertical tracks
           // because we want top-level threads to be isolated.
           final bool contribution = (depth == 0) ? false : !isLast;
-          final nextAncestorHasNext = List<bool>.from(ancestorHasNext)..add(contribution);
-          items.addAll(buildTree(comment.localId, depth + 1, nextAncestorHasNext));
-          
+          final nextAncestorHasNext = List<bool>.from(ancestorHasNext)
+            ..add(contribution);
+          items.addAll(
+            buildTree(comment.localId, depth + 1, nextAncestorHasNext),
+          );
+
           items.add(
             HideRepliesButton(
               depth: depth + 1,

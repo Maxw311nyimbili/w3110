@@ -34,7 +34,9 @@ class MedicineResultCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
+              color: Theme.of(
+                context,
+              ).colorScheme.surfaceVariant.withOpacity(0.5),
               border: Border(
                 bottom: BorderSide(
                   color: Theme.of(context).dividerColor.withOpacity(0.1),
@@ -46,7 +48,9 @@ class MedicineResultCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Icon(
@@ -62,11 +66,14 @@ class MedicineResultCard extends StatelessWidget {
                     children: [
                       Text(
                         result.medicationName,
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.w800,
-                          fontSize: 20,
-                          color: Theme.of(context).textTheme.bodyLarge?.color,
-                        ),
+                        style: Theme.of(context).textTheme.headlineSmall
+                            ?.copyWith(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 20,
+                              color: Theme.of(
+                                context,
+                              ).textTheme.bodyLarge?.color,
+                            ),
                       ),
                       const SizedBox(height: 4),
                       Row(
@@ -124,15 +131,20 @@ class MedicineResultCard extends StatelessWidget {
                               vertical: 6,
                             ),
                             decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.surfaceVariant,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.surfaceVariant,
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
                               i,
-                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                color: Theme.of(context).textTheme.bodySmall?.color,
-                                fontWeight: FontWeight.w600,
-                              ),
+                              style: Theme.of(context).textTheme.labelSmall
+                                  ?.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).textTheme.bodySmall?.color,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                             ),
                           ),
                         )
@@ -164,10 +176,11 @@ class MedicineResultCard extends StatelessWidget {
                             const SizedBox(width: 8),
                             Text(
                               'Critical Warnings',
-                              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                                color: Colors.red,
-                                fontWeight: FontWeight.bold,
-                              ),
+                              style: Theme.of(context).textTheme.labelMedium
+                                  ?.copyWith(
+                                    color: Colors.red,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                             ),
                           ],
                         ),
@@ -190,10 +203,15 @@ class MedicineResultCard extends StatelessWidget {
                                     Expanded(
                                       child: Text(
                                         w,
-                                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                          color: Theme.of(context).textTheme.bodyLarge?.color,
-                                          height: 1.4,
-                                        ),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .labelSmall
+                                            ?.copyWith(
+                                              color: Theme.of(
+                                                context,
+                                              ).textTheme.bodyLarge?.color,
+                                              height: 1.4,
+                                            ),
                                       ),
                                     ),
                                   ],

@@ -48,10 +48,10 @@ class AuthCubit extends Cubit<AuthState> {
         if (user != null) {
           print('✓ User session restored: ${user.email}');
           final authUser = _mapToAuthUser(user);
-          
+
           // Sync theme from user preference
           _themeCubit.updateFromUserPref(user.themeMode);
-          
+
           emit(
             state.copyWith(
               status: AuthStatus.authenticated,
@@ -71,7 +71,7 @@ class AuthCubit extends Cubit<AuthState> {
       print('ℹ️ No existing session found');
       // Set theme to system default or light for guests
       _themeCubit.updateFromUserPref('light');
-      
+
       emit(state.copyWith(status: AuthStatus.unauthenticated));
     } catch (e) {
       print('❌ Auth initialization error: $e');
@@ -137,7 +137,7 @@ class AuthCubit extends Cubit<AuthState> {
       }
 
       print('✓ Authentication complete: ${user.email}');
-      
+
       // Sync theme from user preference
       _themeCubit.updateFromUserPref(user.themeMode);
 
@@ -159,7 +159,10 @@ class AuthCubit extends Cubit<AuthState> {
     } catch (e) {
       print('❌ Sign-in error: $e');
       emit(
-        state.copyWith(status: AuthStatus.error, error: 'Sign-in failed: ${e.toString()}'),
+        state.copyWith(
+          status: AuthStatus.error,
+          error: 'Sign-in failed: ${e.toString()}',
+        ),
       );
     }
   }
@@ -169,10 +172,10 @@ class AuthCubit extends Cubit<AuthState> {
     try {
       emit(state.copyWith(status: AuthStatus.loading));
       final user = await _authRepository.signInAsDemo();
-      
+
       // Demo user defaults to light (or could be parsed)
       _themeCubit.updateFromUserPref(user.themeMode);
-      
+
       emit(
         state.copyWith(
           status: AuthStatus.authenticated,
@@ -293,28 +296,32 @@ class AuthCubit extends Cubit<AuthState> {
   /// Update user display name
   Future<void> updateDisplayName(String name) async {
     if (state.user == null) return;
-    
+
     try {
       emit(state.copyWith(status: AuthStatus.loading));
-      
+
       // 1. Update on backend
       await _landingRepository.updatePreferences(displayName: name);
-      
+
       // 2. Update local state
       final updatedUser = state.user!.copyWith(displayName: name);
-      
-      emit(state.copyWith(
-        status: AuthStatus.authenticated,
-        user: updatedUser,
-      ));
-      
+
+      emit(
+        state.copyWith(
+          status: AuthStatus.authenticated,
+          user: updatedUser,
+        ),
+      );
+
       print('✓ Display name updated to: $name');
     } catch (e) {
       print('❌ Failed to update display name: $e');
-      emit(state.copyWith(
-        status: AuthStatus.error,
-        error: 'Failed to update name',
-      ));
+      emit(
+        state.copyWith(
+          status: AuthStatus.error,
+          error: 'Failed to update name',
+        ),
+      );
     }
   }
 

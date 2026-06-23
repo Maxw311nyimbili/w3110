@@ -42,11 +42,14 @@ class RoleSelectionStep extends StatelessWidget {
                         offset: Offset(0, 20 * (1 - value)),
                         child: Text(
                           AppLocalizations.of(context).selectYourRole,
-                          style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                            color: Theme.of(context).textTheme.displayLarge?.color,
-                            letterSpacing: -1.0,
-                            fontWeight: FontWeight.w800,
-                          ),
+                          style: Theme.of(context).textTheme.displaySmall
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).textTheme.displayLarge?.color,
+                                letterSpacing: -1.0,
+                                fontWeight: FontWeight.w800,
+                              ),
                         ),
                       ),
                     ),
@@ -171,23 +174,29 @@ class RoleSelectionStep extends StatelessWidget {
                           children: [
                             Text(
                               title,
-                              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                color: isSelected
-                                    ? Theme.of(context).colorScheme.primary
-                                    : Theme.of(context).textTheme.bodyLarge?.color,
-                                fontWeight: FontWeight.w700,
-                              ),
+                              style: Theme.of(context).textTheme.headlineSmall
+                                  ?.copyWith(
+                                    color: isSelected
+                                        ? Theme.of(context).colorScheme.primary
+                                        : Theme.of(
+                                            context,
+                                          ).textTheme.bodyLarge?.color,
+                                    fontWeight: FontWeight.w700,
+                                  ),
                             ),
                           ],
                         ),
                         const SizedBox(height: 8),
                         Text(
                           subtitle,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context).textTheme.bodySmall?.color,
-                            fontSize: 14,
-                            height: 1.4,
-                          ),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).textTheme.bodySmall?.color,
+                                fontSize: 14,
+                                height: 1.4,
+                              ),
                         ),
                       ],
                     ),

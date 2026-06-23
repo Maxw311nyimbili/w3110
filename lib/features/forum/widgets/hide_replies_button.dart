@@ -51,7 +51,9 @@ class HideRepliesButton extends StatelessWidget {
                       Container(
                         width: 18,
                         height: 1.5,
-                        margin: const EdgeInsets.only(left: 12), // Align with where avatar was
+                        margin: const EdgeInsets.only(
+                          left: 12,
+                        ), // Align with where avatar was
                         color: lineColor,
                       ),
                       const SizedBox(width: 8),

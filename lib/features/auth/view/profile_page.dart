@@ -142,7 +142,9 @@ class _ProfileViewState extends State<ProfileView> {
                             onPressed: () => Navigator.of(context).pop(),
                             icon: const Icon(Icons.close_rounded),
                             style: IconButton.styleFrom(
-                              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                              backgroundColor: Theme.of(
+                                context,
+                              ).scaffoldBackgroundColor,
                             ),
                           ),
                         ],
@@ -156,7 +158,9 @@ class _ProfileViewState extends State<ProfileView> {
                           color: Theme.of(context).colorScheme.surface,
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: Theme.of(context).dividerColor.withOpacity(0.1),
+                            color: Theme.of(
+                              context,
+                            ).dividerColor.withOpacity(0.1),
                           ),
                           boxShadow: [
                             BoxShadow(
@@ -168,7 +172,9 @@ class _ProfileViewState extends State<ProfileView> {
                         ),
                         child: Container(
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.primary.withOpacity(0.1),
                             shape: BoxShape.circle,
                             image: photoUrl != null
                                 ? DecorationImage(
@@ -181,11 +187,16 @@ class _ProfileViewState extends State<ProfileView> {
                               ? Center(
                                   child: Text(
                                     initial,
-                                    style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                                      color: Theme.of(context).colorScheme.primary,
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 48,
-                                    ),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .displayMedium
+                                        ?.copyWith(
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.primary,
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 48,
+                                        ),
                                   ),
                                 )
                               : null,
@@ -200,7 +211,8 @@ class _ProfileViewState extends State<ProfileView> {
                             child: Text(
                               displayName,
                               textAlign: TextAlign.center,
-                              style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                              style: Theme.of(context).textTheme.displaySmall
+                                  ?.copyWith(
                                     fontWeight: FontWeight.w800,
                                     fontSize: 28,
                                   ),
@@ -211,9 +223,12 @@ class _ProfileViewState extends State<ProfileView> {
                             icon: Icon(
                               Icons.edit_rounded,
                               size: 20,
-                              color: Theme.of(context).colorScheme.primary.withOpacity(0.6),
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.primary.withOpacity(0.6),
                             ),
-                            onPressed: () => _showRenameDialog(context, displayName),
+                            onPressed: () =>
+                                _showRenameDialog(context, displayName),
                           ),
                         ],
                       ),
@@ -228,7 +243,10 @@ class _ProfileViewState extends State<ProfileView> {
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
-                          status?.userRole?.replaceAll('_', ' ').toUpperCase() ?? 'MEMBER',
+                          status?.userRole
+                                  ?.replaceAll('_', ' ')
+                                  .toUpperCase() ??
+                              'MEMBER',
                           style: AppTextStyles.labelSmall.copyWith(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -249,10 +267,14 @@ class _ProfileViewState extends State<ProfileView> {
                       _buildSectionHeader('PERSONAL INFORMATION'),
                       Container(
                         decoration: BoxDecoration(
-                          color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.5),
+                          color: Theme.of(
+                            context,
+                          ).scaffoldBackgroundColor.withOpacity(0.5),
                           borderRadius: BorderRadius.circular(24),
                           border: Border.all(
-                            color: Theme.of(context).dividerColor.withOpacity(0.05),
+                            color: Theme.of(
+                              context,
+                            ).dividerColor.withOpacity(0.05),
                             width: 0.5,
                           ),
                         ),
@@ -289,18 +311,26 @@ class _ProfileViewState extends State<ProfileView> {
                                   vertical: 10,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.5),
+                                  color: Theme.of(
+                                    context,
+                                  ).scaffoldBackgroundColor.withOpacity(0.5),
                                   borderRadius: BorderRadius.circular(16),
                                   border: Border.all(
-                                    color: Theme.of(context).dividerColor.withOpacity(0.05),
+                                    color: Theme.of(
+                                      context,
+                                    ).dividerColor.withOpacity(0.05),
                                   ),
                                 ),
                                 child: Text(
-                                  interest[0].toUpperCase() + interest.substring(1),
-                                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                                    color: Theme.of(context).textTheme.bodyLarge?.color,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                                  interest[0].toUpperCase() +
+                                      interest.substring(1),
+                                  style: Theme.of(context).textTheme.labelMedium
+                                      ?.copyWith(
+                                        color: Theme.of(
+                                          context,
+                                        ).textTheme.bodyLarge?.color,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                 ),
                               );
                             }).toList(),
@@ -403,7 +433,10 @@ class _ProfileViewState extends State<ProfileView> {
     );
   }
 
-  Future<void> _showRenameDialog(BuildContext context, String currentName) async {
+  Future<void> _showRenameDialog(
+    BuildContext context,
+    String currentName,
+  ) async {
     final controller = TextEditingController(text: currentName);
     final l10n = context.l10n;
 
@@ -415,8 +448,8 @@ class _ProfileViewState extends State<ProfileView> {
         title: Text(
           'Change Name',
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+            fontWeight: FontWeight.bold,
+          ),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -425,8 +458,8 @@ class _ProfileViewState extends State<ProfileView> {
             Text(
               'How should we call you?',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).textTheme.bodySmall?.color,
-                  ),
+                color: Theme.of(context).textTheme.bodySmall?.color,
+              ),
             ),
             const SizedBox(height: 16),
             TextField(
@@ -454,7 +487,9 @@ class _ProfileViewState extends State<ProfileView> {
             onPressed: () => Navigator.pop(context),
             child: Text(
               l10n.cancel,
-              style: TextStyle(color: Theme.of(context).textTheme.bodySmall?.color),
+              style: TextStyle(
+                color: Theme.of(context).textTheme.bodySmall?.color,
+              ),
             ),
           ),
           ElevatedButton(

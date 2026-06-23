@@ -33,7 +33,7 @@ class ForumCubit extends Cubit<ForumState> {
       // 1. Fetch all posts from server (community feed)
       // This is the most important part for the UI
       final allPosts = await _forumRepository.fetchAllPostsFromServer();
-      
+
       // 2. Emit success with posts immediately so UI can render
       emit(
         state.copyWith(
@@ -47,7 +47,9 @@ class ForumCubit extends Cubit<ForumState> {
         final hasPendingSync = await _forumRepository.hasPendingSyncItems();
         emit(state.copyWith(hasPendingSync: hasPendingSync));
       } catch (dbError) {
-        print('⚠️ Forum Local DB not available (likely web missing assets): $dbError');
+        print(
+          '⚠️ Forum Local DB not available (likely web missing assets): $dbError',
+        );
         // We keep hasPendingSync as false and continue
       }
 
@@ -176,7 +178,8 @@ class ForumCubit extends Cubit<ForumState> {
         orElse: () => post,
       );
 
-      final isSamePost = state.selectedPost != null &&
+      final isSamePost =
+          state.selectedPost != null &&
           (state.selectedPost!.localId == post.localId ||
               (state.selectedPost!.id.isNotEmpty &&
                   state.selectedPost!.id == post.id));
@@ -226,8 +229,8 @@ class ForumCubit extends Cubit<ForumState> {
 
       // 2. Always fetch comments from server (updates UI with latest data)
       try {
-        final serverComments =
-            await _forumRepository.fetchPostCommentsFromServer(postId);
+        final serverComments = await _forumRepository
+            .fetchPostCommentsFromServer(postId);
 
         // Robust merge: Preserve unsynced personal comments
         final fullyMerged = _mergeComments(state.comments, serverComments);
@@ -411,7 +414,9 @@ class ForumCubit extends Cubit<ForumState> {
       emit(
         state.copyWith(
           posts: state.posts.where((p) => p.localId != localId).toList(),
-          selectedPost: state.selectedPost?.localId == localId ? null : state.selectedPost,
+          selectedPost: state.selectedPost?.localId == localId
+              ? null
+              : state.selectedPost,
         ),
       );
 
@@ -432,7 +437,7 @@ class ForumCubit extends Cubit<ForumState> {
           }
         } catch (e) {
           print('DEBUG: deletePost - server-side delete failed: $e');
-          // We don't necessarily revert the UI if the user expects it gone, 
+          // We don't necessarily revert the UI if the user expects it gone,
           // but we should log/alert.
         }
       }
@@ -570,16 +575,23 @@ class ForumCubit extends Cubit<ForumState> {
 
           // Re-fetch the full comment list from server so we always show the
           // authoritative state (avoids race conditions with concurrent selectPost calls).
-          final serverComments =
-              await _forumRepository.fetchPostCommentsFromServer(postId);
+          final serverComments = await _forumRepository
+              .fetchPostCommentsFromServer(postId);
           final merged = _mergeComments(state.comments, serverComments);
-          emit(state.copyWith(comments: merged, hasPendingSync: false, status: ForumStatus.success));
+          emit(
+            state.copyWith(
+              comments: merged,
+              hasPendingSync: false,
+              status: ForumStatus.success,
+            ),
+          );
         } catch (apiError) {
           // Remove optimistic comment on failure
           emit(
             state.copyWith(
-              comments:
-                  state.comments.where((c) => c.localId != localId).toList(),
+              comments: state.comments
+                  .where((c) => c.localId != localId)
+                  .toList(),
               status: ForumStatus.error,
               error: 'Failed to add comment: ${apiError.toString()}',
             ),
@@ -693,7 +705,9 @@ class ForumCubit extends Cubit<ForumState> {
           );
         }
       } catch (e) {
-        print('⚠️ syncWithBackend: getLocalPosts skipped, keeping current state: $e');
+        print(
+          '⚠️ syncWithBackend: getLocalPosts skipped, keeping current state: $e',
+        );
         emit(state.copyWith(isSyncing: false));
       }
     } catch (e) {
@@ -808,7 +822,8 @@ class ForumCubit extends Cubit<ForumState> {
         state.copyWith(
           posts: updatedPosts ?? state.posts,
           searchResults: updatedSearchResults ?? state.searchResults,
-          selectedPost: state.selectedPost != null &&
+          selectedPost:
+              state.selectedPost != null &&
                   (state.selectedPost!.localId == postId ||
                       state.selectedPost!.id == postId)
               ? targetPost
@@ -1087,10 +1102,12 @@ class ForumCubit extends Cubit<ForumState> {
       final revertedLineComments = state.lineComments
           .where((c) => c.localId != clientId)
           .toList();
-      
+
       final revertedLines = state.answerLines.map((line) {
         if (line.lineId == effectiveLineId) {
-          return line.copyWith(commentCount: (line.commentCount - 1).clamp(0, 999));
+          return line.copyWith(
+            commentCount: (line.commentCount - 1).clamp(0, 999),
+          );
         }
         return line;
       }).toList();
@@ -1264,7 +1281,7 @@ class ForumCubit extends Cubit<ForumState> {
       }
     }
 
-    // Convert back to list and deduplicate by memory address/unique identity 
+    // Convert back to list and deduplicate by memory address/unique identity
     // to avoid double-counting if we have both localId and id versions.
     final result = merged.values.toSet().toList();
     result.sort((a, b) => a.createdAt.compareTo(b.createdAt));

@@ -55,9 +55,10 @@ class _DesktopShell extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final isCollapsed = navState.isDesktopSidebarCollapsed;
-    
+
     // Resolve Title
-    final title = navState.title ?? _getDefaultTitle(context, navState.activeTab);
+    final title =
+        navState.title ?? _getDefaultTitle(context, navState.activeTab);
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -83,15 +84,17 @@ class _DesktopShell extends StatelessWidget {
                   Container(
                     height: 64,
                     padding: const EdgeInsets.symmetric(horizontal: 24),
-                      decoration: BoxDecoration(
-                        color: theme.scaffoldBackgroundColor,
-                        border: Border(
-                          bottom: BorderSide(
-                            color: isDark ? Colors.white.withOpacity(0.05) : AppColors.borderLight,
-                            width: 0.5,
-                          ),
+                    decoration: BoxDecoration(
+                      color: theme.scaffoldBackgroundColor,
+                      border: Border(
+                        bottom: BorderSide(
+                          color: isDark
+                              ? Colors.white.withOpacity(0.05)
+                              : AppColors.borderLight,
+                          width: 0.5,
                         ),
                       ),
+                    ),
                     child: Row(
                       children: [
                         if (navState.leading != null) ...[
@@ -100,12 +103,14 @@ class _DesktopShell extends StatelessWidget {
                         ],
                         if (title != null)
                           DefaultTextStyle(
-                            style: (theme.textTheme.titleLarge ?? 
-                                   theme.textTheme.headlineSmall ?? 
-                                   const TextStyle()).copyWith(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 18,
-                            ),
+                            style:
+                                (theme.textTheme.titleLarge ??
+                                        theme.textTheme.headlineSmall ??
+                                        const TextStyle())
+                                    .copyWith(
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 18,
+                                    ),
                             child: title,
                           ),
                         const Spacer(),
@@ -151,8 +156,9 @@ class _MobileShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final title = navState.title ?? _getDefaultTitle(context, navState.activeTab);
-    
+    final title =
+        navState.title ?? _getDefaultTitle(context, navState.activeTab);
+
     return Scaffold(
       // Keep state using IndexedStack via _ContentArea
       appBar: AppBar(

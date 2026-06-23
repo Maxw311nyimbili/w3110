@@ -80,16 +80,17 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
     );
 
     // ── Warm glow ───────────────────────────────────────────────────────────
-    _glowOpacity = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: 0.0, end: 1.0), weight: 30),
-      TweenSequenceItem(tween: ConstantTween(1.0),           weight: 50),
-      TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.0), weight: 20),
-    ]).animate(
-      CurvedAnimation(
-        parent: _seq,
-        curve: const Interval(0.0, 0.80, curve: Curves.easeInOut),
-      ),
-    );
+    _glowOpacity =
+        TweenSequence<double>([
+          TweenSequenceItem(tween: Tween(begin: 0.0, end: 1.0), weight: 30),
+          TweenSequenceItem(tween: ConstantTween(1.0), weight: 50),
+          TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.0), weight: 20),
+        ]).animate(
+          CurvedAnimation(
+            parent: _seq,
+            curve: const Interval(0.0, 0.80, curve: Curves.easeInOut),
+          ),
+        );
     _glowScale = Tween<double>(begin: 0.6, end: 1.8).animate(
       CurvedAnimation(
         parent: _seq,
@@ -104,15 +105,16 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
         curve: const Interval(0.194, 0.333, curve: Curves.easeOut),
       ),
     );
-    _nameSlide = Tween<Offset>(
-      begin: const Offset(0, 0.5),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(
-        parent: _seq,
-        curve: const Interval(0.194, 0.361, curve: Curves.easeOutCubic),
-      ),
-    );
+    _nameSlide =
+        Tween<Offset>(
+          begin: const Offset(0, 0.5),
+          end: Offset.zero,
+        ).animate(
+          CurvedAnimation(
+            parent: _seq,
+            curve: const Interval(0.194, 0.361, curve: Curves.easeOutCubic),
+          ),
+        );
 
     // ── Tagline ─────────────────────────────────────────────────────────────
     _taglineOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
@@ -148,10 +150,12 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
 
   Future<void> _handleEntry() async {
     // Set status bar
-    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-      statusBarBrightness: Brightness.light,
-      statusBarIconBrightness: Brightness.dark,
-    ));
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarBrightness: Brightness.light,
+        statusBarIconBrightness: Brightness.dark,
+      ),
+    );
 
     try {
       final landingRepo = context.read<LandingRepository>();
@@ -185,7 +189,9 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
 
     final bgColor = isDark ? AppColors.darkCanvas : AppColors.warmIvory;
     final inkColor = isDark ? AppColors.darkTextPrimary : AppColors.ink;
-    final taglineColor = isDark ? AppColors.darkTextSecondary : AppColors.textSecondary;
+    final taglineColor = isDark
+        ? AppColors.darkTextSecondary
+        : AppColors.textSecondary;
     final glowColor = isDark
         ? const Color(0xFF1A2430) // deep navy glow in dark
         : const Color(0xFFE8EDF3); // soft slate-blue tint in light
@@ -319,10 +325,14 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                                     onTap: () {
                                       if (isAuthenticated) {
                                         AppRouter.replaceTo(
-                                            context, AppRouter.shell);
+                                          context,
+                                          AppRouter.shell,
+                                        );
                                       } else {
                                         AppRouter.navigateTo(
-                                            context, AppRouter.landing);
+                                          context,
+                                          AppRouter.landing,
+                                        );
                                       }
                                     },
                                   ),

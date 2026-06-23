@@ -79,10 +79,11 @@ class LandingCubit extends Cubit<LandingState> {
         print(
           'ℹ️ User authenticated but onboarding incomplete. Checking for saved step.',
         );
-        
+
         final savedStepName = await _landingRepository.getCurrentStep();
-        OnboardingStep currentStep = OnboardingStep.roleSelection; // Default for authenticated
-        
+        OnboardingStep currentStep =
+            OnboardingStep.roleSelection; // Default for authenticated
+
         if (savedStepName != null) {
           try {
             currentStep = OnboardingStep.values.firstWhere(
@@ -136,15 +137,17 @@ class LandingCubit extends Cubit<LandingState> {
     }
 
     final nextStep = _getNextStep(state.currentStep);
-    emit(state.copyWith(
-      currentStep: nextStep, 
-      isGuest: false,
-      showValidationError: false, // Reset on change
-    ));
-    
+    emit(
+      state.copyWith(
+        currentStep: nextStep,
+        isGuest: false,
+        showValidationError: false, // Reset on change
+      ),
+    );
+
     // Persistence
     await _landingRepository.saveCurrentStep(nextStep.toString());
-    
+
     // Mid-sync: If moving from Profile Setup, sync to backend
     if (state.currentStep == OnboardingStep.profileSetup) {
       _syncToBackend();
@@ -157,7 +160,7 @@ class LandingCubit extends Cubit<LandingState> {
       print('🔄 [MID-SYNC] Syncing partial profile to backend...');
       await _landingRepository.updatePreferences(
         role: _mapRoleToString(state.selectedRole),
-        // Note: The current API might not have fields for name/nickname yet 
+        // Note: The current API might not have fields for name/nickname yet
         // but we sync what we can to trigger the user record creation/update.
       );
     } catch (e) {
@@ -190,10 +193,12 @@ class LandingCubit extends Cubit<LandingState> {
   Future<void> previousStep() async {
     final previousStep = _getPreviousStep(state.currentStep);
     if (previousStep != null) {
-      emit(state.copyWith(
-        currentStep: previousStep,
-        showValidationError: false,
-      ));
+      emit(
+        state.copyWith(
+          currentStep: previousStep,
+          showValidationError: false,
+        ),
+      );
       await _landingRepository.saveCurrentStep(previousStep.toString());
     }
   }
@@ -246,7 +251,8 @@ class LandingCubit extends Cubit<LandingState> {
         themeMode: user.themeMode,
       );
 
-      final isBackendOnboarded = user.onboardingCompleted == true || user.role != null;
+      final isBackendOnboarded =
+          user.onboardingCompleted == true || user.role != null;
 
       emit(
         state.copyWith(
@@ -264,12 +270,12 @@ class LandingCubit extends Cubit<LandingState> {
       if (isBackendOnboarded) {
         await _landingRepository.saveOnboardingStatus(
           OnboardingStatus(
-             isComplete: true,
-             userRole: user.role ?? 'mother',
-             consentGiven: true,
-             consentVersion: '1.0',
-             completedAt: DateTime.now()
-          )
+            isComplete: true,
+            userRole: user.role ?? 'mother',
+            consentGiven: true,
+            consentVersion: '1.0',
+            completedAt: DateTime.now(),
+          ),
         );
       } else {
         // Move to next step (role selection)

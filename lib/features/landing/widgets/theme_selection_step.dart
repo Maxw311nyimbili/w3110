@@ -80,17 +80,14 @@ class _ThemeSelectionStepState extends State<ThemeSelectionStep> {
                       children: [
                         Text(
                           AppLocalizations.of(context).makeItYours,
-                          style: Theme.of(context)
-                              .textTheme
-                              .displaySmall
+                          style: Theme.of(context).textTheme.displaySmall
                               ?.copyWith(
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: -1.0,
                                 fontSize: 34,
-                                color: Theme.of(context)
-                                    .textTheme
-                                    .displayLarge
-                                    ?.color,
+                                color: Theme.of(
+                                  context,
+                                ).textTheme.displayLarge?.color,
                               ),
                         ),
                         const SizedBox(height: 10),
@@ -208,9 +205,7 @@ class _ThemeCardState extends State<_ThemeCard> {
 
     final borderColor = widget.selected
         ? primary
-        : (isDark
-            ? AppColors.darkBorderSubtle
-            : AppColors.borderLight);
+        : (isDark ? AppColors.darkBorderSubtle : AppColors.borderLight);
 
     final bgColor = widget.selected
         ? primary.withOpacity(isDark ? 0.08 : 0.06)
@@ -237,14 +232,14 @@ class _ThemeCardState extends State<_ThemeCard> {
                       color: primary.withOpacity(0.18),
                       blurRadius: 20,
                       offset: const Offset(0, 4),
-                    )
+                    ),
                   ]
                 : [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.05),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
-                    )
+                    ),
                   ],
           ),
           child: ClipRRect(
@@ -271,8 +266,8 @@ class _ThemeCardState extends State<_ThemeCard> {
                         color: widget.selected
                             ? primary
                             : (isDark
-                                ? AppColors.darkTextSecondary
-                                : AppColors.textSecondary),
+                                  ? AppColors.darkTextSecondary
+                                  : AppColors.textSecondary),
                       ),
                       const SizedBox(width: 8),
                       Text(
@@ -282,8 +277,8 @@ class _ThemeCardState extends State<_ThemeCard> {
                           color: widget.selected
                               ? primary
                               : (isDark
-                                  ? AppColors.darkTextPrimary
-                                  : AppColors.textPrimary),
+                                    ? AppColors.darkTextPrimary
+                                    : AppColors.textPrimary),
                         ),
                       ),
                       const Spacer(),
@@ -323,10 +318,10 @@ class _LightPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const bg = Color(0xFFF8F6EF);       // warmIvory
-    const surface = Color(0xFFFFFFFF);  // white
-    const sidebar = Color(0xFFEDE8E1);  // subtle warm secondary
-    const accent = Color(0xFF7B91AD);   // slateBlue
+    const bg = Color(0xFFF8F6EF); // warmIvory
+    const surface = Color(0xFFFFFFFF); // white
+    const sidebar = Color(0xFFEDE8E1); // subtle warm secondary
+    const accent = Color(0xFF7B91AD); // slateBlue
     const textDark = Color(0xFF18181B);
     const textMid = Color(0xFF6E7278);
 
@@ -422,23 +417,23 @@ class _LightPreview extends StatelessWidget {
   }
 
   static Widget _dot(Color color, double w, double h) => Container(
-        width: w,
-        height: h,
-        margin: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(4),
-        ),
-      );
+    width: w,
+    height: h,
+    margin: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+    decoration: BoxDecoration(
+      color: color,
+      borderRadius: BorderRadius.circular(4),
+    ),
+  );
 
   static Widget _textLine(Color color, double w, double h) => Container(
-        width: w,
-        height: h,
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.35),
-          borderRadius: BorderRadius.circular(3),
-        ),
-      );
+    width: w,
+    height: h,
+    decoration: BoxDecoration(
+      color: color.withOpacity(0.35),
+      borderRadius: BorderRadius.circular(3),
+    ),
+  );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -450,10 +445,10 @@ class _DarkPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const bg = Color(0xFF0D1520);       // darkCanvas
-    const surface = Color(0xFF131E2F);  // darkSurface
-    const sidebar = Color(0xFF192638);  // darkElevated
-    const accent = Color(0xFF9BBBD8);   // darkPrimary
+    const bg = Color(0xFF0D1520); // darkCanvas
+    const surface = Color(0xFF131E2F); // darkSurface
+    const sidebar = Color(0xFF192638); // darkElevated
+    const accent = Color(0xFF9BBBD8); // darkPrimary
     const textBright = Color(0xFFEEF2F7);
     const textDim = Color(0xFFA0B0C4);
 
@@ -553,21 +548,21 @@ class _DarkPreview extends StatelessWidget {
   }
 
   static Widget _dot(Color color, double w, double h) => Container(
-        width: w,
-        height: h,
-        margin: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(4),
-        ),
-      );
+    width: w,
+    height: h,
+    margin: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+    decoration: BoxDecoration(
+      color: color,
+      borderRadius: BorderRadius.circular(4),
+    ),
+  );
 
   static Widget _textLine(Color color, double w, double h) => Container(
-        width: w,
-        height: h,
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.40),
-          borderRadius: BorderRadius.circular(3),
-        ),
-      );
+    width: w,
+    height: h,
+    decoration: BoxDecoration(
+      color: color.withOpacity(0.40),
+      borderRadius: BorderRadius.circular(3),
+    ),
+  );
 }

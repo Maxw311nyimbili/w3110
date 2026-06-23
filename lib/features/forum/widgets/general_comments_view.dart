@@ -75,11 +75,14 @@ class _GeneralCommentsViewState extends State<GeneralCommentsView> {
                           children: [
                             Text(
                               'Discussion',
-                              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                color: Theme.of(context).textTheme.headlineMedium?.color,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: -0.5,
-                              ),
+                              style: Theme.of(context).textTheme.headlineMedium
+                                  ?.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).textTheme.headlineMedium?.color,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: -0.5,
+                                  ),
                             ),
                           ],
                         ),
@@ -101,7 +104,10 @@ class _GeneralCommentsViewState extends State<GeneralCommentsView> {
                     ],
                   ),
                 ),
-                Divider(height: 1, color: Theme.of(context).dividerColor.withOpacity(0.1)),
+                Divider(
+                  height: 1,
+                  color: Theme.of(context).dividerColor.withOpacity(0.1),
+                ),
 
                 // ========== COMMENTS LIST ==========
                 Expanded(
@@ -123,30 +129,42 @@ class _GeneralCommentsViewState extends State<GeneralCommentsView> {
                                 Container(
                                   padding: const EdgeInsets.all(24),
                                   decoration: BoxDecoration(
-                                    color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary.withOpacity(0.1),
                                     shape: BoxShape.circle,
                                   ),
                                   child: Icon(
                                     Icons.chat_bubble_outline_rounded,
                                     size: 40,
-                                    color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary.withOpacity(0.5),
                                   ),
                                 ),
                                 const SizedBox(height: 24),
                                 Text(
                                   'Be the first to speak',
-                                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                    color: Theme.of(context).textTheme.bodyLarge?.color,
-                                    fontWeight: FontWeight.w700,
-                                  ),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineSmall
+                                      ?.copyWith(
+                                        color: Theme.of(
+                                          context,
+                                        ).textTheme.bodyLarge?.color,
+                                        fontWeight: FontWeight.w700,
+                                      ),
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
                                   'Start the conversation by adding a comment below.',
                                   textAlign: TextAlign.center,
-                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: Theme.of(context).textTheme.bodySmall?.color,
-                                  ),
+                                  style: Theme.of(context).textTheme.bodyMedium
+                                      ?.copyWith(
+                                        color: Theme.of(
+                                          context,
+                                        ).textTheme.bodySmall?.color,
+                                      ),
                                 ),
                               ],
                             ),
@@ -164,7 +182,10 @@ class _GeneralCommentsViewState extends State<GeneralCommentsView> {
                 ),
 
                 // ========== REPLY INPUT ==========
-                Divider(height: 1, color: Theme.of(context).dividerColor.withOpacity(0.1)),
+                Divider(
+                  height: 1,
+                  color: Theme.of(context).dividerColor.withOpacity(0.1),
+                ),
                 ReplyInputFieldForModal(
                   isGeneral: true,
                   postId: widget.post.id,
@@ -192,21 +213,29 @@ class _GeneralCommentsViewState extends State<GeneralCommentsView> {
     final Map<String, List<ForumComment>> grouped = {};
     for (final comment in allComments) {
       final pid = comment.parentCommentId;
-      final canonicalPid = (pid == null || pid.isEmpty) ? 'ROOT' : (canonicalIds[pid] ?? pid);
+      final canonicalPid = (pid == null || pid.isEmpty)
+          ? 'ROOT'
+          : (canonicalIds[pid] ?? pid);
       grouped.putIfAbsent(canonicalPid, () => []).add(comment);
     }
 
-    List<Widget> buildTree(String parentCanonicalId, int depth, List<bool> ancestorHasNext) {
-      final List<ForumComment> children = List<ForumComment>.from(grouped[parentCanonicalId] ?? []);
+    List<Widget> buildTree(
+      String parentCanonicalId,
+      int depth,
+      List<bool> ancestorHasNext,
+    ) {
+      final List<ForumComment> children = List<ForumComment>.from(
+        grouped[parentCanonicalId] ?? [],
+      );
       children.sort((a, b) => a.createdAt.compareTo(b.createdAt));
 
       final List<Widget> items = [];
       for (int i = 0; i < children.length; i++) {
         final comment = children[i];
-        
+
         final hasReplies = grouped.containsKey(comment.localId);
         final isExpanded = _expandedCommentIds.contains(comment.localId);
-        
+
         final isLast = i == children.length - 1;
         final isVisuallyLast = isLast && !isExpanded;
 
@@ -281,9 +310,12 @@ class _GeneralCommentsViewState extends State<GeneralCommentsView> {
           // Top-level comments (depth 0) should not contribute to vertical tracks
           // because we want top-level threads to be isolated.
           final bool contribution = (depth == 0) ? false : !isLast;
-          final nextAncestorHasNext = List<bool>.from(ancestorHasNext)..add(contribution);
-          items.addAll(buildTree(comment.localId, depth + 1, nextAncestorHasNext));
-          
+          final nextAncestorHasNext = List<bool>.from(ancestorHasNext)
+            ..add(contribution);
+          items.addAll(
+            buildTree(comment.localId, depth + 1, nextAncestorHasNext),
+          );
+
           if (hasReplies) {
             items.add(
               HideRepliesButton(

@@ -39,12 +39,12 @@ class _AudioPlaybackPillState extends State<AudioPlaybackPill>
           return const SizedBox.shrink();
         }
 
-        final currentLang = state.isSynthesizingAudio 
-            ? state.selectedLanguage 
+        final currentLang = state.isSynthesizingAudio
+            ? state.selectedLanguage
             : state.playingLanguage;
-            
-        final langLabel = currentLang?.code.toUpperCase() == 'TW' 
-            ? 'TWI' 
+
+        final langLabel = currentLang?.code.toUpperCase() == 'TW'
+            ? 'TWI'
             : currentLang?.code.toUpperCase() ?? 'EN';
 
         final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -60,7 +60,9 @@ class _AudioPlaybackPillState extends State<AudioPlaybackPill>
                 color: Theme.of(context).colorScheme.surface.withOpacity(0.95),
                 borderRadius: BorderRadius.circular(30),
                 border: Border.all(
-                  color: AppColors.accentPrimary.withOpacity(isDark ? 0.35 : 0.2),
+                  color: AppColors.accentPrimary.withOpacity(
+                    isDark ? 0.35 : 0.2,
+                  ),
                   width: 1,
                 ),
                 boxShadow: [
@@ -82,7 +84,9 @@ class _AudioPlaybackPillState extends State<AudioPlaybackPill>
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
-                      state.isSynthesizingAudio ? Icons.bubble_chart_rounded : Icons.volume_up_rounded,
+                      state.isSynthesizingAudio
+                          ? Icons.bubble_chart_rounded
+                          : Icons.volume_up_rounded,
                       size: 16,
                       color: AppColors.accentPrimary,
                     ),
@@ -98,7 +102,9 @@ class _AudioPlaybackPillState extends State<AudioPlaybackPill>
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            state.isSynthesizingAudio ? 'Thinking...' : 'Playing ',
+                            state.isSynthesizingAudio
+                                ? 'Thinking...'
+                                : 'Playing ',
                             style: AppTextStyles.labelSmall.copyWith(
                               fontWeight: FontWeight.w700,
                               color: textColor,
@@ -106,7 +112,10 @@ class _AudioPlaybackPillState extends State<AudioPlaybackPill>
                           ),
                           if (!state.isSynthesizingAudio)
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 1,
+                              ),
                               decoration: BoxDecoration(
                                 color: AppColors.accentPrimary,
                                 borderRadius: BorderRadius.circular(4),
@@ -126,9 +135,9 @@ class _AudioPlaybackPillState extends State<AudioPlaybackPill>
                       const SizedBox(height: 2),
                       SizedBox(
                         height: 12,
-                        child: state.isSynthesizingAudio 
-                          ? _buildThinkingDots()
-                          : _buildAudioWave(),
+                        child: state.isSynthesizingAudio
+                            ? _buildThinkingDots()
+                            : _buildAudioWave(),
                       ),
                     ],
                   ),

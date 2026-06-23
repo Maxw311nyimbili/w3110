@@ -54,7 +54,6 @@ class AppRouter {
           settings: settings,
         );
 
-
       case AppRouter.chat:
         final scanResult = settings.arguments as ScanResult?;
         return CupertinoPageRoute(

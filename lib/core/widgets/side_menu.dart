@@ -123,13 +123,10 @@ class _SideMenuState extends State<SideMenu> {
     bool isDesktop,
     bool isDark,
   ) {
-    final labelColor = isDark
-        ? AppColors.darkTextPrimary
-        : AppColors.ink;
-    final toggleColor = (isDark
-            ? AppColors.darkTextSecondary
-            : AppColors.textSecondary)
-        .withOpacity(0.6);
+    final labelColor = isDark ? AppColors.darkTextPrimary : AppColors.ink;
+    final toggleColor =
+        (isDark ? AppColors.darkTextSecondary : AppColors.textSecondary)
+            .withOpacity(0.6);
 
     if (isCollapsed) {
       return Padding(
@@ -174,8 +171,9 @@ class _SideMenuState extends State<SideMenu> {
         vertical: 8,
       ),
       child: Column(
-        crossAxisAlignment:
-            isCollapsed ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+        crossAxisAlignment: isCollapsed
+            ? CrossAxisAlignment.center
+            : CrossAxisAlignment.start,
         children: [
           // New Thread — always first, prominent
           _NavItem(
@@ -197,7 +195,10 @@ class _SideMenuState extends State<SideMenu> {
 
           // Navigation
           if (!isCollapsed)
-            _SectionLabel(AppLocalizations.of(context).navigate, isDark: isDark),
+            _SectionLabel(
+              AppLocalizations.of(context).navigate,
+              isDark: isDark,
+            ),
           _NavItem(
             icon: Icons.chat_bubble_outline_rounded,
             label: AppLocalizations.of(context).askNaiia,
@@ -212,8 +213,7 @@ class _SideMenuState extends State<SideMenu> {
             isCollapsed: isCollapsed,
             isActive: activeTab == AppTab.scanner,
             isDark: isDark,
-            onTap: () =>
-                context.read<NavigationCubit>().setTab(AppTab.scanner),
+            onTap: () => context.read<NavigationCubit>().setTab(AppTab.scanner),
           ),
           _NavItem(
             icon: Icons.people_outline_rounded,
@@ -229,7 +229,10 @@ class _SideMenuState extends State<SideMenu> {
             const SizedBox(height: 6),
             _Divider(),
             const SizedBox(height: 6),
-            _SectionLabel(AppLocalizations.of(context).historyLabel, isDark: isDark),
+            _SectionLabel(
+              AppLocalizations.of(context).historyLabel,
+              isDark: isDark,
+            ),
             _ConversationsSection(isCollapsed: isCollapsed, isDark: isDark),
           ],
         ],
@@ -352,9 +355,7 @@ class _SectionLabel extends StatelessWidget {
           fontSize: 10,
           fontWeight: FontWeight.w700,
           letterSpacing: 1.4,
-          color: (isDark
-              ? AppColors.darkTextTertiary
-              : AppColors.textTertiary),
+          color: (isDark ? AppColors.darkTextTertiary : AppColors.textTertiary),
         ),
       ),
     );
@@ -370,9 +371,7 @@ class _Divider extends StatelessWidget {
     return Container(
       height: 0.5,
       margin: const EdgeInsets.symmetric(horizontal: 12),
-      color: isDark
-          ? Colors.white.withOpacity(0.06)
-          : AppColors.borderLight,
+      color: isDark ? Colors.white.withOpacity(0.06) : AppColors.borderLight,
     );
   }
 }
@@ -422,9 +421,7 @@ class _NavItemState extends State<_NavItem>
       labelWeight = FontWeight.w700;
     } else if (widget.isActive) {
       iconColor = primary;
-      labelColor = widget.isDark
-          ? AppColors.darkTextPrimary
-          : AppColors.ink;
+      labelColor = widget.isDark ? AppColors.darkTextPrimary : AppColors.ink;
       labelWeight = FontWeight.w600;
     } else {
       final base = widget.isDark
@@ -444,8 +441,7 @@ class _NavItemState extends State<_NavItem>
       builder: (context, constraints) {
         // Show the label only when there is genuinely enough room for it.
         // 88 px gives ~56 px of text space after icon + spacer + padding.
-        final showLabel =
-            !widget.isCollapsed && constraints.maxWidth >= 88;
+        final showLabel = !widget.isCollapsed && constraints.maxWidth >= 88;
 
         if (!showLabel) {
           return Padding(
@@ -467,10 +463,10 @@ class _NavItemState extends State<_NavItem>
                       color: widget.isPrimary
                           ? primary.withOpacity(widget.isDark ? 0.14 : 0.09)
                           : widget.isActive
-                              ? primary.withOpacity(0.12)
-                              : _hovered
-                                  ? primary.withOpacity(0.07)
-                                  : Colors.transparent,
+                          ? primary.withOpacity(0.12)
+                          : _hovered
+                          ? primary.withOpacity(0.07)
+                          : Colors.transparent,
                       borderRadius: BorderRadius.circular(11),
                     ),
                     child: Center(
@@ -495,27 +491,32 @@ class _NavItemState extends State<_NavItem>
                 curve: Curves.easeOutCubic,
                 clipBehavior: Clip.hardEdge,
                 margin: const EdgeInsets.symmetric(horizontal: 4),
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 9,
+                ),
                 decoration: BoxDecoration(
                   color: widget.isPrimary
                       ? primary.withOpacity(widget.isDark ? 0.14 : 0.09)
                       : widget.isActive
-                          ? primary.withOpacity(0.10)
-                          : _hovered
-                              ? primary.withOpacity(0.05)
-                              : Colors.transparent,
+                      ? primary.withOpacity(0.10)
+                      : _hovered
+                      ? primary.withOpacity(0.05)
+                      : Colors.transparent,
                   borderRadius: BorderRadius.circular(10),
                   border: widget.isPrimary
                       ? Border.all(
-                          color: primary.withOpacity(widget.isDark ? 0.22 : 0.18),
+                          color: primary.withOpacity(
+                            widget.isDark ? 0.22 : 0.18,
+                          ),
                           width: 0.75,
                         )
                       : widget.isActive
-                          ? Border.all(
-                              color: primary.withOpacity(0.18),
-                              width: 0.75,
-                            )
-                          : null,
+                      ? Border.all(
+                          color: primary.withOpacity(0.18),
+                          width: 0.75,
+                        )
+                      : null,
                 ),
                 child: Row(
                   children: [
@@ -622,7 +623,11 @@ class _ConversationsSectionState extends State<_ConversationsSection> {
               child: _isExpanded
                   ? Padding(
                       padding: const EdgeInsets.only(
-                          left: 16, right: 4, top: 2, bottom: 6),
+                        left: 16,
+                        right: 4,
+                        top: 2,
+                        bottom: 6,
+                      ),
                       child: chatState.isLoadingHistory
                           ? Padding(
                               padding: const EdgeInsets.symmetric(vertical: 10),
@@ -632,46 +637,45 @@ class _ConversationsSectionState extends State<_ConversationsSection> {
                                   height: 14,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 1.5,
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .primary
-                                        .withOpacity(0.5),
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary.withOpacity(0.5),
                                   ),
                                 ),
                               ),
                             )
                           : sessions.isEmpty
-                              ? Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 8),
-                                  child: Text(
-                                    AppLocalizations.of(context).noConversationsYet,
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: widget.isDark
-                                          ? AppColors.darkTextTertiary
-                                          : AppColors.textTertiary,
-                                    ),
-                                  ),
-                                )
-                              : Column(
-                                  children: sessions
-                                      .take(8)
-                                      .map<Widget>((session) => _SessionTile(
-                                            session: session,
-                                            isDark: widget.isDark,
-                                            onTap: () {
-                                              context
-                                                  .read<NavigationCubit>()
-                                                  .setTab(AppTab.chat);
-                                              context
-                                                  .read<ChatCubit>()
-                                                  .loadSession(
-                                                      session.sessionId);
-                                            },
-                                          ))
-                                      .toList(),
+                          ? Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              child: Text(
+                                AppLocalizations.of(context).noConversationsYet,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: widget.isDark
+                                      ? AppColors.darkTextTertiary
+                                      : AppColors.textTertiary,
                                 ),
+                              ),
+                            )
+                          : Column(
+                              children: sessions
+                                  .take(8)
+                                  .map<Widget>(
+                                    (session) => _SessionTile(
+                                      session: session,
+                                      isDark: widget.isDark,
+                                      onTap: () {
+                                        context.read<NavigationCubit>().setTab(
+                                          AppTab.chat,
+                                        );
+                                        context.read<ChatCubit>().loadSession(
+                                          session.sessionId,
+                                        );
+                                      },
+                                    ),
+                                  )
+                                  .toList(),
+                            ),
                     )
                   : const SizedBox.shrink(),
             ),
@@ -773,8 +777,10 @@ class _SessionTileState extends State<_SessionTile> {
               Navigator.pop(dialogContext);
               context.read<ChatCubit>().deleteSession(widget.session.sessionId);
             },
-            child: Text(AppLocalizations.of(context).delete,
-                style: const TextStyle(color: Colors.redAccent)),
+            child: Text(
+              AppLocalizations.of(context).delete,
+              style: const TextStyle(color: Colors.redAccent),
+            ),
           ),
         ],
       ),
@@ -848,9 +854,7 @@ class _AuthFooter extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
-                      color: isDark
-                          ? AppColors.darkTextPrimary
-                          : AppColors.ink,
+                      color: isDark ? AppColors.darkTextPrimary : AppColors.ink,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -870,10 +874,9 @@ class _AuthFooter extends StatelessWidget {
             Icon(
               Icons.settings_outlined,
               size: 15,
-              color: (isDark
-                      ? AppColors.darkTextTertiary
-                      : AppColors.textTertiary)
-                  .withOpacity(0.6),
+              color:
+                  (isDark ? AppColors.darkTextTertiary : AppColors.textTertiary)
+                      .withOpacity(0.6),
             ),
           ],
         ),

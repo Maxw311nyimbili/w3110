@@ -11,5 +11,6 @@ part of 'env.dart';
 class _Env {
   static final String apiUrlDev = 'http://localhost:8000';
   static final String apiUrlStaging = 'https://staging-api.medbot.com';
-  static final String apiUrlProd = 'https://medlinkbackendv11-production.up.railway.app';
+  static final String apiUrlProd =
+      'https://medlinkbackendv11-production.up.railway.app';
 }

@@ -105,8 +105,13 @@ class _ProfileSetupStepState extends State<ProfileSetupStep> {
                           controller: _nicknameController,
                           decoration: _buildInputDecoration(
                             'e.g., Clinical Account, Personal',
-                            errorText: state.showValidationError && (state.accountNickname == null || state.accountNickname!.isEmpty)
-                                ? AppLocalizations.of(context).pleaseEnterNickname
+                            errorText:
+                                state.showValidationError &&
+                                    (state.accountNickname == null ||
+                                        state.accountNickname!.isEmpty)
+                                ? AppLocalizations.of(
+                                    context,
+                                  ).pleaseEnterNickname
                                 : null,
                           ),
                           style: AppTextStyles.bodyLarge,
@@ -114,10 +119,13 @@ class _ProfileSetupStepState extends State<ProfileSetupStep> {
                         const SizedBox(height: 8),
                         Text(
                           AppLocalizations.of(context).useToDistinguish,
-                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: Theme.of(context).textTheme.bodySmall?.color,
-                            fontSize: 13,
-                          ),
+                          style: Theme.of(context).textTheme.labelSmall
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).textTheme.bodySmall?.color,
+                                fontSize: 13,
+                              ),
                         ),
                       ],
                     ),
@@ -130,7 +138,8 @@ class _ProfileSetupStepState extends State<ProfileSetupStep> {
                     child: Padding(
                       padding: const EdgeInsets.only(bottom: 24),
                       child: PremiumButton(
-                        onPressed: () => context.read<LandingCubit>().nextStep(),
+                        onPressed: () =>
+                            context.read<LandingCubit>().nextStep(),
                         text: AppLocalizations.of(context).continueButton,
                       ),
                     ),
@@ -184,15 +193,22 @@ class _ProfileSetupStepState extends State<ProfileSetupStep> {
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.1)),
+        borderSide: BorderSide(
+          color: Theme.of(context).dividerColor.withOpacity(0.1),
+        ),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.1)),
+        borderSide: BorderSide(
+          color: Theme.of(context).dividerColor.withOpacity(0.1),
+        ),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
+        borderSide: BorderSide(
+          color: Theme.of(context).colorScheme.primary,
+          width: 2,
+        ),
       ),
     );
   }

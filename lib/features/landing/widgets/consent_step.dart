@@ -12,23 +12,27 @@ class ConsentStep extends StatelessWidget {
   const ConsentStep({super.key});
 
   void _openPrivacyPolicy(BuildContext context) {
-    Navigator.of(context).push(MaterialPageRoute(
-      builder: (_) => const PolicyViewerPage(
-        title: kPrivacyPolicyTitle,
-        effectiveDate: kPrivacyPolicyDate,
-        sections: kPrivacySections,
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => const PolicyViewerPage(
+          title: kPrivacyPolicyTitle,
+          effectiveDate: kPrivacyPolicyDate,
+          sections: kPrivacySections,
+        ),
       ),
-    ));
+    );
   }
 
   void _openTerms(BuildContext context) {
-    Navigator.of(context).push(MaterialPageRoute(
-      builder: (_) => const PolicyViewerPage(
-        title: kTermsTitle,
-        effectiveDate: kTermsDate,
-        sections: kTermsSections,
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => const PolicyViewerPage(
+          title: kTermsTitle,
+          effectiveDate: kTermsDate,
+          sections: kTermsSections,
+        ),
       ),
-    ));
+    );
   }
 
   @override
@@ -48,7 +52,10 @@ class ConsentStep extends StatelessWidget {
           ),
           body: SafeArea(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 24.0,
+                vertical: 8,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -141,11 +148,9 @@ class ConsentStep extends StatelessWidget {
                           child: Text(
                             '·',
                             style: TextStyle(
-                              color: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
-                                  ?.color
-                                  ?.withOpacity(0.4),
+                              color: Theme.of(
+                                context,
+                              ).textTheme.bodySmall?.color?.withOpacity(0.4),
                               fontSize: 18,
                             ),
                           ),
@@ -168,9 +173,9 @@ class ConsentStep extends StatelessWidget {
                       value: state.consentGiven,
                       onChanged: (value) {
                         context.read<LandingCubit>().giveConsent(
-                              value ?? false,
-                              AppConstants.currentConsentVersion,
-                            );
+                          value ?? false,
+                          AppConstants.currentConsentVersion,
+                        );
                       },
                       onPrivacyTap: () => _openPrivacyPolicy(context),
                       onTermsTap: () => _openTerms(context),
@@ -231,8 +236,11 @@ class ConsentStep extends StatelessWidget {
               color: Theme.of(context).colorScheme.primary.withOpacity(0.07),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, size: 18,
-                color: Theme.of(context).colorScheme.primary),
+            child: Icon(
+              icon,
+              size: 18,
+              color: Theme.of(context).colorScheme.primary,
+            ),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -277,7 +285,9 @@ class ConsentStep extends StatelessWidget {
           fontWeight: FontWeight.w600,
           color: Theme.of(context).colorScheme.primary,
           decoration: TextDecoration.underline,
-          decorationColor: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+          decorationColor: Theme.of(
+            context,
+          ).colorScheme.primary.withOpacity(0.5),
         ),
       ),
     );

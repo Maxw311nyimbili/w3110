@@ -58,15 +58,17 @@ class PostCard extends StatelessWidget {
                 Text(
                   post.authorName,
                   style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        fontWeight: FontWeight.w800,
-                      ),
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
                 const SizedBox(width: 8),
                 Container(
                   width: 3,
                   height: 3,
                   decoration: BoxDecoration(
-                    color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.5),
+                    color: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.color?.withOpacity(0.5),
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -74,8 +76,8 @@ class PostCard extends StatelessWidget {
                 Text(
                   _formatTime(post.createdAt),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 const Spacer(),
                 if (currentUserId == post.authorId) _buildActions(context),
@@ -87,11 +89,11 @@ class PostCard extends StatelessWidget {
             Text(
               post.title,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w900,
-                    fontSize: 18,
-                    height: 1.2,
-                    letterSpacing: -0.5,
-                  ),
+                fontWeight: FontWeight.w900,
+                fontSize: 18,
+                height: 1.2,
+                letterSpacing: -0.5,
+              ),
             ),
             const SizedBox(height: 8),
 
@@ -101,10 +103,10 @@ class PostCard extends StatelessWidget {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    height: 1.5,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w400,
-                  ),
+                height: 1.5,
+                fontSize: 15,
+                fontWeight: FontWeight.w400,
+              ),
             ),
 
             // Footer: Tags and Comments Count
@@ -158,7 +160,9 @@ class PostCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.primary.withOpacity(0.08),
         shape: BoxShape.circle,
-        border: Border.all(color: Theme.of(context).colorScheme.primary.withOpacity(0.1)),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+        ),
       ),
       child: Text(
         name.isNotEmpty ? name[0].toUpperCase() : '?',
@@ -200,9 +204,16 @@ class PostCard extends StatelessWidget {
           value: 'delete',
           child: Row(
             children: [
-              Icon(Icons.delete_outline_rounded, size: 18, color: Theme.of(context).colorScheme.error),
+              Icon(
+                Icons.delete_outline_rounded,
+                size: 18,
+                color: Theme.of(context).colorScheme.error,
+              ),
               const SizedBox(width: 8),
-              Text('Delete', style: TextStyle(color: Theme.of(context).colorScheme.error)),
+              Text(
+                'Delete',
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
+              ),
             ],
           ),
         ),
@@ -288,29 +299,40 @@ class PostCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.primary.withOpacity(0.06),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Theme.of(context).colorScheme.primary.withOpacity(0.05)),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.primary.withOpacity(0.05),
+        ),
       ),
       child: Text(
         '#$tag',
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.primary,
-              fontWeight: FontWeight.w800,
-              fontSize: 11,
-            ),
+          color: Theme.of(context).colorScheme.primary,
+          fontWeight: FontWeight.w800,
+          fontSize: 11,
+        ),
       ),
     );
   }
 
-  Widget _buildStat(BuildContext context, IconData icon, String value, {Color? color}) {
+  Widget _buildStat(
+    BuildContext context,
+    IconData icon,
+    String value, {
+    Color? color,
+  }) {
     return Row(
       children: [
-        Icon(icon, size: 14, color: color ?? Theme.of(context).textTheme.bodySmall?.color),
+        Icon(
+          icon,
+          size: 14,
+          color: color ?? Theme.of(context).textTheme.bodySmall?.color,
+        ),
         const SizedBox(width: 4),
         Text(
           value,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
+            fontWeight: FontWeight.w700,
+          ),
         ),
       ],
     );

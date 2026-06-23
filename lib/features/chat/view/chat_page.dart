@@ -14,7 +14,6 @@ import 'package:cap_project/app/cubit/navigation_cubit.dart';
 import '../cubit/cubit.dart';
 import '../widgets/widgets.dart';
 
-
 import 'package:landing_repository/landing_repository.dart';
 import 'package:cap_project/features/forum/cubit/forum_cubit.dart';
 import 'package:forum_repository/forum_repository.dart';
@@ -63,7 +62,9 @@ class _ChatPageState extends State<ChatPage> {
           );
           context.read<ChatCubit>().initialize();
           if (widget.initialScanResult != null) {
-            context.read<ChatCubit>().addMedicineResult(widget.initialScanResult!);
+            context.read<ChatCubit>().addMedicineResult(
+              widget.initialScanResult!,
+            );
           }
         }
 
@@ -180,8 +181,6 @@ class _ChatViewState extends State<ChatView> {
     });
   }
 
-
-
   Widget _buildAuthAction(BuildContext context) {
     final authState = context.read<AuthCubit>().state;
     final isAuthenticated = authState.status == AuthStatus.authenticated;
@@ -246,7 +245,6 @@ class _ChatViewState extends State<ChatView> {
       ),
     );
   }
-
 
   @override
   Widget build(BuildContext context) {

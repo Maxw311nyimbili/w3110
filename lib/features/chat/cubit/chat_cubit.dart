@@ -7,7 +7,9 @@ import 'package:cap_project/features/medscanner/cubit/medscanner_state.dart'
 import 'package:cap_project/core/services/audio_recording_service.dart';
 import 'package:record/record.dart';
 import 'package:audioplayers/audioplayers.dart';
-import 'package:chat_repository/chat_repository.dart' as repo hide ChatMessage, SourceReference;
+import 'package:chat_repository/chat_repository.dart'
+    as repo
+    hide ChatMessage, SourceReference;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
@@ -72,7 +74,8 @@ class ChatCubit extends Cubit<ChatState> {
     try {
       _isPriming = true;
       await _audioPlayer.setReleaseMode(ReleaseMode.stop);
-      const silentWav = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAgD4AAIA+AAABAAgAZGF0YQAAAAA=';
+      const silentWav =
+          'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAgD4AAIA+AAABAAgAZGF0YQAAAAA=';
       await _audioPlayer.setVolume(0.0);
       await _audioPlayer.play(UrlSource(silentWav, mimeType: 'audio/wav'));
       await Future.delayed(const Duration(milliseconds: 150));
@@ -92,8 +95,8 @@ class ChatCubit extends Cubit<ChatState> {
       if (state == PlayerState.playing) {
         emit(this.state.copyWith(isPlayingAudio: true));
       } else if (state == PlayerState.completed ||
-                 state == PlayerState.stopped ||
-                 state == PlayerState.paused) {
+          state == PlayerState.stopped ||
+          state == PlayerState.paused) {
         emit(this.state.copyWith(isPlayingAudio: false, playingLanguage: null));
       }
     });
@@ -318,7 +321,9 @@ class ChatCubit extends Cubit<ChatState> {
       detailedAnswer = firstSentence['rewritten'] as String? ?? '';
 
       if (firstSentence['citations'] is List) {
-        sources = (firstSentence['citations'] as List).map<SourceReference>((c) {
+        sources = (firstSentence['citations'] as List).map<SourceReference>((
+          c,
+        ) {
           final citation = c as Map<String, dynamic>;
           final sourceData = citation['source'] as Map<String, dynamic>?;
           return SourceReference(
@@ -366,16 +371,17 @@ class ChatCubit extends Cubit<ChatState> {
       print('🔊 [TTS] ⚠️ No audio_url in response - TTS will NOT play');
     }
 
-    final isNewSession = state.sessionId == null || state.historySessions.isEmpty;
-    
+    final isNewSession =
+        state.sessionId == null || state.historySessions.isEmpty;
+
     emit(
       state.copyWith(
         messages: [...state.messages, aiMessage],
         status: ChatStatus.success,
         isTyping: false,
         // Sync sessionId from backend, but fallback to state if missing
-        sessionId: (responseData['session_id'] as String?)?.isNotEmpty == true 
-            ? responseData['session_id'] as String 
+        sessionId: (responseData['session_id'] as String?)?.isNotEmpty == true
+            ? responseData['session_id'] as String
             : state.sessionId,
       ),
     );
@@ -389,7 +395,13 @@ class ChatCubit extends Cubit<ChatState> {
   Future<void> stopAudio() async {
     try {
       await _audioPlayer.stop();
-      emit(state.copyWith(isPlayingAudio: false, isSynthesizingAudio: false, playingLanguage: null));
+      emit(
+        state.copyWith(
+          isPlayingAudio: false,
+          isSynthesizingAudio: false,
+          playingLanguage: null,
+        ),
+      );
     } catch (e) {
       print('🔊 [TTS] ❌ Error stopping audio: $e');
     }
@@ -398,8 +410,10 @@ class ChatCubit extends Cubit<ChatState> {
   Future<void> _playAudio(String url, {VoiceLanguage? language}) async {
     try {
       emit(state.copyWith(playingLanguage: language));
-      print('🔊 [TTS] _playAudio called (${url.length > 60 ? url.substring(0, 60) + '...' : url})');
-      
+      print(
+        '🔊 [TTS] _playAudio called (${url.length > 60 ? url.substring(0, 60) + '...' : url})',
+      );
+
       // On Web, Safari and other browsers often handle data URIs better via UrlSource
       // than decoding to bytes and using BytesSource.
       if (url.startsWith('data:')) {
@@ -410,7 +424,9 @@ class ChatCubit extends Cubit<ChatState> {
           final prefix = url.substring(0, commaIdx);
           final parts = prefix.split(':');
           if (parts.length > 1) {
-            mimeType = parts[1].split(';')[0]; // Extract "audio/mpeg" or "audio/wav"
+            mimeType = parts[1].split(
+              ';',
+            )[0]; // Extract "audio/mpeg" or "audio/wav"
           }
         }
         print('🔊 [TTS]   Playing Data URI with mimeType: $mimeType');
@@ -426,7 +442,10 @@ class ChatCubit extends Cubit<ChatState> {
 
   /// Synthesize a specific message into speech (speak button on a message)
   /// Takes the message content directly - no database ID needed.
-  Future<void> speakMessage(String messageContent, VoiceLanguage language) async {
+  Future<void> speakMessage(
+    String messageContent,
+    VoiceLanguage language,
+  ) async {
     try {
       print('🔊 [TTS] speakMessage called:');
       unawaited(_primeAudio()); // Prime on speak icon click
@@ -632,7 +651,8 @@ class ChatCubit extends Cubit<ChatState> {
         latencyMs: response.processingTimeMs,
       );
 
-      final isNewSession = state.sessionId == null || state.historySessions.isEmpty;
+      final isNewSession =
+          state.sessionId == null || state.historySessions.isEmpty;
 
       emit(
         state.copyWith(
@@ -640,8 +660,8 @@ class ChatCubit extends Cubit<ChatState> {
           status: ChatStatus.success,
           isTyping: false,
           // Always prefer the backend returned sessionId for context continuity
-          sessionId: response.sessionId.isNotEmpty 
-              ? response.sessionId 
+          sessionId: response.sessionId.isNotEmpty
+              ? response.sessionId
               : sessionId,
         ),
       );
@@ -653,9 +673,9 @@ class ChatCubit extends Cubit<ChatState> {
       print('❌ [CHAT] sendMessage ERROR: $e');
       _loadingTimer?.cancel();
       emit(state.resetLoadingMessage());
-      
-      final errorMessageStr = e.toString().contains('ApiException') 
-          ? 'Network issue. Please try again.' 
+
+      final errorMessageStr = e.toString().contains('ApiException')
+          ? 'Network issue. Please try again.'
           : 'Something went wrong. Please try again.';
 
       final errorMessage = ChatMessage(
@@ -873,7 +893,9 @@ class ChatCubit extends Cubit<ChatState> {
   }
 
   void toggleMessageView(String messageId) {
-    final List<ChatMessage> updatedMessages = state.messages.map<ChatMessage>((msg) {
+    final List<ChatMessage> updatedMessages = state.messages.map<ChatMessage>((
+      msg,
+    ) {
       if (msg.id == messageId) {
         return msg.copyWith(showingDetailedView: !msg.showingDetailedView);
       }
@@ -888,18 +910,22 @@ class ChatCubit extends Cubit<ChatState> {
       emit(state.copyWith(isLoadingHistory: true));
       final sessionData = await _chatRepository.fetchSessions(limit: 50);
 
-      final List<HistorySession> historySessions = sessionData.map<HistorySession>((s) {
-        return HistorySession(
-          sessionId: s['session_id'] as String? ?? 'unknown',
-          firstMessage: s['first_message'] as String? ?? 'New Chat',
-          timestamp: DateTime.parse(s['created_at'] as String),
-        );
-      }).toList();
+      final List<HistorySession> historySessions = sessionData
+          .map<HistorySession>((s) {
+            return HistorySession(
+              sessionId: s['session_id'] as String? ?? 'unknown',
+              firstMessage: s['first_message'] as String? ?? 'New Chat',
+              timestamp: DateTime.parse(s['created_at'] as String),
+            );
+          })
+          .toList();
 
-      emit(state.copyWith(
-        isLoadingHistory: false,
-        historySessions: historySessions,
-      ));
+      emit(
+        state.copyWith(
+          isLoadingHistory: false,
+          historySessions: historySessions,
+        ),
+      );
     } catch (e) {
       print('❌ Failed to load history: $e');
       emit(state.copyWith(isLoadingHistory: false));
@@ -913,37 +939,49 @@ class ChatCubit extends Cubit<ChatState> {
         sessionId: sessionId,
         limit: 50,
       );
-      
-      final List<ChatMessage> messages = historyData.map<ChatMessage>((m) => _mapRepoMessageToModel(m)).toList();
 
-      emit(state.copyWith(
-        status: ChatStatus.success,
-        messages: messages,
-        sessionId: sessionId,
-        isTyping: false,
-      ));
+      final List<ChatMessage> messages = historyData
+          .map<ChatMessage>((m) => _mapRepoMessageToModel(m))
+          .toList();
+
+      emit(
+        state.copyWith(
+          status: ChatStatus.success,
+          messages: messages,
+          sessionId: sessionId,
+          isTyping: false,
+        ),
+      );
     } catch (e) {
       print('❌ Failed to load session: $e');
-      emit(state.copyWith(status: ChatStatus.error, error: 'Failed to load chat session', isTyping: false));
+      emit(
+        state.copyWith(
+          status: ChatStatus.error,
+          error: 'Failed to load chat session',
+          isTyping: false,
+        ),
+      );
     }
   }
 
   Future<void> deleteSession(String sessionId) async {
     try {
       await _chatRepository.deleteSession(sessionId);
-      
+
       // Update history list
       final updatedHistory = state.historySessions
           .where((s) => s.sessionId != sessionId)
           .toList();
-          
+
       // If we deleted the current session, clear messages
       if (state.sessionId == sessionId) {
-        emit(state.copyWith(
-          messages: [],
-          sessionId: null,
-          historySessions: updatedHistory,
-        ));
+        emit(
+          state.copyWith(
+            messages: [],
+            sessionId: null,
+            historySessions: updatedHistory,
+          ),
+        );
       } else {
         emit(state.copyWith(historySessions: updatedHistory));
       }
@@ -965,10 +1003,14 @@ class ChatCubit extends Cubit<ChatState> {
           final map = s as Map<String, dynamic>;
           final sourceData = map['source'] as Map<String, dynamic>?;
           return SourceReference(
-            title: (sourceData?['title'] ?? map['title'] ?? 'No title').toString(),
+            title: (sourceData?['title'] ?? map['title'] ?? 'No title')
+                .toString(),
             url: (sourceData?['url'] ?? map['url'] ?? '').toString(),
-            domain: (sourceData?['domain'] ?? map['domain'] ?? 'Unknown').toString(),
-            authority: (sourceData?['authority'] ?? map['authority'] ?? 'UNKNOWN').toString(),
+            domain: (sourceData?['domain'] ?? map['domain'] ?? 'Unknown')
+                .toString(),
+            authority:
+                (sourceData?['authority'] ?? map['authority'] ?? 'UNKNOWN')
+                    .toString(),
             snippet: (map['fragment_text'] ?? map['snippet']) as String?,
           );
         }).toList();

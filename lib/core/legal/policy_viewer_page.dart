@@ -37,8 +37,11 @@ class PolicyViewerPage extends StatelessWidget {
         elevation: 0,
         scrolledUnderElevation: 0.5,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded, size: 20,
-              color: theme.textTheme.bodyLarge?.color),
+          icon: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            size: 20,
+            color: theme.textTheme.bodyLarge?.color,
+          ),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
@@ -59,7 +62,10 @@ class PolicyViewerPage extends StatelessWidget {
                 // Effective date chip
                 Container(
                   margin: const EdgeInsets.only(bottom: 28),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: primary.withOpacity(0.08),
                     borderRadius: BorderRadius.circular(20),

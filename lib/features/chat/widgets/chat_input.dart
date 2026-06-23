@@ -45,17 +45,18 @@ class _RefinedChatInputState extends State<RefinedChatInput>
     _controller.addListener(_onTextChanged);
     _focusNode.onKeyEvent = (node, event) {
       // Enter-to-send logic for larger screens (Web/Tablet/Desktop)
-      final isLargeScreen = ResponsiveUtils.isDesktop(context) || ResponsiveUtils.isTablet(context);
-      
-      if (isLargeScreen && 
-          event is KeyDownEvent && 
+      final isLargeScreen =
+          ResponsiveUtils.isDesktop(context) ||
+          ResponsiveUtils.isTablet(context);
+
+      if (isLargeScreen &&
+          event is KeyDownEvent &&
           event.logicalKey == LogicalKeyboardKey.enter) {
-        
         // If Shift is pressed, allow default behavior (newline)
         if (HardwareKeyboard.instance.isShiftPressed) {
           return KeyEventResult.ignored;
         }
-        
+
         // Otherwise, send message and prevent newline
         if (_controller.text.trim().isNotEmpty) {
           _sendMessage();
@@ -64,7 +65,7 @@ class _RefinedChatInputState extends State<RefinedChatInput>
       }
       return KeyEventResult.ignored;
     };
-    
+
     _pulseController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
@@ -97,12 +98,12 @@ class _RefinedChatInputState extends State<RefinedChatInput>
 
   String _sanitizeInput(String input) {
     var sanitized = input.trim();
-    
+
     // 1. Enforce character limit (redundant with TextField but safe)
     if (sanitized.length > 2000) {
       sanitized = sanitized.substring(0, 2000);
     }
-    
+
     // 2. Simple protection against JSON injection
     // If we see suspicious bracket usage, escape or strip them
     if (sanitized.contains('{') || sanitized.contains('[')) {
@@ -112,16 +113,16 @@ class _RefinedChatInputState extends State<RefinedChatInput>
         sanitized = sanitized.replaceAll('{', '(').replaceAll('}', ')');
       }
     }
-    
+
     return sanitized;
   }
 
   void _sendMessage() {
     final originalText = _controller.text;
     final sanitizedText = _sanitizeInput(originalText);
-    
+
     if (sanitizedText.isEmpty) return;
-    
+
     context.read<ChatCubit>().sendMessage(sanitizedText);
     _controller.clear();
     setState(() => _hasText = false);
@@ -230,7 +231,10 @@ class _RefinedChatInputState extends State<RefinedChatInput>
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.photo_library_outlined, color: Colors.blue),
+              leading: const Icon(
+                Icons.photo_library_outlined,
+                color: Colors.blue,
+              ),
               title: const Text('Photos & Videos'),
               onTap: () {
                 Navigator.pop(context);
@@ -238,7 +242,10 @@ class _RefinedChatInputState extends State<RefinedChatInput>
               },
             ),
             ListTile(
-              leading: const Icon(Icons.description_outlined, color: Colors.orange),
+              leading: const Icon(
+                Icons.description_outlined,
+                color: Colors.orange,
+              ),
               title: const Text('Documents'),
               onTap: () {
                 Navigator.pop(context);
@@ -257,8 +264,6 @@ class _RefinedChatInputState extends State<RefinedChatInput>
       chatCubit.addMedicineResult(result);
     }
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -310,7 +315,9 @@ class _RefinedChatInputState extends State<RefinedChatInput>
             boxShadow: widget.isLandingMode
                 ? [
                     BoxShadow(
-                      color: Theme.of(context).colorScheme.primary.withOpacity(0.08),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withOpacity(0.08),
                       blurRadius: 32,
                       spreadRadius: -4,
                       offset: const Offset(0, 12),
@@ -324,7 +331,9 @@ class _RefinedChatInputState extends State<RefinedChatInput>
                   ]
                 : [
                     BoxShadow(
-                      color: Theme.of(context).colorScheme.primary.withOpacity(0.05),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withOpacity(0.05),
                       blurRadius: 12,
                       offset: const Offset(0, 2),
                     ),
@@ -369,7 +378,13 @@ class _RefinedChatInputState extends State<RefinedChatInput>
               contentPadding: const EdgeInsets.symmetric(vertical: 12),
             ),
             maxLength: 2000,
-            buildCounter: (context, {required currentLength, required isFocused, maxLength}) => null,
+            buildCounter:
+                (
+                  context, {
+                  required currentLength,
+                  required isFocused,
+                  maxLength,
+                }) => null,
           ),
         ),
         Padding(
@@ -413,7 +428,9 @@ class _RefinedChatInputState extends State<RefinedChatInput>
                           boxShadow: canSend
                               ? [
                                   BoxShadow(
-                                    color: AppColors.slateBlue.withOpacity(0.32),
+                                    color: AppColors.slateBlue.withOpacity(
+                                      0.32,
+                                    ),
                                     blurRadius: 12,
                                     offset: const Offset(0, 4),
                                   ),
@@ -520,9 +537,10 @@ class _RefinedChatInputState extends State<RefinedChatInput>
                                 width: 44,
                                 height: 44,
                                 decoration: BoxDecoration(
-                                  color: Theme.of(context).colorScheme.primary.withOpacity(
-                                    0.1,
-                                  ),
+                                  color: Theme.of(context).colorScheme.primary
+                                      .withOpacity(
+                                        0.1,
+                                      ),
                                   shape: BoxShape.circle,
                                 ),
                               ),
@@ -611,27 +629,35 @@ class _RefinedChatInputState extends State<RefinedChatInput>
                         decoration: BoxDecoration(
                           color: Theme.of(context).scaffoldBackgroundColor,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
+                          border: Border.all(
+                            color: Theme.of(
+                              context,
+                            ).dividerColor.withOpacity(0.1),
+                          ),
                         ),
                         child: attachment.type == AttachmentType.image
                             ? ClipRRect(
                                 borderRadius: BorderRadius.circular(12),
-                                child: kIsWeb || attachment.path.startsWith('blob:')
+                                child:
+                                    kIsWeb ||
+                                        attachment.path.startsWith('blob:')
                                     ? Image.network(
                                         attachment.path,
                                         fit: BoxFit.cover,
-                                        errorBuilder: (_, __, ___) => const Icon(
-                                          Icons.broken_image_outlined,
-                                          size: 20,
-                                        ),
+                                        errorBuilder: (_, __, ___) =>
+                                            const Icon(
+                                              Icons.broken_image_outlined,
+                                              size: 20,
+                                            ),
                                       )
                                     : Image.file(
                                         io.File(attachment.path),
                                         fit: BoxFit.cover,
-                                        errorBuilder: (_, __, ___) => const Icon(
-                                          Icons.broken_image_outlined,
-                                          size: 20,
-                                        ),
+                                        errorBuilder: (_, __, ___) =>
+                                            const Icon(
+                                              Icons.broken_image_outlined,
+                                              size: 20,
+                                            ),
                                       ),
                               )
                             : Column(

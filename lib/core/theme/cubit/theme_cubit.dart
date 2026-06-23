@@ -5,8 +5,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class ThemeCubit extends Cubit<ThemeState> {
   ThemeCubit({LandingRepository? landingRepository})
-      : _landingRepository = landingRepository,
-        super(const ThemeState()) {
+    : _landingRepository = landingRepository,
+      super(const ThemeState()) {
     _loadTheme();
   }
 

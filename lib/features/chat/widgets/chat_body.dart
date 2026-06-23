@@ -260,7 +260,9 @@ class _ChatBodyState extends State<ChatBody>
                                     style: GoogleFonts.cormorantGaramond(
                                       fontSize: isDesktop ? 52 : 40,
                                       fontWeight: FontWeight.w300,
-                                      color: Theme.of(context).textTheme.bodyLarge?.color,
+                                      color: Theme.of(
+                                        context,
+                                      ).textTheme.bodyLarge?.color,
                                       letterSpacing: 1.0,
                                       height: 1.1,
                                     ),
@@ -269,10 +271,15 @@ class _ChatBodyState extends State<ChatBody>
                                   Text(
                                     l10n.chatSupportQuestion,
                                     textAlign: TextAlign.center,
-                                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                      color: Theme.of(context).textTheme.bodySmall?.color,
-                                      letterSpacing: 0.2,
-                                    ),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(
+                                          color: Theme.of(
+                                            context,
+                                          ).textTheme.bodySmall?.color,
+                                          letterSpacing: 0.2,
+                                        ),
                                   ),
                                 ],
                               ),
@@ -440,11 +447,11 @@ class _ChatBodyState extends State<ChatBody>
               Text(
                 AppLocalizations.of(context).dailyInsight.toUpperCase(),
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: Theme.of(context).colorScheme.primary,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 2.0,
-                      fontSize: 10,
-                    ),
+                  color: Theme.of(context).colorScheme.primary,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 2.0,
+                  fontSize: 10,
+                ),
               ),
               const SizedBox(height: 12),
               Text(
@@ -558,12 +565,16 @@ class _ChatBodyState extends State<ChatBody>
                   color: Theme.of(context).colorScheme.surface.withOpacity(0.8),
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
-                    color: Theme.of(context).colorScheme.primary.withOpacity(0.22),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withOpacity(0.22),
                     width: 1,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Theme.of(context).colorScheme.primary.withOpacity(0.06),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withOpacity(0.06),
                       blurRadius: 16,
                       offset: const Offset(0, 3),
                     ),

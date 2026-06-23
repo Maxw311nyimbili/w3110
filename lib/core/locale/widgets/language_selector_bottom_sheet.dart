@@ -58,13 +58,17 @@ class LanguageSelectorBottomSheet extends StatelessWidget {
             // Language options
             BlocBuilder<LocaleCubit, LocaleState>(
               builder: (context, state) {
-                final primaryLocales = LocaleState.supportedLocales.where(
-                  (l) => l.languageCode == 'en' || l.languageCode == 'tw',
-                ).toList();
-                
-                final otherLocales = LocaleState.supportedLocales.where(
-                  (l) => l.languageCode == 'ar' || l.languageCode == 'fr',
-                ).toList();
+                final primaryLocales = LocaleState.supportedLocales
+                    .where(
+                      (l) => l.languageCode == 'en' || l.languageCode == 'tw',
+                    )
+                    .toList();
+
+                final otherLocales = LocaleState.supportedLocales
+                    .where(
+                      (l) => l.languageCode == 'ar' || l.languageCode == 'fr',
+                    )
+                    .toList();
 
                 return _LanguageListContent(
                   state: state,
@@ -106,7 +110,8 @@ class _LanguageListContentState extends State<_LanguageListContent> {
       children: [
         // Primary Section
         ...widget.primaryLocales.map((locale) {
-          final isSelected = widget.state.locale.languageCode == locale.languageCode;
+          final isSelected =
+              widget.state.locale.languageCode == locale.languageCode;
           return _LanguageOption(
             locale: locale,
             isSelected: isSelected,
@@ -122,22 +127,33 @@ class _LanguageListContentState extends State<_LanguageListContent> {
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
           child: Row(
             children: [
-              Expanded(child: Divider(color: Theme.of(context).dividerColor.withOpacity(0.05))),
+              Expanded(
+                child: Divider(
+                  color: Theme.of(context).dividerColor.withOpacity(0.05),
+                ),
+              ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: GestureDetector(
                   onTap: () => setState(() => _showOthers = !_showOthers),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primary.withOpacity(0.05),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withOpacity(0.05),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          _showOthers ? AppLocalizations.of(context).showLess : AppLocalizations.of(context).moreOptions,
+                          _showOthers
+                              ? AppLocalizations.of(context).showLess
+                              : AppLocalizations.of(context).moreOptions,
                           style: TextStyle(
                             color: Theme.of(context).colorScheme.primary,
                             fontSize: 12,
@@ -146,7 +162,9 @@ class _LanguageListContentState extends State<_LanguageListContent> {
                         ),
                         const SizedBox(width: 4),
                         Icon(
-                          _showOthers ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
+                          _showOthers
+                              ? Icons.keyboard_arrow_up_rounded
+                              : Icons.keyboard_arrow_down_rounded,
                           size: 16,
                           color: Theme.of(context).colorScheme.primary,
                         ),
@@ -155,7 +173,11 @@ class _LanguageListContentState extends State<_LanguageListContent> {
                   ),
                 ),
               ),
-              Expanded(child: Divider(color: Theme.of(context).dividerColor.withOpacity(0.05))),
+              Expanded(
+                child: Divider(
+                  color: Theme.of(context).dividerColor.withOpacity(0.05),
+                ),
+              ),
             ],
           ),
         ),
@@ -165,7 +187,8 @@ class _LanguageListContentState extends State<_LanguageListContent> {
           firstChild: const SizedBox.shrink(),
           secondChild: Column(
             children: widget.otherLocales.map((locale) {
-              final isSelected = widget.state.locale.languageCode == locale.languageCode;
+              final isSelected =
+                  widget.state.locale.languageCode == locale.languageCode;
               return _LanguageOption(
                 locale: locale,
                 isSelected: isSelected,
@@ -177,7 +200,9 @@ class _LanguageListContentState extends State<_LanguageListContent> {
               );
             }).toList(),
           ),
-          crossFadeState: _showOthers ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+          crossFadeState: _showOthers
+              ? CrossFadeState.showSecond
+              : CrossFadeState.showFirst,
           duration: const Duration(milliseconds: 300),
         ),
       ],
@@ -216,9 +241,9 @@ class _LanguageOption extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: isSelected
                       ? theme.colorScheme.primary.withOpacity(0.12)
-                      : isSecondary 
-                          ? theme.scaffoldBackgroundColor.withOpacity(0.5)
-                          : theme.scaffoldBackgroundColor,
+                      : isSecondary
+                      ? theme.scaffoldBackgroundColor.withOpacity(0.5)
+                      : theme.scaffoldBackgroundColor,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: isSelected
@@ -245,9 +270,11 @@ class _LanguageOption extends StatelessWidget {
                     Text(
                       LocaleState.getLanguageName(locale),
                       style: theme.textTheme.bodyLarge?.copyWith(
-                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                        fontWeight: isSelected
+                            ? FontWeight.w600
+                            : FontWeight.w500,
                         fontSize: 16,
-                        color: isSecondary && !isSelected 
+                        color: isSecondary && !isSelected
                             ? theme.textTheme.bodyLarge?.color?.withOpacity(0.7)
                             : theme.textTheme.bodyLarge?.color,
                       ),
@@ -257,7 +284,9 @@ class _LanguageOption extends StatelessWidget {
                         _getSubtitle(locale.languageCode),
                         style: theme.textTheme.bodySmall?.copyWith(
                           fontSize: 12,
-                          color: theme.textTheme.bodySmall?.color?.withOpacity(0.5),
+                          color: theme.textTheme.bodySmall?.color?.withOpacity(
+                            0.5,
+                          ),
                         ),
                       ),
                   ],
@@ -287,21 +316,31 @@ class _LanguageOption extends StatelessWidget {
 
   String _getEmoji(String code) {
     switch (code) {
-      case 'en': return '🇺🇸';
-      case 'tw': return '🇬🇭';
-      case 'ar': return '🇸🇦';
-      case 'fr': return '🇫🇷';
-      default: return '🌐';
+      case 'en':
+        return '🇺🇸';
+      case 'tw':
+        return '🇬🇭';
+      case 'ar':
+        return '🇸🇦';
+      case 'fr':
+        return '🇫🇷';
+      default:
+        return '🌐';
     }
   }
 
   String _getSubtitle(String code) {
     switch (code) {
-      case 'en': return 'Native English';
-      case 'tw': return 'Akan (Twi)';
-      case 'ar': return 'Standard Arabic';
-      case 'fr': return 'Standard French';
-      default: return '';
+      case 'en':
+        return 'Native English';
+      case 'tw':
+        return 'Akan (Twi)';
+      case 'ar':
+        return 'Standard Arabic';
+      case 'fr':
+        return 'Standard French';
+      default:
+        return '';
     }
   }
 }

@@ -31,7 +31,6 @@ class _SettingsPageState extends State<SettingsPage> {
     super.initState();
   }
 
-
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -48,7 +47,10 @@ class _SettingsPageState extends State<SettingsPage> {
               // Content
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 24,
+                  ),
                   child: Column(
                     children: [
                       // --- Preferences Section ---
@@ -199,7 +201,10 @@ class _SettingsPageState extends State<SettingsPage> {
       builder: (context) => AlertDialog(
         backgroundColor: Theme.of(context).colorScheme.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(l10n.signOut, style: Theme.of(context).textTheme.headlineSmall),
+        title: Text(
+          l10n.signOut,
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
         content: Text(
           'Are you sure you want to sign out?',
           style: Theme.of(context).textTheme.bodyMedium,
@@ -219,8 +224,8 @@ class _SettingsPageState extends State<SettingsPage> {
             child: Text(
               l10n.signOut,
               style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    color: Theme.of(context).colorScheme.error,
-                  ),
+                color: Theme.of(context).colorScheme.error,
+              ),
             ),
           ),
         ],
@@ -246,7 +251,10 @@ class _SettingsPageState extends State<SettingsPage> {
       builder: (context) => AlertDialog(
         backgroundColor: Theme.of(context).colorScheme.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text('Reset All Data?', style: Theme.of(context).textTheme.headlineSmall),
+        title: Text(
+          'Reset All Data?',
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
         content: Text(
           'This will permanently delete ALL local data, including your login session and onboarding progress. The app will restart from scratch.',
           style: Theme.of(context).textTheme.bodyMedium,
@@ -266,8 +274,8 @@ class _SettingsPageState extends State<SettingsPage> {
             child: Text(
               'Reset Everything',
               style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    color: Theme.of(context).colorScheme.error,
-                  ),
+                color: Theme.of(context).colorScheme.error,
+              ),
             ),
           ),
         ],
@@ -294,7 +302,7 @@ class _SettingsPageState extends State<SettingsPage> {
     AppLocalizations l10n,
   ) async {
     final cubit = context.read<ThemeCubit>();
-    
+
     await showModalBottomSheet<void>(
       context: context,
       backgroundColor: Theme.of(context).colorScheme.surface,
@@ -356,17 +364,24 @@ class _SettingsPageState extends State<SettingsPage> {
     return ListTile(
       leading: Icon(
         icon,
-        color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).textTheme.bodySmall?.color,
+        color: isSelected
+            ? Theme.of(context).colorScheme.primary
+            : Theme.of(context).textTheme.bodySmall?.color,
       ),
       title: Text(
         title,
         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-          color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).textTheme.bodyLarge?.color,
+          color: isSelected
+              ? Theme.of(context).colorScheme.primary
+              : Theme.of(context).textTheme.bodyLarge?.color,
           fontWeight: isSelected ? FontWeight.w700 : FontWeight.normal,
         ),
       ),
       trailing: isSelected
-          ? Icon(Icons.check_circle_rounded, color: Theme.of(context).colorScheme.primary)
+          ? Icon(
+              Icons.check_circle_rounded,
+              color: Theme.of(context).colorScheme.primary,
+            )
           : null,
       onTap: onTap,
     );
@@ -463,10 +478,11 @@ class _SettingsPageState extends State<SettingsPage> {
                       children: [
                         Text(
                           title,
-                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 16,
-                          ),
+                          style: Theme.of(context).textTheme.bodyLarge
+                              ?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 16,
+                              ),
                         ),
                         if (subtitle != null) ...[
                           const SizedBox(height: 2),

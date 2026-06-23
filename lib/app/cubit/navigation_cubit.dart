@@ -55,14 +55,21 @@ class NavigationCubit extends Cubit<NavigationState> {
   NavigationCubit() : super(const NavigationState());
 
   void setTab(AppTab tab) {
-    emit(state.copyWith(activeTab: tab, isMobileDrawerOpen: false, clearAppBar: true));
+    emit(
+      state.copyWith(
+        activeTab: tab,
+        isMobileDrawerOpen: false,
+        clearAppBar: true,
+      ),
+    );
   }
 
-
   void toggleDesktopSidebar() {
-    emit(state.copyWith(
-      isDesktopSidebarCollapsed: !state.isDesktopSidebarCollapsed,
-    ));
+    emit(
+      state.copyWith(
+        isDesktopSidebarCollapsed: !state.isDesktopSidebarCollapsed,
+      ),
+    );
   }
 
   void openMobileDrawer() {
@@ -74,14 +81,16 @@ class NavigationCubit extends Cubit<NavigationState> {
   }
 
   void updateAppBar({Widget? title, List<Widget>? actions, Widget? leading}) {
-    emit(state.copyWith(
-      title: title,
-      actions: actions,
-      leading: leading,
-      clearTitle: title == null,
-      clearActions: actions == null,
-      clearLeading: leading == null,
-    ));
+    emit(
+      state.copyWith(
+        title: title,
+        actions: actions,
+        leading: leading,
+        clearTitle: title == null,
+        clearActions: actions == null,
+        clearLeading: leading == null,
+      ),
+    );
   }
 
   void clearAppBar() {

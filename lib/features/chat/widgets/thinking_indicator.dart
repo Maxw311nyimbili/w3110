@@ -46,25 +46,29 @@ class NaiiaThinkingController extends ChangeNotifier {
 
 class _ThinkingIndicatorState extends State<ThinkingIndicator>
     with TickerProviderStateMixin {
-
   // ── Phase 1: heartbeat (1.8 s cardiac lub-dub) ────────────────────────────
   late final AnimationController _heartC;
   late final Animation<double> _beatScale;
   late final Animation<double> _heartSparkOpacity;
 
   // ── Phase 2: spark sequence (3 s breathe + 1.5 s spark cycle) ─────────────
-  late final AnimationController _breathC;   // 3 s slow breathe for core
+  late final AnimationController _breathC; // 3 s slow breathe for core
   late final Animation<double> _breathScale;
 
-  late final AnimationController _sparkC;    // 1.5 s cycle for sequential sparks
+  late final AnimationController _sparkC; // 1.5 s cycle for sequential sparks
   // sparkC drives 4 virtual sparks at offsets 0, 0.12, 0.24, 0.36 of cycle
 
   // ── Cross-fade between phases ──────────────────────────────────────────────
-  late final AnimationController _phaseC;    // 0 = heartbeat, 1 = spark-seq
+  late final AnimationController _phaseC; // 0 = heartbeat, 1 = spark-seq
   late final Animation<double> _phaseAnim;
 
   // ── Word cycling ──────────────────────────────────────────────────────────
-  final List<String> _words = ['thinking', 'searching', 'analyzing', 'verifying'];
+  final List<String> _words = [
+    'thinking',
+    'searching',
+    'analyzing',
+    'verifying',
+  ];
   int _wordIndex = 0;
   late Timer _wordTimer;
 
@@ -86,7 +90,7 @@ class _ThinkingIndicatorState extends State<ThinkingIndicator>
       TweenSequenceItem(tween: Tween(begin: 1.075, end: 1.000), weight: 9),
       TweenSequenceItem(tween: Tween(begin: 1.000, end: 1.045), weight: 8),
       TweenSequenceItem(tween: Tween(begin: 1.045, end: 1.000), weight: 8),
-      TweenSequenceItem(tween: ConstantTween(1.000),             weight: 67),
+      TweenSequenceItem(tween: ConstantTween(1.000), weight: 67),
     ]).animate(CurvedAnimation(parent: _heartC, curve: Curves.easeInOut));
 
     // Sparks flare with the beats and return to resting dim.
@@ -94,7 +98,7 @@ class _ThinkingIndicatorState extends State<ThinkingIndicator>
       TweenSequenceItem(tween: Tween(begin: 0.32, end: 1.00), weight: 8),
       TweenSequenceItem(tween: Tween(begin: 1.00, end: 0.80), weight: 9),
       TweenSequenceItem(tween: Tween(begin: 0.80, end: 0.32), weight: 8),
-      TweenSequenceItem(tween: ConstantTween(0.32),            weight: 75),
+      TweenSequenceItem(tween: ConstantTween(0.32), weight: 75),
     ]).animate(_heartC);
 
     // ── Breathe controller (phase 2 core) ───────────────────────────────────
@@ -103,8 +107,10 @@ class _ThinkingIndicatorState extends State<ThinkingIndicator>
       duration: const Duration(milliseconds: 3000),
     )..repeat(reverse: true);
 
-    _breathScale = Tween<double>(begin: 1.000, end: 1.015)
-        .animate(CurvedAnimation(parent: _breathC, curve: Curves.easeInOut));
+    _breathScale = Tween<double>(
+      begin: 1.000,
+      end: 1.015,
+    ).animate(CurvedAnimation(parent: _breathC, curve: Curves.easeInOut));
 
     // ── Spark-sequence controller ────────────────────────────────────────────
     _sparkC = AnimationController(
@@ -121,7 +127,8 @@ class _ThinkingIndicatorState extends State<ThinkingIndicator>
 
     // ── Word cycling every 2 s ───────────────────────────────────────────────
     _wordTimer = Timer.periodic(const Duration(seconds: 2), (_) {
-      if (mounted) setState(() => _wordIndex = (_wordIndex + 1) % _words.length);
+      if (mounted)
+        setState(() => _wordIndex = (_wordIndex + 1) % _words.length);
     });
 
     widget.controller?.addListener(_onControllerChanged);
@@ -158,9 +165,9 @@ class _ThinkingIndicatorState extends State<ThinkingIndicator>
   double _seqSparkOpacity(double t) {
     const numSparks = 4;
     const offsets = [0.00, 0.12, 0.24, 0.36]; // fraction of cycle
-    const riseFrac  = 0.18;
-    const peakFrac  = 0.18;
-    const fallFrac  = 0.27;
+    const riseFrac = 0.18;
+    const peakFrac = 0.18;
+    const fallFrac = 0.27;
 
     double maxOp = 0.18;
     for (int i = 0; i < numSparks; i++) {
@@ -191,18 +198,23 @@ class _ThinkingIndicatorState extends State<ThinkingIndicator>
         children: [
           // ── Animated mark ─────────────────────────────────────────────────
           AnimatedBuilder(
-            animation: Listenable.merge([_heartC, _breathC, _sparkC, _phaseAnim]),
+            animation: Listenable.merge([
+              _heartC,
+              _breathC,
+              _sparkC,
+              _phaseAnim,
+            ]),
             builder: (_, __) {
               final phase = _phaseAnim.value; // 0 = heartbeat, 1 = spark-seq
 
               // Core scale: blend between heartbeat pulse and calm breathe
-              final coreScale = _beatScale.value * (1 - phase)
-                  + _breathScale.value * phase;
+              final coreScale =
+                  _beatScale.value * (1 - phase) + _breathScale.value * phase;
 
               // Spark opacity: blend between heartbeat flare and seq wave
               final seqOp = _seqSparkOpacity(_sparkC.value);
-              final sparkOp = _heartSparkOpacity.value * (1 - phase)
-                  + seqOp * phase;
+              final sparkOp =
+                  _heartSparkOpacity.value * (1 - phase) + seqOp * phase;
 
               return SizedBox(
                 width: 36,

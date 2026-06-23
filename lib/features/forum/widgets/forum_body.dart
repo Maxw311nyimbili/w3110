@@ -85,8 +85,8 @@ class ForumBody extends StatelessWidget {
         curve: Curves.easeInOut,
         padding: const EdgeInsets.symmetric(vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected 
-              ? Theme.of(context).colorScheme.surface 
+          color: isSelected
+              ? Theme.of(context).colorScheme.surface
               : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
           boxShadow: isSelected
@@ -103,9 +103,9 @@ class ForumBody extends StatelessWidget {
           label,
           textAlign: TextAlign.center,
           style: AppTextStyles.labelLarge.copyWith(
-            color: isSelected 
-              ? Theme.of(context).textTheme.bodyLarge?.color 
-              : Theme.of(context).textTheme.bodySmall?.color,
+            color: isSelected
+                ? Theme.of(context).textTheme.bodyLarge?.color
+                : Theme.of(context).textTheme.bodySmall?.color,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
           ),
         ),

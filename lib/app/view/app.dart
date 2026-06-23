@@ -135,7 +135,7 @@ class _AppState extends State<App> {
     );
 
     // 2. Initialize Cubits with correct dependency order
-    
+
     // ThemeCubit depends only on repositories
     _themeCubit = ThemeCubit(landingRepository: _landingRepository);
 
@@ -271,8 +271,7 @@ class _FlutterLocalizationsFallbackDelegate
   static const _unsupported = {'tw'};
 
   @override
-  bool isSupported(Locale locale) =>
-      _unsupported.contains(locale.languageCode);
+  bool isSupported(Locale locale) => _unsupported.contains(locale.languageCode);
 
   @override
   Future<MaterialLocalizations> load(Locale locale) =>

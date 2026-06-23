@@ -63,12 +63,15 @@ class AuthenticationStep extends StatelessWidget {
                           Text(
                             'Welcome to Naiia',
                             textAlign: TextAlign.center,
-                            style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                              color: Theme.of(context).textTheme.displayLarge?.color,
-                              letterSpacing: -1.0,
-                              fontWeight: FontWeight.w800,
-                              fontSize: 34,
-                            ),
+                            style: Theme.of(context).textTheme.displaySmall
+                                ?.copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).textTheme.displayLarge?.color,
+                                  letterSpacing: -1.0,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 34,
+                                ),
                           ),
                         ],
                       ),
@@ -139,10 +142,13 @@ class AuthenticationStep extends StatelessWidget {
                                   .continueAsGuest(),
                         child: Text(
                           AppLocalizations.of(context).continueAsGuest,
-                          style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                            color: Theme.of(context).textTheme.bodySmall?.color,
-                            fontWeight: FontWeight.w700,
-                          ),
+                          style: Theme.of(context).textTheme.labelLarge
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).textTheme.bodySmall?.color,
+                                fontWeight: FontWeight.w700,
+                              ),
                         ),
                       ),
                     ),

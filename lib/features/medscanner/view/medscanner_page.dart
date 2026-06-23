@@ -72,17 +72,18 @@ class _MedScannerViewState extends State<MedScannerView> {
   void _updateAppBar() {
     if (!mounted) return;
     final isDesktop = ResponsiveUtils.isDesktop(context);
-    
-    context.read<NavigationCubit>().updateAppBar(
-          actions: !isDesktop ? [
-            IconButton(
-              onPressed: () => _showInfoDialog(context),
-              icon: const Icon(Icons.info_outline_rounded, size: 22),
-            ),
-          ] : null,
-        );
-  }
 
+    context.read<NavigationCubit>().updateAppBar(
+      actions: !isDesktop
+          ? [
+              IconButton(
+                onPressed: () => _showInfoDialog(context),
+                icon: const Icon(Icons.info_outline_rounded, size: 22),
+              ),
+            ]
+          : null,
+    );
+  }
 
   @override
   void dispose() {
@@ -113,7 +114,6 @@ class _MedScannerViewState extends State<MedScannerView> {
       ),
     );
   }
-
 
   void _showInfoDialog(BuildContext context) {
     showModalBottomSheet<void>(

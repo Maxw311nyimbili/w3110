@@ -91,7 +91,8 @@ class CommentCard extends StatelessWidget {
                         width: depth * indentWidth,
                         child: CustomPaint(
                           painter: ThreadLinePainter(
-                            lineColor: Theme.of(context).brightness == Brightness.light
+                            lineColor:
+                                Theme.of(context).brightness == Brightness.light
                                 ? Colors.grey[400]!
                                 : Colors.grey[600]!,
                             isLastChild: isLastChild,
@@ -105,7 +106,7 @@ class CommentCard extends StatelessWidget {
                   ],
                 ),
               ),
-  
+
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -126,18 +127,26 @@ class CommentCard extends StatelessWidget {
                             const SizedBox(height: 4),
                             Text(
                               text,
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.9),
-                                height: 1.5,
-                                fontSize: depth > 0 ? 14 : 15,
-                              ),
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(
+                                    color: Theme.of(context)
+                                        .textTheme
+                                        .bodyLarge
+                                        ?.color
+                                        ?.withOpacity(0.9),
+                                    height: 1.5,
+                                    fontSize: depth > 0 ? 14 : 15,
+                                  ),
                             ),
                             const SizedBox(height: 8),
                             _buildActions(context),
-                            
+
                             if (hasReplies && !isExpanded && onExpand != null)
                               Padding(
-                                padding: const EdgeInsets.only(top: 10, bottom: 4),
+                                padding: const EdgeInsets.only(
+                                  top: 10,
+                                  bottom: 4,
+                                ),
                                 child: InkWell(
                                   onTap: onExpand,
                                   borderRadius: BorderRadius.circular(12),
@@ -147,18 +156,28 @@ class CommentCard extends StatelessWidget {
                                         width: 24,
                                         height: 1.5,
                                         decoration: BoxDecoration(
-                                          color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
-                                          borderRadius: BorderRadius.circular(1),
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary
+                                              .withOpacity(0.3),
+                                          borderRadius: BorderRadius.circular(
+                                            1,
+                                          ),
                                         ),
                                       ),
                                       const SizedBox(width: 10),
                                       Text(
                                         'View $replyCount more replies',
-                                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                          color: Theme.of(context).colorScheme.primary,
-                                          fontWeight: FontWeight.w800,
-                                          fontSize: 12,
-                                        ),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .labelSmall
+                                            ?.copyWith(
+                                              color: Theme.of(
+                                                context,
+                                              ).colorScheme.primary,
+                                              fontWeight: FontWeight.w800,
+                                              fontSize: 12,
+                                            ),
                                       ),
                                     ],
                                   ),
@@ -230,7 +249,9 @@ class CommentCard extends StatelessWidget {
                     vertical: 1,
                   ),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primaryContainer.withAlpha(77),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primaryContainer.withAlpha(77),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
@@ -253,8 +274,7 @@ class CommentCard extends StatelessWidget {
             ],
           ),
         ),
-        if (isOwnComment)
-          _buildMenu(context),
+        if (isOwnComment) _buildMenu(context),
       ],
     );
   }
@@ -293,9 +313,13 @@ class CommentCard extends StatelessWidget {
           child: Row(
             children: [
               Icon(
-                isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                isLiked
+                    ? Icons.favorite_rounded
+                    : Icons.favorite_border_rounded,
                 size: 15,
-                color: isLiked ? Colors.red : Theme.of(context).textTheme.bodySmall?.color,
+                color: isLiked
+                    ? Colors.red
+                    : Theme.of(context).textTheme.bodySmall?.color,
               ),
               if (likeCount > 0) ...[
                 const SizedBox(width: 4),
@@ -330,7 +354,9 @@ class CommentCard extends StatelessWidget {
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.surfaceVariant,
               borderRadius: BorderRadius.circular(4),
-              border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
+              border: Border.all(
+                color: Theme.of(context).dividerColor.withOpacity(0.1),
+              ),
             ),
             child: Text(
               typeLabel!.toUpperCase(),

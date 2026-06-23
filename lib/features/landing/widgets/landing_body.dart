@@ -40,20 +40,21 @@ class LandingBody extends StatelessWidget {
                   duration: const Duration(milliseconds: 600),
                   switchInCurve: Curves.easeInOutCubic,
                   switchOutCurve: Curves.easeInOutCubic,
-                  transitionBuilder: (Widget child, Animation<double> animation) {
-                    final slideAnimation = Tween<Offset>(
-                      begin: const Offset(0.05, 0),
-                      end: Offset.zero,
-                    ).animate(animation);
+                  transitionBuilder:
+                      (Widget child, Animation<double> animation) {
+                        final slideAnimation = Tween<Offset>(
+                          begin: const Offset(0.05, 0),
+                          end: Offset.zero,
+                        ).animate(animation);
 
-                    return FadeTransition(
-                      opacity: animation,
-                      child: SlideTransition(
-                        position: slideAnimation,
-                        child: child,
-                      ),
-                    );
-                  },
+                        return FadeTransition(
+                          opacity: animation,
+                          child: SlideTransition(
+                            position: slideAnimation,
+                            child: child,
+                          ),
+                        );
+                      },
                   child: _buildStep(context, state.currentStep),
                 ),
               ),
@@ -100,10 +101,10 @@ class LandingBody extends StatelessWidget {
                     color: isCurrent
                         ? primary
                         : isPast
-                            ? primary.withOpacity(0.35)
-                            : (isDark
-                                ? Colors.white.withOpacity(0.10)
-                                : Colors.black.withOpacity(0.08)),
+                        ? primary.withOpacity(0.35)
+                        : (isDark
+                              ? Colors.white.withOpacity(0.10)
+                              : Colors.black.withOpacity(0.08)),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -173,20 +174,26 @@ class _CompleteStep extends StatelessWidget {
                       children: [
                         Text(
                           AppLocalizations.of(context).youreAllSet,
-                          style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                            color: Theme.of(context).textTheme.displayLarge?.color,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: -1.0,
-                          ),
+                          style: Theme.of(context).textTheme.displaySmall
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).textTheme.displayLarge?.color,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: -1.0,
+                              ),
                         ),
                         const SizedBox(height: 16),
                         Text(
                           AppLocalizations.of(context).personalizingGuide,
                           textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: Theme.of(context).textTheme.bodySmall?.color,
-                            height: 1.5,
-                          ),
+                          style: Theme.of(context).textTheme.bodyLarge
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).textTheme.bodySmall?.color,
+                                height: 1.5,
+                              ),
                         ),
                       ],
                     ),
@@ -195,7 +202,11 @@ class _CompleteStep extends StatelessWidget {
               ),
               const SizedBox(height: 64),
               PremiumButton(
-                onPressed: () => Navigator.pushNamedAndRemoveUntil(context, AppRouter.shell, (route) => false),
+                onPressed: () => Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  AppRouter.shell,
+                  (route) => false,
+                ),
                 text: 'Start Chatting',
               ),
             ],

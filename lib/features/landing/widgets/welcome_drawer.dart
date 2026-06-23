@@ -65,7 +65,8 @@ class WelcomeDrawer extends StatelessWidget {
                       context.read<LandingCubit>().clearError();
                     }
 
-                    if (state.userName != null && (!state.isGuest || state.isComplete)) {
+                    if (state.userName != null &&
+                        (!state.isGuest || state.isComplete)) {
                       Navigator.of(context).pop(); // Close drawer
 
                       // If onboarding is already marked complete in the state,
@@ -94,7 +95,8 @@ class WelcomeDrawer extends StatelessWidget {
                       Text(
                         'Welcome to Naiia',
                         textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                        style: Theme.of(context).textTheme.displaySmall
+                            ?.copyWith(
                               fontSize: 32,
                               fontWeight: FontWeight.w800,
                               letterSpacing: -0.5,
@@ -106,12 +108,11 @@ class WelcomeDrawer extends StatelessWidget {
                         child: Text(
                           AppLocalizations.of(context).authSubtitle,
                           textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: Theme.of(context)
-                                    .textTheme
-                                    .bodyMedium
-                                    ?.color
-                                    ?.withOpacity(0.7),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).textTheme.bodyMedium?.color?.withOpacity(0.7),
                                 height: 1.5,
                                 fontSize: 16,
                               ),
@@ -126,14 +127,16 @@ class WelcomeDrawer extends StatelessWidget {
                                 onPressed: state.isAuthenticating
                                     ? null
                                     : () => context
-                                        .read<LandingCubit>()
-                                        .authenticateWithGoogle(),
+                                          .read<LandingCubit>()
+                                          .authenticateWithGoogle(),
                                 isLoading: state.isAuthenticating,
                               ),
                               const SizedBox(height: 24),
                               TextButton(
                                 onPressed: () {
-                                  context.read<LandingCubit>().continueAsGuest();
+                                  context
+                                      .read<LandingCubit>()
+                                      .continueAsGuest();
                                   Navigator.pop(context);
                                 },
                                 child: Text(

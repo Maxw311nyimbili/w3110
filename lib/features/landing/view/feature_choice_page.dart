@@ -103,33 +103,42 @@ class _FeatureChoicePageState extends State<FeatureChoicePage>
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.primary.withOpacity(0.08),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.primary.withOpacity(0.08),
                             borderRadius: BorderRadius.circular(
                               AppSpacing.radiusFull,
                             ),
                           ),
                           child: Text(
                             'SELECT INTENT',
-                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: Theme.of(context).colorScheme.primary,
-                              letterSpacing: 2.5,
-                            ),
+                            style: Theme.of(context).textTheme.labelSmall
+                                ?.copyWith(
+                                  color: Theme.of(context).colorScheme.primary,
+                                  letterSpacing: 2.5,
+                                ),
                           ),
                         ),
                         const SizedBox(height: 12),
                         Text(
                           'What are we\nfocusing on today?',
-                          style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                            color: Theme.of(context).textTheme.bodyLarge?.color,
-                            height: 1.15,
-                          ),
+                          style: Theme.of(context).textTheme.displaySmall
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).textTheme.bodyLarge?.color,
+                                height: 1.15,
+                              ),
                         ),
                         const SizedBox(height: 6),
                         Text(
                           'Choose one to get started.',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).textTheme.bodySmall?.color,
-                          ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).textTheme.bodySmall?.color,
+                              ),
                         ),
                       ],
                     ),
@@ -254,7 +263,9 @@ class _FeatureCard extends StatelessWidget {
               : Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
           border: Border.all(
-            color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).dividerColor.withOpacity(0.1),
+            color: isSelected
+                ? Theme.of(context).colorScheme.primary
+                : Theme.of(context).dividerColor.withOpacity(0.1),
             width: isSelected ? 1.5 : 1,
           ),
           boxShadow: isSelected
@@ -277,12 +288,16 @@ class _FeatureCard extends StatelessWidget {
               width: 52,
               height: 52,
               decoration: BoxDecoration(
-                color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.primary.withOpacity(0.08),
+                color: isSelected
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.primary.withOpacity(0.08),
                 borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
               ),
               child: Icon(
                 def.icon,
-                color: isSelected ? Colors.white : Theme.of(context).colorScheme.primary,
+                color: isSelected
+                    ? Colors.white
+                    : Theme.of(context).colorScheme.primary,
                 size: 24,
               ),
             ),
@@ -300,10 +315,15 @@ class _FeatureCard extends StatelessWidget {
                       Expanded(
                         child: Text(
                           def.title,
-                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).textTheme.bodyLarge?.color,
-                          ),
+                          style: Theme.of(context).textTheme.headlineSmall
+                              ?.copyWith(
+                                fontWeight: FontWeight.w700,
+                                color: isSelected
+                                    ? Theme.of(context).colorScheme.primary
+                                    : Theme.of(
+                                        context,
+                                      ).textTheme.bodyLarge?.color,
+                              ),
                         ),
                       ),
                       Container(
@@ -313,7 +333,9 @@ class _FeatureCard extends StatelessWidget {
                         ),
                         decoration: BoxDecoration(
                           color: isSelected
-                              ? Theme.of(context).colorScheme.primary.withOpacity(0.1)
+                              ? Theme.of(
+                                  context,
+                                ).colorScheme.primary.withOpacity(0.1)
                               : Theme.of(context).colorScheme.surfaceVariant,
                           borderRadius: BorderRadius.circular(
                             AppSpacing.radiusFull,
@@ -321,13 +343,16 @@ class _FeatureCard extends StatelessWidget {
                         ),
                         child: Text(
                           def.tag,
-                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: isSelected
-                                ? Theme.of(context).colorScheme.primary
-                                : Theme.of(context).textTheme.bodySmall?.color,
-                            letterSpacing: 1.2,
-                            fontWeight: FontWeight.w700,
-                          ),
+                          style: Theme.of(context).textTheme.labelSmall
+                              ?.copyWith(
+                                color: isSelected
+                                    ? Theme.of(context).colorScheme.primary
+                                    : Theme.of(
+                                        context,
+                                      ).textTheme.bodySmall?.color,
+                                letterSpacing: 1.2,
+                                fontWeight: FontWeight.w700,
+                              ),
                         ),
                       ),
                     ],
@@ -355,9 +380,13 @@ class _FeatureCard extends StatelessWidget {
               height: 22,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: isSelected ? Theme.of(context).colorScheme.primary : Colors.transparent,
+                color: isSelected
+                    ? Theme.of(context).colorScheme.primary
+                    : Colors.transparent,
                 border: Border.all(
-                  color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).dividerColor.withOpacity(0.1),
+                  color: isSelected
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(context).dividerColor.withOpacity(0.1),
                   width: 1.5,
                 ),
               ),
@@ -365,7 +394,9 @@ class _FeatureCard extends StatelessWidget {
                   ? Icon(
                       Icons.check_rounded,
                       size: 14,
-                      color: isSelected ? Colors.white : Theme.of(context).colorScheme.primary,
+                      color: isSelected
+                          ? Colors.white
+                          : Theme.of(context).colorScheme.primary,
                     )
                   : null,
             ),
