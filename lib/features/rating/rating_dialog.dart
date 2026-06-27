@@ -383,7 +383,7 @@ class _ThankYouView extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.lg),
           Text(
-            'Thank you! 🎉',
+            'Thank you! ',
             style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.w800,
@@ -400,7 +400,7 @@ class _ThankYouView extends StatelessWidget {
               color: isDark
                   ? AppColors.darkTextSecondary
                   : AppColors.textSecondary,
-              height: 1.5,
+              height: 1.55,
             ),
           ),
           const SizedBox(height: AppSpacing.xl),

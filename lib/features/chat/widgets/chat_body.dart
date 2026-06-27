@@ -36,6 +36,39 @@ class _ChatBodyState extends State<ChatBody>
   bool _showScrollToBottom = false;
   int _unreadCount = 0;
 
+  // GoogleFonts styles cached here so they aren't re-created on every build.
+  // Re-cached in didChangeDependencies so they stay correct after a theme change.
+  late TextStyle _greetingStyleMobile;
+  late TextStyle _greetingStyleDesktop;
+  late TextStyle _dailyFactStyle;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final bodyColor = Theme.of(context).textTheme.bodyLarge?.color;
+    _greetingStyleMobile = GoogleFonts.cormorantGaramond(
+      fontSize: 40,
+      fontWeight: FontWeight.w300,
+      color: bodyColor,
+      letterSpacing: 1.0,
+      height: 1.1,
+    );
+    _greetingStyleDesktop = GoogleFonts.cormorantGaramond(
+      fontSize: 52,
+      fontWeight: FontWeight.w300,
+      color: bodyColor,
+      letterSpacing: 1.0,
+      height: 1.1,
+    );
+    _dailyFactStyle = GoogleFonts.cormorantGaramond(
+      fontSize: 20,
+      height: 1.55,
+      color: bodyColor,
+      fontWeight: FontWeight.w500,
+      fontStyle: FontStyle.italic,
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -125,9 +158,11 @@ class _ChatBodyState extends State<ChatBody>
           return Container(
             color: Theme.of(context).scaffoldBackgroundColor,
             child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 600),
-              switchInCurve: Curves.easeInOutCubic,
-              switchOutCurve: Curves.easeInOutCubic,
+              duration: const Duration(milliseconds: 280),
+              switchInCurve: Curves.easeOut,
+              switchOutCurve: Curves.easeIn,
+              transitionBuilder: (child, animation) =>
+                  FadeTransition(opacity: animation, child: child),
               child: !state.hasMessages
                   ? _buildLandingView(context, state)
                   : _buildActiveView(context, state),
@@ -257,15 +292,9 @@ class _ChatBodyState extends State<ChatBody>
                                   Text(
                                     displayGreeting,
                                     textAlign: TextAlign.center,
-                                    style: GoogleFonts.cormorantGaramond(
-                                      fontSize: isDesktop ? 52 : 40,
-                                      fontWeight: FontWeight.w300,
-                                      color: Theme.of(
-                                        context,
-                                      ).textTheme.bodyLarge?.color,
-                                      letterSpacing: 1.0,
-                                      height: 1.1,
-                                    ),
+                                    style: isDesktop
+                                        ? _greetingStyleDesktop
+                                        : _greetingStyleMobile,
                                   ),
                                   const SizedBox(height: 6),
                                   Text(
@@ -296,15 +325,20 @@ class _ChatBodyState extends State<ChatBody>
                             ),
                             const SizedBox(height: 28),
 
-                            // 3. PROMPT SUGGESTIONS
-                            ConstrainedBox(
-                              constraints: const BoxConstraints(maxWidth: 560),
-                              child: EntryAnimation(
-                                delay: const Duration(milliseconds: 280),
-                                child: _buildSuggestedPrompts(context),
+                            // 3. PROMPT SUGGESTIONS — desktop only
+                            if (!isDesktop) const SizedBox(height: 4),
+                            if (isDesktop) ...[
+                              ConstrainedBox(
+                                constraints: const BoxConstraints(
+                                  maxWidth: 560,
+                                ),
+                                child: EntryAnimation(
+                                  delay: const Duration(milliseconds: 280),
+                                  child: _buildSuggestedPrompts(context),
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 32),
+                              const SizedBox(height: 32),
+                            ],
 
                             // 4. CENTERED INPUT PILL
                             ConstrainedBox(
@@ -457,13 +491,7 @@ class _ChatBodyState extends State<ChatBody>
               Text(
                 dailyFact,
                 textAlign: TextAlign.center,
-                style: GoogleFonts.cormorantGaramond(
-                  fontSize: 20,
-                  height: 1.55,
-                  color: Theme.of(context).textTheme.bodyLarge?.color,
-                  fontWeight: FontWeight.w500,
-                  fontStyle: FontStyle.italic,
-                ),
+                style: _dailyFactStyle,
               ),
             ],
           ),
@@ -486,9 +514,14 @@ class _ChatBodyState extends State<ChatBody>
       itemBuilder: (context, index) {
         final reversedIndex = state.messages.length - 1 - index;
         final message = state.messages[reversedIndex];
-        return RefinedMessageBubble(
-          message: message,
-          key: ValueKey(message.id),
+        // RepaintBoundary gives each bubble its own compositing layer so that
+        // scrolling and streaming text into one bubble don't force every other
+        // bubble on screen to repaint.
+        return RepaintBoundary(
+          child: RefinedMessageBubble(
+            message: message,
+            key: ValueKey(message.id),
+          ),
         );
       },
     );

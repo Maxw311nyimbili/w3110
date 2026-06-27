@@ -277,27 +277,26 @@ class _ChatViewState extends State<ChatView> {
           },
         ),
       ],
-      child: BlocBuilder<ChatCubit, ChatState>(
-        builder: (context, chatState) {
-          return Scaffold(
-            body: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 1000),
-                child: Column(
-                  children: [
-                    // Body
-                    Expanded(
-                      child: ChatBody(
-                        isAudioMode: _isAudioMode,
-                        onToggleAudio: _toggleAudioMode,
-                      ),
-                    ),
-                  ],
+      // No BlocBuilder here — chatState is not used at this level.
+      // ChatBody manages its own BlocBuilder/BlocListener internally.
+      // Removing this prevents the Scaffold from rebuilding on every
+      // message event, typing state change, and streaming chunk.
+      child: Scaffold(
+        body: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1000),
+            child: Column(
+              children: [
+                Expanded(
+                  child: ChatBody(
+                    isAudioMode: _isAudioMode,
+                    onToggleAudio: _toggleAudioMode,
+                  ),
                 ),
-              ),
+              ],
             ),
-          );
-        },
+          ),
+        ),
       ),
     );
   }

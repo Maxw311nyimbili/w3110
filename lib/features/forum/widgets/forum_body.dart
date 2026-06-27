@@ -17,6 +17,17 @@ class ForumBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ForumCubit, ForumState>(
+      // Only rebuild when something visible actually changes.
+      // Without this, every search keystroke (searchQuery updates) triggers a
+      // full rebuild of the Column, filter row, AND the ListView — killing
+      // scroll performance while the user is typing.
+      buildWhen: (prev, curr) =>
+          prev.view != curr.view ||
+          prev.selectedPost != curr.selectedPost ||
+          prev.posts != curr.posts ||
+          prev.postFilter != curr.postFilter ||
+          prev.isSearching != curr.isSearching ||
+          prev.status != curr.status,
       builder: (context, state) {
         if (state.view == ForumView.detail && state.selectedPost != null) {
           return ForumDetailView(post: state.selectedPost!);
@@ -174,12 +185,17 @@ class ForumBody extends StatelessWidget {
               }
 
               final post = displayPosts[state.isSearching ? index - 1 : index];
-              return PostCard(
-                post: post,
-                currentUserId: userId,
-                onTap: () {
-                  context.read<ForumCubit>().selectPost(post);
-                },
+              // RepaintBoundary isolates each card into its own layer so that
+              // scrolling (or a single card rebuilding) doesn't force every
+              // sibling card to repaint.
+              return RepaintBoundary(
+                child: PostCard(
+                  post: post,
+                  currentUserId: userId,
+                  onTap: () {
+                    context.read<ForumCubit>().selectPost(post);
+                  },
+                ),
               );
             },
           ),

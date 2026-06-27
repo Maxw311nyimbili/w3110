@@ -169,13 +169,13 @@ class AuthenticationStep extends StatelessWidget {
   Widget _buildStaggeredEntrance({required Widget child, required int delay}) {
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0.0, end: 1.0),
-      duration: const Duration(milliseconds: 800),
-      curve: Curves.easeOutQuart,
+      duration: const Duration(milliseconds: 320),
+      curve: Curves.easeOut,
       builder: (context, value, _) {
         return Opacity(
           opacity: value,
           child: Transform.translate(
-            offset: Offset(0, 24 * (1 - value)),
+            offset: Offset(0, 12 * (1 - value)),
             child: child,
           ),
         );

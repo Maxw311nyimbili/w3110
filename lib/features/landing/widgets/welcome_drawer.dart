@@ -74,7 +74,7 @@ class WelcomeDrawer extends StatelessWidget {
                       if (state.currentStep == OnboardingStep.complete) {
                         // User is already done, just stay on Chat (the page under the drawer)
                         print(
-                          '✅ User already onboarded, staying on current page',
+                          ' User already onboarded, staying on current page',
                         );
                       } else {
                         AppRouter.replaceTo<void>(

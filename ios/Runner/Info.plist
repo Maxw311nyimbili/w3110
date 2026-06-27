@@ -2,11 +2,7 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 	<dict>
-		<key>CFBundleLocalizations</key>
-		<array>
-			<string>en</string>
-			<string>es</string>
-		</array>
+		<!-- ── Bundle identity ─────────────────────────────────────────────── -->
 		<key>CFBundleDevelopmentRegion</key>
 		<string>$(DEVELOPMENT_LANGUAGE)</string>
 		<key>CFBundleDisplayName</key>
@@ -27,17 +23,21 @@
 		<string>????</string>
 		<key>CFBundleVersion</key>
 		<string>$(FLUTTER_BUILD_NUMBER)</string>
+
+		<!-- ── Supported languages (all languages Naiia serves) ────────────── -->
+		<key>CFBundleLocalizations</key>
+		<array>
+			<string>en</string>
+			<string>ar</string>
+			<string>fr</string>
+		</array>
+
+		<!-- ── Device / orientation ────────────────────────────────────────── -->
 		<key>LSRequiresIPhoneOS</key>
 		<true/>
-		<key>UILaunchStoryboardName</key>
-		<string>LaunchScreen</string>
-		<key>UIMainStoryboardFile</key>
-		<string>Main</string>
 		<key>UISupportedInterfaceOrientations</key>
 		<array>
 			<string>UIInterfaceOrientationPortrait</string>
-			<string>UIInterfaceOrientationLandscapeLeft</string>
-			<string>UIInterfaceOrientationLandscapeRight</string>
 		</array>
 		<key>UISupportedInterfaceOrientations~ipad</key>
 		<array>
@@ -46,19 +46,46 @@
 			<string>UIInterfaceOrientationLandscapeLeft</string>
 			<string>UIInterfaceOrientationLandscapeRight</string>
 		</array>
+
+		<!-- ── UI / display ────────────────────────────────────────────────── -->
+		<key>UILaunchStoryboardName</key>
+		<string>LaunchScreen</string>
+		<key>UIMainStoryboardFile</key>
+		<string>Main</string>
 		<key>UIViewControllerBasedStatusBarAppearance</key>
 		<false/>
+		<key>UIStatusBarHidden</key>
+		<false/>
+		<!-- Enable ProMotion (120 Hz) on supported iPhones -->
 		<key>CADisableMinimumFrameDurationOnPhone</key>
 		<true/>
-		<key>NSPhotoLibraryUsageDescription</key>
-		<string>We need access to your photo library to select images for analysis.</string>
-		<key>NSCameraUsageDescription</key>
-		<string>We need camera access to scan medications and take photos.</string>
-		<key>NSMicrophoneUsageDescription</key>
-		<string>We need microphone access for voice chat.</string>
+		<!-- Required for indirect input (trackpad / keyboard on iPad) -->
 		<key>UIApplicationSupportsIndirectInputEvents</key>
 		<true/>
-		<key>UIStatusBarHidden</key>
+
+		<!-- ── Background modes ─────────────────────────────────────────────── -->
+		<!-- Needed for audioplayers to keep playing while app is backgrounded  -->
+		<key>UIBackgroundModes</key>
+		<array>
+			<string>audio</string>
+		</array>
+
+		<!-- ── Privacy usage descriptions (required by App Store Review) ────── -->
+		<key>NSCameraUsageDescription</key>
+		<string>Naiia uses your camera to scan medication labels and barcodes so you can get instant information about your medicines.</string>
+		<key>NSMicrophoneUsageDescription</key>
+		<string>Naiia uses your microphone so you can ask health questions by voice and receive spoken answers.</string>
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>Naiia accesses your photo library so you can choose an existing image of a medication label for analysis.</string>
+		<key>NSPhotoLibraryAddUsageDescription</key>
+		<string>Naiia may save medication scan results to your photo library for your records.</string>
+		<key>NSDocumentsFolderUsageDescription</key>
+		<string>Naiia accesses your documents so you can upload prescription PDFs or medical letters for analysis.</string>
+
+		<!-- ── App Store encryption declaration ─────────────────────────────── -->
+		<!-- The app uses standard HTTPS (TLS) only — no custom encryption.     -->
+		<!-- This exempts the app from EAR export compliance filings.           -->
+		<key>ITSAppUsesNonExemptEncryption</key>
 		<false/>
 	</dict>
 </plist>

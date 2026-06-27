@@ -48,7 +48,7 @@ class ForumCubit extends Cubit<ForumState> {
         emit(state.copyWith(hasPendingSync: hasPendingSync));
       } catch (dbError) {
         print(
-          '⚠️ Forum Local DB not available (likely web missing assets): $dbError',
+          ' Forum Local DB not available (likely web missing assets): $dbError',
         );
         // We keep hasPendingSync as false and continue
       }
@@ -60,7 +60,7 @@ class ForumCubit extends Cubit<ForumState> {
       try {
         await syncWithBackend();
       } catch (e) {
-        print('⚠️ Background sync skipped: $e');
+        print(' Background sync skipped: $e');
       }
     } catch (e) {
       emit(
@@ -124,15 +124,15 @@ class ForumCubit extends Cubit<ForumState> {
 
   /// Get filtered posts based on current filter
   List<ForumPost> getFilteredPosts(String currentUserId) {
-    print('🔍 Filter: ${state.postFilter}, User ID: $currentUserId');
+    print(' Filter: ${state.postFilter}, User ID: $currentUserId');
     if (state.postFilter == PostFilter.mine) {
       final myPosts = state.posts
           .where((post) => post.authorId == currentUserId)
           .toList();
-      print('✅ My Posts: ${myPosts.length} out of ${state.posts.length} total');
+      print(' My Posts: ${myPosts.length} out of ${state.posts.length} total');
       return myPosts;
     }
-    print('✅ All Posts: ${state.posts.length}');
+    print(' All Posts: ${state.posts.length}');
     return state.posts; // Show all posts
   }
 
@@ -151,18 +151,18 @@ class ForumCubit extends Cubit<ForumState> {
       final userDataJson = await secureStorage.read(key: 'thanzi_user_data');
 
       print(
-        '📦 Read from secure storage: ${userDataJson?.substring(0, 50)}...',
+        ' Read from secure storage: ${userDataJson?.substring(0, 50)}...',
       ); // First 50 chars
 
       if (userDataJson != null && userDataJson.isNotEmpty) {
         final userData = jsonDecode(userDataJson) as Map<String, dynamic>;
         _cachedUserId = userData['id'] as String?;
-        print('✅ Cached user ID: $_cachedUserId');
+        print(' Cached user ID: $_cachedUserId');
       } else {
-        print('❌ No user data in secure storage');
+        print(' No user data in secure storage');
       }
     } catch (e, stack) {
-      print('❌ Error caching user ID: $e');
+      print(' Error caching user ID: $e');
       print('Stack: ${stack.toString().substring(0, 200)}');
       _cachedUserId = null;
     }
@@ -241,7 +241,7 @@ class ForumCubit extends Cubit<ForumState> {
           ),
         );
       } catch (e) {
-        print('⚠️ selectPost: could not fetch server comments: $e');
+        print(' selectPost: could not fetch server comments: $e');
         // Keep whatever we already have
       }
 
@@ -669,14 +669,14 @@ class ForumCubit extends Cubit<ForumState> {
       try {
         await _forumRepository.processSyncQueue();
       } catch (e) {
-        print('⚠️ syncWithBackend: processSyncQueue skipped: $e');
+        print(' syncWithBackend: processSyncQueue skipped: $e');
       }
 
       // Fetch latest posts from server and merge into local DB
       try {
         await _forumRepository.fetchPostsFromServer();
       } catch (e) {
-        print('⚠️ syncWithBackend: fetchPostsFromServer skipped: $e');
+        print(' syncWithBackend: fetchPostsFromServer skipped: $e');
       }
 
       // Reload from local storage to get merged updates.
@@ -706,7 +706,7 @@ class ForumCubit extends Cubit<ForumState> {
         }
       } catch (e) {
         print(
-          '⚠️ syncWithBackend: getLocalPosts skipped, keeping current state: $e',
+          ' syncWithBackend: getLocalPosts skipped, keeping current state: $e',
         );
         emit(state.copyWith(isSyncing: false));
       }
@@ -1309,11 +1309,5 @@ class ForumCubit extends Cubit<ForumState> {
     final result = merged.values.toSet().toList();
     result.sort((a, b) => a.createdAt.compareTo(b.createdAt));
     return result;
-  }
-
-  @override
-  Future<void> close() {
-    _syncTimer?.cancel();
-    return super.close();
   }
 }

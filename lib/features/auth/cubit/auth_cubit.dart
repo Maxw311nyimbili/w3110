@@ -35,7 +35,7 @@ class AuthCubit extends Cubit<AuthState> {
     try {
       emit(state.copyWith(status: AuthStatus.loading));
 
-      print('🔐 Initializing authentication...');
+      print(' Initializing authentication...');
 
       // Check if user has valid tokens
       final isAuthenticated = await _authRepository.isAuthenticated();
@@ -46,7 +46,7 @@ class AuthCubit extends Cubit<AuthState> {
         final user = await _authRepository.getCurrentUser(forceRefresh: true);
 
         if (user != null) {
-          print('✓ User session restored: ${user.email}');
+          print(' User session restored: ${user.email}');
           final authUser = _mapToAuthUser(user);
 
           // Sync theme from user preference
@@ -61,20 +61,20 @@ class AuthCubit extends Cubit<AuthState> {
           return;
         } else {
           print(
-            '⚠️ Session tokens valid but user not found on backend. Clearing stale session.',
+            ' Session tokens valid but user not found on backend. Clearing stale session.',
           );
           await _authRepository.signOut();
         }
       }
 
       // No valid session
-      print('ℹ️ No existing session found');
+      print(' No existing session found');
       // Set theme to system default or light for guests
       _themeCubit.updateFromUserPref('light');
 
       emit(state.copyWith(status: AuthStatus.unauthenticated));
     } catch (e) {
-      print('❌ Auth initialization error: $e');
+      print(' Auth initialization error: $e');
       emit(
         state.copyWith(
           status: AuthStatus.error,
@@ -100,13 +100,13 @@ class AuthCubit extends Cubit<AuthState> {
     try {
       emit(state.copyWith(status: AuthStatus.loading));
 
-      print('🔐 Starting Google Sign-In...');
+      print(' Starting Google Sign-In...');
 
       // Step 1: Get Firebase ID token from Google Sign-In
       final firebaseIdToken = await _authRepository.signInWithGoogle();
 
       if (firebaseIdToken == null) {
-        print('ℹ️ Google Sign-In was cancelled');
+        print(' Google Sign-In was cancelled');
         emit(
           state.copyWith(
             status: AuthStatus.unauthenticated,
@@ -116,7 +116,7 @@ class AuthCubit extends Cubit<AuthState> {
         return;
       }
 
-      print('✓ Got Firebase ID token');
+      print(' Got Firebase ID token');
 
       // Step 2: Exchange Firebase ID token with backend
       // This call sends the ID token to POST /auth/exchange
@@ -125,8 +125,8 @@ class AuthCubit extends Cubit<AuthState> {
         IdTokenExchangeRequest(idToken: firebaseIdToken),
       );
 
-      print('✓ Exchanged ID token for JWT tokens');
-      print('  - Access token expires in: ${authTokens.expiresIn}s');
+      print(' Exchanged ID token for JWT tokens');
+      print(' - Access token expires in: ${authTokens.expiresIn}s');
 
       // Step 3: Get current user from backend
       // The API client now has the access token and will use it for all requests
@@ -136,7 +136,7 @@ class AuthCubit extends Cubit<AuthState> {
         throw Exception('Failed to get user after authentication');
       }
 
-      print('✓ Authentication complete: ${user.email}');
+      print(' Authentication complete: ${user.email}');
 
       // Sync theme from user preference
       _themeCubit.updateFromUserPref(user.themeMode);
@@ -149,7 +149,7 @@ class AuthCubit extends Cubit<AuthState> {
         ),
       );
     } on AuthException catch (e) {
-      print('❌ Auth error: $e');
+      print(' Auth error: $e');
       emit(
         state.copyWith(
           status: AuthStatus.error,
@@ -157,7 +157,7 @@ class AuthCubit extends Cubit<AuthState> {
         ),
       );
     } catch (e) {
-      print('❌ Sign-in error: $e');
+      print(' Sign-in error: $e');
       emit(
         state.copyWith(
           status: AuthStatus.error,
@@ -203,12 +203,12 @@ class AuthCubit extends Cubit<AuthState> {
     try {
       emit(state.copyWith(status: AuthStatus.loading));
 
-      print('🔐 Signing out...');
+      print(' Signing out...');
 
       // Sign out from Firebase and Google
       await _authRepository.signOut();
 
-      print('✓ Signed out successfully');
+      print(' Signed out successfully');
 
       // Reset theme to system default or light for guests
       _themeCubit.updateFromUserPref('light');
@@ -220,7 +220,7 @@ class AuthCubit extends Cubit<AuthState> {
         ),
       );
     } on AuthException catch (e) {
-      print('❌ Sign-out error: $e');
+      print(' Sign-out error: $e');
       emit(
         state.copyWith(
           status: AuthStatus.error,
@@ -228,7 +228,7 @@ class AuthCubit extends Cubit<AuthState> {
         ),
       );
     } catch (e) {
-      print('❌ Sign-out error: $e');
+      print(' Sign-out error: $e');
       emit(
         state.copyWith(
           status: AuthStatus.error,
@@ -250,12 +250,12 @@ class AuthCubit extends Cubit<AuthState> {
   /// - Returns a new access token
   Future<void> refreshToken() async {
     try {
-      print('🔄 Refreshing access token...');
+      print(' Refreshing access token...');
 
       // Call the repository to refresh
       await _authRepository.refreshToken();
 
-      print('✓ Access token refreshed');
+      print(' Access token refreshed');
 
       // Optionally update user info
       final user = await _authRepository.getCurrentUser();
@@ -267,7 +267,7 @@ class AuthCubit extends Cubit<AuthState> {
         );
       }
     } on AuthException catch (e) {
-      print('❌ Token refresh failed: $e');
+      print(' Token refresh failed: $e');
       // Refresh failed - sign out user
       await signOut();
       emit(
@@ -313,9 +313,9 @@ class AuthCubit extends Cubit<AuthState> {
         ),
       );
 
-      print('✓ Display name updated to: $name');
+      print(' Display name updated to: $name');
     } catch (e) {
-      print('❌ Failed to update display name: $e');
+      print(' Failed to update display name: $e');
       emit(
         state.copyWith(
           status: AuthStatus.error,

@@ -69,12 +69,12 @@ class _ThemeSelectionStepState extends State<ThemeSelectionStep> {
               // ── Header ────────────────────────────────────────────────────
               TweenAnimationBuilder<double>(
                 tween: Tween(begin: 0.0, end: 1.0),
-                duration: const Duration(milliseconds: 600),
-                curve: Curves.easeOutCubic,
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeOut,
                 builder: (ctx, v, _) => Opacity(
                   opacity: v,
                   child: Transform.translate(
-                    offset: Offset(0, 20 * (1 - v)),
+                    offset: Offset(0, 12 * (1 - v)),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -110,12 +110,12 @@ class _ThemeSelectionStepState extends State<ThemeSelectionStep> {
               Expanded(
                 child: TweenAnimationBuilder<double>(
                   tween: Tween(begin: 0.0, end: 1.0),
-                  duration: const Duration(milliseconds: 700),
-                  curve: Curves.easeOutCubic,
+                  duration: const Duration(milliseconds: 320),
+                  curve: Curves.easeOut,
                   builder: (ctx, v, _) => Opacity(
                     opacity: v,
                     child: Transform.translate(
-                      offset: Offset(0, 24 * (1 - v)),
+                      offset: Offset(0, 12 * (1 - v)),
                       child: Row(
                         children: [
                           Expanded(
@@ -151,8 +151,8 @@ class _ThemeSelectionStepState extends State<ThemeSelectionStep> {
               // ── Continue button ───────────────────────────────────────────
               TweenAnimationBuilder<double>(
                 tween: Tween(begin: 0.0, end: 1.0),
-                duration: const Duration(milliseconds: 800),
-                curve: Curves.easeOutCubic,
+                duration: const Duration(milliseconds: 350),
+                curve: Curves.easeOut,
                 builder: (ctx, v, _) => Opacity(
                   opacity: v,
                   child: PremiumButton(

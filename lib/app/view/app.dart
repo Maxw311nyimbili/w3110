@@ -93,12 +93,12 @@ class _AppState extends State<App> {
           return await _secureStorage.getAccessToken().timeout(
             const Duration(milliseconds: 500),
             onTimeout: () {
-              print('⚠️ Token retrieval timed out - proceeding as guest');
+              debugPrint('️ Token retrieval timed out - proceeding as guest');
               return null;
             },
           );
         } catch (e) {
-          print('❌ Token retrieval error: $e');
+          debugPrint(' Token retrieval error: $e');
           return null;
         }
       },
@@ -199,17 +199,22 @@ class _AppState extends State<App> {
           BlocProvider.value(value: _navigationCubit),
           BlocProvider.value(value: _ratingCubit),
         ],
-        child: BlocBuilder<ThemeCubit, ThemeState>(
-          builder: (context, themeState) {
-            return BlocBuilder<LocaleCubit, LocaleState>(
-              builder: (context, localeState) {
+        // Use BlocSelector so only the specific fields MaterialApp needs
+        // (themeMode + locale) trigger a rebuild — not the whole ThemeState or
+        // LocaleState object.
+        child: BlocSelector<ThemeCubit, ThemeState, ThemeMode>(
+          selector: (s) => s.flutterThemeMode,
+          builder: (context, themeMode) {
+            return BlocSelector<LocaleCubit, LocaleState, Locale>(
+              selector: (s) => s.locale,
+              builder: (context, locale) {
                 return MaterialApp(
                   title: 'Naiia',
                   debugShowCheckedModeBanner: false,
                   theme: AppTheme.lightTheme,
                   darkTheme: AppTheme.darkTheme,
-                  themeMode: themeState.flutterThemeMode,
-                  locale: localeState.locale,
+                  themeMode: themeMode,
+                  locale: locale,
                   supportedLocales: AppLocalizations.supportedLocales,
                   localizationsDelegates: const [
                     AppLocalizations.delegate,
@@ -259,66 +264,23 @@ class _AppState extends State<App> {
 
 // ── Fallback localizations for locales not in flutter_localizations ───────────
 //
-// `tw` (Twi/Akan) is not in GlobalMaterialLocalizations or
-// GlobalCupertinoLocalizations. Without a fallback, Flutter throws
-// "No MaterialLocalizations found" when that locale is active.
-// This delegate intercepts `tw` and serves English material strings instead.
+// `tw` (Twi/Akan) is not in GlobalMaterialLocalizations, so Flutter would
+// fall back to `en` instead of showing the correct Material strings.
+// This minimal delegate wraps the English material strings for any locale
+// that flutter_localizations doesn't natively support.
+
 class _FlutterLocalizationsFallbackDelegate
     extends LocalizationsDelegate<MaterialLocalizations> {
   const _FlutterLocalizationsFallbackDelegate();
 
-  // Locales we handle because flutter_localizations doesn't support them.
-  static const _unsupported = {'tw'};
-
   @override
-  bool isSupported(Locale locale) => _unsupported.contains(locale.languageCode);
+  bool isSupported(Locale locale) =>
+      !GlobalMaterialLocalizations.delegate.isSupported(locale);
 
   @override
   Future<MaterialLocalizations> load(Locale locale) =>
-      // Serve English material strings for unsupported locales.
       GlobalMaterialLocalizations.delegate.load(const Locale('en'));
 
   @override
   bool shouldReload(_FlutterLocalizationsFallbackDelegate old) => false;
-}
-
-/// Banner to display current environment overlay
-class FlavorBanner extends StatelessWidget {
-  const FlavorBanner({
-    required this.config,
-    required this.child,
-    super.key,
-  });
-
-  final AppConfig config;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      textDirection: TextDirection.ltr,
-      children: [
-        child,
-        _buildBanner(context),
-      ],
-    );
-  }
-
-  Widget _buildBanner(BuildContext context) {
-    return Positioned(
-      top: 0,
-      right: 0,
-      child: CustomPaint(
-        painter: BannerPainter(
-          message: config.isDevelopment ? 'DEV' : 'STAGING',
-          textDirection: TextDirection.ltr,
-          layoutDirection: TextDirection.ltr,
-          location: BannerLocation.topEnd,
-          color: config.isDevelopment
-              ? Colors.green.withOpacity(0.6)
-              : Colors.orange.withOpacity(0.6),
-        ),
-      ),
-    );
-  }
 }

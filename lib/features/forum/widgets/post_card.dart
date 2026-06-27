@@ -31,19 +31,21 @@ class PostCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Cache theme lookup — called once, used throughout this build method.
+    final theme = Theme.of(context);
+    final isLight = theme.brightness == Brightness.light;
+
     return _PressableScale(
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
+          color: theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
-            color: Theme.of(context).brightness == Brightness.light
-                ? AppColors.borderLight
-                : AppColors.darkBorder,
-            width: Theme.of(context).brightness == Brightness.light ? 1.0 : 0.5,
+            color: isLight ? AppColors.borderLight : AppColors.darkBorder,
+            width: isLight ? 1.0 : 0.5,
           ),
           boxShadow: AppShadows.card,
         ),
@@ -57,7 +59,7 @@ class PostCard extends StatelessWidget {
                 const SizedBox(width: 10),
                 Text(
                   post.authorName,
-                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  style: theme.textTheme.labelMedium?.copyWith(
                     fontWeight: FontWeight.w800,
                   ),
                 ),
@@ -66,16 +68,14 @@ class PostCard extends StatelessWidget {
                   width: 3,
                   height: 3,
                   decoration: BoxDecoration(
-                    color: Theme.of(
-                      context,
-                    ).textTheme.bodySmall?.color?.withOpacity(0.5),
+                    color: theme.textTheme.bodySmall?.color?.withOpacity(0.5),
                     shape: BoxShape.circle,
                   ),
                 ),
                 const SizedBox(width: 8),
                 Text(
                   _formatTime(post.createdAt),
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  style: theme.textTheme.bodySmall?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -88,7 +88,7 @@ class PostCard extends StatelessWidget {
             // Title
             Text(
               post.title,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              style: theme.textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.w900,
                 fontSize: 18,
                 height: 1.2,
@@ -102,7 +102,7 @@ class PostCard extends StatelessWidget {
               post.content,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              style: theme.textTheme.bodyMedium?.copyWith(
                 height: 1.5,
                 fontSize: 15,
                 fontWeight: FontWeight.w400,
@@ -141,8 +141,8 @@ class PostCard extends StatelessWidget {
                       : Icons.favorite_border_rounded,
                   post.likeCount.toString(),
                   color: post.isLiked
-                      ? Theme.of(context).colorScheme.error
-                      : Theme.of(context).textTheme.bodySmall?.color,
+                      ? theme.colorScheme.error
+                      : theme.textTheme.bodySmall?.color,
                 ),
               ],
             ),
@@ -153,15 +153,16 @@ class PostCard extends StatelessWidget {
   }
 
   Widget _buildAuthorAvatar(BuildContext context, String name) {
+    final theme = Theme.of(context);
     return Container(
       width: 24,
       height: 24,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primary.withOpacity(0.08),
+        color: theme.colorScheme.primary.withOpacity(0.08),
         shape: BoxShape.circle,
         border: Border.all(
-          color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+          color: theme.colorScheme.primary.withOpacity(0.1),
         ),
       ),
       child: Text(
@@ -169,18 +170,19 @@ class PostCard extends StatelessWidget {
         style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w900,
-          color: Theme.of(context).colorScheme.primary,
+          color: theme.colorScheme.primary,
         ),
       ),
     );
   }
 
   Widget _buildActions(BuildContext context) {
+    final theme = Theme.of(context);
     return PopupMenuButton<String>(
       icon: Icon(
         Icons.more_vert_rounded,
         size: 18,
-        color: Theme.of(context).textTheme.bodySmall?.color,
+        color: theme.textTheme.bodySmall?.color,
       ),
       onSelected: (value) {
         if (value == 'edit') {
@@ -207,12 +209,12 @@ class PostCard extends StatelessWidget {
               Icon(
                 Icons.delete_outline_rounded,
                 size: 18,
-                color: Theme.of(context).colorScheme.error,
+                color: theme.colorScheme.error,
               ),
               const SizedBox(width: 8),
               Text(
                 'Delete',
-                style: TextStyle(color: Theme.of(context).colorScheme.error),
+                style: TextStyle(color: theme.colorScheme.error),
               ),
             ],
           ),
@@ -293,20 +295,21 @@ class PostCard extends StatelessWidget {
   }
 
   Widget _buildTag(BuildContext context, String tag) {
+    final theme = Theme.of(context);
     return Container(
       margin: const EdgeInsets.only(right: 8),
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primary.withOpacity(0.06),
+        color: theme.colorScheme.primary.withOpacity(0.06),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Theme.of(context).colorScheme.primary.withOpacity(0.05),
+          color: theme.colorScheme.primary.withOpacity(0.05),
         ),
       ),
       child: Text(
         '#$tag',
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: Theme.of(context).colorScheme.primary,
+        style: theme.textTheme.bodySmall?.copyWith(
+          color: theme.colorScheme.primary,
           fontWeight: FontWeight.w800,
           fontSize: 11,
         ),
@@ -320,17 +323,18 @@ class PostCard extends StatelessWidget {
     String value, {
     Color? color,
   }) {
+    final theme = Theme.of(context);
     return Row(
       children: [
         Icon(
           icon,
           size: 14,
-          color: color ?? Theme.of(context).textTheme.bodySmall?.color,
+          color: color ?? theme.textTheme.bodySmall?.color,
         ),
         const SizedBox(width: 4),
         Text(
           value,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+          style: theme.textTheme.bodySmall?.copyWith(
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -359,9 +363,9 @@ class _PressableScaleState extends State<_PressableScale> {
       onTapCancel: () => setState(() => _isPressed = false),
       onTap: widget.onTap,
       child: AnimatedScale(
-        scale: _isPressed ? 0.98 : 1.0,
-        duration: const Duration(milliseconds: 100),
-        curve: Curves.easeOutCubic,
+        scale: _isPressed ? 0.97 : 1.0,
+        duration: const Duration(milliseconds: 120),
+        curve: Curves.easeOut,
         child: widget.child,
       ),
     );

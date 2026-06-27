@@ -81,9 +81,9 @@ class ChatCubit extends Cubit<ChatState> {
       await Future.delayed(const Duration(milliseconds: 150));
       await _audioPlayer.stop();
       await _audioPlayer.setVolume(1.0);
-      print('🔊 [TTS] Audio engine primed (web)');
+      debugPrint(' [TTS] Audio engine primed (web)');
     } catch (e) {
-      print('🔊 [TTS] ⚠️ Failed to prime audio: $e');
+      debugPrint(' [TTS] ️ Failed to prime audio: $e');
     } finally {
       _isPriming = false;
     }
@@ -157,18 +157,18 @@ class ChatCubit extends Cubit<ChatState> {
 
   Future<void> startRecording() async {
     try {
-      print('🎤 [STT] startRecording called');
+      debugPrint(' [STT] startRecording called');
       unawaited(_primeAudio()); // Prime on mic click
       final hasPermission = await _audioRecordingService.hasPermission();
-      print('🎤 [STT]   hasPermission: $hasPermission');
+      debugPrint(' [STT] hasPermission: $hasPermission');
       if (!hasPermission) {
-        print('🎤 [STT] ❌ Microphone permission denied');
+        debugPrint(' [STT] Microphone permission denied');
         emit(state.copyWith(error: 'Microphone permission denied'));
         return;
       }
 
       await _audioRecordingService.startRecording();
-      print('🎤 [STT] ✅ Recording started');
+      debugPrint(' [STT] Recording started');
 
       _amplitudeSubscription?.cancel();
       _amplitudeSubscription = _audioRecordingService
@@ -179,27 +179,27 @@ class ChatCubit extends Cubit<ChatState> {
 
       emit(state.copyWith(isRecording: true));
     } catch (e) {
-      print('🎤 [STT] ❌ startRecording ERROR: $e');
+      debugPrint(' [STT] startRecording ERROR: $e');
       emit(state.copyWith(error: 'Failed to start recording: $e'));
     }
   }
 
   Future<void> stopRecording() async {
     try {
-      print('🎤 [STT] stopRecording called');
+      debugPrint(' [STT] stopRecording called');
       final path = await _audioRecordingService.stopRecording();
-      print('🎤 [STT]   recording saved to path: $path');
+      debugPrint(' [STT] recording saved to path: $path');
       _amplitudeSubscription?.cancel();
       emit(state.copyWith(isRecording: false, amplitude: 0.0));
 
       if (path != null) {
-        print('🎤 [STT] ✅ Sending audio message...');
+        debugPrint(' [STT] Sending audio message...');
         await sendAudioMessage(path);
       } else {
-        print('🎤 [STT] ⚠️ No recording path returned - audio NOT sent');
+        debugPrint(' [STT] ️ No recording path returned - audio NOT sent');
       }
     } catch (e) {
-      print('🎤 [STT] ❌ stopRecording ERROR: $e');
+      debugPrint(' [STT] stopRecording ERROR: $e');
       emit(
         state.copyWith(
           isRecording: false,
@@ -222,9 +222,9 @@ class ChatCubit extends Cubit<ChatState> {
 
   Future<void> sendAudioMessage(String audioPath) async {
     try {
-      print('🎤 [VOICE] sendAudioMessage called');
-      print('🎤 [VOICE]   audioPath: $audioPath');
-      print('🎤 [VOICE]   language: ${state.selectedLanguage.code}');
+      debugPrint(' [VOICE] sendAudioMessage called');
+      debugPrint(' [VOICE] audioPath: $audioPath');
+      debugPrint(' [VOICE] language: ${state.selectedLanguage.code}');
 
       emit(state.copyWith(isTyping: true));
 
@@ -238,10 +238,10 @@ class ChatCubit extends Cubit<ChatState> {
         outputLanguage: state.selectedLanguage.code,
       );
 
-      print('🎤 [VOICE] Response received:');
-      print('🎤 [VOICE]   transcript: ${responseData['transcript']}');
-      print('🎤 [VOICE]   audio_url: ${responseData['audio_url']}');
-      print('🎤 [VOICE]   status: ${responseData['status']}');
+      debugPrint(' [VOICE] Response received:');
+      debugPrint(' [VOICE] transcript: ${responseData['transcript']}');
+      debugPrint(' [VOICE] audio_url: ${responseData['audio_url']}');
+      debugPrint(' [VOICE] status: ${responseData['status']}');
 
       if (responseData['transcript'] != null) {
         final userMessage = ChatMessage(
@@ -254,7 +254,7 @@ class ChatCubit extends Cubit<ChatState> {
       }
       _handleChatResponse(responseData);
     } catch (e) {
-      print('🎤 [VOICE] ❌ ERROR in sendAudioMessage: $e');
+      debugPrint(' [VOICE] ERROR in sendAudioMessage: $e');
       if (e.toString().contains('404')) {
         emit(
           state.copyWith(
@@ -305,10 +305,10 @@ class ChatCubit extends Cubit<ChatState> {
     final quickAnswer = validatedAnswer['original_answer'] as String? ?? '';
     final audioUrl = responseData['audio_url'] as String?;
 
-    print('🔊 [TTS] _handleChatResponse:');
-    print('🔊 [TTS]   status: $status');
-    print('🔊 [TTS]   audio_url: $audioUrl');
-    print('🔊 [TTS]   quickAnswer length: ${quickAnswer.length}');
+    debugPrint(' [TTS] _handleChatResponse:');
+    debugPrint(' [TTS] status: $status');
+    debugPrint(' [TTS] audio_url: $audioUrl');
+    debugPrint(' [TTS] quickAnswer length: ${quickAnswer.length}');
 
     String detailedAnswer = '';
     List<SourceReference> sources = [];
@@ -364,11 +364,11 @@ class ChatCubit extends Cubit<ChatState> {
     );
 
     if (audioUrl != null) {
-      print('🔊 [TTS] Audio URL found, attempting playback: $audioUrl');
+      debugPrint(' [TTS] Audio URL found, attempting playback: $audioUrl');
       // Default to English if not specified, or use the selected language if it's the AI response
       _playAudio(audioUrl, language: state.selectedLanguage);
     } else {
-      print('🔊 [TTS] ⚠️ No audio_url in response - TTS will NOT play');
+      debugPrint(' [TTS] ️ No audio_url in response - TTS will NOT play');
     }
 
     final isNewSession =
@@ -403,15 +403,15 @@ class ChatCubit extends Cubit<ChatState> {
         ),
       );
     } catch (e) {
-      print('🔊 [TTS] ❌ Error stopping audio: $e');
+      debugPrint(' [TTS] Error stopping audio: $e');
     }
   }
 
   Future<void> _playAudio(String url, {VoiceLanguage? language}) async {
     try {
       emit(state.copyWith(playingLanguage: language));
-      print(
-        '🔊 [TTS] _playAudio called (${url.length > 60 ? url.substring(0, 60) + '...' : url})',
+      debugPrint(
+        ' [TTS] _playAudio called (${url.length > 60 ? url.substring(0, 60) + '...' : url})',
       );
 
       // On Web, Safari and other browsers often handle data URIs better via UrlSource
@@ -429,14 +429,14 @@ class ChatCubit extends Cubit<ChatState> {
             )[0]; // Extract "audio/mpeg" or "audio/wav"
           }
         }
-        print('🔊 [TTS]   Playing Data URI with mimeType: $mimeType');
+        debugPrint(' [TTS] Playing Data URI with mimeType: $mimeType');
         await _audioPlayer.play(UrlSource(url, mimeType: mimeType));
       } else {
         await _audioPlayer.play(UrlSource(url));
       }
-      print('🔊 [TTS] ✅ Audio playback started successfully');
+      debugPrint(' [TTS] Audio playback started successfully');
     } catch (e) {
-      print('🔊 [TTS] ❌ Error playing audio: $e');
+      debugPrint(' [TTS] Error playing audio: $e');
     }
   }
 
@@ -447,19 +447,19 @@ class ChatCubit extends Cubit<ChatState> {
     VoiceLanguage language,
   ) async {
     try {
-      print('🔊 [TTS] speakMessage called:');
+      debugPrint(' [TTS] speakMessage called:');
       unawaited(_primeAudio()); // Prime on speak icon click
-      print('🔊 [TTS]   content length: ${messageContent.length}');
-      print('🔊 [TTS]   language: ${language.code}');
+      debugPrint(' [TTS] content length: ${messageContent.length}');
+      debugPrint(' [TTS] language: ${language.code}');
 
       if (messageContent.trim().isEmpty) {
-        print('🔊 [TTS] ⚠️ Empty content, skipping synthesis');
+        debugPrint(' [TTS] ️ Empty content, skipping synthesis');
         return;
       }
 
       emit(state.copyWith(isSynthesizingAudio: true));
 
-      print('🔊 [TTS]   Calling /chat/synthesize ...');
+      debugPrint(' [TTS] Calling /chat/synthesize ...');
       final response = await _chatRepository.synthesizeSpeech(
         text: messageContent,
         language: language.code,
@@ -468,15 +468,15 @@ class ChatCubit extends Cubit<ChatState> {
       emit(state.copyWith(isSynthesizingAudio: false));
 
       final audioUrl = response['audio_url'] as String?;
-      print('🔊 [TTS]   synthesize response audio_url: $audioUrl');
+      debugPrint(' [TTS] synthesize response audio_url: $audioUrl');
 
       if (audioUrl != null) {
         await _playAudio(audioUrl, language: language);
       } else {
-        print('🔊 [TTS] ⚠️ synthesize returned no audio_url');
+        debugPrint(' [TTS] ️ synthesize returned no audio_url');
       }
     } catch (e) {
-      print('🔊 [TTS] ❌ speakMessage error: $e');
+      debugPrint(' [TTS] speakMessage error: $e');
       emit(state.copyWith(error: 'Failed to speak message: ${e.toString()}'));
     }
   }
@@ -635,7 +635,7 @@ class ChatCubit extends Cubit<ChatState> {
           ? quickAnswer
           : detailedAnswer;
 
-      print('Debug: isDualMode=$hasDualMode, sources=${sources.length}');
+      debugPrint('Debug: isDualMode=$hasDualMode, sources=${sources.length}');
 
       final aiMessage = ChatMessage(
         id: validatedAnswer?.auditId ?? response.sessionId,
@@ -670,7 +670,7 @@ class ChatCubit extends Cubit<ChatState> {
         loadHistory();
       }
     } catch (e) {
-      print('❌ [CHAT] sendMessage ERROR: $e');
+      debugPrint(' [CHAT] sendMessage ERROR: $e');
       _loadingTimer?.cancel();
       emit(state.resetLoadingMessage());
 
@@ -826,14 +826,14 @@ class ChatCubit extends Cubit<ChatState> {
         // User cancelled, do nothing
       }
     } catch (e) {
-      print('❌ Failed to pick image: $e');
+      debugPrint(' Failed to pick image: $e');
       emit(state.copyWith(error: 'Failed to pick image: $e'));
     }
   }
 
   Future<void> pickDocument() async {
     try {
-      print('📂 Picking document...');
+      debugPrint(' Picking document...');
       // File picker often doesn't need explicit permission on newer Android/iOS for picking
       // as it uses system picker, but let's be safe.
 
@@ -857,7 +857,7 @@ class ChatCubit extends Cubit<ChatState> {
         );
       }
     } catch (e) {
-      print('❌ Failed to pick document: $e');
+      debugPrint(' Failed to pick document: $e');
       emit(state.copyWith(error: 'Failed to pick document: $e'));
     }
   }
@@ -927,7 +927,7 @@ class ChatCubit extends Cubit<ChatState> {
         ),
       );
     } catch (e) {
-      print('❌ Failed to load history: $e');
+      debugPrint(' Failed to load history: $e');
       emit(state.copyWith(isLoadingHistory: false));
     }
   }
@@ -953,7 +953,7 @@ class ChatCubit extends Cubit<ChatState> {
         ),
       );
     } catch (e) {
-      print('❌ Failed to load session: $e');
+      debugPrint(' Failed to load session: $e');
       emit(
         state.copyWith(
           status: ChatStatus.error,
@@ -986,7 +986,7 @@ class ChatCubit extends Cubit<ChatState> {
         emit(state.copyWith(historySessions: updatedHistory));
       }
     } catch (e) {
-      print('❌ Failed to delete session: $e');
+      debugPrint(' Failed to delete session: $e');
       emit(state.copyWith(error: 'Failed to delete conversation: $e'));
     }
   }
@@ -1015,7 +1015,7 @@ class ChatCubit extends Cubit<ChatState> {
           );
         }).toList();
       } catch (e) {
-        print('⚠️ Error parsing sources from history: $e');
+        debugPrint('️ Error parsing sources from history: $e');
       }
     }
 
@@ -1037,7 +1037,7 @@ class ChatCubit extends Cubit<ChatState> {
     }
   }
 
-  /// Clear current conversation and start a fresh session.
+  /// Clear current /// Clears all messages and starts a fresh chat session.
   void startNewSession() {
     emit(
       state.copyWith(
@@ -1045,12 +1045,12 @@ class ChatCubit extends Cubit<ChatState> {
         sessionId: null,
         status: ChatStatus.initial,
         isTyping: false,
-        error: null,
+        currentMessageId: null,
       ),
     );
   }
 
-  /// Clear the history sessions list locally (e.g., on logout).
+  /// Clears local history session list without touching the backend.
   void clearLocalHistorySessions() {
     emit(state.copyWith(historySessions: []));
   }

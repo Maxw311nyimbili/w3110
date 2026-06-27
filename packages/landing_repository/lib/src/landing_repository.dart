@@ -246,8 +246,8 @@ class LandingRepository {
   ///   4. At least [minDaysBetweenPrompts] days since last prompt (default 60).
   Future<bool> checkShouldShowRating({
     int minSessions = 3,
-    int minDaysSinceInstall = 14,
-    int minDaysBetweenPrompts = 60,
+    int minDaysSinceInstall = 3,
+    int minDaysBetweenPrompts = 30,
   }) async {
     try {
       // 1. Already rated — never show again

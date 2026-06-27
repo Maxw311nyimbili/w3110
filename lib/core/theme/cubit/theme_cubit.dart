@@ -44,7 +44,7 @@ class ThemeCubit extends Cubit<ThemeState> {
       try {
         await _landingRepository!.updatePreferences(themeMode: state.name);
       } catch (e) {
-        print('⚠️ Failed to sync theme preference to backend: $e');
+        print(' Failed to sync theme preference to backend: $e');
       }
     }
   }

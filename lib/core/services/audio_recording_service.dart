@@ -30,7 +30,7 @@ class AudioRecordingService {
         await _record.start(const RecordConfig(), path: path ?? '');
       }
     } catch (e) {
-      print('Error starting recording: $e');
+      debugPrint('Error starting recording: $e');
       rethrow;
     }
   }
@@ -40,7 +40,7 @@ class AudioRecordingService {
       final path = await _record.stop();
       return path;
     } catch (e) {
-      print('Error stopping recording: $e');
+      debugPrint('Error stopping recording: $e');
       return null;
     }
   }
@@ -50,7 +50,7 @@ class AudioRecordingService {
       await _record.stop();
       // On web, we don't have direct file access to delete, browser handles blobs
     } catch (e) {
-      print('Error cancelling recording: $e');
+      debugPrint('Error cancelling recording: $e');
     }
   }
 

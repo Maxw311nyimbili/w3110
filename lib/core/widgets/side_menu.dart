@@ -439,9 +439,15 @@ class _NavItemState extends State<_NavItem>
     // and collapse without any timing dependency on the flag.
     return LayoutBuilder(
       builder: (context, constraints) {
+        // Clamp to something finite in case constraints are somehow unbounded
+        // (defensive — should not normally happen with a properly constrained sidebar).
+        final availableWidth = constraints.maxWidth.isFinite
+            ? constraints.maxWidth
+            : 260.0;
+
         // Show the label only when there is genuinely enough room for it.
         // 88 px gives ~56 px of text space after icon + spacer + padding.
-        final showLabel = !widget.isCollapsed && constraints.maxWidth >= 88;
+        final showLabel = !widget.isCollapsed && availableWidth >= 88;
 
         if (!showLabel) {
           return Padding(
@@ -479,77 +485,84 @@ class _NavItemState extends State<_NavItem>
           );
         }
 
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 1),
-          child: MouseRegion(
-            onEnter: (_) => setState(() => _hovered = true),
-            onExit: (_) => setState(() => _hovered = false),
-            child: GestureDetector(
-              onTap: widget.onTap,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 180),
-                curve: Curves.easeOutCubic,
-                clipBehavior: Clip.hardEdge,
-                margin: const EdgeInsets.symmetric(horizontal: 4),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 9,
-                ),
-                decoration: BoxDecoration(
-                  color: widget.isPrimary
-                      ? primary.withOpacity(widget.isDark ? 0.14 : 0.09)
-                      : widget.isActive
-                      ? primary.withOpacity(0.10)
-                      : _hovered
-                      ? primary.withOpacity(0.05)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(10),
-                  border: widget.isPrimary
-                      ? Border.all(
-                          color: primary.withOpacity(
-                            widget.isDark ? 0.22 : 0.18,
-                          ),
-                          width: 0.75,
-                        )
-                      : widget.isActive
-                      ? Border.all(
-                          color: primary.withOpacity(0.18),
-                          width: 0.75,
-                        )
-                      : null,
-                ),
-                child: Row(
-                  children: [
-                    AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 180),
-                      child: Icon(
+        // Explicit width from LayoutBuilder so Row children always get a
+        // finite tight constraint — prevents the RenderFlex overflow that
+        // was firing during the sidebar AnimatedContainer animation.
+        final itemWidth = (availableWidth - 8).clamp(0.0, double.infinity);
+
+        return SizedBox(
+          width: itemWidth,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 1),
+            child: MouseRegion(
+              onEnter: (_) => setState(() => _hovered = true),
+              onExit: (_) => setState(() => _hovered = false),
+              child: GestureDetector(
+                onTap: widget.onTap,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 180),
+                  curve: Curves.easeOutCubic,
+                  clipBehavior: Clip.hardEdge,
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 9,
+                  ),
+                  decoration: BoxDecoration(
+                    color: widget.isPrimary
+                        ? primary.withOpacity(widget.isDark ? 0.14 : 0.09)
+                        : widget.isActive
+                        ? primary.withOpacity(0.10)
+                        : _hovered
+                        ? primary.withOpacity(0.05)
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(10),
+                    border: widget.isPrimary
+                        ? Border.all(
+                            color: primary.withOpacity(
+                              widget.isDark ? 0.22 : 0.18,
+                            ),
+                            width: 0.75,
+                          )
+                        : widget.isActive
+                        ? Border.all(
+                            color: primary.withOpacity(0.18),
+                            width: 0.75,
+                          )
+                        : null,
+                  ),
+                  child: Row(
+                    children: [
+                      // Use isActive as key — prevents duplicate-key crash when
+                      // colour transitions cycle back to a previous value (hover A→B→A).
+                      Icon(
                         widget.icon,
-                        key: ValueKey(iconColor),
+                        key: ValueKey(widget.isActive),
                         size: 18,
                         color: iconColor,
                       ),
-                    ),
-                    const SizedBox(width: 11),
-                    Expanded(
-                      child: AnimatedDefaultTextStyle(
-                        duration: const Duration(milliseconds: 180),
-                        style: AppTextStyles.bodyMedium.copyWith(
-                          color: labelColor,
-                          fontWeight: labelWeight,
-                          fontSize: 13.5,
-                        ),
-                        child: Text(
-                          widget.label,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                      const SizedBox(width: 11),
+                      Expanded(
+                        child: AnimatedDefaultTextStyle(
+                          duration: const Duration(milliseconds: 180),
+                          style: AppTextStyles.bodyMedium.copyWith(
+                            color: labelColor,
+                            fontWeight: labelWeight,
+                            fontSize: 13.5,
+                          ),
+                          child: Text(
+                            widget.label,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                       ),
-                    ),
-                    if (widget.trailing != null) ...[
-                      const SizedBox(width: 6),
-                      widget.trailing!,
+                      if (widget.trailing != null) ...[
+                        const SizedBox(width: 6),
+                        widget.trailing!,
+                      ],
                     ],
-                  ],
+                  ),
                 ),
               ),
             ),

@@ -25,7 +25,7 @@ class AppConfig extends Equatable {
       // iOS simulator / Windows / Web → http://localhost:8000
       // Restore `Env.apiUrlDev` after running:
       //   del lib\app\env.g.dart && dart run build_runner build --delete-conflicting-outputs
-      apiBaseUrl: 'http://localhost:8000',
+      apiBaseUrl: 'http://127.0.0.1:8000',
       environment: Environment.development,
       enableLogging: true,
       apiTimeout: const Duration(seconds: 60),

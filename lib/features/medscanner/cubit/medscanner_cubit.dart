@@ -54,7 +54,7 @@ class MedScannerCubit extends Cubit<MedScannerState> {
         ),
       );
 
-      print('✅ Camera initialized successfully');
+      print(' Camera initialized successfully');
     } catch (e) {
       emit(
         state.copyWith(
@@ -62,7 +62,7 @@ class MedScannerCubit extends Cubit<MedScannerState> {
           error: 'Failed to initialize camera: ${e.toString()}',
         ),
       );
-      print('❌ Camera initialization error: ${e.toString()}');
+      print(' Camera initialization error: ${e.toString()}');
     }
   }
 
@@ -75,7 +75,7 @@ class MedScannerCubit extends Cubit<MedScannerState> {
       emit(state.copyWith(status: MedScannerStatus.capturing));
 
       // Step 1: Capture image from camera
-      print('📷 Capturing image from camera...');
+      print(' Capturing image from camera...');
       final imagePath = await _mediaRepository.captureImage();
 
       if (imagePath == null) {
@@ -88,7 +88,7 @@ class MedScannerCubit extends Cubit<MedScannerState> {
         return;
       }
 
-      print('✅ Image captured: $imagePath');
+      print(' Image captured: $imagePath');
 
       emit(
         state.copyWith(
@@ -98,20 +98,20 @@ class MedScannerCubit extends Cubit<MedScannerState> {
       );
 
       // Step 2: Compress image for upload
-      print('🔧 Compressing image...');
+      print(' Compressing image...');
       final compressedPath = await _mediaRepository.compressImage(imagePath);
 
       // Step 3: Detect barcode if present (optional)
-      print('🔍 Detecting barcode...');
+      print(' Detecting barcode...');
       final barcode = await _mediaRepository.detectBarcode(compressedPath);
       if (barcode != null) {
-        print('✅ Barcode found: $barcode');
+        print(' Barcode found: $barcode');
       } else {
-        print('⚠️ No barcode detected');
+        print(' No barcode detected');
       }
 
       // Step 4: Upload to backend
-      print('📤 Uploading to backend...');
+      print(' Uploading to backend...');
       final uploadResponse = await _mediaRepository.uploadImage(
         UploadRequest(
           imagePath: compressedPath,
@@ -120,16 +120,16 @@ class MedScannerCubit extends Cubit<MedScannerState> {
         ),
       );
 
-      print('✅ Upload successful - Scan ID: ${uploadResponse.scanId}');
+      print(' Upload successful - Scan ID: ${uploadResponse.scanId}');
 
       // Step 5: Analyze medication (backend processes image)
-      print('🔬 Analyzing medication...');
+      print(' Analyzing medication...');
       final repoScanResult = await _mediaRepository.analyzeMedication(
         uploadResponse.scanId,
         barcode: barcode,
       );
 
-      print('✅ Analysis complete: ${repoScanResult.medicationName}');
+      print(' Analysis complete: ${repoScanResult.medicationName}');
 
       // Convert repository ScanResult to state ScanResult
       final scanResult = ScanResult(
@@ -149,7 +149,7 @@ class MedScannerCubit extends Cubit<MedScannerState> {
         ),
       );
     } catch (e) {
-      print('❌ Scan error: ${e.toString()}');
+      print(' Scan error: ${e.toString()}');
       emit(
         state.copyWith(
           status: MedScannerStatus.error,
@@ -164,7 +164,7 @@ class MedScannerCubit extends Cubit<MedScannerState> {
     try {
       emit(state.copyWith(status: MedScannerStatus.processing));
 
-      print('📱 Opening gallery picker...');
+      print(' Opening gallery picker...');
       final imagePath = await _mediaRepository.pickImageFromGallery();
 
       if (imagePath == null) {
@@ -177,16 +177,16 @@ class MedScannerCubit extends Cubit<MedScannerState> {
         return;
       }
 
-      print('✅ Image selected from gallery: $imagePath');
+      print(' Image selected from gallery: $imagePath');
 
       // Follow same flow as captureImage
-      print('🔧 Compressing image...');
+      print(' Compressing image...');
       final compressedPath = await _mediaRepository.compressImage(imagePath);
 
-      print('🔍 Detecting barcode...');
+      print(' Detecting barcode...');
       final barcode = await _mediaRepository.detectBarcode(compressedPath);
 
-      print('📤 Uploading to backend...');
+      print(' Uploading to backend...');
       final uploadResponse = await _mediaRepository.uploadImage(
         UploadRequest(
           imagePath: compressedPath,
@@ -195,13 +195,13 @@ class MedScannerCubit extends Cubit<MedScannerState> {
         ),
       );
 
-      print('🔬 Analyzing medication...');
+      print(' Analyzing medication...');
       final repoScanResult = await _mediaRepository.analyzeMedication(
         uploadResponse.scanId,
         barcode: barcode,
       );
 
-      print('✅ Analysis complete: ${repoScanResult.medicationName}');
+      print(' Analysis complete: ${repoScanResult.medicationName}');
 
       // Convert repository ScanResult to state ScanResult
       final scanResult = ScanResult(
@@ -222,7 +222,7 @@ class MedScannerCubit extends Cubit<MedScannerState> {
         ),
       );
     } catch (e) {
-      print('❌ Gallery picker error: ${e.toString()}');
+      print(' Gallery picker error: ${e.toString()}');
       emit(
         state.copyWith(
           status: MedScannerStatus.error,
@@ -273,7 +273,7 @@ class MedScannerCubit extends Cubit<MedScannerState> {
     } else if (error.contains('too large')) {
       return 'fileTooLarge';
     }
-    // Return original error so it can be displayed if it's a descriptive rejection reason
+    // Return original error so it can be displayed if it's a descriptive reject error message.
     return error;
   }
 }

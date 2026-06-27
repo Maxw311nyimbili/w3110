@@ -37,23 +37,12 @@ class LandingBody extends StatelessWidget {
               __buildProgressBar(context, state.currentStep),
               Expanded(
                 child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 600),
-                  switchInCurve: Curves.easeInOutCubic,
-                  switchOutCurve: Curves.easeInOutCubic,
+                  duration: const Duration(milliseconds: 280),
+                  switchInCurve: Curves.easeOut,
+                  switchOutCurve: Curves.easeIn,
                   transitionBuilder:
                       (Widget child, Animation<double> animation) {
-                        final slideAnimation = Tween<Offset>(
-                          begin: const Offset(0.05, 0),
-                          end: Offset.zero,
-                        ).animate(animation);
-
-                        return FadeTransition(
-                          opacity: animation,
-                          child: SlideTransition(
-                            position: slideAnimation,
-                            child: child,
-                          ),
-                        );
+                        return FadeTransition(opacity: animation, child: child);
                       },
                   child: _buildStep(context, state.currentStep),
                 ),
@@ -164,12 +153,12 @@ class _CompleteStep extends StatelessWidget {
               const SizedBox(height: 48),
               TweenAnimationBuilder<double>(
                 tween: Tween(begin: 0.0, end: 1.0),
-                duration: const Duration(milliseconds: 800),
-                curve: Curves.easeOutCubic,
+                duration: const Duration(milliseconds: 350),
+                curve: Curves.easeOut,
                 builder: (context, value, _) => Opacity(
                   opacity: value,
                   child: Transform.translate(
-                    offset: Offset(0, 20 * (1 - value)),
+                    offset: Offset(0, 12 * (1 - value)),
                     child: Column(
                       children: [
                         Text(

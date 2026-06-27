@@ -120,9 +120,7 @@ class _DesktopShell extends StatelessWidget {
                   ),
 
                 Expanded(
-                  child: SelectionArea(
-                    child: _ContentArea(activeTab: navState.activeTab),
-                  ),
+                  child: _ContentArea(activeTab: navState.activeTab),
                 ),
               ],
             ),
@@ -174,9 +172,11 @@ class _MobileShell extends StatelessWidget {
         width: 280,
         child: SideMenu(),
       ),
-      body: SelectionArea(
-        child: _ContentArea(activeTab: navState.activeTab),
-      ),
+      // SelectionArea removed from mobile — it adds text-selection hit-testing
+      // overhead to every touch event on the entire content area. On iOS/Android
+      // users long-press individual Text widgets to select; wrapping the whole
+      // screen is unnecessary and measurably hurts scroll/gesture performance.
+      body: _ContentArea(activeTab: navState.activeTab),
     );
   }
 
@@ -194,7 +194,13 @@ class _MobileShell extends StatelessWidget {
   }
 }
 
-// ── Content area (IndexedStack keeps state, AnimatedSwitcher fades between tabs) ──
+// ── Content area ──────────────────────────────────────────────────────────────
+//
+// IndexedStack keeps all four pages alive in the widget tree so their scroll
+// positions, camera state, and cubit state survive tab switches.
+//
+// IMPORTANT: do NOT add a key to IndexedStack — a key would cause Flutter to
+// rebuild the stack (and destroy all child state) on every tab change.
 
 class _ContentArea extends StatelessWidget {
   const _ContentArea({required this.activeTab});
@@ -202,22 +208,14 @@ class _ContentArea extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 180),
-      switchInCurve: Curves.easeOut,
-      switchOutCurve: Curves.easeIn,
-      transitionBuilder: (child, animation) =>
-          FadeTransition(opacity: animation, child: child),
-      child: IndexedStack(
-        key: ValueKey(activeTab),
-        index: activeTab.index,
-        children: const [
-          ChatPage(),
-          AuthGuard(child: MedScannerPage()),
-          AuthGuard(child: ForumListPage()),
-          AuthGuard(child: SettingsPage()),
-        ],
-      ),
+    return IndexedStack(
+      index: activeTab.index,
+      children: const [
+        ChatPage(),
+        AuthGuard(child: MedScannerPage()),
+        AuthGuard(child: ForumListPage()),
+        AuthGuard(child: SettingsPage()),
+      ],
     );
   }
 }

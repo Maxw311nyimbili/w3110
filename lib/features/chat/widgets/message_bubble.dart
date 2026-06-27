@@ -31,6 +31,7 @@ class RefinedMessageBubble extends StatelessWidget {
   }
 
   Widget _buildUserMessage(BuildContext context) {
+    final theme = Theme.of(context);
     return EntryAnimation(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(48, 4, 16, 4),
@@ -39,8 +40,8 @@ class RefinedMessageBubble extends StatelessWidget {
           children: [
             Builder(
               builder: (context) {
-                final primary = Theme.of(context).colorScheme.primary;
-                final onPrimary = Theme.of(context).colorScheme.onPrimary;
+                final primary = theme.colorScheme.primary;
+                final onPrimary = theme.colorScheme.onPrimary;
                 return Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 18,
@@ -86,6 +87,7 @@ class RefinedMessageBubble extends StatelessWidget {
   }
 
   Widget _buildAIMessage(BuildContext context) {
+    final theme = Theme.of(context);
     // Use the persisted state from the message model
     final isDetailed = message.showingDetailedView;
 
@@ -149,7 +151,7 @@ class RefinedMessageBubble extends StatelessWidget {
 
             // Sources Section (above the card)
             if (hasSources) ...[
-              _buildSourceList(displaySources),
+              _buildSourceList(context, displaySources),
               const SizedBox(height: 12),
             ],
 
@@ -168,9 +170,7 @@ class RefinedMessageBubble extends StatelessWidget {
                     width: 1.5,
                     height: 36,
                     decoration: BoxDecoration(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.primary.withOpacity(0.35),
+                      color: theme.colorScheme.primary.withOpacity(0.35),
                       borderRadius: BorderRadius.circular(1),
                     ),
                   ),
@@ -182,6 +182,11 @@ class RefinedMessageBubble extends StatelessWidget {
                       curve: Curves.easeInOut,
                       alignment: Alignment.topLeft,
                       child: BlocBuilder<ForumCubit, ForumState>(
+                        // Only rebuild this bubble when the forum open/close
+                        // state for THIS message changes — not on every post load.
+                        buildWhen: (prev, curr) =>
+                            (prev.currentAnswerId == message.id) !=
+                            (curr.currentAnswerId == message.id),
                         builder: (context, forumState) {
                           final isForumOpen =
                               forumState.currentAnswerId == message.id;
@@ -202,34 +207,26 @@ class RefinedMessageBubble extends StatelessWidget {
                             },
                             styleSheet:
                                 MarkdownStyleSheet.fromTheme(
-                                  Theme.of(context),
+                                  theme,
                                 ).copyWith(
                                   p: AppTextStyles.bodyMedium.copyWith(
-                                    color: Theme.of(
-                                      context,
-                                    ).textTheme.bodyLarge?.color,
+                                    color: theme.textTheme.bodyLarge?.color,
                                     height: 1.7,
                                     fontSize: 15,
                                   ),
                                   pPadding: const EdgeInsets.only(bottom: 8),
                                   strong: AppTextStyles.bodyMedium.copyWith(
-                                    color: Theme.of(
-                                      context,
-                                    ).textTheme.bodyLarge?.color,
+                                    color: theme.textTheme.bodyLarge?.color,
                                     fontWeight: FontWeight.w700,
                                     fontSize: 15,
                                   ),
                                   em: AppTextStyles.bodyMedium.copyWith(
-                                    color: Theme.of(
-                                      context,
-                                    ).textTheme.bodyMedium?.color,
+                                    color: theme.textTheme.bodyMedium?.color,
                                     fontStyle: FontStyle.italic,
                                     fontSize: 15,
                                   ),
                                   h1: AppTextStyles.displaySmall.copyWith(
-                                    color: Theme.of(
-                                      context,
-                                    ).textTheme.headlineLarge?.color,
+                                    color: theme.textTheme.headlineLarge?.color,
                                     fontWeight: FontWeight.w700,
                                     height: 1.3,
                                   ),
@@ -238,9 +235,7 @@ class RefinedMessageBubble extends StatelessWidget {
                                     bottom: 8,
                                   ),
                                   h2: AppTextStyles.headlineLarge.copyWith(
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.primary,
+                                    color: theme.colorScheme.primary,
                                     fontWeight: FontWeight.w700,
                                   ),
                                   h2Padding: const EdgeInsets.only(
@@ -248,9 +243,8 @@ class RefinedMessageBubble extends StatelessWidget {
                                     bottom: 6,
                                   ),
                                   h3: AppTextStyles.headlineMedium.copyWith(
-                                    color: Theme.of(
-                                      context,
-                                    ).textTheme.headlineMedium?.color,
+                                    color:
+                                        theme.textTheme.headlineMedium?.color,
                                     fontWeight: FontWeight.w600,
                                   ),
                                   h3Padding: const EdgeInsets.only(
@@ -258,9 +252,7 @@ class RefinedMessageBubble extends StatelessWidget {
                                     bottom: 4,
                                   ),
                                   h4: AppTextStyles.headlineSmall.copyWith(
-                                    color: Theme.of(
-                                      context,
-                                    ).textTheme.bodyLarge?.color,
+                                    color: theme.textTheme.bodyLarge?.color,
                                     fontWeight: FontWeight.w600,
                                   ),
                                   h4Padding: const EdgeInsets.only(
@@ -268,9 +260,7 @@ class RefinedMessageBubble extends StatelessWidget {
                                     bottom: 2,
                                   ),
                                   listBullet: AppTextStyles.bodyMedium.copyWith(
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.primary,
+                                    color: theme.colorScheme.primary,
                                     fontSize: 15,
                                   ),
                                   listBulletPadding: const EdgeInsets.only(
@@ -279,9 +269,7 @@ class RefinedMessageBubble extends StatelessWidget {
                                   listIndent: 20,
                                   blockSpacing: 12,
                                   blockquote: AppTextStyles.bodyMedium.copyWith(
-                                    color: Theme.of(
-                                      context,
-                                    ).textTheme.bodyMedium?.color,
+                                    color: theme.textTheme.bodyMedium?.color,
                                     fontStyle: FontStyle.italic,
                                     fontSize: 15,
                                   ),
@@ -303,42 +291,30 @@ class RefinedMessageBubble extends StatelessWidget {
                                     vertical: 8,
                                   ),
                                   code: TextStyle(
-                                    backgroundColor: Theme.of(
-                                      context,
-                                    ).colorScheme.surface,
+                                    backgroundColor: theme.colorScheme.surface,
                                     fontFamily: 'monospace',
                                     fontSize: 13,
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.primary,
+                                    color: theme.colorScheme.primary,
                                   ),
                                   codeblockDecoration: BoxDecoration(
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.surface,
+                                    color: theme.colorScheme.surface,
                                     borderRadius: BorderRadius.circular(8),
                                     border: Border.all(
-                                      color: Theme.of(
-                                        context,
-                                      ).dividerColor.withOpacity(0.3),
+                                      color: theme.dividerColor.withOpacity(
+                                        0.3,
+                                      ),
                                     ),
                                   ),
                                   codeblockPadding: const EdgeInsets.all(12),
                                   tableHead: AppTextStyles.labelSmall.copyWith(
                                     fontWeight: FontWeight.w700,
-                                    color: Theme.of(
-                                      context,
-                                    ).textTheme.bodyLarge?.color,
+                                    color: theme.textTheme.bodyLarge?.color,
                                   ),
                                   tableBody: AppTextStyles.bodySmall.copyWith(
-                                    color: Theme.of(
-                                      context,
-                                    ).textTheme.bodyMedium?.color,
+                                    color: theme.textTheme.bodyMedium?.color,
                                   ),
                                   tableBorder: TableBorder.all(
-                                    color: Theme.of(
-                                      context,
-                                    ).dividerColor.withOpacity(0.3),
+                                    color: theme.dividerColor.withOpacity(0.3),
                                     width: 1,
                                   ),
                                   tableCellsPadding: const EdgeInsets.symmetric(
@@ -348,9 +324,9 @@ class RefinedMessageBubble extends StatelessWidget {
                                   horizontalRuleDecoration: BoxDecoration(
                                     border: Border(
                                       top: BorderSide(
-                                        color: Theme.of(
-                                          context,
-                                        ).dividerColor.withOpacity(0.3),
+                                        color: theme.dividerColor.withOpacity(
+                                          0.3,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -456,14 +432,18 @@ class RefinedMessageBubble extends StatelessWidget {
       if (await canLaunchUrl(uri)) {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
       } else {
-        debugPrint('Could not launch $url');
+        print('Could not launch $url');
       }
     } catch (e) {
-      debugPrint('Error launching URL: $e');
+      print('Error launching URL: $e');
     }
   }
 
-  Widget _buildSourceList(List<models.SourceReference> sources) {
+  Widget _buildSourceList(
+    BuildContext context,
+    List<models.SourceReference> sources,
+  ) {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -492,10 +472,10 @@ class RefinedMessageBubble extends StatelessWidget {
                   width: 140,
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surface,
+                    color: theme.colorScheme.surface,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: Theme.of(context).dividerColor.withOpacity(0.1),
+                      color: theme.dividerColor.withOpacity(0.1),
                       width: 1,
                     ),
                     boxShadow: [
@@ -525,7 +505,7 @@ class RefinedMessageBubble extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 10,
                                 fontWeight: FontWeight.bold,
-                                color: Theme.of(context).colorScheme.primary,
+                                color: theme.colorScheme.primary,
                               ),
                             ),
                           ),
@@ -555,7 +535,7 @@ class RefinedMessageBubble extends StatelessWidget {
                           fontWeight: FontWeight.w600,
                           fontSize: 12,
                           height: 1.2,
-                          color: Theme.of(context).textTheme.bodyLarge?.color,
+                          color: theme.textTheme.bodyLarge?.color,
                         ),
                       ),
                     ],
@@ -579,11 +559,12 @@ class RefinedMessageBubble extends StatelessWidget {
   }
 
   Widget _buildModeToggle(BuildContext context, bool isDetailed) {
+    final theme = Theme.of(context);
     return Container(
       height: 32, // Slightly taller
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
@@ -597,6 +578,7 @@ class RefinedMessageBubble extends StatelessWidget {
   }
 
   Widget _buildToggleItem(BuildContext context, String label, bool active) {
+    final theme = Theme.of(context);
     return GestureDetector(
       onTap: () {
         context.read<ChatCubit>().toggleMessageView(message.id);
@@ -606,16 +588,12 @@ class RefinedMessageBubble extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14),
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: active
-              ? Theme.of(context).colorScheme.primary
-              : Colors.transparent,
+          color: active ? theme.colorScheme.primary : Colors.transparent,
           borderRadius: BorderRadius.circular(16),
           boxShadow: active
               ? [
                   BoxShadow(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.primary.withOpacity(0.18),
+                    color: theme.colorScheme.primary.withOpacity(0.18),
                     blurRadius: 4,
                     offset: const Offset(0, 1),
                   ),
@@ -713,15 +691,38 @@ class RefinedMessageBubble extends StatelessWidget {
     );
   }
 
+  void _shareToForum(
+    BuildContext context,
+    List<models.SourceReference> sources,
+  ) {
+    final content = message.showingDetailedView
+        ? (message.detailedAnswer ?? message.content)
+        : (message.quickAnswer ?? message.content);
+    final sourceUrls = sources.map((s) => s.url).join('\n');
+    final shareText = sourceUrls.isNotEmpty
+        ? '$content\n\nSources:\n$sourceUrls'
+        : content;
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => BlocProvider.value(
+        value: context.read<ForumCubit>(),
+        child: NewPostSheet(initialContent: shareText),
+      ),
+    );
+  }
+
   void _showListenMenu(BuildContext context) {
+    final theme = Theme.of(context);
     final chatCubit = context.read<ChatCubit>();
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       backgroundColor: Colors.transparent,
       builder: (modalContext) => Container(
         padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
+          color: theme.colorScheme.surface,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         ),
         child: Column(
@@ -731,110 +732,98 @@ class RefinedMessageBubble extends StatelessWidget {
               width: 36,
               height: 4,
               decoration: BoxDecoration(
-                color: Theme.of(context).dividerColor.withOpacity(0.4),
+                color: theme.dividerColor.withOpacity(0.4),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
             Text(
-              'Listen to Medical Response',
-              style: AppTextStyles.labelLarge.copyWith(
-                fontWeight: FontWeight.bold,
+              'Listen in',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
               ),
             ),
             const SizedBox(height: 16),
-            ...models.VoiceLanguage.values.map<Widget>((lang) {
-              return ListTile(
-                leading: Icon(
-                  Icons.play_circle_outline_rounded,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                title: Text('Listen in ${lang.label}'),
-                onTap: () {
-                  Navigator.pop(modalContext);
-                  // Pass the displayed content (quick or detailed) to synthesize
-                  final textToSpeak = message.showingDetailedView
-                      ? (message.detailedAnswer ?? message.content)
-                      : (message.quickAnswer ?? message.content);
-                  chatCubit.speakMessage(textToSpeak, lang);
+            ...models.VoiceLanguage.values.map(
+              (lang) => BlocBuilder<ChatCubit, models.ChatState>(
+                bloc: chatCubit,
+                builder: (ctx, state) {
+                  final isSelected = state.selectedLanguage == lang;
+                  return ListTile(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+                    leading: Container(
+                      width: 40,
+                      height: 40,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? theme.colorScheme.primary.withOpacity(0.12)
+                            : theme.colorScheme.surfaceVariant,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Text(
+                        lang.code.toUpperCase(),
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: isSelected
+                              ? theme.colorScheme.primary
+                              : theme.textTheme.bodySmall?.color,
+                        ),
+                      ),
+                    ),
+                    title: Text(
+                      lang.label,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: isSelected
+                            ? FontWeight.w600
+                            : FontWeight.w400,
+                        color: isSelected
+                            ? theme.colorScheme.primary
+                            : theme.textTheme.bodyMedium?.color,
+                      ),
+                    ),
+                    trailing: isSelected
+                        ? Icon(
+                            Icons.check_circle_rounded,
+                            color: theme.colorScheme.primary,
+                            size: 20,
+                          )
+                        : null,
+                    onTap: () {
+                      chatCubit.updateLanguage(lang);
+                      chatCubit.speakMessage(message.content, lang);
+                      Navigator.of(modalContext).pop();
+                    },
+                  );
                 },
-              );
-            }).toList(),
+              ),
+            ),
           ],
         ),
       ),
     );
   }
-
-  Future<void> _shareToForum(
-    BuildContext context,
-    List<models.SourceReference> sources,
-  ) async {
-    final forumCubit = context.read<ForumCubit>();
-    final content = message.content;
-
-    // Show a quick loading snackbar
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Preparing AI discussion...'),
-        duration: Duration(milliseconds: 1500),
-      ),
-    );
-
-    try {
-      // Use the new AI-driven preparation endpoint
-      final prepared = await forumCubit.preparePost(
-        // Extract query from chat if possible, or fallback
-        'Question about medical details', // Placeholder query
-        content,
-      );
-
-      if (!context.mounted) return;
-
-      final forumSources = sources
-          .map<ForumPostSource>(
-            (s) => ForumPostSource(
-              title: s.title,
-              url: s.url,
-              snippet: s.snippet,
-            ),
-          )
-          .toList();
-
-      showModalBottomSheet(
-        context: context,
-        isScrollControlled: true,
-        backgroundColor: Colors.transparent,
-        builder: (modalContext) => BlocProvider.value(
-          value: forumCubit,
-          child: NewPostSheet(
-            initialTitle: prepared['title'] ?? '',
-            initialContent: prepared['content'] ?? content,
-            sources: forumSources,
-            originalAnswerId: message.id,
-          ),
-        ),
-      );
-    } catch (e) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error preparing share: $e')),
-      );
-    }
-  }
 }
 
-/// Small non-breathing Naiia mark used as the AI avatar in chat bubbles.
-/// Re-uses BrandLogo with breathing disabled for a clean static icon.
+// ── Avatar mark ───────────────────────────────────────────────────────────────
+
 class _NaiiaAvatarMark extends StatelessWidget {
   const _NaiiaAvatarMark({required this.size});
   final double size;
 
   @override
   Widget build(BuildContext context) {
-    return BrandLogo(
-      size: size,
-      isBreathing: false,
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primary.withOpacity(0.08),
+        shape: BoxShape.circle,
+      ),
+      child: Center(
+        child: BrandLogo(size: size * 0.6, isBreathing: false),
+      ),
     );
   }
 }
